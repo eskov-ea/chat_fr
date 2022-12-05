@@ -1,0 +1,216 @@
+PODS:
+  - audio_session (0.0.1):
+    - Flutter
+  - audioplayers_darwin (0.0.1):
+    - Flutter
+  - CryptoSwift (1.5.1)
+  - DKImagePickerController/Core (4.3.4):
+    - DKImagePickerController/ImageDataManager
+    - DKImagePickerController/Resource
+  - DKImagePickerController/ImageDataManager (4.3.4)
+  - DKImagePickerController/PhotoGallery (4.3.4):
+    - DKImagePickerController/Core
+    - DKPhotoGallery
+  - DKImagePickerController/Resource (4.3.4)
+  - DKPhotoGallery (0.0.17):
+    - DKPhotoGallery/Core (= 0.0.17)
+    - DKPhotoGallery/Model (= 0.0.17)
+    - DKPhotoGallery/Preview (= 0.0.17)
+    - DKPhotoGallery/Resource (= 0.0.17)
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Core (0.0.17):
+    - DKPhotoGallery/Model
+    - DKPhotoGallery/Preview
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Model (0.0.17):
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Preview (0.0.17):
+    - DKPhotoGallery/Model
+    - DKPhotoGallery/Resource
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Resource (0.0.17):
+    - SDWebImage
+    - SwiftyGif
+  - easy_pdf_viewer (1.0.1):
+    - Flutter
+  - file_picker (0.0.1):
+    - DKImagePickerController/PhotoGallery
+    - Flutter
+  - Flutter (1.0.0)
+  - flutter_callkit_incoming (0.0.1):
+    - CryptoSwift
+    - Flutter
+  - flutter_image_compress (0.0.1):
+    - Flutter
+    - Mantle
+    - SDWebImage
+    - SDWebImageWebPCoder
+  - flutter_secure_storage (3.3.1):
+    - Flutter
+  - flutter_sound (9.2.13):
+    - Flutter
+    - flutter_sound_core (= 9.2.13)
+  - flutter_sound_core (9.2.13)
+  - FMDB (2.7.5):
+    - FMDB/standard (= 2.7.5)
+  - FMDB/standard (2.7.5)
+  - gallery_saver (0.0.1):
+    - Flutter
+  - image_picker_ios (0.0.1):
+    - Flutter
+  - just_audio (0.0.1):
+    - Flutter
+  - libwebp (1.2.1):
+    - libwebp/demux (= 1.2.1)
+    - libwebp/mux (= 1.2.1)
+    - libwebp/webp (= 1.2.1)
+  - libwebp/demux (1.2.1):
+    - libwebp/webp
+  - libwebp/mux (1.2.1):
+    - libwebp/demux
+  - libwebp/webp (1.2.1)
+  - linphone-sdk (5.1.72):
+    - linphone-sdk/all-frameworks (= 5.1.72)
+    - linphone-sdk/app-extension (= 5.1.72)
+    - linphone-sdk/app-extension-swift (= 5.1.72)
+    - linphone-sdk/basic-frameworks (= 5.1.72)
+    - linphone-sdk/swift (= 5.1.72)
+  - linphone-sdk/all-frameworks (5.1.72)
+  - linphone-sdk/app-extension (5.1.72)
+  - linphone-sdk/app-extension-swift (5.1.72):
+    - linphone-sdk/app-extension
+  - linphone-sdk/basic-frameworks (5.1.72):
+    - linphone-sdk/app-extension
+  - linphone-sdk/swift (5.1.72):
+    - linphone-sdk/app-extension-swift
+    - linphone-sdk/basic-frameworks
+  - Mantle (2.2.0):
+    - Mantle/extobjc (= 2.2.0)
+  - Mantle/extobjc (2.2.0)
+  - package_info_plus (0.4.5):
+    - Flutter
+  - path_provider_ios (0.0.1):
+    - Flutter
+  - record (0.0.1):
+    - Flutter
+  - SDWebImage (5.13.0):
+    - SDWebImage/Core (= 5.13.0)
+  - SDWebImage/Core (5.13.0)
+  - SDWebImageWebPCoder (0.9.0):
+    - libwebp (~> 1.0)
+    - SDWebImage/Core (~> 5.13)
+  - sqflite (0.0.2):
+    - Flutter
+    - FMDB (>= 2.7.5)
+  - SwiftyGif (5.4.3)
+  - url_launcher_ios (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - audio_session (from `.symlinks/plugins/audio_session/ios`)
+  - audioplayers_darwin (from `.symlinks/plugins/audioplayers_darwin/ios`)
+  - easy_pdf_viewer (from `.symlinks/plugins/easy_pdf_viewer/ios`)
+  - file_picker (from `.symlinks/plugins/file_picker/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_callkit_incoming (from `.symlinks/plugins/flutter_callkit_incoming/ios`)
+  - flutter_image_compress (from `.symlinks/plugins/flutter_image_compress/ios`)
+  - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+  - flutter_sound (from `.symlinks/plugins/flutter_sound/ios`)
+  - gallery_saver (from `.symlinks/plugins/gallery_saver/ios`)
+  - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
+  - just_audio (from `.symlinks/plugins/just_audio/ios`)
+  - linphone-sdk (~> 5.1.60)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
+  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - record (from `.symlinks/plugins/record/ios`)
+  - sqflite (from `.symlinks/plugins/sqflite/ios`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - CryptoSwift
+    - DKImagePickerController
+    - DKPhotoGallery
+    - flutter_sound_core
+    - FMDB
+    - libwebp
+    - Mantle
+    - SDWebImage
+    - SDWebImageWebPCoder
+    - SwiftyGif
+  https://gitlab.linphone.org/BC/public/podspec.git:
+    - linphone-sdk
+
+EXTERNAL SOURCES:
+  audio_session:
+    :path: ".symlinks/plugins/audio_session/ios"
+  audioplayers_darwin:
+    :path: ".symlinks/plugins/audioplayers_darwin/ios"
+  easy_pdf_viewer:
+    :path: ".symlinks/plugins/easy_pdf_viewer/ios"
+  file_picker:
+    :path: ".symlinks/plugins/file_picker/ios"
+  Flutter:
+    :path: Flutter
+  flutter_callkit_incoming:
+    :path: ".symlinks/plugins/flutter_callkit_incoming/ios"
+  flutter_image_compress:
+    :path: ".symlinks/plugins/flutter_image_compress/ios"
+  flutter_secure_storage:
+    :path: ".symlinks/plugins/flutter_secure_storage/ios"
+  flutter_sound:
+    :path: ".symlinks/plugins/flutter_sound/ios"
+  gallery_saver:
+    :path: ".symlinks/plugins/gallery_saver/ios"
+  image_picker_ios:
+    :path: ".symlinks/plugins/image_picker_ios/ios"
+  just_audio:
+    :path: ".symlinks/plugins/just_audio/ios"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
+  path_provider_ios:
+    :path: ".symlinks/plugins/path_provider_ios/ios"
+  record:
+    :path: ".symlinks/plugins/record/ios"
+  sqflite:
+    :path: ".symlinks/plugins/sqflite/ios"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
+
+SPEC CHECKSUMS:
+  audio_session: 4f3e461722055d21515cf3261b64c973c062f345
+  audioplayers_darwin: 877d9a4d06331c5c374595e46e16453ac7eafa40
+  CryptoSwift: c4f2debceb38bf44c80659afe009f71e23e4a082
+  DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
+  DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
+  easy_pdf_viewer: 0b396564ff0e65320c2a505551fb6de05d57f512
+  file_picker: 817ab1d8cd2da9d2da412a417162deee3500fc95
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  flutter_callkit_incoming: 417dd1b46541cdd5d855ad795ccbe97d1c18155e
+  flutter_image_compress: fd2b476345226e1a10ea352fa306af95704642c1
+  flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
+  flutter_sound: c60effa2a350fb977885f0db2fbc4c1ad5160900
+  flutter_sound_core: 26c10e5832e76aaacfae252d8925232281c486ae
+  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  gallery_saver: 9fc173c9f4fcc48af53b2a9ebea1b643255be542
+  image_picker_ios: b786a5dcf033a8336a657191401bfdf12017dabb
+  just_audio: baa7252489dbcf47a4c7cc9ca663e9661c99aafa
+  libwebp: 98a37e597e40bfdb4c911fc98f2c53d0b12d05fc
+  linphone-sdk: f6b697a34336ff0599c3d0688e883a9fe9a48f5f
+  Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
+  package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
+  path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
+  record: cae05d8dd3cdb1dea3511b20e5a5811a1ae00d0d
+  SDWebImage: 0327043dbb9533e75f2eff8445b3df0f2ceca6ac
+  SDWebImageWebPCoder: 3dc350894112feab5375cfba9ce0986544a66a69
+  sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
+  SwiftyGif: 6c3eafd0ce693cad58bb63d2b2fb9bacb8552780
+  url_launcher_ios: 839c58cdb4279282219f5e248c3321761ff3c4de
+
+PODFILE CHECKSUM: d4b203d2ab503ecffd633560658ae75c3831a7e9
+
+COCOAPODS: 1.11.3

@@ -1,0 +1,40 @@
+import '../../models/user_profile_model.dart';
+class UserProfileState {}
+
+class UserProfileInitialState extends UserProfileState {
+  final UserProfileData? user;
+
+  UserProfileInitialState({
+    required this.user
+  });
+}
+
+class UserProfileLoadedState extends UserProfileState{
+  final UserProfileData? user;
+
+  // const UserProfileLoadedState.initial():
+  //       user = null;
+
+  UserProfileLoadedState({
+    required this.user
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is UserProfileLoadedState &&
+              runtimeType == other.runtimeType &&
+              user == other.user;
+
+  @override
+  int get hashCode => user.hashCode;
+
+  UserProfileLoadedState copyWith({
+    UserProfileData? user,
+  }) {
+    return UserProfileLoadedState(
+      user: user ?? this.user,
+    );
+  }
+
+}

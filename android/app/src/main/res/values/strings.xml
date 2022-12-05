@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_notification_channel_id">default_notification_channel_id</string>
+    <string name="dot">.</string>
+    <string name="dialog_text_loading">Calling</string>
+    <string name="text_mute_btn">Mute</string>
+    <string name="text_speaker_btn">Speaker</string>
+    <string name="text_message_btn">Message</string>
+</resources>
