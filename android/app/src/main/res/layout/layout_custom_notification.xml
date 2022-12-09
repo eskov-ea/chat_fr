@@ -14,7 +14,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_toStartOf="@id/ivAvatar"
             android:orientation="vertical">
 
             <TextView
@@ -25,24 +24,15 @@
                 android:textSize="@dimen/size_text_action" />
 
 
-            <TextView
-                android:id="@+id/tvNumber"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.Compat.Notification.Line2"
-                android:textSize="@dimen/size_text_action" />
+<!--            <TextView-->
+<!--                android:id="@+id/tvNumber"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:textAppearance="@style/TextAppearance.Compat.Notification.Line2"-->
+<!--                android:textSize="@dimen/size_text_action" />-->
 
         </LinearLayout>
 
-
-        <ImageView
-            android:id="@+id/ivAvatar"
-            android:layout_width="@dimen/base_margin_x4"
-            android:layout_height="@dimen/base_margin_x4"
-            android:layout_alignParentRight="true"
-            android:layout_centerInParent="true"
-            android:scaleType="centerCrop"
-            android:visibility="invisible" />
     </RelativeLayout>
 
     <LinearLayout

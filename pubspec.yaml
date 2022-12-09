@@ -95,6 +95,8 @@ flutter:
    - assets/image_icon_2.png
    - assets/file_icon.png
    - assets/file_icon_2.png
+   - assets/download_icon.png
+   - assets/blured_img_icon.jpg
 #   - assets/mock_data/messages.json
 #   - images/a_dot_ham.jpeg
 #   - assets/ff-16b-2c-44100hz.aac

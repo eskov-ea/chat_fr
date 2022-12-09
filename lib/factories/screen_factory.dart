@@ -15,7 +15,6 @@ import '../ui/screens/running_call_screen.dart';
 import '../ui/screens/home_screen.dart';
 import '../ui/screens/image_screen.dart';
 import '../ui/widgets/file_previewer_widget.dart';
-import '../ui/widgets/image_preview_widget.dart';
 import '../ui/widgets/loader_widget.dart';
 
 class ScreenFactory {
@@ -95,8 +94,14 @@ class ScreenFactory {
     );
   }
 
-  Widget makeImageScreen(AttachmentViewPageArguments arguments) {
-    return  ImageScreen(width: 0.4, attachmentId: arguments.attachmentId, fileName: arguments.fileName);
+  Widget makeImageScreen(ImageScreenArguments arguments) {
+    return  ImageScreen(
+      width: arguments.width ?? 0.4,
+      fileBytesRepresentation: arguments.fileBytesRepresentation,
+      localFileAttachment: arguments.localFileAttachment,
+      fileName: arguments.fileName,
+      saveImageFunction: arguments.saveCallback,
+    );
   }
 
   Widget makePdfViewPage(AttachmentViewPageArguments arguments) {
@@ -111,8 +116,6 @@ class ScreenFactory {
     return AudioPlayerWidget(key: UniqueKey(), attachmentId: arguments.attachmentId, fileName: arguments.fileName,);
   }
   
-  Widget makeImageMessagePage(AttachmentViewPageArguments arguments) {
-    return ImagePreviewWidget(width: 0.4, attachmentId: arguments.attachmentId,);
-  }
+
 
 }

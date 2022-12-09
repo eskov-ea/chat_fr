@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/ui/pages/sending_file_preview.dart';
 import 'package:chat/ui/pages/sending_image_preview.dart';
@@ -8,6 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:image/image.dart' as IMG;
+
+
 
 Widget SendingObjectOptionsPage({
   required context,
@@ -41,9 +43,14 @@ Widget SendingObjectOptionsPage({
       );
     }
     if (result != null && kIsWeb) {
-      final bytes = await result.readAsBytes();
+      final Uint8List bytes = await result.readAsBytes();
+      IMG.Image img = IMG.decodeImage(bytes)!;
+      print("original image size W x H  --> ${img.width} x ${img.height}");
+      print("original image size  -->  ${img.length}");
+      print("original bytes size  -->  ${bytes.lengthInBytes}");
+
       String base64 = base64Encode(bytes);
-      final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.name.split('.').last, parentMessageId: parentMessageId);
+      final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.name.split('.').last, parentMessageId: parentMessageId, bytes: bytes);
       print(response);
     }
   }
@@ -87,7 +94,7 @@ Widget SendingObjectOptionsPage({
     if (result != null && kIsWeb) {
       final bytes = result.files.first.bytes;
       String base64 = base64Encode(bytes!);
-      final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.files.first.name.split('.').last, parentMessageId:parentMessageId);
+      final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.files.first.name.split('.').last, parentMessageId:parentMessageId, bytes: null);
       print(response);
     }
   }

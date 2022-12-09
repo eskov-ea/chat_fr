@@ -1,4 +1,5 @@
 import 'package:chat/factories/screen_factory.dart';
+import 'package:chat/ui/screens/image_screen.dart';
 import 'package:flutter/material.dart';
 import '../pages/user_profile_info_page.dart';
 import '../screens/running_call_screen.dart';
@@ -43,7 +44,7 @@ class MainNavigation {
           builder: (BuildContext context) => _screenFactory.makeChatScreen(arguments)
         );
       case MainNavigationRouteNames.imageScreen:
-        final arguments = settings.arguments as AttachmentViewPageArguments;
+        final arguments = settings.arguments as ImageScreenArguments;
         const String name = MainNavigationRouteNames.imageViewPage;
         return MaterialPageRoute(
             builder: (BuildContext context) => _screenFactory.makeImageScreen(arguments)
@@ -101,13 +102,6 @@ class MainNavigation {
         return MaterialPageRoute(
             settings: const RouteSettings(name: name),
             builder: (BuildContext context) => _screenFactory.makeAudioMessagePage(arguments)
-        );
-      case MainNavigationRouteNames.imageViewPage:
-        final arguments = settings.arguments as AttachmentViewPageArguments;
-        const String name = MainNavigationRouteNames.imageViewPage;
-        return MaterialPageRoute(
-            settings: const RouteSettings(name: name),
-            builder: (BuildContext context) => _screenFactory.makeImageMessagePage(arguments)
         );
       default:
         const widget = Text('Navigation error!!!');

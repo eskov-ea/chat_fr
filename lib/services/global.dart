@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:chat/bloc/dialogs_bloc/dialogs_bloc.dart';
+import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
 import 'package:chat/storage/sqflite_database.dart';
+import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,6 +16,7 @@ import '../models/message_model.dart';
 import '../ui/navigation/main_navigation.dart';
 import 'package:chat/view_models/auth/auth_view_cubit.dart';
 import 'package:chat/models/message_model.dart' as parseTime;
+import '../view_models/chats_builder_view/chat_view_cubit.dart';
 import 'messages/messages_repository.dart';
 import 'package:universal_html/html.dart' as html;
 
@@ -245,4 +249,9 @@ webPlatformSaveFile({required bytes, required filename}) async {
   } else {
     throw Exception("Should be called on web only");
   }
+}
+
+refreshAllData(BuildContext context){
+  BlocProvider.of<DialogsViewCubit>(context).refreshAllDialogs();
+  BlocProvider.of<ChatsBuilderBloc>(context).add(RefreshChatsBuilderEvent());
 }

@@ -47,6 +47,8 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         onChatsBuilderReceivedUpdatedMessageStatusesEvent(event, emit);
       } else if (event is ChatsBuilderUpdateLocalMessageEvent) {
         onChatsBuilderUpdateLocalMessageEvent(event, emit);
+      } else if (event is RefreshChatsBuilderEvent) {
+        onRefreshChatsBuilderEvent(event, emit);
       }
     });
   }
@@ -137,6 +139,15 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
   @override
   Future<void> close() async {
     super.close();
+  }
+
+  void onRefreshChatsBuilderEvent(
+      RefreshChatsBuilderEvent event,
+      Emitter<ChatsBuilderState> emit
+    ) {
+    print("onRefreshChatsBuilderEvent ${state.chats.length}");
+    final newState = state.copyWith(updatedChats: [], updatedCounter: 0);
+    emit(newState);
   }
 
 }

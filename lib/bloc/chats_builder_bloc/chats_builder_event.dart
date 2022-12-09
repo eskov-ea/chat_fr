@@ -55,3 +55,4 @@ class ChatsBuilderUpdateLocalMessageEvent extends ChatsBuilderEvent {
   });
 }
 
+class RefreshChatsBuilderEvent extends ChatsBuilderEvent{}

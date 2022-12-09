@@ -48,3 +48,4 @@ class DialogUserExitChatEvent extends DialogsEvent{
   });
 }
 
+class RefreshDialogsEvent extends DialogsEvent{}

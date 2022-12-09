@@ -1,13 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../models/dialog_model.dart';
 import '../../models/message_model.dart';
 import 'package:http/http.dart' as http;
-
 import '../../storage/data_storage.dart';
+import 'dart:ui' as UI;
+// show Codec, instantiateImageCodec, FrameInfo
+import 'package:image/image.dart' as IMG;
+import 'dart:typed_data' as typedData;
+import 'dart:convert' as convert;
 
 
 class MessagesProvider {
@@ -193,7 +198,7 @@ class MessagesProvider {
         'parent_id': parentMessageId,
         'file': {
           'name': '$uniq.$filetype',
-          'preview': base64file,
+          'preview': '',
           'content': base64file
         }
       }
@@ -222,17 +227,17 @@ class MessagesProvider {
     final tmpFileCompressed = await createTemporaryFile();
     final compressedFile = await _compressAndGetFile(file, tmpFileCompressed.path);
     final bytesCompressed = File(compressedFile.path).readAsBytesSync();
-    // final bytes = File(file.path).readAsBytesSync();
+    final preview =  resizeImage(bytesCompressed);
     final uniq = DateTime.now().microsecondsSinceEpoch.toString();
     String base64Image = base64Encode(bytesCompressed);
-    // String base64ImageCompressed = base64Encode(bytesCompressed);
+
     final postData = jsonEncode(<String, Object>{
       'data': {
         'message': '$messageText',
         'parent_id': parentMessageId,
         'file': {
           'name': '$uniq.$filetype',
-          'preview': 'image',
+          'preview': preview,
           'content': base64Image
         }
       }
@@ -247,7 +252,7 @@ class MessagesProvider {
     );
     print("RESPONSEIMAGE   ${response.body}");
 
-    // compressedFile.delete();
+    compressedFile.delete();
     return response.body;
   }
   Future<String> sendMessageWithFileBase64({
@@ -262,6 +267,8 @@ class MessagesProvider {
     final bytes = File(filePath.path).readAsBytesSync();
     final uniq = DateTime.now().microsecondsSinceEpoch.toString();
     String base64Image = base64Encode(bytes);
+    final preview = resizeImage(bytes);
+
     print("base64Image   $base64Image");
     final postData = jsonEncode(<String, Object>{
       'data': {
@@ -269,7 +276,7 @@ class MessagesProvider {
         'parent_id': parentMessageId,
         'file': {
           'name': '$uniq.$filetype',
-          'preview': 'pdf',
+          'preview': preview,
           'content': base64Image
         }
       }
@@ -287,21 +294,23 @@ class MessagesProvider {
   }
 
   Future<String> sendMessageWithFileBase64ForWeb({
-    required base64,
-    required dialogId,
-    required filetype,
-    required parentMessageId
+    required String base64,
+    required int dialogId,
+    required String filetype,
+    required int parentMessageId,
+    required Uint8List? bytes
   }) async {
     print('SENDING MESSAGE WITh FILE');
     final String? token = await _secureStorage.getToken();
     final uniq = DateTime.now().microsecondsSinceEpoch.toString();
+    final preview = await resizeImageWeb(bytes);
     final postData = jsonEncode(<String, Object>{
       'data': {
         'message': '',
         'parent_id': parentMessageId,
         'file': {
           'name': '$uniq.$filetype',
-          'preview': 'image',
+          'preview': preview ?? '',
           'content': base64
         }
       }
@@ -358,4 +367,35 @@ Future<Uint8List?> testCompressFile(File file) async {
   print(file.lengthSync());
   print(result?.length);
   return result;
+}
+
+String? resizeImage(Uint8List data) {
+  try {
+    IMG.Image img = IMG.decodeImage(data)!;
+    IMG.Image resized = IMG.copyResize(img, width: 8);
+    final resizedData = IMG.encodeJpg(resized);
+    final base64resizedData = base64Encode(resizedData);
+    return base64resizedData;
+  } catch(err) {
+    print("Resize error --> $err");
+    return null;
+  }
+}
+
+resizeImageWeb(Uint8List? bytes) async {
+
+  if (bytes == null) return "";
+  var codec = await UI.instantiateImageCodec(bytes,
+      targetHeight: 200, targetWidth: 200, allowUpscaling: false);
+  var frameInfo = await codec.getNextFrame();
+  UI.Image targetUiImage = frameInfo.image;
+
+  ByteData? targetByteData =
+  await targetUiImage.toByteData(format: UI.ImageByteFormat.png);
+  print('resized image WxH size is ${targetUiImage.width}x${targetUiImage.width}');
+  final Uint8List targetlUinit8List = targetByteData!.buffer.asUint8List();
+
+  String resizedBase64Image = convert.base64Encode(targetlUinit8List);
+  print('resized image base64 size is ${resizedBase64Image.length}');
+  return resizedBase64Image;
 }

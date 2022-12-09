@@ -37,6 +37,11 @@ class DialogsViewCubit extends Cubit<DialogsViewCubitState> {
     );
   }
 
+  void refreshAllDialogs(){
+    emit(DialogsLoadingViewCubitState());
+    dialogsBloc.add(RefreshDialogsEvent());
+  }
+
   @override
   Future<void> close() {
     dialogBlocSubscription.cancel();

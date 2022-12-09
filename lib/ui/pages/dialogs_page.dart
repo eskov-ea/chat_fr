@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../models/dialog_model.dart';
 import '../../../utils.dart';
 import '../../models/message_model.dart';
+import '../../services/global.dart';
 import '../../services/helpers/navigation_helpers.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/slidable_widget.dart';
@@ -50,34 +51,40 @@ class _MessagesPageState extends State<MessagesPage> {
             if (state.dialogs.isEmpty) {
               return const Center(child: Text("No dialogs yet"),);
             } else{
-              return CustomScrollView(
-                slivers: [
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                          (context, index) =>
-                          Container(
-                              padding: const EdgeInsets.only(
-                                  left: 10, right: 10, top: 0, bottom: 0),
-                              child: Align(
-                                child: _MessageTitle(
-                                  userId: userId,
-                                  dialogData: DialogData(
-                                      userData: state.dialogs[index].userData,
-                                      dialogId: state.dialogs[index].dialogId,
-                                      usersList: state.dialogs[index].usersList,
-                                      chatType: state.dialogs[index].chatType,
-                                      lastMessage: state.dialogs[index].lastMessage,
-                                      name: state.dialogs[index].name,
-                                      description: state.dialogs[index].description,
-                                      chatUsers: state.dialogs[index].chatUsers
+              return RefreshIndicator(
+                onRefresh: () async {
+                  print("we refresh it here");
+                  refreshAllData(context);
+                },
+                child: CustomScrollView(
+                  slivers: [
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                            (context, index) =>
+                            Container(
+                                padding: const EdgeInsets.only(
+                                    left: 10, right: 10, top: 0, bottom: 0),
+                                child: Align(
+                                  child: _MessageTitle(
+                                    userId: userId,
+                                    dialogData: DialogData(
+                                        userData: state.dialogs[index].userData,
+                                        dialogId: state.dialogs[index].dialogId,
+                                        usersList: state.dialogs[index].usersList,
+                                        chatType: state.dialogs[index].chatType,
+                                        lastMessage: state.dialogs[index].lastMessage,
+                                        name: state.dialogs[index].name,
+                                        description: state.dialogs[index].description,
+                                        chatUsers: state.dialogs[index].chatUsers
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                      childCount: state.dialogs.length,
-                    ),
-                  )
-                ],
+                        childCount: state.dialogs.length,
+                      ),
+                    )
+                  ],
+                ),
               );
             }
           }

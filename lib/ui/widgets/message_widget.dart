@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:chat/models/message_model.dart';
+import 'package:chat/ui/widgets/image_preview_widget.dart';
 import 'package:chat/ui/widgets/pdf_viewer_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:focused_menu/focused_menu.dart';
@@ -62,7 +64,7 @@ class MessageWidget extends StatefulWidget {
 
 class _MessageWidgetState extends State<MessageWidget>  with SingleTickerProviderStateMixin {
 
-  File? fileAttachment;
+  File? localFileAttachment;
 
   @override
   void initState() {
@@ -74,10 +76,10 @@ class _MessageWidgetState extends State<MessageWidget>  with SingleTickerProvide
     super.dispose();
   }
   checkIfAttachmentLoaded() async {
-    if (widget.file != null){
-      fileAttachment = await isLocalFileExist(fileName: widget.file!.name);
+    if (widget.file != null && !kIsWeb){
+      localFileAttachment = await isLocalFileExist(fileName: widget.file!.name);
       setState(() {});
-      print("Check if file exists -->  $fileAttachment");
+      print("Check if file exists -->  $localFileAttachment");
     }
   }
 
@@ -106,7 +108,7 @@ class _MessageWidgetState extends State<MessageWidget>  with SingleTickerProvide
       senderName: widget.senderName,
       parentMessage: widget.parentMessage,
       repliedMsgSenderName: widget.repliedMsgSenderName,
-      fileAttachment: fileAttachment
+      fileAttachment: localFileAttachment
     );
   }
 }
@@ -226,39 +228,15 @@ class _MessageTile extends StatelessWidget {
                       children: [
                         //TODO: refactor 3 widgets with one function/widget to avoid unnecessary code
                         file != null && file!.filetype == "jpg" || file != null && file!.filetype == "jpeg" || file != null && file!.filetype == "png"
-                          // ? ImagePreviewWidget(base64StringPreview: file!.preview, id: file!.attachmentId, base64StringContent: file!.content!, width: MediaQuery.of(context).size.width * 0.4,)
-                          ? Column(
-                            children: [
-                              if (p2p != 1 && !isMe) _authorNameWidgetGroupChat(senderName, _borderRadius),
-                              Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: isMe ? AppColors.myMessageBackground : Theme.of(context).cardColor,
-                                  borderRadius:  BorderRadius.only(
-                                    topLeft: const Radius.circular(_borderRadius),
-                                    topRight: const Radius.circular(_borderRadius),
-                                    bottomRight: isMe ? const Radius.circular(0.0) : const Radius.circular(_borderRadius),
-                                    bottomLeft: !isMe ? const Radius.circular(0.0) : const Radius.circular(_borderRadius),
-                                  ),
-                                ),
-                                child: GestureDetector(
-                                  onTap: (){
-                                    Navigator.of(context).pushNamed(
-                                        MainNavigationRouteNames.imageScreen,
-                                        arguments: AttachmentViewPageArguments(
-                                            fileName: file!.name,
-                                            fileExt: file!.filetype,
-                                            attachmentId: file!.attachmentId
-                                        )
-                                    );
-                                  },
-                                  child: fileAttachment != null
-                                      ? Image.file(fileAttachment!, width: 256,)
-                                      : Image.asset("assets/image_icon_2.png", width: 75,),
-                                ),
-                              )
-                            ],
-                          )
+                          ? ImagePreviewWidget(
+                              p2p: p2p,
+                              isMe: isMe,
+                              senderName: senderName,
+                              borderRadius: _borderRadius,
+                              file: file, localFileAttachment:
+                              fileAttachment,
+                              authorNameWidgetGroupChat: _authorNameWidgetGroupChat,
+                            )
                           : const SizedBox.shrink(),
                         file != null && file!.filetype == "mp4"
                           // ? AudioPlayerWidget(base64file: file!.preview, key: UniqueKey(),)

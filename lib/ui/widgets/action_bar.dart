@@ -3,18 +3,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:chat/bloc/chats_builder_bloc/chats_builder_state.dart';
 import 'package:chat/models/message_model.dart';
-import 'package:chat/models/message_model.dart' as parseTime;
 import 'package:chat/services/global.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sound/public/flutter_sound_recorder.dart';
+import 'package:flutter_sound_platform_interface/flutter_sound_recorder_platform_interface.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:record/record.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
-import '../../models/chat_builder_model.dart';
 import '../../models/dialog_model.dart';
 import '../../services/dialogs/dialogs_api_provider.dart';
 import '../../services/messages/messages_api_provider.dart';
@@ -22,10 +20,8 @@ import '../../services/messages/messages_repository.dart';
 import '../../theme.dart';
 import '../pages/sending_image_object_options_page.dart';
 import 'glowing_action_button.dart';
-
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:audio_session/audio_session.dart';
-import 'dart:typed_data';
 import 'package:flutter_sound_platform_interface/flutter_sound_platform_interface.dart';
 
 
@@ -76,7 +72,6 @@ class ActionBarState extends State<ActionBar> {
   bool sendButton = false;
   bool isSendButtonDisabled = false;
   // final _audioRecorder = Record();
-  final _audioRecorder = FlutterSoundRecorder();
   Codec _codec = Codec.aacMP4;
   String _mPath = 'voice.mp4';
   bool _mRecorderIsInited = false;
@@ -169,8 +164,12 @@ class ActionBarState extends State<ActionBar> {
     await recorder.stopRecorder();
   }
   void record(FlutterSoundRecorder? recorder) async {
-    await recorder!.startRecorder(codec: _codec, toFile: _mPath);
-    setState(() {});
+    try {
+      await recorder!.startRecorder(codec: _codec, toFile: _mPath, audioSource: AudioSource.microphone);
+      setState(() {});
+    } catch (err) {
+      print("ERROR recording audio startRecorder  -->  $err ");
+    }
   }
 
   _start(FlutterSoundRecorder? recorder) async {
@@ -179,8 +178,8 @@ class ActionBarState extends State<ActionBar> {
         return null;
       }
       record(recorder);
-    } catch (e) {
-      print(e);
+    } catch (err) {
+      print("ERROR recording an audio message  $err");
     }
   }
 
