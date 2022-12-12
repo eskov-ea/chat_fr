@@ -188,7 +188,7 @@ class _ChatScreenState extends State<ChatScreen> {
                               usersCubit: widget.usersCubit,
                               partnerName: widget.username,
                             )
-                                : const Center(child: Text('No messages yet'),)
+                                : const Center(child: Text('Нет сообщений'),)
                           ),
                           if (isRecording == true ) Positioned.fill(
                               child: BackdropFilter(
@@ -373,7 +373,7 @@ class _MessageListState extends State<_MessageList> {
               );
             // );
           } else {
-              return const Center(child: Text('Loading...'),);
+              return const Center(child: Text('Загрузка...'),);
             }
           },
     );

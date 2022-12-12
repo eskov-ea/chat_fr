@@ -300,7 +300,7 @@ class MessagesProvider {
     required int parentMessageId,
     required Uint8List? bytes
   }) async {
-    print('SENDING MESSAGE WITh FILE');
+    print('SENDING MESSAGE WITh FILE WEB');
     final String? token = await _secureStorage.getToken();
     final uniq = DateTime.now().microsecondsSinceEpoch.toString();
     final preview = await resizeImageWeb(bytes);
@@ -325,7 +325,6 @@ class MessagesProvider {
     );
     print("RESPONSEIMAGE   ${response.body}");
 
-    // compressedFile.delete();
     return response.body;
   }
 

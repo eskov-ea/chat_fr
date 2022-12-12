@@ -11,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sound/public/flutter_sound_recorder.dart';
 import 'package:flutter_sound_platform_interface/flutter_sound_recorder_platform_interface.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../models/dialog_model.dart';
@@ -165,6 +166,12 @@ class ActionBarState extends State<ActionBar> {
   }
   void record(FlutterSoundRecorder? recorder) async {
     try {
+      PermissionStatus status = await Permission.microphone.request();
+      if (status != PermissionStatus.granted) {
+        customToastMessage(context, "Необходимо разрешить доступ к микрофону!");
+        throw RecordingPermissionException("Microphone permission not granted");
+      }
+
       await recorder!.startRecorder(codec: _codec, toFile: _mPath, audioSource: AudioSource.microphone);
       setState(() {});
     } catch (err) {

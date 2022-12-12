@@ -3,11 +3,15 @@ import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/ui/pages/sending_file_preview.dart';
 import 'package:chat/ui/pages/sending_image_preview.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:image/image.dart' as IMG;
+import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
+import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
+import '../../models/message_model.dart';
 
 
 
@@ -43,15 +47,45 @@ Widget SendingObjectOptionsPage({
       );
     }
     if (result != null && kIsWeb) {
-      final Uint8List bytes = await result.readAsBytes();
-      IMG.Image img = IMG.decodeImage(bytes)!;
-      print("original image size W x H  --> ${img.width} x ${img.height}");
-      print("original image size  -->  ${img.length}");
-      print("original bytes size  -->  ${bytes.lengthInBytes}");
+      //TODO: refactor this repeated code
+      showModalBottomSheet(
+          isDismissible: false,
+          isScrollControlled: true,
+          backgroundColor: Colors.black54,
+          context: context,
+          builder: (BuildContext context) => Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              CircularProgressIndicator(),
+              SizedBox(
+                height: 30,
+              ),
+              Text(
+                "Отправка",
+                style: TextStyle(color: Colors.white, fontSize: 24),
+              )
+            ],
+          ));
+      try {
+        final Uint8List bytes = await result.readAsBytes();
+        IMG.Image img = IMG.decodeImage(bytes)!;
+        print("original image size W x H  --> ${img.width} x ${img.height}");
+        print("original image size  -->  ${img.length}");
+        print("original bytes size  -->  ${bytes.lengthInBytes}");
 
-      String base64 = base64Encode(bytes);
-      final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.name.split('.').last, parentMessageId: parentMessageId, bytes: bytes);
-      print(response);
+        String base64 = base64Encode(bytes);
+        final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.name.split('.').last, parentMessageId: parentMessageId, bytes: bytes);
+        print(response);
+        final message = MessageData.fromJson(jsonDecode(response)["data"]);
+        BlocProvider.of<ChatsBuilderBloc>(context).add(
+            ChatsBuilderAddMessageEvent(message: message, dialog: dialogId!));
+      } catch (err) {
+        print("ERROR sending image on web  --> $err");
+      }
+      BlocProvider.of<ChatsBuilderBloc>(context)
+          .add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
+      Navigator.pop(context);
+      Navigator.pop(context);
     }
   }
 
@@ -78,6 +112,7 @@ Widget SendingObjectOptionsPage({
   void _pickFileAndSend() async {
     final FilePickerResult? result = await FilePicker.platform.pickFiles();
     if (result != null && !kIsWeb) {
+      //TODO: refactor this repeated code
       Navigator.of(context).push(
           MaterialPageRoute(builder: (context) =>
               SendingFilePreview(
@@ -92,10 +127,40 @@ Widget SendingObjectOptionsPage({
       );
     }
     if (result != null && kIsWeb) {
-      final bytes = result.files.first.bytes;
-      String base64 = base64Encode(bytes!);
-      final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.files.first.name.split('.').last, parentMessageId:parentMessageId, bytes: null);
-      print(response);
+      showModalBottomSheet(
+        isDismissible: false,
+        isScrollControlled: true,
+        backgroundColor: Colors.black54,
+        context: context,
+        builder: (BuildContext context) => Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            CircularProgressIndicator(),
+            SizedBox(
+              height: 30,
+            ),
+            Text(
+              "Отправка",
+              style: TextStyle(color: Colors.white, fontSize: 24),
+            )
+          ],
+        ));
+      try {
+        final bytes = result.files.first.bytes;
+        String base64 = base64Encode(bytes!);
+        final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.files.first.name.split('.').last, parentMessageId:parentMessageId, bytes: null);
+        print(response);
+        final message = MessageData.fromJson(jsonDecode(response)["data"]);
+        print("message -->  $message");
+        BlocProvider.of<ChatsBuilderBloc>(context).add(
+            ChatsBuilderAddMessageEvent(message: message, dialog: dialogId!));
+      } catch (err) {
+        print("ERROR sending image on web  --> $err");
+      }
+      BlocProvider.of<ChatsBuilderBloc>(context)
+          .add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
+      Navigator.pop(context);
+      Navigator.pop(context);
     }
   }
 
@@ -116,7 +181,7 @@ Widget SendingObjectOptionsPage({
                 ),
               ),
               child: const Text(
-                'Choose file',
+                'Выбрать файл',
                 style: TextStyle(color: Colors.black54, fontSize: 20),
               )
           ),
@@ -132,7 +197,7 @@ Widget SendingObjectOptionsPage({
                 ),
               ),
               child: const Text(
-                'Choose photo or video',
+                'Выбрать фото',
                 style: TextStyle(color: Colors.black54, fontSize: 20),
               )
           ),
@@ -148,7 +213,7 @@ Widget SendingObjectOptionsPage({
                 ),
               ),
               child: const Text(
-                'Open camera',
+                'Открыть камеру',
                 style: TextStyle(color: Colors.black54, fontSize: 20),
               )
           ),
@@ -170,7 +235,7 @@ Widget SendingObjectOptionsPage({
                 ),
               ),
               child: const Text(
-                'Cancel',
+                'Отменить',
                 style: TextStyle(color: Colors.red, fontSize: 20),
               )
           ),

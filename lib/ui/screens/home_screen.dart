@@ -61,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String? callerName;
   String? os;
   SqfliteDatabase? _db;
+  bool isUpdateAvailable = false;
 
 
   Future<void> sipRegistration(UserProfileAsteriskSettings settings) async {
@@ -92,6 +93,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     String buildNumber = packageInfo.buildNumber;
     print("Current app version is $version  $buildNumber");
     if (packageInfo.version != settings.version) {
+      isUpdateAvailable = true;
       if(os == "android") {
         customToastMessage(context, "Доступна новая версия приложения. Вы можете обновить ее в разделе Профиль");
       } else {
@@ -236,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           _screenFactory.makeMessagesPage(),
           _screenFactory.makeCallsPage(),
           _screenFactory.makeContactsPage(),
-          _screenFactory.makeProfilePage(),
+          _screenFactory.makeProfilePage(isUpdateAvailable),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

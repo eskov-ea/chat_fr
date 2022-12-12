@@ -136,7 +136,7 @@ class _AuthScreenState extends State<AuthScreen> {
               borderSide: BorderSide(color: LightColors.mainText, width: 2.5, )
             ),
 
-            labelText: 'Login',
+            labelText: 'Логин',
             labelStyle: TextStyle(fontSize: 22),
             prefixIcon: Icon(Icons.person),
             prefixIconColor: Colors.blue,
@@ -150,7 +150,7 @@ class _AuthScreenState extends State<AuthScreen> {
           obscureText: _hidePassword,
           style: const TextStyle(fontSize: 20, color: LightColors.mainText, decoration: TextDecoration.none),
           decoration: InputDecoration(
-            labelText: 'Password',
+            labelText: 'Пароль',
             labelStyle: const TextStyle(fontSize: 22),
             prefixIcon: const Icon(Icons.lock),
             suffixIcon: GestureDetector(
@@ -173,7 +173,7 @@ class _AuthScreenState extends State<AuthScreen> {
               child: CircularProgressIndicator(strokeWidth: 2),
             )
             : const Text(
-              'Login',
+              'Логин',
               style: TextStyle(fontSize: 20),
           ),
           style: ElevatedButton.styleFrom(

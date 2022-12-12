@@ -1,17 +1,21 @@
+import 'dart:io';
 import 'package:chat/bloc/profile_bloc/profile_bloc.dart';
 import 'package:chat/bloc/profile_bloc/profile_state.dart';
 import 'package:chat/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../services/auth/auth_repo.dart';
-import '../../services/pusher/dart_pusher_channels.dart';
 import '../navigation/main_navigation.dart';
 
 
-final channel = DartPusherChannels();
-
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+
+  final bool isUpdateAvailable;
+
+  const ProfilePage({
+    required this.isUpdateAvailable,
+    Key? key
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +87,24 @@ class ProfilePage extends StatelessWidget {
                           ],
                         ),
                       ),
+                      Platform.isAndroid
+                          ? OutlinedButton(
+                              onPressed: () async {
+                                isUpdateAvailable ? downLoadNewAppVersion() : (){};
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isUpdateAvailable ? LightColors.profilePageButton : Colors.white10,
+                                minimumSize: const Size.fromHeight(50),
+                                shape: RoundedRectangleBorder(
+                                    side: BorderSide(color:isUpdateAvailable ? Colors.black54 : Colors.black12, width: 2, style: BorderStyle.solid),
+                                    borderRadius: BorderRadius.zero),
+                              ),
+                              child: const Text(
+                                'Загрузить новую версию',
+                                style: TextStyle(color: Colors.black26, fontSize: 20, fontWeight: FontWeight.w300),
+                              )
+                            )
+                          : SizedBox.shrink(),
                       OutlinedButton(
                           onPressed: () async {
                             await AuthRepository().logout();
@@ -98,7 +120,7 @@ class ProfilePage extends StatelessWidget {
                                 borderRadius: BorderRadius.zero),
                           ),
                           child: const Text(
-                            'Log out',
+                            'Выйти из аккаунта',
                             style: TextStyle(color: Colors.red, fontSize: 20, fontWeight: FontWeight.w600),
                           )
                       ),
@@ -133,7 +155,7 @@ class ProfilePage extends StatelessWidget {
                       borderRadius: BorderRadius.zero),
                 ),
                 child: const Text(
-                  'Log out',
+                  'Выйти из аккаунта',
                   style: TextStyle(
                       color: Colors.red,
                       fontSize: 20,
@@ -143,5 +165,9 @@ class ProfilePage extends StatelessWidget {
         }
       },
     );
+  }
+
+  downLoadNewAppVersion() {
+    print("download new virsion");
   }
 }
