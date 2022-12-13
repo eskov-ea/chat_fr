@@ -260,7 +260,7 @@ class ActionBarState extends State<ActionBar> {
                           ),
                           borderRadius: BorderRadius.all(Radius.circular(20.0))
                         ),
-                        hintText: 'Type something...',
+                        hintText: 'Напишите сообщение...',
                         focusedBorder: OutlineInputBorder(
                             borderSide: BorderSide(
                                 color: Colors.black45,

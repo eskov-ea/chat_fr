@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String? callerName;
   String? os;
   SqfliteDatabase? _db;
-  bool isUpdateAvailable = false;
+  bool isUpdateAvailable = true;
 
 
   Future<void> sipRegistration(UserProfileAsteriskSettings settings) async {

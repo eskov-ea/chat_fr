@@ -5,6 +5,7 @@ import 'package:chat/ui/widgets/image_preview_widget.dart';
 import 'package:chat/ui/widgets/pdf_viewer_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
@@ -159,6 +160,13 @@ class _MessageTile extends StatelessWidget {
 
   static const _borderRadius = 10.0;
 
+  void _copyMessageToClipboard(BuildContext context) {
+    Clipboard.setData(ClipboardData(text: message)).then((_){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Сообщение скопировано")));
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return SwipeTo(
@@ -191,7 +199,7 @@ class _MessageTile extends StatelessWidget {
                           style: TextStyle(color: Colors.black54),
                         ),
                         onPressed: () {
-                          print("message   $message");
+                          _copyMessageToClipboard(context);
                         },
                         trailingIcon: const Icon(Icons.copy)),
                     FocusedMenuItem(
@@ -229,6 +237,7 @@ class _MessageTile extends StatelessWidget {
                         //TODO: refactor 3 widgets with one function/widget to avoid unnecessary code
                         file != null && file!.filetype == "jpg" || file != null && file!.filetype == "jpeg" || file != null && file!.filetype == "png"
                           ? ImagePreviewWidget(
+                              key: ValueKey<int>(file!.attachmentId),
                               p2p: p2p,
                               isMe: isMe,
                               senderName: senderName,
@@ -304,25 +313,6 @@ class _MessageTile extends StatelessWidget {
                           )
                           : const SizedBox.shrink(),
                         const SizedBox(height: 5,),
-
-
-                        // file != null && file!.filetype != "pdf" && file!.filetype != "mp4" && file!.filetype != "jpg"
-                        //   ? GestureDetector(
-                        //   onTap: (){
-                        //     Navigator.of(context).pushNamed(
-                        //         MainNavigationRouteNames.foreignAppsFileViewPage,
-                        //         arguments: AttachmentViewPageArguments(
-                        //             fileName: file!.name,
-                        //             fileExt: file!.filetype,
-                        //             attachmentId: file!.attachmentId
-                        //         )
-                        //     );
-                        //   },
-                        //   child: Image.asset("assets/PDF_file_icon.png", width: 64,),
-                        // )
-                        //   : const SizedBox.shrink(),
-
-
                         message.isNotEmpty && message.trim() != ""
                             ? Container(
                           constraints: BoxConstraints(

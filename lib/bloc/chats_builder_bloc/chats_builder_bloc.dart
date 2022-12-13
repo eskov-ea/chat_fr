@@ -28,9 +28,9 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         print("WsStateUpdateStatus   ${streamState.statuses}");
         add(ChatsBuilderReceivedUpdatedMessageStatusesEvent(statuses: streamState.statuses));
       } else if (streamState is WsStateNewDialogCreated) {
-        // add(DialogsLoadEvent());
+
       } else if (streamState is Connected) {
-        // add(DialogsLoadEvent());
+
       }
     });
 
@@ -40,7 +40,8 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       } else if(event is ChatsBuilderCreateEvent) {
         await onChatsBuilderCreateEvent(event, emit);
       } else if (event is ChatsBuilderAddMessageEvent) {
-        await onChatsBuilderAddMessageEvent(event, emit);
+        Future.microtask(() =>
+           onChatsBuilderAddMessageEvent(event, emit));
       } else if (event is ChatsBuilderUpdateStatusMessagesEvent) {
         await onChatsBuilderUpdateStatusMessagesEvent(event, emit);
       } else if (event is ChatsBuilderReceivedUpdatedMessageStatusesEvent) {

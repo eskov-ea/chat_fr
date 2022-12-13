@@ -320,7 +320,7 @@ class _MessageListState extends State<_MessageList> {
                 pageNumber++;
                 return const Center(child: CircularProgressIndicator(),);
               }
-              if ( currentState.messages.isEmpty) return const Center(child: Text('No messages yet'),);
+              if ( currentState.messages.isEmpty) return const Center(child: Text('Нет сообщений'),);
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: ListView.builder(
@@ -345,6 +345,7 @@ class _MessageListState extends State<_MessageList> {
                               ),
                             ),
                           MessageWidget(
+                            key: ValueKey<int>(currentState.messages[index].messageId),
                             index: index,
                             senderId: currentState.messages[index].senderId,
                             userId: widget.userId,

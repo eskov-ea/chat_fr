@@ -102,8 +102,7 @@ class MessagesProvider {
         Uri.parse('https://erp.mcfef.com/api/chat/message/setchatred/$dialogId'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $token',
-          // 'Referer': 'https://erp.mcfef.com'
+          'Authorization': 'Bearer $token'
         }
     );
     //TODO: process 401 error

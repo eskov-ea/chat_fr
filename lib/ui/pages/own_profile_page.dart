@@ -4,6 +4,7 @@ import 'package:chat/bloc/profile_bloc/profile_state.dart';
 import 'package:chat/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../services/auth/auth_repo.dart';
 import '../navigation/main_navigation.dart';
 
@@ -23,20 +24,6 @@ class ProfilePage extends StatelessWidget {
       builder: (BuildContext context, state) {
         if (state is UserProfileLoadedState){
           return Scaffold(
-            // appBar: AppBar(
-            //   iconTheme: Theme.of(context).iconTheme,
-            //   centerTitle: true,
-            //   backgroundColor: AppColors.backgroundLight,
-            //   elevation: 0,
-            //   title: Text(""),
-            //   actions: [
-            //     TextButton(
-            //       child: const Text('Edit',
-            //         style: TextStyle(color: Colors.white, fontSize: 20),),
-            //       onPressed: () {},
-            //     ),
-            //   ],
-            // ),
             body: SafeArea(
               child: SizedBox(
                 width: MediaQuery.of(context).size.width,
@@ -90,7 +77,7 @@ class ProfilePage extends StatelessWidget {
                       Platform.isAndroid
                           ? OutlinedButton(
                               onPressed: () async {
-                                isUpdateAvailable ? downLoadNewAppVersion() : (){};
+                                isUpdateAvailable ? downLoadNewAppVersion(state.user?.appSettings?.downloadUrlAndroid) : (){};
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: isUpdateAvailable ? LightColors.profilePageButton : Colors.white10,
@@ -99,9 +86,9 @@ class ProfilePage extends StatelessWidget {
                                     side: BorderSide(color:isUpdateAvailable ? Colors.black54 : Colors.black12, width: 2, style: BorderStyle.solid),
                                     borderRadius: BorderRadius.zero),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Загрузить новую версию',
-                                style: TextStyle(color: Colors.black26, fontSize: 20, fontWeight: FontWeight.w300),
+                                style: TextStyle(color: isUpdateAvailable ? Colors.black54 : Colors.black26, fontSize: 20, fontWeight: FontWeight.w300),
                               )
                             )
                           : SizedBox.shrink(),
@@ -167,7 +154,14 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  downLoadNewAppVersion() {
-    print("download new virsion");
+  downLoadNewAppVersion(String? url) async {
+    print("download new version");
+    if(url == null) return;
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)){
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+    // can't launch url
+    }
   }
 }
