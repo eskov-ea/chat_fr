@@ -104,7 +104,9 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
             final dialogChannel = clientSubscribeToChannel(authToken: token, client: socket, channelName: 'private-chat.${dialog.dialogId}');
             channels.add(dialogChannel);
             StreamSubscription dialogEventSubscription = dialogChannel.bind('update').listen((event) {
-              if (event.data["message"] != null && event.data["message"]["user_id"] != userId ) {
+              if (event.data["message"] != null
+                  // && event.data["message"]["user_id"] != userId
+              ) {
                 final newMessage = MessageData.fromJson(event.data["message"]);
                 print("NEW MESSAGE    ->  $newMessage");
                 add(WsEventReceiveNewMessage(message: newMessage));

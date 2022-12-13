@@ -70,28 +70,34 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     final userId = await DataProvider().getUserId();
     List<MessageData> messages = await messagesProvider.getMessages(userId, event.dialogId, event.pageNumber);
     var chatExist = false;
+    final Map<String, bool> newMessagesDictionary = state.messagesDictionary;
     for (var chat in state.chats) {
       if (chat.chatId == event.dialogId) {
-        chat.messages.addAll(messages);
+        for (var message in messages) {
+          newMessagesDictionary["${message.messageId}"] = true;
+          chat.messages.add(message);
+        }
         chatExist = true;
       }
     }
     if (chatExist == false) {
+      for (var message in messages) {
+        newMessagesDictionary["${message.messageId}"] = true;
+      }
       state.chats.add(ChatsData.makeChatsData(event.dialogId, messages));
     }
     // final newState = state.copyWith(updatedChats: state.chats, updatedCounter: state.counter++);
-    emit(ChatsBuilderState(counter: state.counter++, chats: state.chats));
+    emit(ChatsBuilderState(counter: state.counter++, chats: state.chats, messagesDictionary: newMessagesDictionary));
   }
 
   Future<void> onChatsBuilderAddMessageEvent (
       ChatsBuilderAddMessageEvent event, Emitter<ChatsBuilderState> emit
       ) async {
     print("TRY TO ADD MESSAGE");
+    if (state.messagesDictionary["${event.message.messageId}"] != null) return;
     for (var chat in state.chats) {
       if (chat.chatId == event.dialog) {
-        if (chat.messages.isEmpty || chat.messages.last.messageId != event.message.messageId) {
-          chat.messages.insert(0, event.message);
-        }
+        chat.messages.insert(0, event.message);
       }
     }
     emit(state.copyWith(updatedChats: state.chats, updatedCounter: state.counter++));
