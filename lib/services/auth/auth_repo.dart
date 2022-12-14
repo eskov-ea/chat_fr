@@ -39,6 +39,8 @@ class AuthRepository {
         final userId = profile.id;
         await _secureStorage.setUserId(userId);
         return authToken;
+      } else if (response.statusCode == 403) {
+        throw ApiClientException(ApiClientExceptionType.access);
       } else {
         throw ApiClientException(ApiClientExceptionType.auth);
       }

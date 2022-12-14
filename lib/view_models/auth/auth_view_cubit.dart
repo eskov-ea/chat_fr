@@ -60,8 +60,11 @@ class AuthViewCubit extends Cubit<AuthViewCubitState> {
       case ApiClientExceptionType.network:
         return 'Сервер не доступен. Проверте подключение к интернету';
       case ApiClientExceptionType.auth:
-        return 'Неправильный логин пароль!';
+        return 'Неправильный логин или пароль!';
+      case ApiClientExceptionType.access:
+        return 'Недостаточно прав доступа!';
       case ApiClientExceptionType.sessionExpired:
+        return 'Суссия устарела, обновите КЕШ';
       case ApiClientExceptionType.other:
         return 'Произошла ошибка. Попробуйте еще раз';
     }
