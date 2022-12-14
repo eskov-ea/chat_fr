@@ -102,7 +102,7 @@ class LastMessageData {
     return json == null
         ?  LastMessageData(
             messageId: 0,
-            message: "No messages yet",
+            message: "Нет сообщений",
             senderId: 0,
             time: null,
             statuses: [],
@@ -191,14 +191,14 @@ class DialogMessageData {
   static DialogMessageData fromJson(json) =>
         json != null
             ? DialogMessageData(
-                message: json["text"] ?? 'No messages yet',
+                message: json["text"] ?? 'Нет сообщений',
                 messageDate: getDate(DateTime.tryParse(json["updatedAt"])),
                 readStatus: json["read"],
                 senderMessageData: SenderMessageData.fromJson(json["user"]),
                 attachments: json["attachments"].length > 0 ? true : false,
                 attachmentType: json["attachments"].length > 0 ? json["attachments"][0]["filetype"] : null )
             : DialogMessageData(
-            message: 'No messages yet',
+            message: 'Нет сообщений',
             messageDate: '',
             readStatus: true,
             senderMessageData: SenderMessageData.fromJson(json),

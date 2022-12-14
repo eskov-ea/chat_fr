@@ -56,3 +56,5 @@ class ChatsBuilderUpdateLocalMessageEvent extends ChatsBuilderEvent {
 }
 
 class RefreshChatsBuilderEvent extends ChatsBuilderEvent{}
+
+class DeleteAllChatsEvent extends ChatsBuilderEvent{}

@@ -49,4 +49,8 @@ class DataProvider {
     return _secureStorage.write(key: _Keys.deviceID, value: value);
   }
 
+  Future<void> deleteDeviceID() {
+    return _secureStorage.delete(key: _Keys.deviceID);
+  }
+
 }

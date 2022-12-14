@@ -49,7 +49,7 @@ class _MessagesPageState extends State<MessagesPage> {
         builder: (context, state) {
           if (state is DialogsLoadedViewCubitState) {
             if (state.dialogs.isEmpty) {
-              return const Center(child: Text("No dialogs yet"),);
+              return const Center(child: Text("Нет диалогов"),);
             } else{
               return RefreshIndicator(
                 onRefresh: () async {

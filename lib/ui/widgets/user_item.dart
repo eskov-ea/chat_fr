@@ -103,7 +103,7 @@ class UserItem extends StatelessWidget {
     if (dialogs == null) return null;
 
     while(dialogs.moveNext()) {
-    print("${dialogs.current} ");
+    print("current dialog findDialog ${dialogs.current} ");
       if (dialogs.current.usersList.first.id == userId &&
           dialogs.current.usersList.last.id == partnerId ||
           dialogs.current.usersList.first.id == partnerId &&

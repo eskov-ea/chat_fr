@@ -32,7 +32,7 @@ class AuthViewCubit extends Cubit<AuthViewCubitState> {
   void logout(BuildContext context){
     print('logout event');
     authBloc.add(LogoutEvent());
-    Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.auth);
+    // Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.auth);
   }
 
   void _onState(AuthState state) {

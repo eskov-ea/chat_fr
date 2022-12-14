@@ -84,12 +84,12 @@ class ActionBarState extends State<ActionBar> {
 
   @override
   void initState() {
-    super.initState();
     init().then((value) {
       setState(() {
         _mRecorderIsInited = true;
       });
     });
+    super.initState();
   }
   @override
   void dispose() {

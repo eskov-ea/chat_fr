@@ -72,6 +72,9 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     print("usernameusername ${widget.username}");
+    print("chatscreen  ${widget.username} "
+        "${widget.dialogData} ${widget.dialogCubit} ${widget.usersCubit} "
+        "${widget.userId} ${widget.partnerId}");
     super.initState();
   }
 
@@ -156,11 +159,11 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           actions: [
-            if (widget.dialogData == null || widget.dialogData?.chatType.p2p == 1 && !kIsWeb) IconButton(
-              icon: const Icon(CupertinoIcons.video_camera, color: AppColors.secondary, size: 38,),
-              onPressed: () {},
-            ),
-            if ((widget.dialogData == null && !kIsWeb) || (widget.dialogData!.chatType.p2p == 1 && !kIsWeb)) Padding(
+            // if (widget.dialogData == null || widget.dialogData?.chatType.p2p == 1 && !kIsWeb) IconButton(
+            //   icon: const Icon(CupertinoIcons.video_camera, color: AppColors.secondary, size: 38,),
+            //   onPressed: () {},
+            // ),
+            if (!kIsWeb && ( widget.dialogData == null || widget.dialogData!.chatType.p2p == 1)) Padding(
               padding: const EdgeInsets.only(right: 20),
               child: IconButton(
                 icon: const Icon(CupertinoIcons.phone, color: AppColors.secondary, size: 30,),
@@ -255,6 +258,7 @@ class _MessageListState extends State<_MessageList> {
 
   @override
   void initState() {
+    print("init messages list");
     super.initState();
     BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogData.dialogId));
     setupScrollListener(
@@ -545,7 +549,7 @@ UserContact? findPartnerUserProfile(UsersViewCubit usersCubit, int partnerId) {
 
 
 class ChatPageArguments {
-  final int userId;
+  final int? userId;
   final int partnerId;
   final DialogData? dialogData;
   final String username;

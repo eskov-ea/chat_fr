@@ -53,8 +53,19 @@ class AuthRepository {
   }
 
   Future<void> logout() async {
+    final token = await _secureStorage.getToken();
+    final res = await http.get(
+      Uri.parse('https://erp.mcfef.com/api/logout'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token',
+      },
+    );
     await _secureStorage.deleteUserId();
     await _secureStorage.deleteToken();
+    await _secureStorage.deleteDeviceID();
+    final token2 = await _secureStorage.getToken();
+    print("logout res ${res.body}, token $token2");
     // TODO: function to delete deviceId for notifications from db
   }
 

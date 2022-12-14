@@ -1,11 +1,15 @@
 import 'dart:io';
+import 'package:chat/bloc/chats_builder_bloc/chats_builder_event.dart';
 import 'package:chat/bloc/profile_bloc/profile_bloc.dart';
 import 'package:chat/bloc/profile_bloc/profile_state.dart';
 import 'package:chat/theme.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../services/auth/auth_repo.dart';
+import '../../view_models/dialogs_page/dialogs_view_cubit.dart';
 import '../navigation/main_navigation.dart';
 
 
@@ -74,7 +78,7 @@ class ProfilePage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Platform.isAndroid
+                      !kIsWeb && Platform.isAndroid
                           ? OutlinedButton(
                               onPressed: () async {
                                 isUpdateAvailable ? downLoadNewAppVersion(state.user?.appSettings?.downloadUrlAndroid) : (){};
@@ -94,13 +98,16 @@ class ProfilePage extends StatelessWidget {
                           : SizedBox.shrink(),
                       OutlinedButton(
                           onPressed: () async {
-                            await AuthRepository().logout();
                             //TODO: check if logout consistently works through add event
+                            BlocProvider.of<DialogsViewCubit>(context).deleteAllDialogs();
+                            BlocProvider.of<ChatsBuilderBloc>(context).add(DeleteAllChatsEvent());
+                            await AuthRepository().logout();
                             // BlocProvider.of<AuthViewCubit>(context).logout(context);
-                            Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.auth);
+                            Navigator.of(context)
+                                .pushReplacementNamed(MainNavigationRouteNames.auth);
                           },
                           style: ElevatedButton.styleFrom(
-                            primary: LightColors.profilePageButton,
+                            backgroundColor: LightColors.profilePageButton,
                             minimumSize: const Size.fromHeight(50),
                             shape: const RoundedRectangleBorder(
                                 side: BorderSide(color: Colors.black54, width: 2, style: BorderStyle.solid),
@@ -123,45 +130,20 @@ class ProfilePage extends StatelessWidget {
                 child: Center(
                   child: CircularProgressIndicator(),
                 )),
-            OutlinedButton(
-                onPressed: () async {
-                  await AuthRepository().logout();
-                  //TODO: check if logout consistently works through add event
-                  // BlocProvider.of<AuthViewCubit>(context).logout(context);
-                  Navigator.of(context)
-                      .pushReplacementNamed(MainNavigationRouteNames.auth);
-                },
-                style: ElevatedButton.styleFrom(
-                  primary: LightColors.profilePageButton,
-                  minimumSize: const Size.fromHeight(50),
-                  shape: const RoundedRectangleBorder(
-                      side: BorderSide(
-                          color: Colors.black54,
-                          width: 2,
-                          style: BorderStyle.solid),
-                      borderRadius: BorderRadius.zero),
-                ),
-                child: const Text(
-                  'Выйти из аккаунта',
-                  style: TextStyle(
-                      color: Colors.red,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600),
-                )),
           ]);
         }
       },
     );
   }
+}
 
-  downLoadNewAppVersion(String? url) async {
-    print("download new version");
-    if(url == null) return;
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)){
+void downLoadNewAppVersion(String? url) async {
+  print("download new version");
+  if(url == null) return;
+  final uri = Uri.parse(url);
+  if (await canLaunchUrl(uri)){
     await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
+  } else {
     // can't launch url
-    }
   }
 }

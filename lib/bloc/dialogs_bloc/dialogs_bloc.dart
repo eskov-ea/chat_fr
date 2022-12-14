@@ -86,6 +86,8 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         onDialogUserExitChatEvent(event, emit);
       } else if (event is RefreshDialogsEvent) {
         onRefreshDialogsEvent(event, emit);
+      } else if (event is DeleteAllDialogsEvent) {
+        onDeleteAllDialogsEvent(event, emit);
       }
     });
   }
@@ -177,6 +179,15 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     final newState = state.copyWith(dialogs: []);
     // emit(newState);
     add(DialogsLoadEvent());
+  }
+
+  void onDeleteAllDialogsEvent(
+      DeleteAllDialogsEvent event,
+      Emitter<DialogsState> emit
+      ){
+    print("onDeleteDialogsEvent  ${state.dialogs?.length}");
+    final newState = state.copyWith(dialogs: []);
+    emit(newState);
   }
 
 

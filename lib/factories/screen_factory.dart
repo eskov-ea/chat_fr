@@ -53,7 +53,7 @@ class ScreenFactory {
       usersCubit: arguments.usersCubit,
       dialogData: arguments.dialogData,
       username: arguments.username,
-      userId: arguments.userId,
+      userId: arguments.userId!,
       partnerId: arguments.partnerId,
     );
   }
