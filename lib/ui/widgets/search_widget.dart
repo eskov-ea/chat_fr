@@ -1,6 +1,6 @@
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+
 
 class SearchWidget extends StatefulWidget {
   const SearchWidget({required this.cubit ,Key? key}) : super(key: key);

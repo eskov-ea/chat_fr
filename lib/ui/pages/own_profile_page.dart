@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:chat/bloc/chats_builder_bloc/chats_builder_event.dart';
 import 'package:chat/bloc/profile_bloc/profile_bloc.dart';
+import 'package:chat/bloc/profile_bloc/profile_events.dart';
 import 'package:chat/bloc/profile_bloc/profile_state.dart';
 import 'package:chat/theme.dart';
 import 'package:flutter/foundation.dart';
@@ -8,8 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
+import '../../bloc/user_bloc/user_event.dart';
+import '../../bloc/ws_bloc/ws_event.dart';
 import '../../services/auth/auth_repo.dart';
 import '../../view_models/dialogs_page/dialogs_view_cubit.dart';
+import '../../view_models/user/users_view_cubit.dart';
+import '../../view_models/websocket/websocket_view_cubit.dart';
 import '../navigation/main_navigation.dart';
 
 
@@ -101,6 +106,9 @@ class ProfilePage extends StatelessWidget {
                             //TODO: check if logout consistently works through add event
                             BlocProvider.of<DialogsViewCubit>(context).deleteAllDialogs();
                             BlocProvider.of<ChatsBuilderBloc>(context).add(DeleteAllChatsEvent());
+                            BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLogoutEvent());
+                            BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(WsEventCloseConnection());
+                            BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersDeleteEvent());
                             await AuthRepository().logout();
                             // BlocProvider.of<AuthViewCubit>(context).logout(context);
                             Navigator.of(context)

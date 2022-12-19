@@ -6,5 +6,5 @@ class ProfileBlocLoadingEvent extends ABlocEvent {}
 
 class ProfileBlocLoadedEvent extends ABlocEvent {}
 
-class ProfileBlocChangeProfileEvent extends ABlocEvent {}
+class ProfileBlocLogoutEvent extends ABlocEvent {}
 

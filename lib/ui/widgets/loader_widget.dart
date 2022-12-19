@@ -1,10 +1,7 @@
-import 'package:chat/ui/screens/outgoing_call_screen.dart';
 import 'package:chat/view_models/loader/loader_view_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../navigation/main_navigation.dart';
-import '../screens/incoming_call_screen.dart';
-import '../screens/running_call_screen.dart';
 
 
 class LoaderWidget extends StatelessWidget {

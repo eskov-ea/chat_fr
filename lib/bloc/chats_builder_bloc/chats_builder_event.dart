@@ -44,12 +44,12 @@ class ChatsBuilderAddMessageEvent extends ChatsBuilderEvent {
 }
 
 class ChatsBuilderUpdateLocalMessageEvent extends ChatsBuilderEvent {
-  final int messageId;
+  final int localMessageId;
   final MessageData message;
   final int dialogId;
 
   ChatsBuilderUpdateLocalMessageEvent({
-    required this.messageId,
+    required this.localMessageId,
     required this.message,
     required this.dialogId,
   });

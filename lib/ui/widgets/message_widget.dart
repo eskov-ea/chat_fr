@@ -348,6 +348,9 @@ class _MessageTile extends StatelessWidget {
                                       style: isMe
                                           ? const TextStyle(color: Colors.white, fontSize: 16)
                                           : const TextStyle(color: Colors.black, fontSize: 16),
+                                      linkStyle: isMe
+                                          ? const TextStyle(color: Colors.white, fontSize: 16)
+                                          : const TextStyle(color: Colors.blueAccent, fontSize: 16),
                                     )
                                   ),
                                 ]

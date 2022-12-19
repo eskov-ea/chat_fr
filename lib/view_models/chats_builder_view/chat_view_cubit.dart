@@ -13,10 +13,8 @@ class ChatBuilderScreenViewCubit extends Cubit<ChatScreenViewCubitState> {
     required ChatScreenViewCubitState initialState,
     required this.chatsBuilderBloc
   }) : super(initialState) {
-    Future.microtask(() {
       _onState(chatsBuilderBloc.state);
       messagesBlocSubscription = chatsBuilderBloc.stream.listen(_onState);
-    });
   }
 
   void _onState(ChatsBuilderState state) {

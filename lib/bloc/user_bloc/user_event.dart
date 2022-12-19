@@ -8,14 +8,7 @@ abstract class UsersEvent extends Equatable{
 
 class UsersLoadEvent extends UsersEvent {}
 
-class UsersUpdateEvent extends UsersEvent{
-  final List<UserContact> users;
-
-  UsersUpdateEvent(this.users);
-
-  @override
-  List<Object> get props => [users];
-}
+class UsersDeleteEvent extends UsersEvent{}
 
 class UsersSearchEvent extends UsersEvent {
   final String searchQuery;

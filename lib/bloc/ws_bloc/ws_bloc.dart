@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:chat/bloc/ws_bloc/ws_event.dart';
 import 'package:chat/bloc/ws_bloc/ws_state.dart';
-import 'package:chat/models/contact_model.dart';
 import 'package:chat/services/messages/messages_api_provider.dart';
 import 'package:dart_pusher_channels/base.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,6 +42,8 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
         onWsEventReconnect(event, emit);
       } else if (event is WsEventDisconnect) {
         onWsEventDisconnect(event, emit);
+      } else if (event is WsEventCloseConnection) {
+        onWsEventCloseConnection(event, emit);
       } else if (event is WsEventGetUpdatesOnResume) {
         await onWsEventGetUpdatesOnResume(event, emit);
       } else if (event is WsUserJoinChatEvent) {
@@ -109,7 +110,10 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
               ) {
                 final newMessage = MessageData.fromJson(event.data["message"]);
                 print("NEW MESSAGE    ->  $newMessage");
-                add(WsEventReceiveNewMessage(message: newMessage));
+                Future.delayed(Duration(seconds: 1)).then((v){
+                  add(WsEventReceiveNewMessage(message: newMessage));
+                });
+                // add(WsEventReceiveNewMessage(message: newMessage));
               } else if (event.data["message_status"] != null) {
                 final newStatuses = MessageStatuses.fromJson([event.data["message_status"]]);
                 print("UPDATE STATUSES    -> ${newStatuses.last}");
@@ -136,6 +140,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
   }
 
   void onNewMessageReceived(event, emit){
+    print("Emit new message received state");
     emit(WsStateReceiveNewMessage(message:  event.message));
   }
 
@@ -156,7 +161,10 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
       if (event.data["message"] != null && event.data["message"]["user_id"] != userId) {
         final newMessage = MessageData.fromJson(event.data["message"]);
         print("NEW MESSAGE    ->  $newMessage");
-        add(WsEventReceiveNewMessage(message: newMessage));
+          add(WsEventReceiveNewMessage(message: newMessage));
+        // Future.microtask(() {
+        //   add(WsEventReceiveNewMessage(message: newMessage));
+        // });
       } else if (event.data["message_status"] != null) {
         final newStatuses = MessageStatuses.fromJson([event.data["message_status"]]);
         add(WsEventUpdateStatus(statuses: newStatuses));
@@ -176,6 +184,29 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
     //   channel?.subscribe();
     // }
     socket!.reconnect();
+  }
+  void onWsEventCloseConnection(event, emit) async {
+    emit(Unconnected());
+    await generalEventSubscription?.cancel();
+    for(var eventSubscription in eventSubscriptions) {
+      await eventSubscription.cancel();
+    }
+    for(var channel in channels) {
+      try {
+        channel?.unsubscribe();
+      } catch (err) {
+        print(err);
+      }
+    }
+    generalEventSubscription = null;
+    eventSubscriptions = [];
+    socket?.close();
+    socket = null;
+    print("onWsEventGetUpdatesOnResume start");
+    while (await hasNetwork() != true) {
+      print("CHECK FOR INTERNET CONNECTIVITY");
+      await Future.delayed(const Duration(seconds: 3));
+    }
   }
 
   void onWsEventDisconnect(event, emit) async {

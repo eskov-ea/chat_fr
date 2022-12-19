@@ -73,7 +73,7 @@ class _FilePreviewerWidgetState extends State<FilePreviewerWidget> {
         webPlatformSaveFile(bytes: bytes, filename: widget.fileName);
       }
     } catch (err) {
-      print(err);
+      print("fromBase64ToFileOnDevice  error  $err");
       customToastMessage(
           context, "Произошла ошибка, не удалось сохранить файл!");
     }

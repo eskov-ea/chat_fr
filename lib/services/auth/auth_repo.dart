@@ -67,7 +67,6 @@ class AuthRepository {
     await _secureStorage.deleteToken();
     await _secureStorage.deleteDeviceID();
     final token2 = await _secureStorage.getToken();
-    print("logout res ${res.body}, token $token2");
     // TODO: function to delete deviceId for notifications from db
   }
 

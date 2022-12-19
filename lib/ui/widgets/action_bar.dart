@@ -355,10 +355,10 @@ class ActionBarState extends State<ActionBar> {
       );
       // TODO: if response status code is 200 else ..
       final sentMessage = await MessagesRepository().sendMessage(dialogId: widget.dialogId!, messageText: messageText, parentMessageId: widget.replyedMessageId);
-      print("sentMessage  $sentMessage");
+      print("sentMessage response  $sentMessage");
       final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
       BlocProvider.of<ChatsBuilderBloc>(context).add(
-          ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: widget.dialogId!, messageId: localMessage.messageId)
+          ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: widget.dialogId!, localMessageId: localMessage.messageId)
       );
       widget.dialogCubit.updateLastDialogMessage(localMessage);
     } catch (err) {
@@ -415,7 +415,7 @@ class ActionBarState extends State<ActionBar> {
       }
       // _sendMessage(context);
     } catch(err) {
-      print(err);
+      print("createDialogAndSendMessage error  $err");
     }
     setState(() {
       isSendButtonDisabled = false;

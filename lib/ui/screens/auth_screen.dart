@@ -56,7 +56,7 @@ class _AuthScreenState extends State<AuthScreen> {
       });
       print(e);
     } catch (err) {
-      print(err);
+      print("_checkDeviceToken error  $err");
     }
   }
 

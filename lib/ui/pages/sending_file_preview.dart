@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:easy_pdf_viewer/easy_pdf_viewer.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
@@ -9,7 +8,6 @@ import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../models/message_model.dart';
 import '../../services/global.dart';
 import '../../services/messages/messages_repository.dart';
-import 'package:chat/models/message_model.dart' as parseTime;
 
 class SendingFilePreview extends StatefulWidget {
   const SendingFilePreview({
@@ -172,71 +170,5 @@ class _SendingFilePreviewState extends State<SendingFilePreview> {
         ),
       ),
     );
-  }
-
-  _sendMessage(context) async {
-    showModalBottomSheet(
-        isDismissible: false,
-        isScrollControlled: true,
-        backgroundColor: Colors.black54,
-        context: context,
-        builder: (BuildContext context) =>
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                CircularProgressIndicator(),
-                SizedBox(height: 30,),
-                Text("Отправка", style: TextStyle(color: Colors.white, fontSize: 24),)
-              ],
-            )
-    );
-    try {
-      final messageText = widget.controller.text;
-      final String filetype = widget.file.path.split('.').last;
-      widget.controller.clear();
-      //TODO: implement local message beind added first
-      // final localMessage = MessageData(
-      //   messageId: 1111,
-      //   senderId: widget.userId,
-      //   dialogId: widget.dialogId!,
-      //   message: messageText,
-      //   messageDate: parseTime.getDate(DateTime.now()),
-      //   messageTime: parseTime.getTime(DateTime.now()),
-      //   rawDate: DateTime.now(),
-      //   file: MessageAttachmentsData(
-      //       preview: '',
-      //       name: '11',
-      //       attachmentId: 11,
-      //       chatMessageId: 11,
-      //       filetype: filetype,
-      //       content: ''),
-      //   status: [MessageStatuses(
-      //       id: 0,
-      //       userId: widget.userId,
-      //       statusId: 0,
-      //       messageId: 0,
-      //       dialogId: widget.dialogId!,
-      //       createdAt: DateTime.now().toString()
-      //   )],
-      // );
-      // TODO: if response status code is 200 else ..
-      print("messageText  --> $messageText");
-      final sentMessage = await MessagesRepository().sendMessageWithFile(dialogId: widget.dialogId, messageText: messageText, file: widget.file, filetype: filetype, parentMessageId: widget.parentMessageId);
-      final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
-      BlocProvider.of<ChatsBuilderBloc>(context).add(
-          ChatsBuilderAddMessageEvent(message: message, dialog: widget.dialogId!)
-      );
-      // BlocProvider.of<ChatsBuilderBloc>(context).add(
-      //     ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: widget.dialogId!, messageId: localMessage.messageId)
-      // );
-      // dialogCubit.updateLastDialogMessage(localMessage);
-    } catch (err) {
-      print(err);
-    }
-    BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogId!));
-    // TODO: Can be refactored to named route
-    Navigator.pop(context);
-    Navigator.pop(context);
-    Navigator.pop(context);
   }
 }

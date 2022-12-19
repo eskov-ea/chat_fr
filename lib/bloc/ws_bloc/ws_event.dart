@@ -1,4 +1,3 @@
-import 'package:chat/models/contact_model.dart';
 import 'package:dart_pusher_channels/api.dart';
 import 'package:equatable/equatable.dart';
 import '../../models/dialog_model.dart';
@@ -59,6 +58,8 @@ class WsEventNewDialogCreated extends WsBlocEvent {
 }
 
 class WsEventDisconnect extends WsBlocEvent{}
+
+class WsEventCloseConnection extends WsBlocEvent{}
 
 class WsEventReconnect extends WsBlocEvent{}
 

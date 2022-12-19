@@ -17,7 +17,7 @@ class ProfileBloc extends Bloc<ABlocEvent, UserProfileState> {
         await onProfileBlocLoadingEvent(event, emit);
       } else if (event is ProfileBlocLoadedEvent) {
         await onProfileBlocLoadedEvent(event, emit);
-      } else if (event is ProfileBlocChangeProfileEvent) {
+      } else if (event is ProfileBlocLogoutEvent) {
         await onProfileBlocChangeProfileEvent(event, emit);
       }
     });
@@ -35,7 +35,6 @@ class ProfileBloc extends Bloc<ABlocEvent, UserProfileState> {
   }
 
   Future<void> onProfileBlocChangeProfileEvent (event, emit) async {
-
-
+    emit(UserProfileLoggedOutState());
   }
 }

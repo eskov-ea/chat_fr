@@ -1,10 +1,6 @@
 import 'dart:async';
-import 'package:chat/bloc/calls_bloc/calls_bloc.dart';
-import 'package:chat/models/user_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../bloc/calls_bloc/calls_state.dart';
 import '../../services/global.dart';
 
 class RunningCallScreen extends StatefulWidget {

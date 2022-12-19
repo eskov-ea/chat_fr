@@ -1,5 +1,4 @@
 import '../../models/contact_model.dart';
-import '../../models/user_profile_model.dart';
 
 class UsersListContainer {
   final List<UserContact> users;

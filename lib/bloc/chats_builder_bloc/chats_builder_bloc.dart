@@ -40,8 +40,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       } else if(event is ChatsBuilderCreateEvent) {
         await onChatsBuilderCreateEvent(event, emit);
       } else if (event is ChatsBuilderAddMessageEvent) {
-        Future.microtask(() =>
-           onChatsBuilderAddMessageEvent(event, emit));
+        onChatsBuilderAddMessageEvent(event, emit);
       } else if (event is ChatsBuilderUpdateStatusMessagesEvent) {
         await onChatsBuilderUpdateStatusMessagesEvent(event, emit);
       } else if (event is ChatsBuilderReceivedUpdatedMessageStatusesEvent) {
@@ -76,8 +75,10 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     for (var chat in state.chats) {
       if (chat.chatId == event.dialogId) {
         for (var message in messages) {
-          newMessagesDictionary["${message.messageId}"] = true;
-          chat.messages.add(message);
+          if (newMessagesDictionary["${message.messageId}"] != true) {
+            newMessagesDictionary["${message.messageId}"] = true;
+            chat.messages.add(message);
+          }
         }
         chatExist = true;
       }
@@ -96,13 +97,19 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       ChatsBuilderAddMessageEvent event, Emitter<ChatsBuilderState> emit
       ) async {
     print("TRY TO ADD MESSAGE");
-    if (state.messagesDictionary["${event.message.messageId}"] != null) return;
-    for (var chat in state.chats) {
-      if (chat.chatId == event.dialog) {
-        chat.messages.insert(0, event.message);
+    if (state.messagesDictionary["${event.message.messageId}"] != null) {
+      print("Message already in the list");
+      return;
+    } else {
+      for (var chat in state.chats) {
+        if (chat.chatId == event.dialog) {
+          print("ADD MESSAGE  ${event.message}");
+          chat.messages.insert(0, event.message);
+        }
       }
+      emit(state.copyWith(
+          updatedChats: state.chats, updatedCounter: state.counter++));
     }
-    emit(state.copyWith(updatedChats: state.chats, updatedCounter: state.counter++));
   }
 
   Future<void> onChatsBuilderUpdateStatusMessagesEvent (
@@ -136,13 +143,15 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       ){
     for (var chat in state.chats) {
       if (chat.chatId == event.dialogId) {
-        print("CHATS LOCAL   ${chat.messages}");
-        final message = chat.messages.firstWhere((element) => element.messageId == event.messageId);
+        print("ChatsBuilderUpdateLocalMessageEvent");
+        final message = chat.messages.firstWhere((element) => element.messageId == event.localMessageId);
         message.messageId = event.message.messageId;
         message.status.addAll(event.message.status);
+        state.messagesDictionary["${event.message.messageId}"] = true;
       }
     }
-    emit(state.copyWith(updatedChats: state.chats, updatedCounter: state.counter++));
+    emit(state.copyWith(updatedChats: state.chats,
+        updatedCounter: state.counter++));
   }
 
   @override

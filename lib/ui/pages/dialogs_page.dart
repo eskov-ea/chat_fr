@@ -75,7 +75,8 @@ class _MessagesPageState extends State<MessagesPage> {
                                         lastMessage: state.dialogs[index].lastMessage,
                                         name: state.dialogs[index].name,
                                         description: state.dialogs[index].description,
-                                        chatUsers: state.dialogs[index].chatUsers
+                                        chatUsers: state.dialogs[index].chatUsers,
+                                        messageCount: state.dialogs[index].messageCount
                                     ),
                                   ),
                                 ),
@@ -134,7 +135,6 @@ class _MessageTitle extends StatelessWidget {
 
     final String partnerName = getChatItemName(dialogData);
     final List partners = getPartnersData(dialogData.usersList);
-
 
     return InkWell(
       onTap: () {

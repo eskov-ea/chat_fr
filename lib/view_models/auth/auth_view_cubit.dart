@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../bloc/auth_bloc/auth_bloc.dart';
 import '../../../../bloc/auth_bloc/auth_event.dart';
 import '../../../../bloc/auth_bloc/auth_state.dart';
-import '../../ui/navigation/main_navigation.dart';
 import 'auth_exceptions.dart';
 import 'auth_view_state.dart';
 

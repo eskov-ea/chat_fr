@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../services/global.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/call_user_item.dart';
 import '../widgets/search_widget.dart';

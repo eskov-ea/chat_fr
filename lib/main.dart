@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:chat/bloc/auth_bloc/auth_bloc.dart';
 import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
 import 'package:chat/services/dialogs/dialogs_api_provider.dart';

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/user_profile_model.dart';
 import 'package:chat/storage/data_storage.dart';
@@ -19,6 +20,7 @@ import '../../bloc/chats_builder_bloc/chats_builder_state.dart';
 import '../../bloc/profile_bloc/profile_bloc.dart';
 import '../../bloc/profile_bloc/profile_events.dart';
 import '../../bloc/profile_bloc/profile_state.dart';
+import '../../bloc/user_bloc/user_event.dart';
 import '../../bloc/ws_bloc/ws_bloc.dart';
 import '../../bloc/ws_bloc/ws_event.dart';
 import '../../bloc/ws_bloc/ws_state.dart';
@@ -30,6 +32,7 @@ import '../../services/messages/messages_repository.dart';
 import '../../services/push_notifications/push_notification_service.dart';
 import '../../storage/sqflite_database.dart';
 import '../../theme.dart';
+import '../../view_models/websocket/websocket_view_cubit.dart';
 import '../navigation/main_navigation.dart';
 import '../pages/new_message_page.dart';
 import '../widgets/icon_buttons.dart';
@@ -74,8 +77,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         "domain": settings.asteriskHost
       });
     } catch (err) {
-      print("ERROR");
-      print(err);
+      print("sipRegistration error  $err");
     }
   }
 
@@ -119,9 +121,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  void shouldDownloadData() async {
+    if (context.read<ProfileBloc>().state is UserProfileLoggedOutState) {
+      print("There was logout");
+      BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLoadingEvent());
+      BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.add(DialogsLoadEvent());
+      BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(InitializeSocketEvent());
+      BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersLoadEvent());
+    }
+  }
+
   @override
   void initState() {
-    super.initState();
+    shouldDownloadData();
     WidgetsBinding.instance?.addObserver(this);
     userProfileDataSubscription =  BlocProvider.of<ProfileBloc>(context).stream.listen(_onBlocProfileStateChanged);
     updateUserProfileData();
@@ -193,6 +205,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         }
       });
     }
+    super.initState();
   }
 
   @override
@@ -309,11 +322,11 @@ _sendMessage({required context, required userId, required dialogId}) async {
     print("sentMessage  $sentMessage");
     final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
     BlocProvider.of<ChatsBuilderBloc>(context).add(
-        ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: dialogId!, messageId: localMessage.messageId)
+        ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: dialogId!, localMessageId: localMessage.messageId)
     );
     BlocProvider.of<DialogsViewCubit>(context).updateLastDialogMessage(localMessage);
   } catch (err) {
-    print(err);
+    print("_sendMessage error $err");
   }
   BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
 }

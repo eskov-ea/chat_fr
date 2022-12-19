@@ -12,9 +12,6 @@ class UserProfileInitialState extends UserProfileState {
 class UserProfileLoadedState extends UserProfileState{
   final UserProfileData? user;
 
-  // const UserProfileLoadedState.initial():
-  //       user = null;
-
   UserProfileLoadedState({
     required this.user
   });
@@ -37,4 +34,8 @@ class UserProfileLoadedState extends UserProfileState{
     );
   }
 
+}
+
+class UserProfileLoggedOutState extends UserProfileState {
+  final UserProfileData? user = null;
 }

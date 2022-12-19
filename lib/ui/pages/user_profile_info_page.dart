@@ -1,8 +1,6 @@
-import 'package:chat/models/user_profile_model.dart';
 import 'package:chat/ui/widgets/user_profile_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import '../../models/contact_model.dart';
 import '../../theme.dart';
 

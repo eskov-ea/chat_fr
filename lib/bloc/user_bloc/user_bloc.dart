@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:chat/bloc/user_bloc/user_event.dart';
 import 'package:chat/bloc/user_bloc/user_state.dart';
 import 'package:chat/bloc/user_bloc/users_list_container.dart';
-import 'package:chat/models/user_profile_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/contact_model.dart';
 import '../../services/users/users_repository.dart';
@@ -26,6 +25,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersLoadedState> {
     });
     on<UsersLoadEvent>(onUsersLoadEvent);
     on<UsersSearchEvent>(onUsersSearchEvent);
+    on<UsersDeleteEvent>(onUsersDeleteEvent);
   }
 
   void onUsersLoadEvent (
@@ -33,6 +33,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersLoadedState> {
       ) async {
     final String? token = await _secureStorage.getToken();
     List<UserContact> users = await usersRepository.getAllUsers(token);
+    users.sort((a, b) => a.lastname.compareTo(b.lastname));
     print(users);
     if (state.isSearchMode) {
       print('state.isSearchMode');
@@ -58,6 +59,12 @@ class UsersBloc extends Bloc<UsersEvent, UsersLoadedState> {
     );
     emit(newState);
     add(UsersLoadEvent());
+  }
+
+  void onUsersDeleteEvent(
+      UsersDeleteEvent event, emit
+      ) {
+   emit(UsersLoadedState.initial());
   }
 
 

@@ -154,7 +154,6 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       ) {
     final newDialogs = [ ...state.dialogs!];
     for (var dialog in newDialogs) {
-      print("LAST MESSAGE    ${ event.message}");
       if (dialog.dialogId == event.message.dialogId) {
         dialog.lastMessage.message = event.message.message;
         dialog.lastMessage.messageId = event.message.messageId;
