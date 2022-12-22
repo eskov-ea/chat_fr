@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:chat/bloc/auth_bloc/auth_bloc.dart';
+import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
 import 'package:chat/services/dialogs/dialogs_api_provider.dart';
 import 'package:chat/services/messages/messages_api_provider.dart';
@@ -50,11 +51,12 @@ class MyApp extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    final ws =  WsBloc(initialState: Unconnected());
+    final websocketBloc =  WsBloc(initialState: Unconnected());
+    final errorHandlerBloc =  ErrorHandlerBloc();
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-            create: (context) => ws
+            create: (context) => websocketBloc
         ),
         BlocProvider(
             create: (_) => AuthViewCubit(authBloc: AuthBloc(authRepo: AuthRepository()), initialState: AuthViewCubitFormFillInProgressState())
@@ -66,19 +68,20 @@ class MyApp extends StatelessWidget{
             lazy: false,
             create: (context) => ChatsBuilderBloc(
                 messagesProvider: MessagesProvider(),
-                webSocketBloc: ws)
+                webSocketBloc: websocketBloc)
               ..add(ChatsBuilderCreateEvent())
         ),
         BlocProvider(
             create: (_) => UsersViewCubit(
               usersBloc: UsersBloc(
-                  usersRepository: UsersRepository(), webSocketBloc: ws)
+                  usersRepository: UsersRepository(), webSocketBloc: websocketBloc)
                 ..add(UsersLoadEvent()),)
         ),
         BlocProvider(
             create: (context) => DialogsViewCubit(
                 dialogsBloc: DialogsBloc(
-                    webSocketBloc: ws,
+                    webSocketBloc: websocketBloc,
+                    errorHandlerBloc: errorHandlerBloc,
                     dialogsProvider: DialogsProvider(),
                     initialState: const DialogsState.initial()
                 )..add(DialogsLoadEvent()),
@@ -86,7 +89,7 @@ class MyApp extends StatelessWidget{
                 ))),
         BlocProvider(
           create: (_) => WebsocketViewCubit(
-              wsBloc: ws,
+              wsBloc: websocketBloc,
               initialState: WebsocketViewCubitState.unknown
           ),
         ),
@@ -95,7 +98,7 @@ class MyApp extends StatelessWidget{
         ),
         BlocProvider(
           create: (_) => CallsBloc(),
-          lazy: false,),
+          lazy: false,)
       ],
       child: MaterialApp(
           theme: AppTheme.light(),
@@ -109,3 +112,5 @@ class MyApp extends StatelessWidget{
     );
   }
 }
+
+

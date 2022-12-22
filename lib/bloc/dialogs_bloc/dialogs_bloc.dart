@@ -3,6 +3,9 @@ import 'dart:convert';
 
 import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_state.dart';
+import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
+import 'package:chat/bloc/error_handler_bloc/error_handler_events.dart';
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/bloc/user_bloc/user_event.dart';
 import 'package:chat/bloc/user_bloc/user_state.dart';
 import 'package:chat/models/dialog_model.dart';
@@ -19,10 +22,12 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   final DialogsProvider dialogsProvider;
   late final StreamSubscription newMessageSubscription;
   final WsBloc webSocketBloc;
+  final ErrorHandlerBloc errorHandlerBloc;
 
   DialogsBloc({
     required DialogsState initialState,
     required this.webSocketBloc,
+    required this.errorHandlerBloc,
     required this.dialogsProvider}) : super(initialState) {
         newMessageSubscription = webSocketBloc.stream.listen((streamState) {
           print("DIALOGEXIT   ${streamState}");
@@ -95,11 +100,18 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   Future<void> onDialogsLoadEvent (
       DialogsLoadEvent event, Emitter<DialogsState> emit
       ) async {
-    List<DialogData>? dialogs = await dialogsProvider.getDialogs();
-    if (dialogs != null) sortDialogsByLastMessage(dialogs);
-    final newState = state.copyWith(dialogs: dialogs);
-    emit(newState);
-    webSocketBloc.add(InitializeSocketEvent());
+    try {
+      List<DialogData> dialogs = await dialogsProvider.getDialogs();
+      if (dialogs.isNotEmpty) sortDialogsByLastMessage(dialogs);
+      final newState = state.copyWith(dialogs: dialogs);
+      emit(newState);
+      webSocketBloc.add(InitializeSocketEvent());
+    } catch(err) {
+      final e = err as AppErrorException;
+      errorHandlerBloc.add(ErrorHandlerWithErrorEvent(error: err, errorStack: e.message));
+      final errorState = state.copyWith(dialogs: [], searchQuery: "", isErrorHappened: true);
+      emit(errorState);
+    }
   }
 
   void onReceiveNewDialogEvent(

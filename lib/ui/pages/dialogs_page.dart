@@ -48,6 +48,20 @@ class _MessagesPageState extends State<MessagesPage> {
       body: BlocBuilder<DialogsViewCubit, DialogsViewCubitState>(
         builder: (context, state) {
           if (state is DialogsLoadedViewCubitState) {
+            if (state.isError) return Container(
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("Произошла ошибка при загрузке диалогов"),
+                  SizedBox(height: 20,),
+                  ElevatedButton(
+                    onPressed: (){refreshAllData(context);},
+                    child: Text("Обновить")
+                  )
+                ],
+              ),
+            );
             if (state.dialogs.isEmpty) {
               return const Center(child: Text("Нет диалогов"),);
             } else{

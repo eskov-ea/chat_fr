@@ -24,8 +24,9 @@ class DialogsViewCubit extends Cubit<DialogsViewCubitState> {
 
   void _onState(DialogsState state) {
     final dialogs = state.dialogs;
+    final isError = state.isErrorHappened;
     if (dialogs != null) {
-      final newState = DialogsLoadedViewCubitState(dialogs: dialogs, searchQuery: "");
+      final newState = DialogsLoadedViewCubitState(dialogs: dialogs, searchQuery: "", isError: isError);
       emit(newState);
     }
   }

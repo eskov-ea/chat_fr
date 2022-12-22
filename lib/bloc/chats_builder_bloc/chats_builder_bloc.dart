@@ -18,7 +18,6 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
   ChatsBuilderBloc({
     required this.webSocketBloc,
     required this.messagesProvider}) : super( ChatsBuilderState.initial()){
-
     newMessageSubscription = webSocketBloc.stream.listen((streamState) {
       print("streamState   ${streamState}");
       if (streamState is WsStateReceiveNewMessage){
@@ -29,10 +28,9 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         add(ChatsBuilderReceivedUpdatedMessageStatusesEvent(statuses: streamState.statuses));
       } else if (streamState is WsStateNewDialogCreated) {
 
-      } else if (streamState is Connected) {
-
       }
     });
+    print("newMessageSubscription $newMessageSubscription");
 
     on<ChatsBuilderEvent>((event, emit) async {
       if(event is ChatsBuilderLoadMessagesEvent) {

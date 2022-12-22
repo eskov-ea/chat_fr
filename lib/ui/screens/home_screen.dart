@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:chat/bloc/dialogs_bloc/dialogs_bloc.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
+import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
+import 'package:chat/bloc/error_handler_bloc/error_handler_state.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/user_profile_model.dart';
 import 'package:chat/storage/data_storage.dart';
@@ -17,6 +20,7 @@ import '../../bloc/calls_bloc/calls_state.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_state.dart';
+import '../../bloc/error_handler_bloc/error_types.dart';
 import '../../bloc/profile_bloc/profile_bloc.dart';
 import '../../bloc/profile_bloc/profile_events.dart';
 import '../../bloc/profile_bloc/profile_state.dart';
@@ -65,6 +69,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String? os;
   SqfliteDatabase? _db;
   bool isUpdateAvailable = true;
+  late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
+
 
 
   Future<void> sipRegistration(UserProfileAsteriskSettings settings) async {
@@ -78,6 +84,39 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       });
     } catch (err) {
       print("sipRegistration error  $err");
+    }
+  }
+
+  void _subscribeToErrorsBlocStream() {
+    _errorHandlerBlocSubscription = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.errorHandlerBloc.stream.listen(_onErrorState);
+  }
+
+  void _onErrorState(ErrorHandlerState state){
+    if (state is ErrorHandlerWithErrorState) {
+      final String message = _mapErrorToMessage(state.error);
+      final error = state.error as AppErrorException;
+      customToastMessage(context, "Error message: $message, error was: ${error.message}, location: ${error.errorLocation}");
+    }
+  }
+  String _mapErrorToMessage(Object error) {
+    if (error is! AppErrorException) {
+      return 'Неизвестная ошибка, поторите попытку';
+    }
+    switch (error.type) {
+      case AppErrorExceptionType.network:
+        return 'Сервер не доступен. Проверте подключение к интернету';
+      case AppErrorExceptionType.auth:
+        return 'Не получилось загрузить данные, нужна повторная авторизация';
+      case AppErrorExceptionType.access:
+        return 'Недостаточно прав доступа для получения данных, свяжитесь с администратором!';
+      case AppErrorExceptionType.sessionExpired:
+        return 'Суссия устарела, обновите КЕШ';
+      case AppErrorExceptionType.other:
+        return 'Произошла ошибка. Попробуйте еще раз';
+      case AppErrorExceptionType.parsing:
+        return 'Произошла ошибка при обработки данных. Попробуйте еще раз';
+      case AppErrorExceptionType.getData:
+        return 'Произошла ошибка при загрузке данных. Попробуйте еще раз';
     }
   }
 
@@ -205,6 +244,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         }
       });
     }
+    _subscribeToErrorsBlocStream();
     super.initState();
   }
 
@@ -239,6 +279,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void dispose() {
     callServiceBlocSubscription.cancel();
     if ( _db != null) _db!.closeDb();
+    _errorHandlerBlocSubscription.cancel();
     super.dispose();
   }
 

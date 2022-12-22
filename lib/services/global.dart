@@ -12,6 +12,8 @@ import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 import '../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../bloc/chats_builder_bloc/chats_builder_event.dart';
+import '../bloc/ws_bloc/ws_bloc.dart';
+import '../bloc/ws_bloc/ws_event.dart';
 import '../models/message_model.dart';
 import '../ui/navigation/main_navigation.dart';
 import 'package:chat/view_models/auth/auth_view_cubit.dart';
@@ -254,4 +256,5 @@ webPlatformSaveFile({required bytes, required filename}) async {
 refreshAllData(BuildContext context){
   BlocProvider.of<DialogsViewCubit>(context).refreshAllDialogs();
   BlocProvider.of<ChatsBuilderBloc>(context).add(RefreshChatsBuilderEvent());
+  // BlocProvider.of<WsBloc>(context).add(WsEventDisconnect());
 }

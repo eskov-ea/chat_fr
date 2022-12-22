@@ -50,4 +50,6 @@ class DialogUserExitChatEvent extends DialogsEvent{
 
 class RefreshDialogsEvent extends DialogsEvent{}
 
+class DialogsLoadFailureEvent extends DialogsEvent{}
+
 class DeleteAllDialogsEvent extends DialogsEvent{}

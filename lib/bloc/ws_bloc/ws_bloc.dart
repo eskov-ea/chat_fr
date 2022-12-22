@@ -140,7 +140,6 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
   }
 
   void onNewMessageReceived(event, emit){
-    print("Emit new message received state");
     emit(WsStateReceiveNewMessage(message:  event.message));
   }
 
@@ -161,10 +160,10 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
       if (event.data["message"] != null && event.data["message"]["user_id"] != userId) {
         final newMessage = MessageData.fromJson(event.data["message"]);
         print("NEW MESSAGE    ->  $newMessage");
+        // add(WsEventReceiveNewMessage(message: newMessage));
+        Future.microtask(() {
           add(WsEventReceiveNewMessage(message: newMessage));
-        // Future.microtask(() {
-        //   add(WsEventReceiveNewMessage(message: newMessage));
-        // });
+        });
       } else if (event.data["message_status"] != null) {
         final newStatuses = MessageStatuses.fromJson([event.data["message_status"]]);
         add(WsEventUpdateStatus(statuses: newStatuses));
@@ -186,6 +185,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
     socket!.reconnect();
   }
   void onWsEventCloseConnection(event, emit) async {
+    print("onWsEventCloseConnection");
     emit(Unconnected());
     await generalEventSubscription?.cancel();
     for(var eventSubscription in eventSubscriptions) {

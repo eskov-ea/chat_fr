@@ -78,6 +78,7 @@ class AuthRepository {
         'Authorization': 'Bearer $token',
       },
     );
+    print("AuthCheckStatusEvent  ${response.body}");
     if (response.statusCode == 200) {
       return true;
     }

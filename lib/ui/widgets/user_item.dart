@@ -98,16 +98,18 @@ class UserItem extends StatelessWidget {
   DialogData? findDialog(BuildContext context, int userId, int partnerId){
     print('findDialog    $userId, $partnerId');
     // TODO: Another way to find a dialog is to send request to create a dialog.
-    // If dialog exist it would return this dialog or create and return dialog.
+    // If dialog exists it would return this dialog or create a new one and return it.
     final Iterator<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs?.iterator;
     if (dialogs == null) return null;
 
     while(dialogs.moveNext()) {
     print("current dialog findDialog ${dialogs.current} ");
       if (dialogs.current.usersList.first.id == userId &&
-          dialogs.current.usersList.last.id == partnerId ||
+          dialogs.current.usersList.last.id == partnerId &&
+          dialogs.current.chatType.p2p == 1 ||
           dialogs.current.usersList.first.id == partnerId &&
-          dialogs.current.usersList.last.id == userId) {
+          dialogs.current.usersList.last.id == userId &&
+          dialogs.current.chatType.p2p == 1 ) {
         return dialogs.current;
       }
     }

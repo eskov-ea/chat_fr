@@ -1,3 +1,4 @@
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
@@ -48,8 +49,7 @@ class DialogData extends Equatable {
                   .toList()
               : null);
     } catch (err) {
-      print("DialogData model error  $err");
-      return DialogData(dialogId: json["id"], chatType: DialogType.fromJson(json["chat_type"]), userData: DialogAuthorData.fromJson(json["user"]), usersList: [], name: "", description: "", lastMessage: LastMessageData.fromJson(null), chatUsers: [], messageCount: 0);
+      throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "DialogData model, fromJson method");
     }
   }
 
@@ -77,15 +77,21 @@ class DialogType {
   final String name;
   final String description;
 
-  static DialogType fromJson(json) => DialogType(
-      typeId: json["id"],
-      typeName: json["name"],
-      p2p: json["p2p"],
-      secure: json["secure"],
-      readonly: json["readonly"],
-      picture: json["picture"],
-      name: json["name"],
-      description: json["description"]);
+  static DialogType fromJson(json) {
+    try {
+      return DialogType(
+          typeId: json["id"],
+          typeName: json["name"],
+          p2p: json["p2p"],
+          secure: json["secure"],
+          readonly: json["readonly"],
+          picture: json["picture"],
+          name: json["name"],
+          description: json["description"]);
+    } catch (err) {
+      throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "DialogType model");
+    }
+  }
 }
 
 class LastMessageData {
@@ -132,11 +138,17 @@ class DialogPartnerData {
   final String senderName;
   final String imageUrl;
 
-  static DialogPartnerData fromJson(json) => DialogPartnerData(
-      senderId: json["id"],
-      senderName: json["fullname"],
-      imageUrl:
-          json["imageUrl"] ?? "https://sushistar73.ru/assets/img/noavatar.png");
+  static DialogPartnerData fromJson(json) {
+    try {
+      return DialogPartnerData(
+          senderId: json["id"],
+          senderName: json["fullname"],
+          imageUrl: json["imageUrl"] ??
+              "https://sushistar73.ru/assets/img/noavatar.png");
+    } catch (err) {
+      throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "DialogPartnerData model");
+    }
+  }
 }
 
 class DialogAuthorData {
@@ -200,7 +212,7 @@ class DialogMessageData {
               : null);
     }
     catch (err) {
-      print("DialogMessageData model error  $err");
+      throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "DialogMessageData model");
       return DialogMessageData.emptyData();
     }
   }
@@ -210,13 +222,15 @@ class SenderMessageData {
   SenderMessageData({required this.id});
   String id;
 
-  static SenderMessageData fromJson(json) => json != null
-      ? SenderMessageData(
-          id: json["_id"] ?? '',
-        )
-      : SenderMessageData(
-          id: '',
-        );
+  static SenderMessageData fromJson(json) {
+    try {
+      return SenderMessageData(
+        id: json["_id"] ?? '',
+      );
+    } catch (err) {
+      throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "SenderMessageData model");
+    }
+  }
 }
 
 class ChatUser {
@@ -232,20 +246,31 @@ class ChatUser {
   final bool active;
   final UserContact user;
 
-  static ChatUser fromJson(json) => ChatUser(
-      chatId: json["chat_id"],
-      userId: json["user_id"],
-      chatUserRole: json["chat_user_role_id"],
-      active: json["active"],
-      user: UserContact.fromJson(json["user"]));
+  static ChatUser fromJson(json) {
+    try {
+      return ChatUser(
+          chatId: json["chat_id"],
+          userId: json["user_id"],
+          chatUserRole: json["chat_user_role_id"],
+          active: json["active"],
+          user: UserContact.fromJson(json["user"]));
+    } catch (err) {
+      throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "ChatUser model");
+    }
+  }
 }
 
 class DialogId {
   DialogId({required this.dialogId});
   int dialogId;
 
-  static DialogId fromJson(json) =>
-      DialogId(dialogId: json["dialogId"] ?? json["_id"]);
+  static DialogId fromJson(json) {
+    try {
+      return DialogId(dialogId: json["dialogId"] ?? json["_id"]);
+    } catch (err) {
+      throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "DialogId model");
+    }
+  }
 }
 
 String getDateDialogModel(rawDate) {

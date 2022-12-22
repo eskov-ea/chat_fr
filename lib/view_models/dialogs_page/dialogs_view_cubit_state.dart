@@ -5,10 +5,12 @@ class DialogsViewCubitState{}
 class DialogsLoadedViewCubitState extends DialogsViewCubitState {
   final List<DialogData> dialogs;
   final String searchQuery;
+  final bool isError;
 
   DialogsLoadedViewCubitState({
     required this.dialogs,
-    required this.searchQuery
+    required this.searchQuery,
+    required this.isError
   });
 
   @override
@@ -17,19 +19,22 @@ class DialogsLoadedViewCubitState extends DialogsViewCubitState {
           other is DialogsLoadedViewCubitState &&
               runtimeType == other.runtimeType &&
               dialogs == other.dialogs &&
-              searchQuery == other.searchQuery;
+              searchQuery == other.searchQuery &&
+              isError == other.isError;
 
   @override
-  int get hashCode => dialogs.hashCode ^ searchQuery.hashCode;
+  int get hashCode => dialogs.hashCode ^ searchQuery.hashCode ^ isError.hashCode;
 
   DialogsLoadedViewCubitState copyWith({
     List<DialogData>? dialogs,
     String? searchQuery,
+    bool? isError
   }) {
     return DialogsLoadedViewCubitState(
       dialogs:
       dialogs ?? this.dialogs,
       searchQuery: searchQuery ?? this.searchQuery,
+      isError: isError ?? this.isError
     );
   }
 }
