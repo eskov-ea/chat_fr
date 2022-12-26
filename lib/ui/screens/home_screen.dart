@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:chat/bloc/dialogs_bloc/dialogs_bloc.dart';
+import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
+import 'package:chat/bloc/call_logs_bloc/call_logs_event.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
-import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_state.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/user_profile_model.dart';
@@ -41,7 +41,6 @@ import '../navigation/main_navigation.dart';
 import '../pages/new_message_page.dart';
 import '../widgets/icon_buttons.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
-import 'package:chat/models/message_model.dart' as parseTime;
 import 'running_call_screen.dart';
 
 
@@ -151,6 +150,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           && state.user!.userProfileSettings!.asteriskUserPassword != null
           && state.user!.userProfileSettings!.asteriskHost != null  ) {
         sipRegistration(state.user!.userProfileSettings!);
+        getUserCallLog(state.user!.userProfileSettings!);
       } else {
         customToastMessage(context, "Не удалось получить настройки для Asterisk с сервера. Пожалуйста, сообщите об этой ошибке разработчикам");
       }
@@ -168,6 +168,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(InitializeSocketEvent());
       BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersLoadEvent());
     }
+  }
+
+  void getUserCallLog(UserProfileAsteriskSettings settings) {
+    BlocProvider.of<CallLogsBloc>(context).add(LoadCallLogsEvent(passwd: settings.asteriskUserPassword!));
   }
 
   @override

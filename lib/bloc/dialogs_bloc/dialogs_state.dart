@@ -1,8 +1,4 @@
 import 'package:chat/models/dialog_model.dart';
-import 'package:equatable/equatable.dart';
-import '../../models/contact_model.dart';
-
-
 
 class DialogsState {
   final List<DialogData>? dialogs;

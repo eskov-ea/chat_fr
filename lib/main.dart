@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:chat/bloc/auth_bloc/auth_bloc.dart';
+import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
+import 'package:chat/bloc/call_logs_bloc/call_logs_state.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
 import 'package:chat/services/dialogs/dialogs_api_provider.dart';
@@ -98,7 +100,12 @@ class MyApp extends StatelessWidget{
         ),
         BlocProvider(
           create: (_) => CallsBloc(),
-          lazy: false,)
+          lazy: false,
+        ),
+        BlocProvider(
+          create: (_) => CallLogsBloc(CallLogInitialState()),
+          lazy: false,
+        ),
       ],
       child: MaterialApp(
           theme: AppTheme.light(),

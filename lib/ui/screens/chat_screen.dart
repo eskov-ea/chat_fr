@@ -168,7 +168,7 @@ class _ChatScreenState extends State<ChatScreen> {
               child: IconButton(
                 icon: const Icon(CupertinoIcons.phone, color: AppColors.secondary, size: 30,),
                 onPressed: () {
-                  callNumber(context ,widget.partnerId);
+                  callNumber(context ,widget.partnerId.toString());
                 },
               ),
             ),

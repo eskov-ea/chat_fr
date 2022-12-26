@@ -1,6 +1,7 @@
 import 'package:chat/factories/screen_factory.dart';
 import 'package:chat/ui/screens/image_screen.dart';
 import 'package:flutter/material.dart';
+import '../pages/calls_page.dart';
 import '../pages/user_profile_info_page.dart';
 import '../screens/running_call_screen.dart';
 import '../screens/chat_screen.dart';
@@ -22,6 +23,7 @@ abstract class MainNavigationRouteNames {
   static const runningCallScreen = '/home_screen/running_call_screen';
   static const outgoingCallScreen = '/home_screen/outgoing_call_screen';
   static const incomingCallScreen = '/home_screen/incoming_call_screen';
+  static const callInfoPage = '/home_screen/call_info_page';
 }
 
 
@@ -102,6 +104,13 @@ class MainNavigation {
         return MaterialPageRoute(
             settings: const RouteSettings(name: name),
             builder: (BuildContext context) => _screenFactory.makeAudioMessagePage(arguments)
+        );
+      case MainNavigationRouteNames.callInfoPage:
+        final arguments = settings.arguments as CallRenderData;
+        const String name = MainNavigationRouteNames.audioMessagePage;
+        return MaterialPageRoute(
+            settings: const RouteSettings(name: name),
+            builder: (BuildContext context) => _screenFactory.makeCallInfoPage(arguments)
         );
       default:
         const widget = Text('Navigation error!!!');

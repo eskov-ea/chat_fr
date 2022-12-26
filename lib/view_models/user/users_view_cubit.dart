@@ -3,6 +3,7 @@ import 'package:chat/bloc/user_bloc/user_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../bloc/user_bloc/user_bloc.dart';
 import '../../../../bloc/user_bloc/user_state.dart';
+import '../../models/contact_model.dart';
 import 'users_view_cubit_state.dart';
 
 class UsersViewCubit extends Cubit<UsersViewCubitState> {
@@ -21,7 +22,11 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
   void _onState(UsersState state) {
     if (state is UsersLoadedState){
       final users = state.users;
-      emit(UsersViewCubitLoadedState(users: users, searchQuery: ''));
+      final Map<String, UserContact> usersDictionary = {};
+      users.forEach((user) {
+        usersDictionary["${user.id}"] = user;
+      });
+      emit(UsersViewCubitLoadedState(users: users, searchQuery: '', usersDictionary: usersDictionary));
     }
   }
 

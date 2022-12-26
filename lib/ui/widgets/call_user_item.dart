@@ -19,7 +19,7 @@ class CallUserItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 2),
       child: GestureDetector(
         onTap:() {
-          callNumber(context, user.id);
+          callNumber(context, user.id.toString());
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

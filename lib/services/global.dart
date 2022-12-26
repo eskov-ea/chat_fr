@@ -14,6 +14,7 @@ import '../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../bloc/ws_bloc/ws_bloc.dart';
 import '../bloc/ws_bloc/ws_event.dart';
+import '../models/dialog_model.dart';
 import '../models/message_model.dart';
 import '../ui/navigation/main_navigation.dart';
 import 'package:chat/view_models/auth/auth_view_cubit.dart';
@@ -44,7 +45,7 @@ const String noAppToOpenFileMessage =
     "Нет приложения, чтобы отрыть данный файл. Установите приложение и попробуйте снова";
 
 const sipChannel = MethodChannel("com.application.chat/sip");
-Future<void> callNumber(BuildContext context, int userId) async {
+Future<void> callNumber(BuildContext context, String userId) async {
   print("OUTGOING CALL NUMBER");
   await sipChannel.invokeMethod(
       "OUTGOING_CALL", {"number": "sip:${userId}@aster.mcfef.com"});
@@ -257,4 +258,54 @@ refreshAllData(BuildContext context){
   BlocProvider.of<DialogsViewCubit>(context).refreshAllDialogs();
   BlocProvider.of<ChatsBuilderBloc>(context).add(RefreshChatsBuilderEvent());
   // BlocProvider.of<WsBloc>(context).add(WsEventDisconnect());
+}
+
+getMonthRussianName(int month){
+  switch(month){
+    case 1:
+      return "января";
+    case 2:
+      return "февраля";
+    case 3:
+      return "марта";
+    case 4:
+      return "апреля";
+    case 5:
+      return "мая";
+    case 6:
+      return "июня";
+    case 7:
+      return "июля";
+    case 8:
+      return "августа";
+    case 9:
+      return "сентября";
+    case 10:
+      return "октября";
+    case 11:
+      return "ноября";
+    case 12:
+      return "декабря";
+  }
+}
+
+DialogData? findDialog(BuildContext context, int userId, int partnerId){
+  print('findDialog    $userId, $partnerId');
+  // TODO: Another way to find a dialog is to send request to create a dialog.
+  // If dialog exists it would return this dialog or create a new one and return it.
+  final Iterator<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs?.iterator;
+  if (dialogs == null) return null;
+
+  while(dialogs.moveNext()) {
+    print("current dialog findDialog ${dialogs.current} ");
+    if (dialogs.current.usersList.first.id == userId &&
+        dialogs.current.usersList.last.id == partnerId &&
+        dialogs.current.chatType.p2p == 1 ||
+        dialogs.current.usersList.first.id == partnerId &&
+            dialogs.current.usersList.last.id == userId &&
+            dialogs.current.chatType.p2p == 1 ) {
+      return dialogs.current;
+    }
+  }
+  return null;
 }

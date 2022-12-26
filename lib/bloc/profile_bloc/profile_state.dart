@@ -1,5 +1,7 @@
 import '../../models/user_profile_model.dart';
-class UserProfileState {}
+abstract class UserProfileState {
+  final UserProfileData? user = null;
+}
 
 class UserProfileInitialState extends UserProfileState {
   final UserProfileData? user;

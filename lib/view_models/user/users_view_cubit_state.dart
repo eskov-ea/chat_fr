@@ -1,17 +1,19 @@
 import '../../../../models/contact_model.dart';
-import '../../../../models/user_profile_model.dart';
 
 abstract class UsersViewCubitState {
   final List<UserContact> users = [];
+  final Map<String, UserContact> usersDictionary = {};
 }
 
 class UsersViewCubitLoadedState extends UsersViewCubitState {
   final List<UserContact> users;
   final String searchQuery;
+  final Map<String, UserContact> usersDictionary;
 
   UsersViewCubitLoadedState({
     required this.users,
-    required this.searchQuery
+    required this.searchQuery,
+    required this.usersDictionary
   });
 
   @override
@@ -28,10 +30,12 @@ class UsersViewCubitLoadedState extends UsersViewCubitState {
   UsersViewCubitLoadedState copyWith({
     List<UserContact>? users,
     String? searchQuery,
+    Map<String, UserContact>? usersDictionary,
   }) {
     return UsersViewCubitLoadedState(
       users: users ?? this.users,
       searchQuery: searchQuery ?? this.searchQuery,
+      usersDictionary: usersDictionary ?? this.usersDictionary,
     );
   }
 }
