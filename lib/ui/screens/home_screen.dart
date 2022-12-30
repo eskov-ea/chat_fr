@@ -69,6 +69,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   SqfliteDatabase? _db;
   bool isUpdateAvailable = true;
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
+  bool _isAppRunning = true;
 
 
 
@@ -170,6 +171,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  void _frequentlyFetchingCallLogs() async {
+    while (_isAppRunning == true) {
+      print("UPDATING CALL LOGS..");
+      await Future.delayed(const Duration(seconds: 30));
+      BlocProvider.of<CallLogsBloc>(context).add(UpdateCallLogsEvent());
+    }
+  }
+
   void getUserCallLog(UserProfileAsteriskSettings settings) {
     BlocProvider.of<CallLogsBloc>(context).add(LoadCallLogsEvent(passwd: settings.asteriskUserPassword!));
   }
@@ -218,6 +227,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         } else if(state is EndedCallServiceState) {
           print("NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
+          BlocProvider.of<CallLogsBloc>(context).add(UpdateCallLogsEvent());
         } else if(state is ErrorCallServiceState) {
           final List<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs;
           int? dialogId;
@@ -249,6 +259,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       });
     }
     _subscribeToErrorsBlocStream();
+    _frequentlyFetchingCallLogs();
     super.initState();
   }
 
@@ -264,9 +275,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           print('HOMESCREEN DISCONNECTED SOCKET STATE');
           bloc.add(InitializeSocketEvent());
         }
+        _isAppRunning = true;
+        Future.delayed(Duration(seconds: 30)).then((_) => {
+          _frequentlyFetchingCallLogs()
+        });
         break;
       case AppLifecycleState.paused:
-
+        _isAppRunning = false;
     }
   }
 

@@ -9,3 +9,12 @@ class LoadCallLogsEvent extends CallLogsEvent {
     required this.passwd
   });
 }
+
+class UpdateCallLogsEvent extends CallLogsEvent {
+  // final String passwd;
+
+  // UpdateCallLogsEvent({
+  //   required this.passwd
+  // });
+}
+

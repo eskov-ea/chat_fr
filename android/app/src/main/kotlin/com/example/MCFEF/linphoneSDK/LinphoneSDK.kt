@@ -170,7 +170,7 @@ class LinphoneSDK (context: Context) {
                             )
                     )
                     val args = makePlatformEventPayload("ENDED", call.remoteAddress.username)
-
+                    Log.w("CALL_ENDED", "${call.callLog.duration}")
                     MainActivity.callServiceEventSink?.success(args)
                 }
                 Call.State.OutgoingInit -> {

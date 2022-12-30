@@ -3,6 +3,9 @@ import '../../models/call_model.dart';
 abstract class CallLogsBlocState{}
 
 class CallLogInitialState extends CallLogsBlocState{}
+class CallLogErrorState extends CallLogsBlocState{
+
+}
 
 class CallsLoadedLogState extends CallLogsBlocState{
   final List<CallModel> callLog;

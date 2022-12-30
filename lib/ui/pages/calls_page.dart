@@ -1,16 +1,18 @@
+import 'dart:async';
+
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
+import 'package:chat/bloc/call_logs_bloc/call_logs_event.dart';
 import 'package:chat/models/call_model.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
-import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/call_logs_bloc/call_logs_state.dart';
-import '../../bloc/profile_bloc/profile_bloc.dart';
 import '../../services/global.dart';
 import '../../view_models/user/users_view_cubit.dart';
+import '../../view_models/user/users_view_cubit_state.dart';
 import '../widgets/app_bar.dart';
 
 class CallsPage extends StatefulWidget {
@@ -22,15 +24,29 @@ class CallsPage extends StatefulWidget {
 }
 
 class _CallsPageState extends State<CallsPage> {
+
+
   @override
   void initState() {
     DataProvider().getUserId().then( (val) {
       userId = val;
     });
+    _errorSubscription = BlocProvider.of<CallLogsBloc>(context).stream.listen((state) {
+      _onState(state);
+    });
     super.initState();
   }
 
   String? userId;
+  late final StreamSubscription _errorSubscription;
+  bool isError = false;
+  void _onState(state) {
+    if (state is CallLogErrorState) {
+      setState(() {
+        isError = true;
+      });
+    }
+  }
 
   String getDate(String callDate) {
     final now = DateTime.now();
@@ -38,6 +54,9 @@ class _CallsPageState extends State<CallsPage> {
     final timeDiff = now.difference(callTime).inDays;
     switch(timeDiff) {
       case 0:
+        if (callTime.hour < 10 && callTime.minute < 10) return "0${callTime.hour}:0${callTime.minute}";
+        if (callTime.hour < 10) return "0${callTime.hour}:${callTime.minute}";
+        if (callTime.minute < 10) return "${callTime.hour}:0${callTime.minute}";
         return "${callTime.hour}:${callTime.minute}";
       case 1:
         return "Вчера";
@@ -47,58 +66,69 @@ class _CallsPageState extends State<CallsPage> {
   }
 
   Widget getCallInfo(Map<String, UserContact>  users, CallModel call, int index) {
-    CallRenderData? data;
-    if (call.toCaller == userId) {
-      final user = users["${call.fromCaller}"]!;
-      data = CallRenderData(
-        userId: int.parse(userId!),
-        callName: call.callStatus == "ANSWERED" ? "Входящий" : "Пропущенный",
-        callerName: "${user.firstname} ${user.lastname}",
-        callerNumber: call.fromCaller,
-        callDate: DateTime.parse(call.date),
-        callDuration: call.duration
-      );
-    } else {
-      final user = users["${call.toCaller}"]!;
-      data = CallRenderData(
-          userId: int.parse(userId!),
-          callName: "Исходящий",
-          callerName: "${user.firstname} ${user.lastname}",
-          callerNumber: call.toCaller,
-          callDate: DateTime.parse(call.date),
-          callDuration: call.duration
-      );
-    }
-    return GestureDetector(
-      onTap: (){
-        callNumber(context, data!.callerNumber);
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        color: index % 2 == 0 ? Colors.transparent : Colors.grey[200],
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
+    try {
+      CallRenderData? data;
+      if (call.toCaller == userId) {
+        final user = users["${call.fromCaller}"]!;
+        data = CallRenderData(
+            userId: int.parse(userId!),
+            callName:
+                call.callStatus == "ANSWERED" ? "Входящий" : "Пропущенный",
+            callerName: "${user.firstname} ${user.lastname}",
+            callerNumber: call.fromCaller,
+            callDate: DateTime.parse(call.date),
+            callDuration: call.duration);
+      } else {
+        final user = users["${call.toCaller}"]!;
+        data = CallRenderData(
+            userId: int.parse(userId!),
+            callName: "Исходящий",
+            callerName: "${user.firstname} ${user.lastname}",
+            callerNumber: call.toCaller,
+            callDate: DateTime.parse(call.date),
+            callDuration: call.duration);
+      }
+      return GestureDetector(
+        onTap: () {
+          callNumber(context, data!.callerNumber);
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          color: index % 2 == 0 ? Colors.transparent : Colors.grey[200],
+          child:
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(data.callerName,
+                  Text(
+                    data.callerName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 18),
                   ),
-                  SizedBox(height: 5,),
+                  SizedBox(
+                    height: 5,
+                  ),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(Icons.phone,
+                      Icon(
+                        Icons.phone,
                         size: 20,
                       ),
-                      SizedBox(width: 5,),
-                      Text(data.callName,
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Text(
+                        data.callName,
                         style: TextStyle(
-                          color: call.callStatus == "NO ANSWER" && call.toCaller == userId ? Colors.red[500] : Colors.grey[700],
+                          color: call.callStatus == "NO ANSWER" &&
+                                      call.toCaller == userId ||
+                                  call.callStatus == "FAILED" &&
+                                      call.toCaller == userId
+                              ? Colors.red[500]
+                              : Colors.grey[700],
                         ),
                       )
                     ],
@@ -107,23 +137,28 @@ class _CallsPageState extends State<CallsPage> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              child: Text(getDate(call.date))
-            ),
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: Text(getDate(call.date))),
             GestureDetector(
-              onTap: (){
+              onTap: () {
                 print("Get call info");
-                Navigator.of(context).pushNamed(MainNavigationRouteNames.callInfoPage, arguments: data);
+                Navigator.of(context).pushNamed(
+                    MainNavigationRouteNames.callInfoPage,
+                    arguments: data);
               },
               child: Icon(
                 Icons.info_outline,
                 color: Colors.blueAccent,
               ),
             )
-          ]
+          ]),
         ),
-      ),
-    );
+      );
+    } catch (err) {
+      return Container(
+        child: Text(err.toString()),
+      );
+    }
   }
 
   @override
@@ -132,47 +167,50 @@ class _CallsPageState extends State<CallsPage> {
       appBar: CustomAppBar(context),
       body: kIsWeb
         ? const Center(child: Text("Недоступно в веб-версии"),)
-        : BlocBuilder<CallLogsBloc, CallLogsBlocState>(
-          builder: (context, state) {
-            if (state is CallsLoadedLogState) {
-              final users = BlocProvider.of<UsersViewCubit>(context).state.usersDictionary;
-              if (state.callLog.isEmpty) {
-                return Center(
-                  child: Text("Нет истории звонков"),
-                );
-              } else {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                      child: Text("Журнал звонков",
-                        style: TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.w700
+        : isError
+          ? Center(child: Text("Произошла ошибка при загрузке истории звонков"),)
+          : BlocBuilder<CallLogsBloc, CallLogsBlocState>(
+              builder: (context, state) {
+                final usersState = BlocProvider.of<UsersViewCubit>(context).state;
+                if (state is CallsLoadedLogState && usersState is UsersViewCubitLoadedState) {
+                  final users = usersState.usersDictionary;
+                  if (state.callLog.isEmpty) {
+                    return Center(
+                      child: Text("Нет истории звонков"),
+                    );
+                  } else {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                          child: Text("Журнал звонков",
+                            style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.w700
+                            ),
+                          )
                         ),
-                      )
-                    ),
-                    Divider(
-                      color: Colors.grey[600],
-                      thickness: 0.4,
-                      height: 8,
-                    ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: state.callLog.length,
-                        itemBuilder: (context, index) {
-                          return getCallInfo(users, state.callLog[index], index);
-                      }),
-                    ),
-                  ],
-                );
+                        Divider(
+                          color: Colors.grey[600],
+                          thickness: 0.4,
+                          height: 8,
+                        ),
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: state.callLog.length,
+                            itemBuilder: (context, index) {
+                              return getCallInfo(users, state.callLog[index], index);
+                          }),
+                        ),
+                      ],
+                    );
+                  }
+                } else {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
               }
-            } else {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-          }
       ),
     );
   }

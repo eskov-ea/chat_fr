@@ -103,7 +103,8 @@ class MyApp extends StatelessWidget{
           lazy: false,
         ),
         BlocProvider(
-          create: (_) => CallLogsBloc(CallLogInitialState()),
+          create: (_) => CallLogsBloc(initialState: CallLogInitialState(),
+            errorHandlerBloc: errorHandlerBloc),
           lazy: false,
         ),
       ],
