@@ -37,9 +37,37 @@ class DialogsProvider {
     }
   }
 
+  Future<List<DialogData>> getPublicDialogs() async {
+    final String? token = await _secureStorage.getToken();
+
+    try {
+      final response = await http.get(
+        Uri.parse('https://erp.mcfef.com/api/chat/chats/public'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      if (response.statusCode == 200) {
+        List<dynamic> collection = jsonDecode(response.body)["data"];
+        List<DialogData> dialogs =
+        collection.map((dialog) => DialogData.fromJson(dialog)).toList();
+        return dialogs;
+      } else if (response.statusCode == 403) {
+        throw AppErrorException(AppErrorExceptionType.access, null, "DialogsProvider, loading dialogs");
+      } else {
+        throw AppErrorException(AppErrorExceptionType.getData, null, "DialogsProvider, loading dialogs");
+      }
+    } on SocketException{
+      throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, loading dialogs");
+    } catch(err) {
+      throw AppErrorException(AppErrorExceptionType.other, err.toString(), "DialogsProvider, loading dialogs");
+    }
+  }
 
 
-  Future<DialogData> createDialog({required chatType, required users, required chatName, required chatDescription}) async {
+
+  Future<DialogData> createDialog({required chatType, required users, required chatName, required chatDescription, required isPublic}) async {
     final String? token = await _secureStorage.getToken();
     try {
       final response = await http.post(
@@ -53,7 +81,8 @@ class DialogsProvider {
             'chat_type_id': chatType,
             'users': users,
             'name': chatName,
-            'description': chatDescription
+            'description': chatDescription,
+            'is_public': isPublic
           }
         }),
       );

@@ -14,6 +14,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
+import '../../bloc/error_handler_bloc/error_types.dart';
 import '../../models/dialog_model.dart';
 import '../../services/dialogs/dialogs_api_provider.dart';
 import '../../services/messages/messages_api_provider.dart';
@@ -344,12 +345,12 @@ class ActionBarState extends State<ActionBar> {
   }
 
   _sendMessage(context, ParentMessage? parentMessage) async {
+    final messageText = _messageController.text;
+    final localMessage = createLocalMessage(replyedMessageId: widget.replyedMessageId,
+        dialogId: widget.dialogId!, messageText: messageText, parentMessage: widget.parentMessage, userId: widget.userId);
+    print("localMessage  ${localMessage}");
     try {
-      final messageText = _messageController.text;
       _messageController.clear();
-      final localMessage = createLocalMessage(replyedMessageId: widget.replyedMessageId,
-          dialogId: widget.dialogId!, messageText: messageText, parentMessage: widget.parentMessage, userId: widget.userId);
-      print("localMessage  $localMessage");
       BlocProvider.of<ChatsBuilderBloc>(context).add(
           ChatsBuilderAddMessageEvent(message: localMessage, dialog: widget.dialogId!)
       );
@@ -363,6 +364,10 @@ class ActionBarState extends State<ActionBar> {
       widget.dialogCubit.updateLastDialogMessage(localMessage);
     } catch (err) {
       print(err);
+      customToastMessage(context, "Ошибка: Произошла ошибка при отправке сообщения, попробуйте еще раз");
+      BlocProvider.of<ChatsBuilderBloc>(context).add(
+          ChatsBuilderUpdateMessageWithErrorEvent(message: localMessage, dialog: widget.dialogId!)
+      );
     }
     BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogId!));
     setState(() {
@@ -374,18 +379,21 @@ class ActionBarState extends State<ActionBar> {
       await createDialogAndSendMessage(context, widget.rootWidget);
       dialogId = widget.dialogId;
     }
-    final sentMessage = await MessagesProvider().sendAudioMessage(
-        filePath: filePath,
-        userId: userId,
-        dialogId: dialogId,
-        filetype: filetype,
-        parentMessageId: widget.replyedMessageId
-    );
-    final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
-    print("SENTMESSAGE  -->  ${message.file}");
-    BlocProvider.of<ChatsBuilderBloc>(context).add(
-        ChatsBuilderAddMessageEvent(message: message, dialog: widget.dialogId!)
-    );
+    try {
+      final sentMessage = await MessagesProvider().sendAudioMessage(
+          filePath: filePath,
+          userId: userId,
+          dialogId: dialogId,
+          filetype: filetype,
+          parentMessageId: widget.replyedMessageId);
+      final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
+      print("SENTMESSAGE  -->  ${message.file}");
+      BlocProvider.of<ChatsBuilderBloc>(context).add(
+          ChatsBuilderAddMessageEvent(message: message, dialog: widget.dialogId!)
+      );
+    } catch (err) {
+      customToastMessage(context, "Ошибка: Произошла ошибка при отправке сообщения, попробуйте еще раз");
+    }
 
   }
   createDialogAndSendMessage(context, rootWidget) async {
@@ -395,7 +403,7 @@ class ActionBarState extends State<ActionBar> {
       isSendButtonDisabled = true;
     });
     try {
-      final newDialog = await DialogsProvider().createDialog(chatType: 1, users: [widget.partnerId], chatName: "p2p", chatDescription: null);
+      final newDialog = await DialogsProvider().createDialog(chatType: 1, users: [widget.partnerId], chatName: "p2p", chatDescription: null, isPublic: false);
       setState(() {
         widget.dialogId = newDialog?.dialogId;
       });

@@ -41,6 +41,11 @@ class _MessagesPageState extends State<MessagesPage> {
     });
   }
 
+  void checkRequiredChats() {
+    final dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs;
+    print("checkRequiredChats   ${dialogs}");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,5 +1,7 @@
 
 
+import '../../models/call_model.dart';
+
 abstract class CallLogsEvent{}
 
 class LoadCallLogsEvent extends CallLogsEvent {
@@ -7,6 +9,14 @@ class LoadCallLogsEvent extends CallLogsEvent {
 
   LoadCallLogsEvent({
     required this.passwd
+  });
+}
+
+class AddCallToLogEvent extends CallLogsEvent {
+  final CallModel call;
+
+  AddCallToLogEvent({
+    required this.call
   });
 }
 

@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../models/call_model.dart';
+
 abstract class CallsEvent{}
 
 class IncomingCallEvent extends CallsEvent {
@@ -26,5 +28,11 @@ class ErrorCallEvent extends CallsEvent {
 
 class ConnectingCallServiceEvent extends CallsEvent {}
 
-class EndedCallServiceEvent extends CallsEvent {}
+class EndedCallServiceEvent extends CallsEvent {
+  final CallModel callData;
+
+  EndedCallServiceEvent({
+    required this.callData
+  });
+}
 

@@ -9,6 +9,7 @@ import com.example.MCFEF.MainActivity
 import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver
 import com.example.MCFEF.calls_manager.Data
 import com.example.MCFEF.makePlatformEventPayload
+import com.example.flutterimagecompress.logger.log
 import io.flutter.Log
 import org.linphone.core.*
 
@@ -25,6 +26,7 @@ class LinphoneSDK (context: Context) {
             "backgroundUrl" to "https://i.pravatar.cc/500",
             "actionColor" to "#4CAF50"
     )
+    var callStatus: String? = null
 
     init {
         Log.w("LinphoneSDK", "APP WAS STARTED")
@@ -92,7 +94,7 @@ class LinphoneSDK (context: Context) {
                 Log.w("SIP RegistrationState status", "true")
             } else if (state == RegistrationState.Ok) {
                 Log.w("SIP RegistrationState status", "false")
-                val args = makePlatformEventPayload("REGISTRATION", null)
+                val args = makePlatformEventPayload("REGISTRATION", null, null)
                 MainActivity.callServiceEventSink?.success(args)
 //                Log.w("Account setup", account.params.contactUriParameters.toString())
                 Log.w("Account setup 4", core.defaultAccount?.params?.identityAddress.toString())
@@ -125,14 +127,13 @@ class LinphoneSDK (context: Context) {
                             )
                     )
 
-                    val callArgs = makePlatformEventPayload("INCOMING", call.remoteAddress.username)
+                    val callArgs = makePlatformEventPayload("INCOMING", call.remoteAddress.username, null)
 
                     MainActivity.callServiceEventSink?.success(callArgs)
-
                 }
                 Call.State.Connected -> {
                     Log.w("ACTIVE_CALL", "Connected   ${call.remoteAddress.username}")
-                    val args = makePlatformEventPayload("CONNECTED", call.remoteAddress.username)
+                    val args = makePlatformEventPayload("CONNECTED", call.remoteAddress.username, null)
 
                     MainActivity.callServiceEventSink?.success(args)
 
@@ -169,13 +170,20 @@ class LinphoneSDK (context: Context) {
                                     data
                             )
                     )
-                    val args = makePlatformEventPayload("ENDED", call.remoteAddress.username)
-                    Log.w("CALL_ENDED", "${call.callLog.duration}")
+
+                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
+                            callStatus = if (call.callLog.status.name == "Success")  "ANSWERED" else "NO ANSWER",
+                            fromCaller = call.callLog.fromAddress.username,
+                            toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
+                            callId = call.callLog.callId)
+
+                    val args = makePlatformEventPayload("ENDED", call.remoteAddress.username, callData)
+                    Log.w("CALL_ENDED", "${callData}")
                     MainActivity.callServiceEventSink?.success(args)
                 }
                 Call.State.OutgoingInit -> {
                     Log.w("OUTGOING_CALL", "OutgoingInit")
-                    val args = makePlatformEventPayload("OUTGOING", call.remoteAddress.username)
+                    val args = makePlatformEventPayload("OUTGOING", call.remoteAddress.username, null)
                     MainActivity.callServiceEventSink?.success(args)
                 }
                 Call.State.OutgoingProgress  -> {
@@ -186,7 +194,7 @@ class LinphoneSDK (context: Context) {
                 }
                 Call.State.Error -> {
                     Log.w("ERROR_CALL", "OutgoingInit")
-                    val args = makePlatformEventPayload("ERROR", call.remoteAddress.username)
+                    val args = makePlatformEventPayload("ERROR", call.remoteAddress.username, null)
                     MainActivity.callServiceEventSink?.success(args)
                 }
 
@@ -195,4 +203,16 @@ class LinphoneSDK (context: Context) {
 
     }
 
+}
+
+fun makeCallDataPayload(duration: String?, callStatus: String?, fromCaller: String?, toCaller: String?,
+             date: String?, callId: String?): Map<String, Any?> {
+    return mapOf(
+            "duration" to duration,
+            "disposition" to callStatus,
+            "dst" to toCaller,
+            "src" to fromCaller,
+            "calldate" to date,
+            "uniqueid" to callId
+    )
 }

@@ -67,7 +67,7 @@ class CallInfoPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("${callData.callDate.hour}:${callData.callDate.minute}"),
+                      Text(getTime(callData.callDate)),
                       SizedBox(width: 10,),
                       Text(callData.callName,
                         style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w700),
@@ -108,7 +108,6 @@ class CallInfoPage extends StatelessWidget {
                   SizedBox(width: 20,),
                   GestureDetector(
                     onTap: (){
-                      print("Message ${callData.callerName}");
                       final dialogData= findDialog(context, 40, int.parse(callData.callerNumber));
                       final ChatPageArguments chatArgs = ChatPageArguments(
                         userId: 40,
@@ -147,4 +146,11 @@ class CallInfoPage extends StatelessWidget {
       ),
     );
   }
+}
+
+String getTime(DateTime callTime) {
+  if (callTime.hour < 10 && callTime.minute < 10) return "0${callTime.hour}:0${callTime.minute}";
+  if (callTime.hour < 10) return "0${callTime.hour}:${callTime.minute}";
+  if (callTime.minute < 10) return "${callTime.hour}:0${callTime.minute}";
+  return "${callTime.hour}:${callTime.minute}";
 }

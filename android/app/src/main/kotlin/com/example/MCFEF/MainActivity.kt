@@ -458,10 +458,11 @@ private fun outgoingCall(remoteSipUri: String, context: Context) {
     core.inviteAddressWithParams(remoteAddress, params)
 }
 
-fun makePlatformEventPayload(event: String, callerId: String?): Map<String, Any?> {
+fun makePlatformEventPayload(event: String, callerId: String?, callData: Map<String, Any?>?): Map<String, Any?> {
     return mapOf(
             "event" to event,
-            "callerId" to callerId
+            "callerId" to callerId,
+            "callData" to callData
     )
 }
 
@@ -484,14 +485,6 @@ class EventHandlerSip: EventChannel.StreamHandler{
         eventSink = null
     }
 
-}
-
-/**
- * Convert data to JSON to send to Dart side
- */
-data class CallData (
-        var state: String? = null,
-        var username: String? = null) {
 }
 
 /**

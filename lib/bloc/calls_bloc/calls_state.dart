@@ -1,3 +1,5 @@
+import '../../models/call_model.dart';
+
 abstract class CallState  {
   const CallState();
 
@@ -9,7 +11,23 @@ class ConnectedCallServiceState extends CallState{
 
 }
 
-class EndedCallServiceState extends CallState{}
+class EndedCallServiceState extends CallState{
+  final CallModel callData;
+
+  EndedCallServiceState({
+    required this.callData
+  });
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is EndedCallServiceState &&
+              callData.id == other.callData.id &&
+              runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => callData.hashCode;
+}
 
 class OutgoingCallServiceState extends CallState{
   final String callerName;

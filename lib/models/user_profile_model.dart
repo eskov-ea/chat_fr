@@ -14,6 +14,7 @@ class UserProfileData extends Equatable{
   final String? image = null;
   final UserProfileAsteriskSettings? userProfileSettings;
   final AppSettings? appSettings;
+  final ChatSettings? chatSettings;
 
   const UserProfileData({
     required this.id,
@@ -26,7 +27,8 @@ class UserProfileData extends Equatable{
     required this.dept,
     required this.email,
     required this.userProfileSettings,
-    required this.appSettings
+    required this.appSettings,
+    required this.chatSettings
   });
 
   static UserProfileData fromJson(json) => UserProfileData(
@@ -40,7 +42,8 @@ class UserProfileData extends Equatable{
           dept: json['user']['staff']['dept'] ?? "",
           email: json['user']['email'] ?? "",
           userProfileSettings: UserProfileAsteriskSettings.fromJson(json['settings']),
-          appSettings: AppSettings.fromJson(json['settings'])
+          appSettings: AppSettings.fromJson(json['settings']),
+          chatSettings: ChatSettings.fromJson(json['settings'])
       );
 
 
@@ -116,5 +119,24 @@ class AppSettings extends Equatable{
 
   @override
   List<Object?> get props => [version, downloadUrlAndroid];
+
+}
+class ChatSettings extends Equatable{
+  final List<String?> autoJoinChats;
+
+  const ChatSettings({
+    required this.autoJoinChats
+  });
+
+  static ChatSettings? fromJson(json) {
+    return json == null
+        ? null
+        : ChatSettings(
+          autoJoinChats: json['chat']["autojoin"],
+        );
+  }
+
+  @override
+  List<Object?> get props => [autoJoinChats];
 
 }

@@ -47,6 +47,14 @@ class DialogsViewCubit extends Cubit<DialogsViewCubitState> {
     dialogsBloc.add(DeleteAllDialogsEvent());
   }
 
+  void getPublicDialogs() {
+
+  }
+
+  void joinDialog(userId, dialogId) {
+    dialogsBloc.add(DialogUserJoinChatEvent(user: userId, dialogId: dialogId ));
+  }
+
   @override
   Future<void> close() {
     dialogBlocSubscription.cancel();

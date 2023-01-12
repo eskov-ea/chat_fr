@@ -368,6 +368,7 @@ class _MessageListState extends State<_MessageList> {
                             p2p: widget.dialogData.chatType.p2p,
                             senderName: getSenderName(widget.usersCubit.state.users, currentState.messages[index].senderId),
                             parentMessage: currentState.messages[index].parentMessage,
+                            isError: currentState.messages[index].isError,
                             repliedMsgSenderName: currentState.messages[index].parentMessage != null
                                   ? getSenderName(widget.usersCubit.state.users, currentState.messages[index].parentMessage?.senderId)
                                   : null

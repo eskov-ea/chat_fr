@@ -9,7 +9,6 @@ import '../../models/message_model.dart';
 import 'package:http/http.dart' as http;
 import '../../storage/data_storage.dart';
 import 'dart:ui' as UI;
-// show Codec, instantiateImageCodec, FrameInfo
 import 'package:image/image.dart' as IMG;
 import 'dart:typed_data' as typedData;
 import 'dart:convert' as convert;
@@ -61,13 +60,13 @@ class MessagesProvider {
         return collection;
       } else if (response.statusCode == 401) {
         // TODO: implement logout
-        return null;
+        throw Exception("Необходимо авторизоваться");
       } else {
-        return null;
+        throw Exception("Произошла ошибка при отправке сообщения, повторите еще раз");
       }
     } catch (err) {
       print(err);
-      return null;
+      throw Exception("Произошла ошибка при отправке сообщения, повторите еще раз");
     }
   }
 

@@ -69,7 +69,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   SqfliteDatabase? _db;
   bool isUpdateAvailable = true;
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
-  bool _isAppRunning = true;
 
 
 
@@ -99,6 +98,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
   String _mapErrorToMessage(Object error) {
+    print("Error happened");
     if (error is! AppErrorException) {
       return 'Неизвестная ошибка, поторите попытку';
     }
@@ -143,6 +143,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  void _autoJoinChats(ChatSettings settings) async {
+    if (settings.autoJoinChats.isNotEmpty) {
+      try {
+        final String? userId = await _dataProvider.getUserId();
+        final dialogVC = BlocProvider.of<DialogsViewCubit>(context);
+        final publicDialogs = await DialogsProvider().getPublicDialogs();
+        for (var dialog in publicDialogs) {
+          dialogVC.joinDialog(userId, dialog.dialogId);
+        }
+      } catch (err) {
+        print(err);
+        customToastMessage(context, "Не удалось проверить корпоративные группы и каналы");
+      }
+    }
+  }
+
   void _onBlocProfileStateChanged(UserProfileState state){
     if (state is UserProfileLoadedState) {
       print("asterisk  --> ${state.user!.userProfileSettings!.asteriskUserPassword} ");
@@ -157,6 +173,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
       if (state.user?.appSettings != null){
         checkAppVersion(state.user!.appSettings!);
+        _autoJoinChats(state.user!.chatSettings!);
       }
     }
   }
@@ -171,14 +188,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  void _frequentlyFetchingCallLogs() async {
-    while (_isAppRunning == true) {
-      print("UPDATING CALL LOGS..");
-      await Future.delayed(const Duration(seconds: 30));
-      BlocProvider.of<CallLogsBloc>(context).add(UpdateCallLogsEvent());
-    }
-  }
-
   void getUserCallLog(UserProfileAsteriskSettings settings) {
     BlocProvider.of<CallLogsBloc>(context).add(LoadCallLogsEvent(passwd: settings.asteriskUserPassword!));
   }
@@ -188,6 +197,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     shouldDownloadData();
     WidgetsBinding.instance?.addObserver(this);
     userProfileDataSubscription =  BlocProvider.of<ProfileBloc>(context).stream.listen(_onBlocProfileStateChanged);
+    _subscribeToErrorsBlocStream();
     updateUserProfileData();
     getOs();
     if (!kIsWeb) {
@@ -227,7 +237,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         } else if(state is EndedCallServiceState) {
           print("NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
-          BlocProvider.of<CallLogsBloc>(context).add(UpdateCallLogsEvent());
+          print("CALL_ENDED  ${state.callData.callStatus}");
+          BlocProvider.of<CallLogsBloc>(context).add(AddCallToLogEvent(call: state.callData));
         } else if(state is ErrorCallServiceState) {
           final List<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs;
           int? dialogId;
@@ -258,8 +269,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         }
       });
     }
-    _subscribeToErrorsBlocStream();
-    _frequentlyFetchingCallLogs();
     super.initState();
   }
 
@@ -275,13 +284,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           print('HOMESCREEN DISCONNECTED SOCKET STATE');
           bloc.add(InitializeSocketEvent());
         }
-        _isAppRunning = true;
-        Future.delayed(Duration(seconds: 30)).then((_) => {
-          _frequentlyFetchingCallLogs()
-        });
+        BlocProvider.of<CallLogsBloc>(context).add(UpdateCallLogsEvent());
         break;
       case AppLifecycleState.paused:
-        _isAppRunning = false;
     }
   }
 
@@ -392,7 +397,7 @@ _sendMessage({required context, required userId, required dialogId}) async {
 }
 
 createDialog(context, partnerId) async {
-    final newDialog = await DialogsProvider().createDialog(chatType: 1, users: [partnerId], chatName: "p2p", chatDescription: null);
+    final newDialog = await DialogsProvider().createDialog(chatType: 1, users: [partnerId], chatName: "p2p", chatDescription: null, isPublic: false);
     print("SENDING_PUSH   ${newDialog?.dialogId}");
     if (newDialog != null) {
       final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);

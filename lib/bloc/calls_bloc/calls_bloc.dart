@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:chat/models/call_model.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'calls_event.dart';
@@ -24,7 +25,9 @@ class CallsBloc
       } else if (callEvent.event == "CONNECTED") {
         add(ConnectedCallEvent());
       } else if (callEvent.event == "ENDED") {
-        add(EndedCallServiceEvent());
+        final callData = CallModel.fromJson(callEvent.callData);
+        print("CALL_ENDED  ${callEvent.callData!["calldate"]}");
+        add(EndedCallServiceEvent(callData: callData));
       } else if (callEvent.event == "INCOMING") {
         add(IncomingCallEvent(callerId: callEvent.callerId!));
       } else if (callEvent.event == "OUTGOING") {
@@ -40,7 +43,7 @@ class CallsBloc
         } else if (event is IncomingCallEvent) {
           emit(IncomingCallState(callerName: event.callerId));
         } else if (event is EndedCallServiceEvent) {
-          emit(EndedCallServiceState());
+          emit(EndedCallServiceState(callData: event.callData));
           add(ConnectingCallServiceEvent());
         } else if (event is OutgoingCallEvent) {
           emit(OutgoingCallServiceState(callerName: event.callerId));
@@ -67,14 +70,16 @@ class CallsBloc
 class CallServiceEventModel {
   final String event;
   final String? callerId;
+  final Map<String, dynamic>? callData;
 
   const CallServiceEventModel({
     required this.event,
-    required this.callerId
+    required this.callerId,
+    required this.callData
   });
 
   static CallServiceEventModel fromJson(data) {
-    var json = null;
+    var json;
     if (data.runtimeType == String) {
       json = jsonDecode(data);
     } else {
@@ -82,8 +87,15 @@ class CallServiceEventModel {
     }
     return CallServiceEventModel(
         event: json["event"],
-        callerId: json["callerId"]
+        callerId: json["callerId"],
+        callData: makeCallDataMap(json["callData"])
     );
   }
 }
 
+makeCallDataMap(string) {
+  if (string == null) return null;
+  final json = jsonDecode(jsonEncode(string));
+  print("CALL_ENDED  JSON $json");
+  return json;
+}

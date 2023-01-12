@@ -49,6 +49,8 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         onRefreshChatsBuilderEvent(event, emit);
       } else if (event is DeleteAllChatsEvent) {
         onDeleteAllChatsEvent(event, emit);
+      } else if (event is ChatsBuilderUpdateMessageWithErrorEvent) {
+        onChatsBuilderUpdateLocalMessageWithErrorEvent(event, emit);
       }
     });
   }
@@ -150,6 +152,26 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     }
     emit(state.copyWith(updatedChats: state.chats,
         updatedCounter: state.counter++));
+  }
+
+  Future<void> onChatsBuilderUpdateLocalMessageWithErrorEvent (
+      ChatsBuilderUpdateMessageWithErrorEvent event, Emitter<ChatsBuilderState> emit
+      ) async {
+    print("TRY TO UPDATE ERROR MESSAGE");
+    final chats = [...state.chats];
+    for (var chat in chats) {
+      if (chat.chatId == event.dialog) {
+        print("UPDATE MESSAGE WITH ERROR  ${event.message}");
+        for (var message in chat.messages) {
+          if (message.messageId == event.message.messageId) {
+            message.isError = true;
+            break;
+          }
+        }
+      }
+    }
+    emit(state.copyWith(
+        updatedChats: chats, updatedCounter: state.counter++));
   }
 
   @override

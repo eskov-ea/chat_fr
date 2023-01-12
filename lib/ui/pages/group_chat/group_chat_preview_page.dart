@@ -99,7 +99,7 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
               onPressed: () async {
                 print("GROUPLIST  -->  $groupUsersList");
                 loadingInProgressModalWidget(context, "Загрузка");
-                final newGroup = await _dialogsProvider.createDialog(chatType: 2, users: widget.usersList, chatName: _textFieldController.text, chatDescription: null);
+                final newGroup = await _dialogsProvider.createDialog(chatType: 2, users: widget.usersList, chatName: _textFieldController.text, chatDescription: null, isPublic: false);
                 if (newGroup != null) {
                   Navigator.of(context).pushNamed(
                       MainNavigationRouteNames.homeScreen

@@ -43,6 +43,16 @@ class ChatsBuilderAddMessageEvent extends ChatsBuilderEvent {
   });
 }
 
+class ChatsBuilderUpdateMessageWithErrorEvent extends ChatsBuilderEvent {
+  final MessageData message;
+  final int dialog;
+
+  ChatsBuilderUpdateMessageWithErrorEvent({
+    required this.message,
+    required this.dialog,
+  });
+}
+
 class ChatsBuilderUpdateLocalMessageEvent extends ChatsBuilderEvent {
   final int localMessageId;
   final MessageData message;

@@ -17,7 +17,7 @@ class CallModel {
   });
 
   static CallModel fromJson(json) => CallModel(
-      date: json["calldate"],
+      date: getDateFromUnix(json["calldate"]),
       fromCaller: json["src"],
       toCaller: json["dst"],
       duration: json["duration"],
@@ -25,4 +25,14 @@ class CallModel {
       id: json["uniqueid"],
   );
 
+}
+
+String getDateFromUnix(json) {
+  try {
+    final seconds = int.parse(json);
+    final date =  DateTime.fromMillisecondsSinceEpoch(seconds * 1000).toString();
+    return date;
+  } catch (_) {
+    return json;
+  }
 }

@@ -36,6 +36,7 @@ class MessageWidget extends StatefulWidget {
     required this.senderName,
     required this.parentMessage,
     required this.repliedMsgSenderName,
+    required this.isError,
     Key? key
   }) : super(key: key);
 
@@ -58,6 +59,7 @@ class MessageWidget extends StatefulWidget {
   final String? senderName;
   final ParentMessage? parentMessage;
   final String? repliedMsgSenderName;
+  final bool isError;
 
   @override
   State<MessageWidget> createState() => _MessageWidgetState();
@@ -109,7 +111,9 @@ class _MessageWidgetState extends State<MessageWidget>  with SingleTickerProvide
       senderName: widget.senderName,
       parentMessage: widget.parentMessage,
       repliedMsgSenderName: widget.repliedMsgSenderName,
-      fileAttachment: localFileAttachment
+      isError: widget.isError,
+      fileAttachment: localFileAttachment,
+
     );
   }
 }
@@ -136,6 +140,7 @@ class _MessageTile extends StatelessWidget {
     required this.parentMessage,
     required this.repliedMsgSenderName,
     required this.fileAttachment,
+    required this.isError,
   }) : super(key: key);
 
   final int index;
@@ -157,6 +162,7 @@ class _MessageTile extends StatelessWidget {
   final MessageAttachmentsData? file;
   final ParentMessage? parentMessage;
   final File? fileAttachment;
+  final bool isError;
 
   static const _borderRadius = 10.0;
 
@@ -280,7 +286,7 @@ class _MessageTile extends StatelessWidget {
                               ],
                           )
                           : const SizedBox.shrink(),
-                        file != null && file!.filetype != "mp4" && file!.filetype != "jpeg" && file!.filetype != "jpg"
+                        file != null && file!.filetype != "mp4" && file!.filetype != "jpeg" && file!.filetype != "jpg" && file!.filetype != "png"
                           ? Column(
                             children: [
                               if (p2p != 1 && !isMe) _authorNameWidgetGroupChat(senderName, _borderRadius),
@@ -363,7 +369,8 @@ class _MessageTile extends StatelessWidget {
                     ),
                   ),
                 ),
-                Padding(
+                !isError
+                ?Padding(
                   padding: const EdgeInsets.only(top: 4.0),
                   child: Row(
                     children: [
@@ -376,19 +383,21 @@ class _MessageTile extends StatelessWidget {
                         ),
                       ),
                       if (isMe) const SizedBox(width: 8,),
-                      if (isMe) Icon(
-                        Icons.check_circle_rounded,
-                        color: status == 4
-                            ? Colors.green[700]
-                            : Colors.grey,
-                        size: 20.0,
-                      ),
+                      if (isMe) _StatusWidget(status),
                     ],
                   ),
-                ),
+                )
+                : SizedBox.shrink(),
                 const SizedBox(height: 5.0,)
               ],
             ),
+            isError
+            ? Container(
+                alignment: Alignment.center,
+                // padding: EdgeInsets.only(bottom: 25),
+                child: Icon(Icons.error, size: 35, color: Colors.red,),
+            )
+            : SizedBox.shrink()
           ],
         ),
       ),
@@ -550,4 +559,57 @@ Widget RepliedMessageBody(borderRadius, ParentMessage parentMessage, senderName)
       ),
     ),
   );
+}
+
+Widget _StatusWidget(status) {
+  Widget _widget = SizedBox.shrink();
+  switch (status) {
+    case 2:
+      _widget = Icon(
+        Icons.check_outlined,
+        color: Colors.grey,
+        size: 20.0,
+      );
+      break;
+    case 3:
+      _widget = Stack(
+        alignment: Alignment.center,
+        children: [
+          Icon(
+            Icons.check_outlined,
+            color: Colors.grey,
+            size: 20.0,
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 15),
+            child: Icon(
+              Icons.check_outlined,
+              color: Colors.grey,
+              size: 20.0,
+            ),
+          ),
+        ],
+      );
+      break;
+    case 4:
+      _widget = Stack(
+        children: [
+          Icon(
+            Icons.check_outlined,
+            color: Colors.green,
+            size: 20.0,
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 10),
+            child: Icon(
+              Icons.check_outlined,
+              color: Colors.green,
+              size: 20.0,
+            ),
+          ),
+        ],
+      );
+      break;
+  }
+  return _widget;
 }

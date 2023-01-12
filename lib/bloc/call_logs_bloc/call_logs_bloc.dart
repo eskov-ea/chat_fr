@@ -19,6 +19,9 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
       if(event is LoadCallLogsEvent) {
         try {
           final logs = await _callLogService.getCallLogs(passwd: event.passwd);
+          logs.forEach((call) {
+            state.logsDictionary[call.id] = true;
+          });
           _asteriskPasswd = event.passwd;
           final newState = CallsLoadedLogState(callLog: logs);
           emit(newState);
@@ -31,6 +34,9 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
       } else if (event is UpdateCallLogsEvent) {
         try {
           final logs = await _callLogService.getCallLogs(passwd: _asteriskPasswd);
+          logs.forEach((call) {
+            state.logsDictionary[call.id] = true;
+          });
           final newState = CallsLoadedLogState(callLog: logs);
           emit(newState);
         } catch (err) {
@@ -38,6 +44,13 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
           errorHandlerBloc.add(ErrorHandlerWithErrorEvent(error: err, errorStack: e.message));
           final errorState = CallLogErrorState();
           emit(errorState);
+        }
+      } else if (event is AddCallToLogEvent) {
+        print("IS_CALL_LOGGED  ${state.logsDictionary}");
+        if(state.logsDictionary[event.call.id]  != true) {
+          final newLogState = [event.call, ...state.callLog];
+          state.logsDictionary[event.call.id] = true;
+          emit(CallsLoadedLogState(callLog: newLogState));
         }
       }
     });

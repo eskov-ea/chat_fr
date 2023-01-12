@@ -192,6 +192,7 @@ MessageData createLocalMessage({
       messageTime: parseTime.getTime(DateTime.now()),
       rawDate: DateTime.now(),
       file: null,
+      isError: false,
       status: [
         MessageStatuses(
             id: 0,

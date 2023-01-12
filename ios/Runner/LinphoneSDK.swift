@@ -80,26 +80,33 @@ class LinphoneSDK : ObservableObject
                         self.mCall = call
                         self.incomingCallName = call.remoteAddress?.username ?? "Unknown"
                         self.isCallIncoming = true
-                        let payload = makeEventPayload(event: "INCOMING", callerId: call.remoteAddress?.username)
+                        let payload = makeEventPayload(event: "INCOMING", callerId: call.remoteAddress?.username, callData: nil)
                         self.eventSink?(payload)
                         self.mProviderDelegate.incomingCall()
                     }
                     self.remoteAddress = call.remoteAddress!.asStringUriOnly()
                 } else if (state == .Connected) { // When a call is over
-                    let payload = makeEventPayload(event: "CONNECTED", callerId: call.remoteAddress?.username)
+                    let payload = makeEventPayload(event: "CONNECTED", callerId: call.remoteAddress?.username, callData: nil)
                     self.eventSink?(payload)
-//                    self.isCallIncoming = false
                     self.isCallRunning = true
-                } else if (state == .Released || state == .End || state == .Error) {
-                    let payload = makeEventPayload(event: "ENDED", callerId: call.remoteAddress?.username)
+                } else if ( state == .Released ) {
+                    let callStatus: String  = (call.callLog?.status.rawValue == 0) ? "ANSWERED" : "NO ANSWER"
+                    let callData = CallData(duration: call.callLog?.duration.description, disposition: callStatus, dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId   )
+                        print("CALL_STATUS  \(callData)")
+                    let payload = makeEventPayload(event: "ENDED", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                     if (self.isCallRunning) {
                         self.mProviderDelegate.stopCall()
                     }
                     self.remoteAddress = "Nobody yet"
-                } else if (state == .OutgoingInit) {
+                } else if (state == .Error) {
+                    print("ERROR CALL")
+                    let payload = makeEventPayload(event: "ERROR", callerId: call.remoteAddress?.username, callData: nil)
+                    self.eventSink?(payload)
+                    self.mProviderDelegate.stopCall()
+                }  else if (state == .OutgoingInit) {
                     print("OUTGOING INIT CALL")
-                    let payload = makeEventPayload(event: "OUTGOING", callerId: call.remoteAddress?.username)
+                    let payload = makeEventPayload(event: "OUTGOING", callerId: call.remoteAddress?.username, callData: nil)
                     self.eventSink?(payload)
 //                    self.incomingCallName = call.toAddress?.username ?? "Unknown"
 //                    self.mProviderDelegate.outgoingCall()
@@ -315,9 +322,9 @@ class LinphoneSDK : ObservableObject
         }
 }
 
-func makeEventPayload(event: String, callerId: String?) -> String? {
+func makeEventPayload(event: String, callerId: String?, callData: CallData?) -> String? {
     do {
-        let eventPayload = EventPayload(event: event, callerId: callerId)
+        let eventPayload = EventPayload(event: event, callerId: callerId, callData: callData)
         let jsonEventPayload = try JSONEncoder().encode(eventPayload)
         let jsonEventPayloadString = String(data: jsonEventPayload, encoding: .utf8)!
         return jsonEventPayloadString
@@ -331,9 +338,30 @@ struct EventPayload: Codable {
     
     let event: String
     let callerId: String?
+    let callData: CallData?
     
-    init(event: String, callerId: String?) {
+    init(event: String, callerId: String?, callData: CallData?) {
         self.event = event
         self.callerId = callerId
+        self.callData = callData
+    }
+}
+
+struct CallData: Codable {
+    let duration: String?
+    let disposition: String?
+    let dst: String?
+    let src: String?
+    let calldate: String?
+    let uniqueid: String?
+    
+    init(duration: String?, disposition: String?, dst: String?, src: String?,
+         calldate: String?, uniqueid: String?) {
+        self.duration = duration
+        self.disposition = disposition
+        self.dst = dst
+        self.src = src
+        self.calldate = calldate
+        self.uniqueid = uniqueid
     }
 }
