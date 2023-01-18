@@ -6,11 +6,14 @@ import 'package:chat/ui/widgets/pdf_viewer_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
 import 'package:swipe_to/swipe_to.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
+import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../services/global.dart';
 import '../../theme.dart';
 import '../navigation/main_navigation.dart';
@@ -37,11 +40,13 @@ class MessageWidget extends StatefulWidget {
     required this.parentMessage,
     required this.repliedMsgSenderName,
     required this.isError,
+    required this.dialogId,
     Key? key
   }) : super(key: key);
 
   final int index;
   final int userId;
+  final int dialogId;
   final int p2p;
   final List selected;
   final bool selectedMode;
@@ -113,7 +118,7 @@ class _MessageWidgetState extends State<MessageWidget>  with SingleTickerProvide
       repliedMsgSenderName: widget.repliedMsgSenderName,
       isError: widget.isError,
       fileAttachment: localFileAttachment,
-
+      dialogId: widget.dialogId
     );
   }
 }
@@ -141,6 +146,7 @@ class _MessageTile extends StatelessWidget {
     required this.repliedMsgSenderName,
     required this.fileAttachment,
     required this.isError,
+    required this.dialogId,
   }) : super(key: key);
 
   final int index;
@@ -163,6 +169,7 @@ class _MessageTile extends StatelessWidget {
   final ParentMessage? parentMessage;
   final File? fileAttachment;
   final bool isError;
+  final int dialogId;
 
   static const _borderRadius = 10.0;
 
@@ -392,16 +399,75 @@ class _MessageTile extends StatelessWidget {
               ],
             ),
             isError
-            ? Container(
-                alignment: Alignment.center,
-                // padding: EdgeInsets.only(bottom: 25),
-                child: Icon(Icons.error, size: 35, color: Colors.red,),
+            ? GestureDetector(
+              onTap: (){
+                showModalBottomSheet(
+                    isDismissible: true,
+                    isScrollControlled: false,
+                    backgroundColor: Colors.transparent,
+                    context: context,
+                    builder: (BuildContext context) => Container(
+                      padding: EdgeInsets.all(8),
+                      height: 200,
+                      color: Colors.white,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            "Произошла ошибка при отправке сообщения",
+                            style: TextStyle(fontSize: 18),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(
+                            height: 30,
+                          ),
+                          GestureDetector(
+                            onTap: (){ _deleteErroredMessage(messageId, dialogId, context); },
+                            child: Container(
+                              child: Text("Отправить снова",
+                                style: TextStyle(fontSize: 18),
+                              ),
+                            )
+                          ),
+                          SizedBox(height: 20,),
+                          GestureDetector(
+                              onTap: (){
+                                _deleteErroredMessage(messageId, dialogId, context);
+                                Navigator.of(context).pop();
+                              },
+                              child: Container(
+                                child: Text("Удалить сообщение",
+                                  style: TextStyle(fontSize: 18, color: Colors.red),
+                                ),
+                              )
+                          ),
+                        ],
+                      ),
+                    ));
+              },
+              child: Container(
+                  alignment: Alignment.center,
+                  // padding: EdgeInsets.only(bottom: 25),
+                  child: Icon(Icons.error, size: 35, color: Colors.red,),
+              ),
             )
             : SizedBox.shrink()
           ],
         ),
       ),
     );
+  }
+
+  void _resendErroredMessage(int messageId, int dialogId, BuildContext context) {
+    print("_resendErroredMessage  -->  $messageId");
+    BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderDeleteLocalMessageEvent(dialogId: dialogId, messageId: messageId));
+
+  }
+
+  void _deleteErroredMessage(int messageId, int dialogId, BuildContext context) {
+    print("_deleteErroredMessage  -->  $messageId");
+    BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderDeleteLocalMessageEvent(dialogId: dialogId, messageId: messageId));
   }
 }
 
@@ -612,4 +678,34 @@ Widget _StatusWidget(status) {
       break;
   }
   return _widget;
+}
+
+Future<void> _showSimpleDialog(context) async {
+  await showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog( // <-- SEE HERE
+          title: const Text('Select Booking Type'),
+          children: <Widget>[
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('General'),
+            ),
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Silver'),
+            ),
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Gold'),
+            ),
+          ],
+        );
+      });
 }

@@ -146,14 +146,56 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void _autoJoinChats(ChatSettings settings) async {
     if (settings.autoJoinChats.isNotEmpty) {
       try {
+        bool isJoined = false;
         final String? userId = await _dataProvider.getUserId();
-        final dialogVC = BlocProvider.of<DialogsViewCubit>(context);
+        // final dialogVC = BlocProvider.of<DialogsViewCubit>(context);
         final publicDialogs = await DialogsProvider().getPublicDialogs();
-        for (var dialog in publicDialogs) {
-          dialogVC.joinDialog(userId, dialog.dialogId);
+        if (publicDialogs.isNotEmpty) {
+          for (var requiredChat in settings.autoJoinChats){
+            for (var publicDialog in publicDialogs) {
+              if (requiredChat.dialogId == publicDialog.dialogId){
+                await DialogsProvider()
+                    .joinDialog(userId, publicDialog.dialogId);
+                isJoined = true;
+              }
+            }
+          }
+          if(isJoined == true) refreshAllData(context);
         }
+        // for (var publicDialog in publicDialogs) {
+        //   bool isJoined = false;
+        //   while (dialogVC.dialogsBloc.state.dialogs == null) {
+        //     await Future.delayed(Duration(seconds: 3));
+        //   }
+        //   for (var dialog in dialogVC.dialogsBloc.state.dialogs!) {
+        //     if(publicDialog.dialogId == dialog.dialogId ) {
+        //       for (var user in publicDialog.chatUsers!) {
+        //         if (user.userId.toString() == userId) {
+        //           if (user.active != true) {
+        //             // final json = await DialogsProvider().joinDialog(userId, publicDialog.dialogId);
+        //             // final dialog = DialogData.fromJson(json);
+        //             // print("dialogdialog  $dialog di");
+        //           }
+        //           isJoined = true;
+        //           break;
+        //         }
+        //       }
+        //     }
+        //   }
+        //   if (isJoined != true) {
+        //     final chatUser = await DialogsProvider().joinDialog(userId, publicDialog.dialogId);
+        //     for (var user in BlocProvider.of<UsersViewCubit>(context).state.users) {
+        //       if (user.id.toString() == userId) {
+        //         publicDialog.chatUsers!.add(chatUser);
+        //         dialogVC.dialogsBloc.add(ReceiveNewDialogEvent(dialog: publicDialog));
+        //         break;
+        //       }
+        //     }
+        //     // dialogVC.joinDialog(chatUser, publicDialog.dialogId);
+        //   }
+        // }
       } catch (err) {
-        print(err);
+        print("publicDialog err   $err");
         customToastMessage(context, "Не удалось проверить корпоративные группы и каналы");
       }
     }
@@ -284,7 +326,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           print('HOMESCREEN DISCONNECTED SOCKET STATE');
           bloc.add(InitializeSocketEvent());
         }
-        BlocProvider.of<CallLogsBloc>(context).add(UpdateCallLogsEvent());
+        final passwd = BlocProvider.of<ProfileBloc>(context).state.user?.userProfileSettings?.asteriskUserPassword;
+        if (passwd == null) return;
+        BlocProvider.of<CallLogsBloc>(context).add(UpdateCallLogsEvent(passwd: passwd));
         break;
       case AppLifecycleState.paused:
     }

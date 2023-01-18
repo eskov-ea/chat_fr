@@ -80,11 +80,12 @@ class _MessagesPageState extends State<MessagesPage> {
                     SliverList(
                       delegate: SliverChildBuilderDelegate(
                             (context, index) =>
+                            !_isDialogActive(state.dialogs[index], userId!) ? SizedBox.shrink() :
                             Container(
                                 padding: const EdgeInsets.only(
                                     left: 10, right: 10, top: 0, bottom: 0),
                                 child: Align(
-                                  child: _MessageTitle(
+                                  child: _DialogItem(
                                     userId: userId,
                                     dialogData: DialogData(
                                         userData: state.dialogs[index].userData,
@@ -117,8 +118,8 @@ class _MessagesPageState extends State<MessagesPage> {
 }
 
 
-class _MessageTitle extends StatelessWidget {
-  const _MessageTitle({
+class _DialogItem extends StatelessWidget {
+  const _DialogItem({
     Key? key,
     required this.dialogData,
     required this.userId,
@@ -320,5 +321,16 @@ bool isMessageReadByMe (List<MessageStatuses>? statuses, int userId) {
   return true;
 }
 
+bool _isDialogActive(DialogData dialog, int userId) {
+  bool isUserActive = false;
+  for(var user in dialog.chatUsers!) {
+    if (user.userId == userId && user.active == true) {
+      isUserActive = true;
+      return isUserActive;
+    }
+  }
+
+  return isUserActive;
+}
 
 

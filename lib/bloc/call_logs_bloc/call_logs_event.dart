@@ -21,10 +21,10 @@ class AddCallToLogEvent extends CallLogsEvent {
 }
 
 class UpdateCallLogsEvent extends CallLogsEvent {
-  // final String passwd;
+  final String passwd;
 
-  // UpdateCallLogsEvent({
-  //   required this.passwd
-  // });
+  UpdateCallLogsEvent({
+    required this.passwd
+  });
 }
 

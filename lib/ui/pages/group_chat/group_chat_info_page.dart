@@ -1,11 +1,10 @@
 import 'dart:async';
-
 import 'package:chat/models/dialog_model.dart';
+import 'package:chat/storage/data_storage.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../models/contact_model.dart';
 import '../../../services/dialogs/dialogs_api_provider.dart';
 import '../../../theme.dart';
@@ -38,44 +37,52 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
   List<ChatUser> stateUsers = [];
   //TODO: higt this functionality up to bloc
   final DialogsProvider _dialogsProvider = DialogsProvider();
-  StreamSubscription? _dialogStateSubscription;
+  // StreamSubscription? _dialogStateSubscription;
+  bool isDeleteUserMode = false;
+  bool isAdmin = false;
+  String? userId;
 
   @override
   void initState() {
     print("DIALOGSBLOC    ${BlocProvider.of<DialogsViewCubit>(context)}");
     getStateUsers(null);
-    _dialogStateSubscription = widget.dialogsViewCubit.dialogsBloc.stream.listen((event) {
-      getStateUsers(event);
-    });
+    // _dialogStateSubscription = widget.dialogsViewCubit.dialogsBloc.stream.listen((event) {
+    //   getStateUsers(event);
+    // });
     super.initState();
   }
 
   @override
   void dispose() {
-    _dialogStateSubscription?.cancel();
+    // _dialogStateSubscription?.cancel();
     super.dispose();
   }
 
-  addUserCallback(user){
-    // setState(() {
-    //   stateUsers.add(user);
-    // });
+  addUserCallback(ChatUser user){
+    if (!stateUsers.contains(user)) {
+      setState(() {
+        stateUsers.add(user);
+      });
+    }
   }
 
-  getStateUsers(event){
-    print("DIALOGSBLOC   ${widget.dialogsViewCubit.dialogsBloc.state.dialogs}");
+  getStateUsers(event) async {
+    final userId = await DataProvider().getUserId();
+    print("getStateUsers INIT  $event");
     stateUsers = [];
     for (var user in widget.dialogData.chatUsers!) {
       if (user.active) {
         stateUsers.add(user);
       }
+      if (user.userId.toString() == userId && user.chatUserRole == 1) {
+        isAdmin = true;
+      }
     }
     setState(() {});
-    print("StateUsers  ${stateUsers}");
-    print("StateUsers  ${widget.chatUsers}");
   }
 
   deleteUserFromChat(ChatUser user) {
+    //TODO: add check
     setState(() {
       stateUsers.remove(user);
     });
@@ -154,52 +161,106 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                   child: ListView.builder(
                       itemCount: stateUsers.length,
                       itemBuilder: (context, index) {
-                        return SlidableWidget(
-                          onDismissed: (SlidableActionEnum action) {
-                            deleteUserFromChat(stateUsers![index]);
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.only(bottom: 5, left: 10, right: 10, top: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                CircleAvatar(
-                                  radius: 20,
-                                  backgroundColor: Colors.grey,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(4), // Border radius
-                                    child: ClipOval(
-                                        child: false
-                                            ? Image.network("")
-                                            : Image.asset('assets/images/no_avatar.png')
-                                    ),
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 5, left: 10, right: 10, top: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              CircleAvatar(
+                                radius: 20,
+                                backgroundColor: Colors.grey,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4), // Border radius
+                                  child: ClipOval(
+                                      child: false
+                                          ? Image.network("")
+                                          : Image.asset('assets/images/no_avatar.png')
                                   ),
                                 ),
-                                const SizedBox(width: 20,),
-                                Expanded(
-                                  child: Container(
-                                    padding: EdgeInsets.only(bottom: 10),
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                          bottom: index == widget.users.length - 1
-                                          ? BorderSide(width: 0, color: Colors.transparent)
-                                          : BorderSide(width: 1, color: Colors.black26)
-                                      )
-                                    ),
-                                    child: Text("${widget.users[index].firstname} ${widget.users[index].lastname}",
-                                      style: TextStyle(fontSize: 20),
-                                    ),
+                              ),
+                              const SizedBox(width: 20,),
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.only(bottom: 10),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                        bottom: index == widget.users.length - 1
+                                        ? BorderSide(width: 0, color: Colors.transparent)
+                                        : BorderSide(width: 1, color: Colors.black26)
+                                    )
+                                  ),
+                                  child: Text("${stateUsers[index].user.firstname} ${stateUsers[index].user.lastname}",
+                                    style: TextStyle(fontSize: 20),
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                              stateUsers[index].chatUserRole == 1
+                                  ? Icon(Icons.star)
+                                  : SizedBox.shrink(),
+                              isDeleteUserMode
+                                  ? IconButton(
+                                      icon: Icon( Icons.remove_circle, color: Colors.red,),
+                                      onPressed: () {
+                                        showModalBottomSheet(
+                                            isDismissible: false,
+                                            isScrollControlled: true,
+                                            backgroundColor: Colors.black54,
+                                            context: context,
+                                            builder: (BuildContext context) => AlertDialog(
+                                              content: Container(
+                                                height: 180,
+                                                color: Colors.white,
+                                                child: Column(
+                                                  mainAxisAlignment: MainAxisAlignment.end,
+                                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                                  children: [
+                                                    Text('Удалить ${stateUsers[index].user.firstname} ${stateUsers[index].user.lastname} из списка участников?',
+                                                      style: TextStyle(fontSize: 18, color: Colors.black),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 30,
+                                                    ),
+                                                    OutlinedButton(
+                                                      onPressed: (){
+                                                        deleteUserFromChat(stateUsers[index]);
+                                                        setState(() {
+                                                          isDeleteUserMode = false;
+                                                        });
+                                                        Navigator.of(context).pop();
+                                                      },
+                                                      child: SizedBox(
+                                                        width: 70,
+                                                        child: Text('Удалить',
+                                                          textAlign: TextAlign.center,
+                                                          style: TextStyle(color: Colors.red, fontSize: 16),))
+                                                    ),
+                                                    OutlinedButton(
+                                                      onPressed: (){
+                                                        Navigator.of(context).pop();
+                                                      },
+                                                      child: SizedBox(
+                                                        width: 70,
+                                                        child: Text('Назад',
+                                                          textAlign: TextAlign.center,
+                                                          style: TextStyle(color: Colors.black, fontSize: 16),),
+                                                      )
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ));
+                                      },
+                                    )
+                                  : SizedBox.shrink(),
+                            ],
                           ),
                         );
                       }
                   ),
                 ),
               ),
-              Container(
+              isAdmin
+              ? Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 height: 150,
                 child: Column(
@@ -235,35 +296,58 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                           style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.w300),
                         )
                     ),
-                    // OutlinedButton(
-                    //     onPressed: () async {
-                    //       try {
-                    //
-                    //       } catch (err) {
-                    //         print(err);
-                    //       }
-                    //     },
-                    //     style: ElevatedButton.styleFrom(
-                    //       primary: LightColors.profilePageButton,
-                    //       minimumSize: const Size.fromHeight(50),
-                    //       shape: const RoundedRectangleBorder(
-                    //           side: BorderSide(color: Colors.black54, width: 2, style: BorderStyle.solid),
-                    //           borderRadius: BorderRadius.only(
-                    //               bottomRight: Radius.circular(8),
-                    //               bottomLeft: Radius.circular(8),
-                    //               topRight: Radius.zero,
-                    //               topLeft: Radius.zero
-                    //           )
-                    //       ),
-                    //     ),
-                    //     child: const Text(
-                    //       'Удалить участника',
-                    //       style: TextStyle(color: Colors.red, fontSize: 20, fontWeight: FontWeight.w300),
-                    //     )
-                    // ),
+                    OutlinedButton(
+                        onPressed: () async {
+                          setState(() {
+                            isDeleteUserMode = !isDeleteUserMode;
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: LightColors.profilePageButton,
+                          minimumSize: const Size.fromHeight(50),
+                          shape: const RoundedRectangleBorder(
+                              side: BorderSide(color: Colors.black54, width: 2, style: BorderStyle.solid),
+                              borderRadius: BorderRadius.only(
+                                  bottomRight: Radius.circular(8),
+                                  bottomLeft: Radius.circular(8),
+                                  topRight: Radius.zero,
+                                  topLeft: Radius.zero
+                              )
+                          ),
+                        ),
+                        child: Text(
+                          isDeleteUserMode ? 'Готово' : 'Удалить участника',
+                          style: TextStyle(color: isDeleteUserMode ? Colors.black54 : Colors.red, fontSize: 20, fontWeight: FontWeight.w300),
+                        )
+                      ),
                   ],
                 ),
               )
+              : Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+                child: OutlinedButton(
+                  onPressed: () async {
+                    deleteUserFromChat(stateUsers.firstWhere((user) => user.userId.toString() == userId));
+                    Navigator.popUntil(context, (route) => route.settings.name == '/home_screen');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: LightColors.profilePageButton,
+                    minimumSize: const Size.fromHeight(50),
+                    shape: const RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black54, width: 2, style: BorderStyle.solid),
+                        borderRadius: BorderRadius.only(
+                            bottomRight: Radius.circular(8),
+                            bottomLeft: Radius.circular(8),
+                            topRight: Radius.zero,
+                            topLeft: Radius.zero
+                        )
+                    ),
+                  ),
+                  child: Text('Выйти из группы',
+                    style: TextStyle(color: Colors.red, fontSize: 20, fontWeight: FontWeight.w300),
+                  )
+                ),
+              ),
             ],
           ),
         ),

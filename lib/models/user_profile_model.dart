@@ -1,3 +1,4 @@
+import 'package:chat/models/dialog_model.dart';
 import 'package:equatable/equatable.dart';
 
 class UserProfileData extends Equatable{
@@ -122,7 +123,7 @@ class AppSettings extends Equatable{
 
 }
 class ChatSettings extends Equatable{
-  final List<String?> autoJoinChats;
+  final List<DialogData> autoJoinChats;
 
   const ChatSettings({
     required this.autoJoinChats
@@ -132,7 +133,9 @@ class ChatSettings extends Equatable{
     return json == null
         ? null
         : ChatSettings(
-          autoJoinChats: json['chat']["autojoin"],
+          autoJoinChats: json['chat']["autojoin"]
+              .map<DialogData>((dialog) => DialogData.fromJson(dialog))
+              .toList()
         );
   }
 

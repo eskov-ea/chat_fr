@@ -33,6 +33,16 @@ class ChatsBuilderLoadMessagesEvent extends ChatsBuilderEvent {
   });
 }
 
+class ChatsBuilderDeleteLocalMessageEvent extends ChatsBuilderEvent {
+  final int dialogId;
+  final int messageId;
+
+  ChatsBuilderDeleteLocalMessageEvent({
+    required this.dialogId,
+    required this.messageId
+  });
+}
+
 class ChatsBuilderAddMessageEvent extends ChatsBuilderEvent {
   final MessageData message;
   final int dialog;

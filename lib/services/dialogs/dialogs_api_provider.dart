@@ -103,9 +103,9 @@ class DialogsProvider {
     }
   }
 
-  Future joinDialog(userId, dialogId) async {
+  Future<ChatUser> joinDialog(userId, dialogId) async {
     final String? token = await _secureStorage.getToken();
-
+    print("JOINDIALOG SERVICE  START");
     try {
       final response = await http.get(
         Uri.parse('https://erp.mcfef.com/api/chat/join/$dialogId/$userId}'),
@@ -114,7 +114,8 @@ class DialogsProvider {
           'Authorization': 'Bearer $token',
         },
       );
-      print("JOINDIALOG  ${response.body}");
+      print("JOINDIALOG SERVICE  ${response.body}");
+      return ChatUser.fromJson(jsonDecode(response.body)["data"]);
     } on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, joining user to dialog $dialogId");
     } catch(err) {

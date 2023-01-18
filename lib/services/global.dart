@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:chat/bloc/dialogs_bloc/dialogs_bloc.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
 import 'package:chat/storage/sqflite_database.dart';
@@ -182,7 +183,7 @@ MessageData createLocalMessage({
   required messageText,
 }) =>
     MessageData(
-      messageId: 1111,
+      messageId: Random().nextInt(100000),
       parentMessageId: replyedMessageId,
       parentMessage: parentMessage,
       senderId: userId,

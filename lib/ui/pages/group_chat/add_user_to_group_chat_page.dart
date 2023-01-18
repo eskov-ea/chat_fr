@@ -1,6 +1,10 @@
+import 'package:chat/models/dialog_model.dart';
+import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../bloc/dialogs_bloc/dialogs_event.dart';
 import '../../../models/contact_model.dart';
 import '../../../services/dialogs/dialogs_api_provider.dart';
 import '../../widgets/search_widget.dart';
@@ -29,9 +33,8 @@ class _AddingUserToGroupChatPageState extends State<AddingUserToGroupChatPage> {
   final DialogsProvider _dialogsProvider = DialogsProvider();
   addUsersToDialog() async {
     for (var user in selected) {
-      print(user);
-      _dialogsProvider.joinDialog(user.id, widget.dialogId);
-      widget.addUserCallback(user);
+      final ChatUser chatUser = await _dialogsProvider.joinDialog(user.id, widget.dialogId);
+      widget.addUserCallback(chatUser);
     }
   }
 

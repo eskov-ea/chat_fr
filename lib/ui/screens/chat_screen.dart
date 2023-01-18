@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import '../../../bloc/ws_bloc/ws_state.dart';
 import '../../../services/messages/messages_repository.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
@@ -371,7 +372,8 @@ class _MessageListState extends State<_MessageList> {
                             isError: currentState.messages[index].isError,
                             repliedMsgSenderName: currentState.messages[index].parentMessage != null
                                   ? getSenderName(widget.usersCubit.state.users, currentState.messages[index].parentMessage?.senderId)
-                                  : null
+                                  : null,
+                            dialogId: widget.dialogData.dialogId,
                           )
                         ],
                       );

@@ -129,16 +129,23 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   }
 
   void onDialogUserJoinChatEvent(DialogUserJoinChatEvent event, emit) {
-    final newDialogs = [ ...state.dialogs!];
-    for (var dialog in newDialogs) {
-      if(dialog.dialogId == event.dialogId) {
-        dialog.usersList.add(event.user.user);
-        dialog.chatUsers?.add(event.user);
-        break;
+    print("DialogUserJoinChatEvent");
+    try {
+      // dialogsProvider.joinDialog(event.user.userId, event.dialogId);
+
+      final newDialogs = [ ...state.dialogs!];
+      for (var dialog in newDialogs) {
+        if(dialog.dialogId == event.dialogId) {
+          dialog.usersList.add(event.user.user);
+          dialog.chatUsers?.add(event.user);
+          break;
+        }
       }
+      final newState = state.copyWith(dialogs: newDialogs);
+      emit(newState);
+    } catch (err) {
+      print(err);
     }
-    final newState = state.copyWith(dialogs: newDialogs);
-    emit(newState);
   }
 
   void onDialogUserExitChatEvent(DialogUserExitChatEvent event, emit) {

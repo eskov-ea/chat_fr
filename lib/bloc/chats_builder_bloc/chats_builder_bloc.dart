@@ -9,6 +9,8 @@ import '../ws_bloc/ws_state.dart';
 import 'chats_builder_event.dart';
 import 'chats_builder_state.dart';
 
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+
 
 class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
   final MessagesProvider messagesProvider;
@@ -51,6 +53,8 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         onDeleteAllChatsEvent(event, emit);
       } else if (event is ChatsBuilderUpdateMessageWithErrorEvent) {
         onChatsBuilderUpdateLocalMessageWithErrorEvent(event, emit);
+      } else if (event is ChatsBuilderDeleteLocalMessageEvent) {
+        onChatsBuilderDeleteLocalMessageEvent(event, emit);
       }
     });
   }
@@ -109,6 +113,15 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       }
       emit(state.copyWith(
           updatedChats: state.chats, updatedCounter: state.counter++));
+      final userId = await DataProvider().getUserId();
+      if (event.message.senderId.toString() != userId) {
+        FlutterRingtonePlayer.play(
+          android: AndroidSounds.notification,
+          ios: IosSounds.glass,
+          looping: false,
+          volume: 1.0,
+        );
+      }
     }
   }
 
@@ -195,6 +208,16 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     print("onRefreshChatsBuilderEvent ${state.chats.length}");
     final newState = state.copyWith(updatedChats: [], updatedCounter: 0);
     emit(newState);
+  }
+
+  void onChatsBuilderDeleteLocalMessageEvent(
+      ChatsBuilderDeleteLocalMessageEvent event,
+      Emitter<ChatsBuilderState> emit
+      ) {
+    final newState = [...state.chats];
+    final ChatsData chat = newState.firstWhere((el) => el.chatId == event.dialogId);
+    chat.messages.removeWhere((message) => message.messageId == event.messageId);
+    emit(state.copyWith(updatedChats: newState, updatedCounter: state.counter++, updatedMessagesDictionary: state.messagesDictionary));
   }
 
 }

@@ -51,8 +51,9 @@ class DialogsViewCubit extends Cubit<DialogsViewCubitState> {
 
   }
 
-  void joinDialog(userId, dialogId) {
-    dialogsBloc.add(DialogUserJoinChatEvent(user: userId, dialogId: dialogId ));
+  void joinDialog(user, dialogId) {
+    print("join to required dialog");
+    dialogsBloc.add(DialogUserJoinChatEvent(user: user, dialogId: dialogId ));
   }
 
   @override
