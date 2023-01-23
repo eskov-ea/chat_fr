@@ -266,25 +266,33 @@ class _DialogItem extends StatelessWidget {
                   const SizedBox(
                     height: 8,
                   ),
-                  ( dialogData.lastMessage.senderId != 0 && dialogData.lastMessage.senderId != userId && Helpers.checkIReadMessage(dialogData.lastMessage.statuses, userId!) != 4)
-                      ? Container(
-                    width: 18,
-                    height: 18,
-                    decoration: const BoxDecoration(
-                      color: AppColors.secondary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Center(
-                      child: Text(
-                        ' ',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: AppColors.textLigth,
+                  Row(
+                    children: [
+                      dialogData.chatType.typeId == 3 || dialogData.chatType.typeId == 4
+                          ? Align(child: Icon(Icons.lock))
+                          : SizedBox.shrink(),
+                      ( dialogData.lastMessage.senderId != 0 && dialogData.lastMessage.senderId != userId && Helpers.checkIReadMessage(dialogData.lastMessage.statuses, userId!) != 4)
+                          ? Container(
+                        padding: EdgeInsets.only(left: 10),
+                        width: 18,
+                        height: 18,
+                        decoration: const BoxDecoration(
+                          color: AppColors.secondary,
+                          shape: BoxShape.circle,
                         ),
-                      ),
-                    ),
+                        child: const Center(
+                          child: Text(
+                            ' ',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.textLigth,
+                            ),
+                          ),
+                        ),
+                      )
+                          : const SizedBox.shrink()
+                    ],
                   )
-                      : const SizedBox.shrink()
                 ],
               ),
             ),

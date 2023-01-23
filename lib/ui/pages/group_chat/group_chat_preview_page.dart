@@ -8,12 +8,14 @@ import '../../navigation/main_navigation.dart';
 
 class GroupChatPreviewPage extends StatefulWidget {
   const GroupChatPreviewPage({
+    required this.chatType,
     required this.usersList,
     required this.bloc, Key? key
   }) : super(key: key);
 
   final List usersList;
   final UsersViewCubit bloc;
+  final int chatType;
 
   @override
   State<GroupChatPreviewPage> createState() => _GroupChatPreviewPageState();
@@ -21,12 +23,21 @@ class GroupChatPreviewPage extends StatefulWidget {
 
 class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
   final List<UserContact> groupUsersList = [];
-  final TextEditingController _textFieldController = TextEditingController();
+  final TextEditingController _textNameFieldController = TextEditingController();
+  final TextEditingController _textDescriptionFieldController = TextEditingController();
   final DialogsProvider _dialogsProvider = DialogsProvider();
+  int currentChatType = 0;
+  bool isPublic = false;
 
   @override
   void initState() {
     _makeGroupUsersList();
+
+    if (groupUsersList.length > 1) {
+      currentChatType = 4;
+    } else {
+      currentChatType = widget.chatType;
+    }
     super.initState();
   }
 
@@ -45,6 +56,12 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
     } else {
       setState(() {});
     }
+  }
+
+  void changeIsPublic(bool) {
+    setState(() {
+      isPublic = bool;
+    });
   }
 
   @override
@@ -68,67 +85,122 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
         leadingWidth: 100,
         // title: const Text('New message'),
       ),
-      body: Column(
-        children: [
-          Expanded(
-              child: Container(
-            alignment: Alignment.center,
-            height: 300,
-            padding: EdgeInsets.only(left: 5, right: 5, top: 40),
-            child: Center(
-              child: _groupUsersList(groupUsersList, removeUserFromGroupList),
-            ),
-          )),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 60.0),
-            child: ConstrainedBox(
-              constraints: BoxConstraints.tight(Size(MediaQuery.of(context).size.width * 0.7, 50)),
-              child: TextFormField(
-                controller: _textFieldController,
-                decoration: const InputDecoration(
-                  labelText: "Введите название группы"
-                ),
-                style: const TextStyle(
-                    fontSize: 22,
-                    color: Colors.black,
-                    decoration: TextDecoration.none),
-              ),
-            ),
+      body: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height,
           ),
-          OutlinedButton(
-              onPressed: () async {
-                print("GROUPLIST  -->  $groupUsersList");
-                loadingInProgressModalWidget(context, "Загрузка");
-                final newGroup = await _dialogsProvider.createDialog(chatType: 2, users: widget.usersList, chatName: _textFieldController.text, chatDescription: null, isPublic: false);
-                if (newGroup != null) {
-                  Navigator.of(context).pushNamed(
-                      MainNavigationRouteNames.homeScreen
-                  );
-                } else {
-                  Navigator.of(context).pop();
-                  customToastMessage(context, "Произошла ошибка. Попробуйте еще раз");
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                primary: Colors.blue,
-                minimumSize: const Size.fromHeight(60),
-                shape: const RoundedRectangleBorder(
-                    side: BorderSide(
-                        color: Colors.black54,
-                        width: 2,
-                        style: BorderStyle.solid),
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(8),
-                        topRight: Radius.circular(8))),
-              ),
-              child: const Text(
-                'Начать групповой чат',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              SingleChildScrollView(
+                  child: Container(
+                alignment: Alignment.center,
+                height: 280,
+                padding: EdgeInsets.only(left: 5, right: 5, top: 40),
+                child: Center(
+                  child: _groupUsersList(groupUsersList, removeUserFromGroupList),
+                ),
               )),
-        ],
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  height: 60,
+                  child: TextFormField(
+                    controller: _textNameFieldController,
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      labelText: "  Введите название группы"
+                    ),
+                    style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.black,
+                        decoration: TextDecoration.none),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10.0),
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  height: 100,
+                  child: TextFormField(
+                    // expands: true,
+                    minLines: 3,
+                    maxLines: 10,
+                    controller: _textDescriptionFieldController,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                      labelText: "Введите описание группы"
+                    ),
+                    style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.black,
+                        decoration: TextDecoration.none),
+                  ),
+                ),
+              ),
+              currentChatType == 2 || currentChatType == 5
+              ? SizedBox(
+                width: MediaQuery.of(context).size.width * 0.8,
+                height: 60,
+                child: Stack(
+                  children: [
+                    Checkbox(
+                      value: isPublic, onChanged: changeIsPublic,
+                      checkColor: Colors.blueAccent,
+                      activeColor: Colors.white,
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(left: 50),
+                      child: Text("Публичный чат, любой пользователь может найти и присоединиться",
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    )
+                  ],
+                ),
+              )
+              : SizedBox.shrink(),
+              SizedBox(height: 30,),
+              OutlinedButton(
+                  onPressed: () async {
+                    //TODO: optimize
+                    print("GROUPLIST  -->  $groupUsersList");
+                    loadingInProgressModalWidget(context, "Загрузка");
+                    final newGroup = await _dialogsProvider.createDialog(chatType: currentChatType, users: widget.usersList, chatName: _textNameFieldController.text, chatDescription: _textDescriptionFieldController.text, isPublic: isPublic);
+                    if (newGroup != null) {
+                      Navigator.of(context).pushNamed(
+                          MainNavigationRouteNames.homeScreen
+                      );
+                    } else {
+                      Navigator.of(context).pop();
+                      customToastMessage(context, "Произошла ошибка. Попробуйте еще раз");
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.blue,
+                    minimumSize: Size(MediaQuery.of(context).size.width * 0.8, 60),
+                    shape: const RoundedRectangleBorder(
+                        side: BorderSide(
+                            color: Colors.black54,
+                            width: 2,
+                            style: BorderStyle.solid),
+                        borderRadius: BorderRadius.all(Radius.circular(8))
+                    ),
+                  ),
+                  child: const Text(
+                    'Начать групповой чат',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600),
+                  )),
+            ],
+          ),
+        ),
       ),
     );
   }

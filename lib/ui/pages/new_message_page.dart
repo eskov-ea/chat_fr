@@ -20,15 +20,8 @@ class _NewMessagePageState extends State<NewMessagePage> {
   bool selectedMode = false;
   List selected = [];
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  // }
-  //
-  // @override
-  // void dispose() {
-  //   super.dispose();
-  // }
+  // 2 - групповой чат; 3 - р2р приватный чат; 4 - групповой приватный чат; 5 - групповой чат в режиме чтения;
+  late int chatType;
 
   void _setSelected(id) {
     print(id);
@@ -44,9 +37,6 @@ class _NewMessagePageState extends State<NewMessagePage> {
     });
   }
 
-  void _setSelectedMode() {
-    if (!selectedMode) selectedMode = true;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,12 +50,18 @@ class _NewMessagePageState extends State<NewMessagePage> {
               leading: Builder(
                 builder: (BuildContext context) {
                   return TextButton(
-                    child: const Text('Отменить',
+                    child: Text(
+                      selectedMode ? 'Назад' : 'Отменить',
                       style: TextStyle(color: Colors.white, fontSize: 20),),
                     onPressed: () {
-                      Navigator.pop(context);
-                      // _bloc.searchContact('');
-                      _bloc.resetSearchQuery();
+                      if (selectedMode) {
+                        setState(() {
+                          selectedMode = false;
+                        });
+                      } else {
+                        Navigator.pop(context);
+                        _bloc.resetSearchQuery();
+                      }
                     },
                   );
                 },
@@ -79,11 +75,7 @@ class _NewMessagePageState extends State<NewMessagePage> {
                         primary: Colors.white,
                         textStyle: const TextStyle(fontSize: 20)
                     ),
-                    onPressed: (){
-                      setState(() {
-                        selectedMode = false;
-                      });
-                    },
+                    onPressed: (){},
                     child: const Text('Дальше', style: TextStyle(color: Colors.white12),),
                   ),
                 if (selectedMode && selected.isNotEmpty)
@@ -94,7 +86,7 @@ class _NewMessagePageState extends State<NewMessagePage> {
                     ),
                     onPressed: (){
                       print(selected);
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => GroupChatPreviewPage(usersList: selected, bloc: widget.bloc,)));
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => GroupChatPreviewPage(usersList: selected, bloc: widget.bloc, chatType: chatType,)));
                       setState(() {
                         // selectedMode = false;
                       });
@@ -115,6 +107,7 @@ class _NewMessagePageState extends State<NewMessagePage> {
                       onPressed: () {
                         setState(() {
                           selectedMode = true;
+                          chatType = 2;
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -139,7 +132,12 @@ class _NewMessagePageState extends State<NewMessagePage> {
                   ),
                 if (!selectedMode)
                   OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        setState(() {
+                          selectedMode = true;
+                          chatType = 3;
+                        });
+                      },
                       style: ElevatedButton.styleFrom(
                         primary: Colors.white,
                         minimumSize: const Size.fromHeight(50),
@@ -147,13 +145,26 @@ class _NewMessagePageState extends State<NewMessagePage> {
                             side: BorderSide(color: Colors.black54, width: 2, style: BorderStyle.solid),
                             borderRadius: BorderRadius.zero),
                       ),
-                      child: const Text(
-                        'Новый секретный чат',
-                        style: TextStyle(color: Colors.black12, fontSize: 20),
-                      )),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.lock, color: Colors.black54,),
+                          SizedBox(width: 15,),
+                          const Text(
+                          'Новый секретный чат',
+                          style: TextStyle(color: Colors.black54, fontSize: 20),
+                          )
+                        ],
+                      )
+                  ),
                 if (!selectedMode)
                   OutlinedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        setState(() {
+                          selectedMode = true;
+                          chatType = 4;
+                        });
+                      },
                       style: ElevatedButton.styleFrom(
                         primary: Colors.white,
                         minimumSize: const Size.fromHeight(50),

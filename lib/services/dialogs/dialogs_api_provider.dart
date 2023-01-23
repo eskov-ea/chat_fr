@@ -86,6 +86,7 @@ class DialogsProvider {
           }
         }),
       );
+      print("CREATE DIALOG  -->  $chatType");
       print("CREATE DIALOG  -->  ${response.body}");
       if (response.statusCode == 200) {
         DialogData dialog =
