@@ -49,6 +49,8 @@ PODS:
     - Mantle
     - SDWebImage
     - SDWebImageWebPCoder
+  - flutter_ringtone_player (0.0.1):
+    - Flutter
   - flutter_secure_storage (3.3.1):
     - Flutter
   - flutter_sound (9.2.13):
@@ -120,6 +122,7 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_callkit_incoming (from `.symlinks/plugins/flutter_callkit_incoming/ios`)
   - flutter_image_compress (from `.symlinks/plugins/flutter_image_compress/ios`)
+  - flutter_ringtone_player (from `.symlinks/plugins/flutter_ringtone_player/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - flutter_sound (from `.symlinks/plugins/flutter_sound/ios`)
   - gallery_saver (from `.symlinks/plugins/gallery_saver/ios`)
@@ -163,6 +166,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_callkit_incoming/ios"
   flutter_image_compress:
     :path: ".symlinks/plugins/flutter_image_compress/ios"
+  flutter_ringtone_player:
+    :path: ".symlinks/plugins/flutter_ringtone_player/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
   flutter_sound:
@@ -197,6 +202,7 @@ SPEC CHECKSUMS:
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_callkit_incoming: 417dd1b46541cdd5d855ad795ccbe97d1c18155e
   flutter_image_compress: fd2b476345226e1a10ea352fa306af95704642c1
+  flutter_ringtone_player: 15eba85187230b87b2512f0e1b92225618bc03e7
   flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
   flutter_sound: c60effa2a350fb977885f0db2fbc4c1ad5160900
   flutter_sound_core: 26c10e5832e76aaacfae252d8925232281c486ae

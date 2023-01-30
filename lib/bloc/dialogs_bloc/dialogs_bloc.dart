@@ -30,7 +30,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     required this.errorHandlerBloc,
     required this.dialogsProvider}) : super(initialState) {
         newMessageSubscription = webSocketBloc.stream.listen((streamState) {
-          print("DIALOGEXIT   ${streamState}");
+          print("DialogsEvent   ${streamState}");
           if (streamState is WsStateReceiveNewMessage){
             final dialogs = state.dialogs;
             final List<DialogData> newDialogs = [...dialogs!];
@@ -78,7 +78,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
           }
         });
     on<DialogsEvent>((event, emit) async {
-      print("DIALOGEXIT   ${event}");
+      print("DialogsEvent   ${event}");
       if (event is DialogsLoadEvent) {
         await onDialogsLoadEvent(event, emit);
       } else if (event is ReceiveNewDialogEvent) {
@@ -152,14 +152,12 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     final newDialogs = [ ...state.dialogs!];
     for (var dialog in newDialogs) {
       if(dialog.dialogId == event.dialogId) {
-        print("DIALOGEXIT   ${dialog.chatUsers!.length}");
         for (var user in dialog.chatUsers!) {
           if (user.user.id == event.user.user.id) {
             dialog.chatUsers!.remove(user);
             break;
           }
         }
-        print("DIALOGEXIT   ${dialog.chatUsers!.length}");
         break;
       }
     }

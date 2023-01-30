@@ -218,6 +218,10 @@ class ActionBarState extends State<ActionBar> {
                       onTap: (){
                         // TODO: implement taking/ sending pictures/ files functionality
                         openCameraOptions(createDialogAndSendMessage);
+                        final dia = BlocProvider.of<ChatsBuilderBloc>(context).state.chats.firstWhere((chat) => chat.chatId == widget.dialogId);
+                        print(" ${dia.messages[0].messageId} ${dia.messages[0].message} ${dia.messages[0].file?.attachmentId } ");
+                        print(" ${dia.messages[1].messageId} ${dia.messages[1].message} ${dia.messages[1].file?.attachmentId }");
+                        print(" ${dia.messages[2].messageId} ${dia.messages[2].message} ${dia.messages[2].file?.attachmentId }");
                       },
                       child: widget.isRecording
                         ? Text(
@@ -236,6 +240,7 @@ class ActionBarState extends State<ActionBar> {
                     child: TextFormField(
                       maxLines: 10,
                       minLines: 1,
+                      textCapitalization: TextCapitalization.sentences,
                       focusNode: widget.focusNode,
                       controller: _messageController,
                       onChanged: (value) {

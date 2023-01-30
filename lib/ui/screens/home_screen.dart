@@ -162,38 +162,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           }
           if(isJoined == true) refreshAllData(context);
         }
-        // for (var publicDialog in publicDialogs) {
-        //   bool isJoined = false;
-        //   while (dialogVC.dialogsBloc.state.dialogs == null) {
-        //     await Future.delayed(Duration(seconds: 3));
-        //   }
-        //   for (var dialog in dialogVC.dialogsBloc.state.dialogs!) {
-        //     if(publicDialog.dialogId == dialog.dialogId ) {
-        //       for (var user in publicDialog.chatUsers!) {
-        //         if (user.userId.toString() == userId) {
-        //           if (user.active != true) {
-        //             // final json = await DialogsProvider().joinDialog(userId, publicDialog.dialogId);
-        //             // final dialog = DialogData.fromJson(json);
-        //             // print("dialogdialog  $dialog di");
-        //           }
-        //           isJoined = true;
-        //           break;
-        //         }
-        //       }
-        //     }
-        //   }
-        //   if (isJoined != true) {
-        //     final chatUser = await DialogsProvider().joinDialog(userId, publicDialog.dialogId);
-        //     for (var user in BlocProvider.of<UsersViewCubit>(context).state.users) {
-        //       if (user.id.toString() == userId) {
-        //         publicDialog.chatUsers!.add(chatUser);
-        //         dialogVC.dialogsBloc.add(ReceiveNewDialogEvent(dialog: publicDialog));
-        //         break;
-        //       }
-        //     }
-        //     // dialogVC.joinDialog(chatUser, publicDialog.dialogId);
-        //   }
-        // }
       } catch (err) {
         print("publicDialog err   $err");
         customToastMessage(context, "Не удалось проверить корпоративные группы и каналы");

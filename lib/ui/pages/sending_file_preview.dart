@@ -114,7 +114,7 @@ class _SendingFilePreviewState extends State<SendingFilePreview> {
                 controller: widget.controller,
 
                 decoration: InputDecoration(
-                  hintText: 'Add a caption...',
+                  hintText: 'Добавить подпись',
                   alignLabelWithHint: true,
                   helperStyle: TextStyle(),
                   contentPadding: const EdgeInsets.only(left: 25.0, right: 4.0, bottom: 4.0),

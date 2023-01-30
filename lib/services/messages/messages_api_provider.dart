@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../models/dialog_model.dart';
@@ -83,7 +82,6 @@ class MessagesProvider {
         'parent_id': parentMessageId
       }
       });
-    // print(postData);
     final response = await http.post(
       Uri.parse('https://erp.mcfef.com/api/chat/message/add/$dialogId'),
       headers: <String, String>{
@@ -97,46 +95,41 @@ class MessagesProvider {
 
   Future<void> updateMessageStatuses({required int dialogId}) async {
     final String? token = await _secureStorage.getToken();
-    http.get(
+    final res = await http.get(
         Uri.parse('https://erp.mcfef.com/api/chat/message/setchatred/$dialogId'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token'
         }
     );
+    print(" RESPONSE UPDATE ${res.body}");
     //TODO: process 401 error
   }
 
-
-
-
-
-
-
-
-
-
-
-
-  Future deleteMessage({
-    required userId,
-    required messageId
+  Future<bool> deleteMessage({
+    required List<int> messageId,
   }) async {
     print('DELETING MESSAGE');
-    final postData = jsonEncode(<String, String>{
-      'userId': userId,
-      'messageId': messageId
+    final String? token = await _secureStorage.getToken();
+    final postData = jsonEncode(<String, dynamic>{
+      'id': messageId,
+      'status_id': 5
     });
-    // print(postData);
-    final response = await http.delete(
-        Uri.parse('https://web-notifications.ru/api/messages'),
+    print("DELETING MESSAGE data  $postData");
+    final response = await http.post(
+        Uri.parse('https://erp.mcfef.com/api/chat/message/setstatuses'),
         headers: <String, String>{
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
         },
         body: postData
     );
-    print(response.statusCode);
-    print(response);
+    print(response.body);
+    if (response.statusCode == 200){
+      return true;
+    } else {
+      return false;
+    }
   }
 
   Future<int?> createDialogAndSendMessage ({required userId, required partnerId, required message}) async {
@@ -185,74 +178,38 @@ class MessagesProvider {
     required parentMessageId
   }) async {
     print('SENDING MESSAGE WITh AUDIO FILE');
-    final String? token = await _secureStorage.getToken();
-    final bytes = File(filePath).readAsBytesSync();
-    String base64file = base64Encode(bytes);
-    final uniq = DateTime.now().microsecondsSinceEpoch.toString();
-    print(base64file);
-    final postData = jsonEncode(<String, Object>{
-      'data': {
-        'message': '',
-        'parent_id': parentMessageId,
-        'file': {
-          'name': '$uniq.$filetype',
-          'preview': '',
-          'content': base64file
+    try {
+      final String? token = await _secureStorage.getToken();
+      final bytes = File(filePath).readAsBytesSync();
+      String base64file = base64Encode(bytes);
+      final uniq = DateTime.now().microsecondsSinceEpoch.toString();
+      print(base64file);
+      final postData = jsonEncode(<String, Object>{
+        'data': {
+          'message': '',
+          'parent_id': parentMessageId,
+          'file': {
+            'name': '$uniq.$filetype',
+            'preview': '',
+            'content': base64file
+          }
         }
-      }
-    });
-    final response = await http.post(
-        Uri.parse('https://erp.mcfef.com/api/chat/message/add/$dialogId'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $token'
-        },
-        body: postData
-    );
-    print("AUDIORESPONSE    ${response.body}");
-    return response.body;
+      });
+      final response = await http.post(
+          Uri.parse('https://erp.mcfef.com/api/chat/message/add/$dialogId'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': 'Bearer $token'
+          },
+          body: postData);
+      print("AUDIORESPONSE    ${response.body}");
+      return response.body;
+    } catch (err) {
+      print("sendAudioMessage $err");
+      throw Exception('Error sending audio message');
+    }
   }
 
-  Future<String> sendMessageWithImageFileBase64({
-    required file,
-    required dialogId,
-    required messageText,
-    required filetype,
-    required parentMessageId
-  }) async {
-    print('SENDING MESSAGE WITh FILE');
-    final String? token = await _secureStorage.getToken();
-    final tmpFileCompressed = await createTemporaryFile();
-    final compressedFile = await _compressAndGetFile(file, tmpFileCompressed.path);
-    final bytesCompressed = File(compressedFile.path).readAsBytesSync();
-    final preview =  resizeImage(bytesCompressed);
-    final uniq = DateTime.now().microsecondsSinceEpoch.toString();
-    String base64Image = base64Encode(bytesCompressed);
-
-    final postData = jsonEncode(<String, Object>{
-      'data': {
-        'message': '$messageText',
-        'parent_id': parentMessageId,
-        'file': {
-          'name': '$uniq.$filetype',
-          'preview': preview,
-          'content': base64Image
-        }
-      }
-    });
-    final response = await http.post(
-        Uri.parse('https://erp.mcfef.com/api/chat/message/add/$dialogId'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $token'
-        },
-        body: postData
-    );
-    print("RESPONSEIMAGE   ${response.body}");
-
-    compressedFile.delete();
-    return response.body;
-  }
   Future<String> sendMessageWithFileBase64({
     required filePath,
     required dialogId,
@@ -279,16 +236,20 @@ class MessagesProvider {
         }
       }
     });
-    final response = await http.post(
-        Uri.parse('https://erp.mcfef.com/api/chat/message/add/$dialogId'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $token'
-        },
-        body: postData
-    );
-    print(response.body);
-    return response.body;
+    try {
+      final response = await http.post(
+          Uri.parse('https://erp.mcfef.com/api/chat/message/add/$dialogId'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': 'Bearer $token'
+          },
+          body: postData);
+      print(response.body);
+      return response.body;
+    } catch (err) {
+      print("sendMessageWithFileBase64 $err");
+      throw Exception('Error sending file base64 message');
+    }
   }
 
   Future<String> sendMessageWithFileBase64ForWeb({
@@ -313,17 +274,21 @@ class MessagesProvider {
         }
       }
     });
-    final response = await http.post(
-        Uri.parse('https://erp.mcfef.com/api/chat/message/add/$dialogId'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Authorization': 'Bearer $token'
-        },
-        body: postData
-    );
-    print("RESPONSEIMAGE   ${response.body}");
+    try {
+      final response = await http.post(
+          Uri.parse('https://erp.mcfef.com/api/chat/message/add/$dialogId'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': 'Bearer $token'
+          },
+          body: postData);
+      print("RESPONSEIMAGE   ${response.body}");
 
-    return response.body;
+      return response.body;
+    } catch (err) {
+      print("sendMessageWithFileBase64ForWeb $err");
+      throw Exception('Error sending file base64 message on web');
+    }
   }
 
 }
@@ -396,3 +361,52 @@ resizeImageWeb(Uint8List? bytes) async {
   print('resized image base64 size is ${resizedBase64Image.length}');
   return resizedBase64Image;
 }
+
+
+
+/** DEPRECATED */
+// Future<String> sendMessageWithImageFileBase64({
+//   required file,
+//   required dialogId,
+//   required messageText,
+//   required filetype,
+//   required parentMessageId
+// }) async {
+//   print('SENDING MESSAGE WITh FILE');
+//   try {
+//     final String? token = await _secureStorage.getToken();
+//     final tmpFileCompressed = await createTemporaryFile();
+//     final compressedFile =
+//         await _compressAndGetFile(file, tmpFileCompressed.path);
+//     final bytesCompressed = File(compressedFile.path).readAsBytesSync();
+//     final preview = resizeImage(bytesCompressed);
+//     final uniq = DateTime.now().microsecondsSinceEpoch.toString();
+//     String base64Image = base64Encode(bytesCompressed);
+//
+//     final postData = jsonEncode(<String, Object>{
+//       'data': {
+//         'message': '$messageText',
+//         'parent_id': parentMessageId,
+//         'file': {
+//           'name': '$uniq.$filetype',
+//           'preview': preview,
+//           'content': base64Image
+//         }
+//       }
+//     });
+//     final response = await http.post(
+//         Uri.parse('https://erp.mcfef.com/api/chat/message/add/$dialogId'),
+//         headers: <String, String>{
+//           'Content-Type': 'application/json; charset=UTF-8',
+//           'Authorization': 'Bearer $token'
+//         },
+//         body: postData);
+//     print("RESPONSEIMAGE   ${response.body}");
+//
+//     compressedFile.delete();
+//     return response.body;
+//   } catch (err) {
+//     print("sendMessageWithImageFileBase64 $err");
+//     throw Exception('Error sending image base64 message');
+//   }
+// }

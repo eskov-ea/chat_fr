@@ -105,31 +105,42 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        if (widget.p2p != 1 && !widget.isMe) widget.authorNameWidgetGroupChat(widget.senderName, widget.borderRadius),
-        Container(
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: widget.isMe ? AppColors.myMessageBackground : Theme.of(context).cardColor,
-            borderRadius:  BorderRadius.only(
-              topLeft: Radius.circular(widget.borderRadius),
-              topRight: Radius.circular(widget.borderRadius),
-              bottomRight: widget.isMe ? const Radius.circular(0.0) : Radius.circular(widget.borderRadius),
-              bottomLeft: !widget.isMe ? const Radius.circular(0.0) : Radius.circular(widget.borderRadius),
+    return Container(
+      decoration: BoxDecoration(
+      color: widget.isMe ? AppColors.myMessageBackground : Theme.of(context).cardColor,
+        borderRadius:  BorderRadius.only(
+        topLeft: Radius.circular(widget.borderRadius),
+        topRight: Radius.circular(widget.borderRadius),
+        bottomRight: widget.isMe ? const Radius.circular(0.0) : Radius.circular(widget.borderRadius),
+        bottomLeft: !widget.isMe ? const Radius.circular(0.0) : Radius.circular(widget.borderRadius),
+      )),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          if (widget.p2p != 1 && !widget.isMe) widget.authorNameWidgetGroupChat(widget.senderName, widget.borderRadius),
+          Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: widget.isMe ? AppColors.myMessageBackground : Theme.of(context).cardColor,
+              borderRadius:  BorderRadius.only(
+                topLeft: Radius.circular(widget.borderRadius),
+                topRight: Radius.circular(widget.borderRadius),
+                bottomRight: widget.isMe ? const Radius.circular(0.0) : Radius.circular(widget.borderRadius),
+                bottomLeft: !widget.isMe ? const Radius.circular(0.0) : Radius.circular(widget.borderRadius),
+              ),
             ),
-          ),
-          child: getImagePreview(
-            file: widget.file,
-            localFileAttachment: imageFile,
-            isDownloading: isDownloading,
-            downloadImageFunction: _startDownloadingImage,
-            context: context,
-            fileBytesRepresentation: fileBytesRepresentation,
-            saveImageFunction: _safeImageToDevice
-          ),
-        )
-      ],
+            child: getImagePreview(
+              file: widget.file,
+              localFileAttachment: imageFile,
+              isDownloading: isDownloading,
+              downloadImageFunction: _startDownloadingImage,
+              context: context,
+              fileBytesRepresentation: fileBytesRepresentation,
+              saveImageFunction: _safeImageToDevice
+            ),
+          )
+        ],
+      ),
     );
   }
 }

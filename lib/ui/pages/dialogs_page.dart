@@ -43,7 +43,6 @@ class _MessagesPageState extends State<MessagesPage> {
 
   void checkRequiredChats() {
     final dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs;
-    print("checkRequiredChats   ${dialogs}");
   }
 
   @override
@@ -80,8 +79,11 @@ class _MessagesPageState extends State<MessagesPage> {
                     SliverList(
                       delegate: SliverChildBuilderDelegate(
                             (context, index) =>
-                            !_isDialogActive(state.dialogs[index], userId!) ? SizedBox.shrink() :
-                            Container(
+                            !_isDialogActive(state.dialogs[index], userId!) ||
+                            state.dialogs[index].chatType.typeId == 4 && !(state.dialogs[index].messageCount > 0) ||
+                            state.dialogs[index].chatType.typeId == 3 && !(state.dialogs[index].messageCount > 0)
+                            ? SizedBox.shrink()
+                            : Container(
                                 padding: const EdgeInsets.only(
                                     left: 10, right: 10, top: 0, bottom: 0),
                                 child: Align(
@@ -271,9 +273,9 @@ class _DialogItem extends StatelessWidget {
                       dialogData.chatType.typeId == 3 || dialogData.chatType.typeId == 4
                           ? Align(child: Icon(Icons.lock))
                           : SizedBox.shrink(),
+                          SizedBox(width: 10,),
                       ( dialogData.lastMessage.senderId != 0 && dialogData.lastMessage.senderId != userId && Helpers.checkIReadMessage(dialogData.lastMessage.statuses, userId!) != 4)
                           ? Container(
-                        padding: EdgeInsets.only(left: 10),
                         width: 18,
                         height: 18,
                         decoration: const BoxDecoration(

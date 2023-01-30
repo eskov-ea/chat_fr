@@ -29,6 +29,10 @@ class ChatBuilderScreenViewCubit extends Cubit<ChatScreenViewCubitState> {
     chatsBuilderBloc.add(RefreshChatsBuilderEvent());
   }
 
+  void deleteMessagesCubitEvent(List<int> messagesId) {
+    print("Messages to be deleted ${messagesId}");
+  }
+
   @override
   Future<void> close() {
     messagesBlocSubscription.cancel();

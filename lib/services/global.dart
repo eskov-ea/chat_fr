@@ -107,7 +107,9 @@ sendMessageWithPayload(
     required int? dialogId,
     required File file,
     required parentMessageId}) async {
-  if (dialogId == null) {}
+  if (dialogId == null) {
+    customToastMessage(context, "Отправьте сначала текстовое сообщение для создания диалога");
+  }
   showModalBottomSheet(
       isDismissible: false,
       isScrollControlled: true,
@@ -129,7 +131,7 @@ sendMessageWithPayload(
   try {
     //TODO: implement local message beind added first
     // TODO: if response status code is 200 else ..
-    print("parentMessageId  $parentMessageId");
+    print("SEND IMAGE");
     final sentMessage = await MessagesRepository().sendMessageWithFile(
         dialogId: dialogId,
         messageText: messageText,
@@ -139,15 +141,17 @@ sendMessageWithPayload(
     final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
     BlocProvider.of<ChatsBuilderBloc>(context)
         .add(ChatsBuilderAddMessageEvent(message: message, dialog: dialogId!));
+    BlocProvider.of<ChatsBuilderBloc>(context)
+        .add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
+    // TODO: Can be refactored to named route
+    Navigator.pop(context);
+    Navigator.pop(context);
+    Navigator.pop(context);
   } catch (err) {
-    print(err);
+    customToastMessage(context, "Не удалось отправить сообщение. Попробуйте еще раз");
+    Navigator.pop(context);
+
   }
-  BlocProvider.of<ChatsBuilderBloc>(context)
-      .add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
-  // TODO: Can be refactored to named route
-  Navigator.pop(context);
-  Navigator.pop(context);
-  Navigator.pop(context);
 }
 
 loadingInProgressModalWidget(BuildContext context, String message) {
@@ -204,6 +208,38 @@ MessageData createLocalMessage({
             createdAt: DateTime.now().toString())
       ],
     );
+
+sendMessageFromGlobal({
+  required context,
+  required ParentMessage? parentMessage,
+  required String messageText,
+  required int? repliedMessageId,
+  required int dialogId,
+  required int userId,
+  required localMessage,
+}) async {
+  try {
+    BlocProvider.of<ChatsBuilderBloc>(context).add(
+        ChatsBuilderAddMessageEvent(message: localMessage, dialog: dialogId));
+    // TODO: if response status code is 200 else ..
+    final sentMessage = await MessagesRepository().sendMessage(
+        dialogId: dialogId,
+        messageText: messageText,
+        parentMessageId: repliedMessageId);
+    print("sentMessage response  $sentMessage");
+    final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
+    BlocProvider.of<ChatsBuilderBloc>(context).add(
+        ChatsBuilderUpdateLocalMessageEvent(
+            message: message,
+            dialogId: dialogId,
+            localMessageId: localMessage.messageId));
+    BlocProvider.of<DialogsViewCubit>(context)
+        .updateLastDialogMessage(localMessage);
+  } catch (err) {
+    throw Exception('Что-то пошло не так');
+  }
+  // BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId));
+}
 
 loadFileAndSaveLocally({required String fileName, required attachmentId}) async {
   final Directory documentDirectory = await getApplicationDocumentsDirectory();

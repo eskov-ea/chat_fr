@@ -61,7 +61,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
 
   onInitializeSocketEvent(event, emit) async {
     emit(ConnectingState());
-    print("onInitializeSocketEvent");
+    print("socket onInitializeSocketEvent");
     token = await _secureStorage.getToken();
     final rawUserId =  await _secureStorage.getUserId();
     userId = int.parse(rawUserId!);

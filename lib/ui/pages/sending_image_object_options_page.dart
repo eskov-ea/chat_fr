@@ -12,6 +12,7 @@ import 'package:image/image.dart' as IMG;
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../models/message_model.dart';
+import '../../services/global.dart';
 
 
 
@@ -66,26 +67,28 @@ Widget SendingObjectOptionsPage({
               )
             ],
           ));
-      try {
-        final Uint8List bytes = await result.readAsBytes();
-        IMG.Image img = IMG.decodeImage(bytes)!;
-        print("original image size W x H  --> ${img.width} x ${img.height}");
-        print("original image size  -->  ${img.length}");
-        print("original bytes size  -->  ${bytes.lengthInBytes}");
+        try {
+          final Uint8List bytes = await result.readAsBytes();
+          IMG.Image img = IMG.decodeImage(bytes)!;
+          print("original image size W x H  --> ${img.width} x ${img.height}");
+          print("original image size  -->  ${img.length}");
+          print("original bytes size  -->  ${bytes.lengthInBytes}");
 
-        String base64 = base64Encode(bytes);
-        final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.name.split('.').last, parentMessageId: parentMessageId, bytes: bytes);
-        print(response);
-        final message = MessageData.fromJson(jsonDecode(response)["data"]);
-        BlocProvider.of<ChatsBuilderBloc>(context).add(
-            ChatsBuilderAddMessageEvent(message: message, dialog: dialogId!));
-      } catch (err) {
-        print("ERROR sending image on web  --> $err");
-      }
-      BlocProvider.of<ChatsBuilderBloc>(context)
-          .add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
-      Navigator.pop(context);
-      Navigator.pop(context);
+          String base64 = base64Encode(bytes);
+          final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.name.split('.').last, parentMessageId: parentMessageId, bytes: bytes);
+          print(response);
+          // final message = MessageData.fromJson(jsonDecode(response)["data"]);
+          // BlocProvider.of<ChatsBuilderBloc>(context).add(
+          //     ChatsBuilderAddMessageEvent(message: message, dialog: dialogId!));
+          BlocProvider.of<ChatsBuilderBloc>(context)
+              .add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
+          Navigator.pop(context);
+          Navigator.pop(context);
+        } catch (err) {
+          print("ERROR sending image on web  --> $err");
+          Navigator.pop(context);
+          customToastMessage(context, "Не удалось отправить сообщение. Попробуйте еще раз");
+        }
     }
   }
 
@@ -152,15 +155,16 @@ Widget SendingObjectOptionsPage({
         print(response);
         final message = MessageData.fromJson(jsonDecode(response)["data"]);
         print("message -->  $message");
-        BlocProvider.of<ChatsBuilderBloc>(context).add(
-            ChatsBuilderAddMessageEvent(message: message, dialog: dialogId!));
+        // BlocProvider.of<ChatsBuilderBloc>(context).add(
+        //     ChatsBuilderAddMessageEvent(message: message, dialog: dialogId!));
+        BlocProvider.of<ChatsBuilderBloc>(context)
+            .add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
+        Navigator.pop(context);
+        Navigator.pop(context);
       } catch (err) {
         print("ERROR sending image on web  --> $err");
+        Navigator.pop(context);
       }
-      BlocProvider.of<ChatsBuilderBloc>(context)
-          .add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
-      Navigator.pop(context);
-      Navigator.pop(context);
     }
   }
 

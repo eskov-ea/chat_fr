@@ -72,10 +72,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void initState() {
-    print("usernameusername ${widget.username}");
-    print("chatscreen  ${widget.username} "
-        "${widget.dialogData} ${widget.dialogCubit} ${widget.usersCubit} "
-        "${widget.userId} ${widget.partnerId}");
     super.initState();
   }
 
@@ -373,6 +369,7 @@ class _MessageListState extends State<_MessageList> {
                             repliedMsgSenderName: currentState.messages[index].parentMessage != null
                                   ? getSenderName(widget.usersCubit.state.users, currentState.messages[index].parentMessage?.senderId)
                                   : null,
+                            repliedMsgId: currentState.messages[index].parentMessage?.parentMessageId,
                             dialogId: widget.dialogData.dialogId,
                           )
                         ],

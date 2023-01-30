@@ -75,7 +75,6 @@ class _AuthScreenState extends State<AuthScreen> {
     _checkDeviceToken();
   }
 
-  // @override
   void _onNextFieldFocus(
       BuildContext context, FocusNode currentFocus, FocusNode nextFocus) {
     currentFocus.unfocus();
