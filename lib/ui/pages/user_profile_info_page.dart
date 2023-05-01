@@ -1,3 +1,4 @@
+import 'package:chat/services/global.dart';
 import 'package:chat/ui/widgets/user_profile_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,10 +8,12 @@ import '../../theme.dart';
 class UserProfileInfoPage extends StatelessWidget {
   const UserProfileInfoPage({
     required this.user,
+    required this.partnerId,
     Key? key
   }) : super(key: key);
 
   final UserContact user;
+  final int partnerId;
 
   @override
   Widget build(BuildContext context) {
@@ -71,8 +74,13 @@ class UserProfileInfoPage extends StatelessWidget {
                   ),
                   width: MediaQuery.of(context).size.width * 0.25,
                   child: Column(
-                    children: const [
-                      Icon(Icons.phone, color: AppColors.secondary,),
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          callNumber(context, partnerId.toString());
+                        },
+                        icon: Icon(Icons.phone, color: AppColors.secondary,),
+                      ),
                       Text("Аудио", style: TextStyle(color: AppColors.secondary),)
                     ],
                   ),
@@ -85,8 +93,13 @@ class UserProfileInfoPage extends StatelessWidget {
                   ),
                   width: MediaQuery.of(context).size.width * 0.25,
                   child: Column(
-                    children: const [
-                      Icon(Icons.videocam_rounded, color: AppColors.secondary,),
+                    children: [
+                      IconButton(
+                        onPressed: (){
+                          customToastMessage(context, "Возможность видеозвонка еще не готова..");
+                        },
+                        icon: Icon(Icons.videocam_rounded, color: AppColors.secondary,)
+                      ),
                       Text("Видео", style: TextStyle(color: AppColors.secondary),)
                     ],
                   ),
@@ -99,8 +112,13 @@ class UserProfileInfoPage extends StatelessWidget {
                   ),
                   width: MediaQuery.of(context).size.width * 0.25,
                   child: Column(
-                    children: const [
-                      Icon(Icons.search, color: AppColors.secondary,),
+                    children: [
+                      IconButton(
+                        onPressed: (){
+                          customToastMessage(context, "Режим поиска пока не готов..");
+                        },
+                        icon: Icon(Icons.search, color: AppColors.secondary,)
+                      ),
                       Text("Поиск", style: TextStyle(color: AppColors.secondary),)
                     ],
                   ),
@@ -117,6 +135,7 @@ class UserProfileInfoPage extends StatelessWidget {
 
 class UserProfileArguments {
   final UserContact user;
+  final int partnerId;
 
-  UserProfileArguments({required this.user});
+  UserProfileArguments({required this.user, required this.partnerId});
 }

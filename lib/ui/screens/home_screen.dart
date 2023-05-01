@@ -65,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool _isPushSent = false;
   final DataProvider _dataProvider = DataProvider();
   String? callerName;
+  String? myUserName;
   String? os;
   SqfliteDatabase? _db;
   bool isUpdateAvailable = true;
@@ -144,6 +145,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _autoJoinChats(ChatSettings settings) async {
+    print('autojoin');
     if (settings.autoJoinChats.isNotEmpty) {
       try {
         bool isJoined = false;
@@ -152,6 +154,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         final publicDialogs = await DialogsProvider().getPublicDialogs();
         if (publicDialogs.isNotEmpty) {
           for (var requiredChat in settings.autoJoinChats){
+            print('autojoin  ${requiredChat.name}');
             for (var publicDialog in publicDialogs) {
               if (requiredChat.dialogId == publicDialog.dialogId){
                 await DialogsProvider()
@@ -171,6 +174,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _onBlocProfileStateChanged(UserProfileState state){
     if (state is UserProfileLoadedState) {
+      myUserName = "${state.user?.firstname} ${state.user?.lastname}";
       print("asterisk  --> ${state.user!.userProfileSettings!.asteriskUserPassword} ");
       if (kIsWeb) return;
       if (state.user != null && state.user?.userProfileSettings != null
@@ -202,20 +206,28 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     BlocProvider.of<CallLogsBloc>(context).add(LoadCallLogsEvent(passwd: settings.asteriskUserPassword!));
   }
 
+  Future<void> showId () async {
+    final id = await _dataProvider.getDeviceID();
+    await MethodChannel("com.application.chat/method").invokeMethod('getDeviceToken');
+    print('token:  $id');
+  }
   @override
   void initState() {
     shouldDownloadData();
+    showId();
     WidgetsBinding.instance?.addObserver(this);
     userProfileDataSubscription =  BlocProvider.of<ProfileBloc>(context).stream.listen(_onBlocProfileStateChanged);
     _subscribeToErrorsBlocStream();
     updateUserProfileData();
     getOs();
     if (!kIsWeb) {
-      _db = getSqfliteDatabase();
+      // _db = getSqfliteDatabase();
       callServiceBlocSubscription = BlocProvider.of<CallsBloc>(context).stream.listen((state) async {
         if (state is IncomingCallState) {
           final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => el.id.toString() == state.callerName);
           callerName = "${callerUser.firstname} ${callerUser.lastname}";
+          // FAke data
+          // if (callerName == null) callerName = 'Undefined';
           if (Platform.isIOS) return;
           Navigator.of(context).pushNamed(
               MainNavigationRouteNames.incomingCallScreen,
@@ -272,8 +284,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             dialogId ??= await createDialog(context, state.callerName);
             // print("SENDING_PUSH   ${dialogId}");
             _pushNotificationService.sendMissCallPush(
-                userId: state.callerName, userName: callerName);
-            print("CALUSERID   ${state.callerName}");
+                userId: state.callerName, userName: myUserName);
+            print("PUSH CALUSERID   ${state.callerName}");
             _sendMessage(context: context, userId: int.parse(userId!), dialogId: dialogId);
           }
         }

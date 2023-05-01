@@ -85,4 +85,25 @@ class AuthRepository {
     return false;
   }
 
+  Future<void> resetPassword(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('https://erp.mcfef.com/api/user/lostpassword'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8'
+        },
+        body: jsonEncode(
+            <String, dynamic> {
+              'data': {
+                'email': email
+              }
+            }
+        ),
+      );
+      print('RESET_PASSWORD_RESPONSE   ${response.body}');
+    } catch (err) {
+      print('RESET_PASSWORD_ERROR   $err');
+    }
+  }
+
 }

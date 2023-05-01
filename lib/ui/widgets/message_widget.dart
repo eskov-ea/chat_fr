@@ -53,7 +53,7 @@ class MessageWidget extends StatefulWidget {
   final int p2p;
   final List selected;
   final bool selectedMode;
-  final Function() setSelectedMode;
+  final Function setSelectedMode;
   final Function(int) setSelected;
   final String message;
   final int messageId;
@@ -186,6 +186,81 @@ class _MessageTile extends StatelessWidget {
     });
   }
 
+  audioMessCallback (BuildContext context) {
+    Navigator.of(context).pushNamed(
+      MainNavigationRouteNames.audioMessagePage,
+      arguments: AttachmentViewPageArguments(
+        fileName: file!.name,
+        fileExt: file!.filetype,
+        attachmentId: file!.attachmentId
+      )
+    );
+  }
+
+  void fileAttachmentMessCallback(BuildContext context) {
+    Navigator.of(context).pushNamed(
+        MainNavigationRouteNames.filePreviewPage,
+        arguments: AttachmentViewPageArguments(
+            fileName: file!.name,
+            fileExt: file!.filetype,
+            attachmentId: file!.attachmentId
+        )
+    );
+  }
+
+  Widget fileIconWidget ({
+    required BuildContext context,
+    required double width,
+    required String iconPath,
+    required callback
+  }) {
+    return Column(
+      children: [
+        Container(
+          width: 100,
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: isMe ? AppColors.myMessageBackground : Theme.of(context).cardColor,
+            borderRadius:  BorderRadius.only(
+              topLeft: const Radius.circular(_borderRadius),
+              topRight: const Radius.circular(_borderRadius),
+              bottomRight: isMe ? const Radius.circular(0.0) : const Radius.circular(_borderRadius),
+              bottomLeft: !isMe ? const Radius.circular(0.0) : const Radius.circular(_borderRadius),
+            ),
+          ),
+          child: GestureDetector(
+            onTap: () {callback(context);},
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Image.asset(iconPath, width: width,),
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(top: 10, right: 0, bottom: 0),
+                      child: Text(
+                        messageTime,
+                        style: const TextStyle(
+                          color:AppColors.textFaded,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    if (isMe) const SizedBox(width: 1,),
+                    if (isMe) _StatusWidget(status),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        )
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -242,7 +317,7 @@ class _MessageTile extends StatelessWidget {
                           style: TextStyle(color: Colors.black54),
                         ),
                         onPressed: () {
-                          setSelectedMode();
+                          setSelectedMode(true);
                           setSelected(messageId);
                         },
                         trailingIcon: const Icon(Icons.control_point)),
@@ -265,6 +340,8 @@ class _MessageTile extends StatelessWidget {
                               file: file, localFileAttachment:
                               fileAttachment,
                               authorNameWidgetGroupChat: _authorNameWidgetGroupChat,
+                              messageTime: messageTime,
+                              status: _StatusWidget(status),
                             )
                           : const SizedBox.shrink(),
                         file != null && file!.filetype == "mp4"
@@ -272,71 +349,29 @@ class _MessageTile extends StatelessWidget {
                           ? Column(
                               children: [
                                 if (p2p != 1 && !isMe) _authorNameWidgetGroupChat(senderName, _borderRadius),
-                                Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: isMe ? AppColors.myMessageBackground : Theme.of(context).cardColor,
-                                    borderRadius:  BorderRadius.only(
-                                      topLeft: const Radius.circular(_borderRadius),
-                                      topRight: const Radius.circular(_borderRadius),
-                                      bottomRight: isMe ? const Radius.circular(0.0) : const Radius.circular(_borderRadius),
-                                      bottomLeft: !isMe ? const Radius.circular(0.0) : const Radius.circular(_borderRadius),
-                                    ),
-                                  ),
-                                  child: GestureDetector(
-                                    onTap: (){
-                                      Navigator.of(context).pushNamed(
-                                          MainNavigationRouteNames.audioMessagePage,
-                                          arguments: AttachmentViewPageArguments(
-                                            fileName: file!.name,
-                                            fileExt: file!.filetype,
-                                            attachmentId: file!.attachmentId
-                                          )
-                                      );
-                                    },
-                                    child: Image.asset("assets/audio_icon.png", width: 64),
-                                  ),
-                                )
+                                fileIconWidget(
+                                  context: context,
+                                  iconPath: "assets/audio_icon.png",
+                                  width: 64,
+                                  callback: audioMessCallback
+                                ),
                               ],
                           )
                           : const SizedBox.shrink(),
-                        file != null && file!.filetype != "mp4" && file!.filetype != "jpeg" && file!.filetype != "jpg" && file!.filetype != "png"
-                          ? Column(
-                            children: [
-                              if (p2p != 1 && !isMe) _authorNameWidgetGroupChat(senderName, _borderRadius),
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: isMe ? AppColors.myMessageBackground : Theme.of(context).cardColor,
-                                  borderRadius:  BorderRadius.only(
-                                    topLeft: const Radius.circular(_borderRadius),
-                                    topRight: const Radius.circular(_borderRadius),
-                                    bottomRight: isMe ? const Radius.circular(0.0) : const Radius.circular(_borderRadius),
-                                    bottomLeft: !isMe ? const Radius.circular(0.0) : const Radius.circular(_borderRadius),
-                                  ),
-                                ),
-                                child: GestureDetector(
-                                  onTap: (){
-                                    Navigator.of(context).pushNamed(
-                                        MainNavigationRouteNames.filePreviewPage,
-                                        arguments: AttachmentViewPageArguments(
-                                            fileName: file!.name,
-                                            fileExt: file!.filetype,
-                                            attachmentId: file!.attachmentId
-                                        )
-                                    );
-                                  },
-                                  child: Image.asset("assets/file_icon_2.png", width: 64,),
-                                ),
-                              )
-                            ],
-                          )
+                            file != null && file!.filetype != "mp4" && file!.filetype != "jpeg" && file!.filetype != "jpg" && file!.filetype != "png"
+                          ? fileIconWidget(
+                              context: context,
+                              iconPath: "assets/file_icon_2.png",
+                              width: 64,
+                              callback: fileAttachmentMessCallback
+                            )
                           : const SizedBox.shrink(),
                         const SizedBox(height: 5,),
                         message.isNotEmpty && message.trim() != ""
                             ? Container(
                           constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width * 0.9
+                            maxWidth: MediaQuery.of(context).size.width * 0.9,
+                            minWidth: 100
                           ),
                           decoration: BoxDecoration(
                             color: isMe ? AppColors.myMessageBackground : Theme.of(context).cardColor,
@@ -366,12 +401,30 @@ class _MessageTile extends StatelessWidget {
                                       onOpen: (link) => _launchUrl(Uri.tryParse(link.url)),
                                       text: message,
                                       style: isMe
-                                          ? const TextStyle(color: Colors.white, fontSize: 16)
+                                          ? const TextStyle(color: Colors.black, fontSize: 16)
                                           : const TextStyle(color: Colors.black, fontSize: 16),
                                       linkStyle: isMe
                                           ? const TextStyle(color: Colors.white, fontSize: 16)
                                           : const TextStyle(color: Colors.blueAccent, fontSize: 16),
                                     )
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.only(right: 10, bottom: 5),
+                                        child: Text(
+                                          messageTime,
+                                          style: const TextStyle(
+                                            color:AppColors.textFaded,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      if (isMe) const SizedBox(width: 1,),
+                                      if (isMe) _StatusWidget(status),
+                                    ],
                                   ),
                                 ]
                               ),
@@ -386,20 +439,20 @@ class _MessageTile extends StatelessWidget {
                 !isError
                 ?Padding(
                   padding: const EdgeInsets.only(top: 4.0),
-                  child: Row(
-                    children: [
-                      Text(
-                        messageTime,
-                        style: const TextStyle(
-                          color: AppColors.textFaded,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (isMe) const SizedBox(width: 8,),
-                      if (isMe) _StatusWidget(status),
-                    ],
-                  ),
+                  // child: Row(
+                  //   children: [
+                  //     Text(
+                  //       messageTime,
+                  //       style: const TextStyle(
+                  //         color: AppColors.textFaded,
+                  //         fontSize: 12,
+                  //         fontWeight: FontWeight.bold,
+                  //       ),
+                  //     ),
+                  //     if (isMe) const SizedBox(width: 8,),
+                  //     if (isMe) _StatusWidget(status),
+                  //   ],
+                  // ),
                 )
                 : SizedBox.shrink(),
                 const SizedBox(height: 5.0,)
@@ -723,32 +776,4 @@ Widget _StatusWidget(status) {
   return _widget;
 }
 
-Future<void> _showSimpleDialog(context) async {
-  await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return SimpleDialog( // <-- SEE HERE
-          title: const Text('Select Booking Type'),
-          children: <Widget>[
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('General'),
-            ),
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Silver'),
-            ),
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Gold'),
-            ),
-          ],
-        );
-      });
-}
+

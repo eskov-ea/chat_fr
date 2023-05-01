@@ -10,7 +10,7 @@ class PushNotificationService {
     final postData = jsonEncode(<String, Object>{
       'data': {
         'message': {
-          'title': 'Пропущенный звонок от ',
+          'title': 'Пропущенный звонок от $userName',
           'body': ''
         }
       }

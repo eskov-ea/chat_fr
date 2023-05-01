@@ -136,6 +136,7 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                 style: TextStyle(fontSize: 24),
               ),
               Text("Описание: ${widget.dialogData.description ?? "групповой чат"}",
+               textAlign: TextAlign.center,
                style: const TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 20,),

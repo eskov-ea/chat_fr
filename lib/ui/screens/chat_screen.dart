@@ -18,6 +18,8 @@ import '../../models/contact_model.dart';
 import '../../models/message_model.dart';
 import '../../services/global.dart';
 import '../../services/helpers/navigation_helpers.dart';
+import '../../services/messages/messages_api_provider.dart';
+import '../../view_models/chats_builder_view/chat_view_cubit.dart';
 import '../../view_models/user/users_view_cubit.dart';
 import '../../view_models/user/users_view_cubit_state.dart';
 import '../widgets/action_bar.dart';
@@ -82,6 +84,8 @@ class _ChatScreenState extends State<ChatScreen> {
   String? senderReplyName;
   int? replyedMessageId;
   ParentMessage? replyedParentMsg;
+  bool isSelectedMode = false;
+  List<int> selected = [];
 
   Function? setReplyMessage(message, senderId, messageId) {
     setState(() {
@@ -102,6 +106,44 @@ class _ChatScreenState extends State<ChatScreen> {
   void setRecording(bool value){
     setState(() {
       isRecording = value;
+    });
+  }
+
+  void setSelectedMode(bool value){
+    setState(() {
+      isSelectedMode = value;
+      if (!value) selected = [];
+    });
+  }
+
+  void deleteMessages() async {
+    try {
+      final bool response =
+          await MessagesProvider().deleteMessage(messageId: selected);
+      if (response) {
+        BlocProvider.of<ChatsBuilderBloc>(context).add(
+            ChatsBuilderDeleteMessagesEvent(
+                messagesId: selected, dialogId: widget.dialogData!.dialogId));
+      } else {
+        customToastMessage(context, 'Не получилось удалить сообщения. Попробуйте еще раз');
+      }
+    } catch (err) {
+      print('deleteMessages  $err');
+      customToastMessage(context, 'Не получилось удалить сообщения. Попробуйте еще раз');
+    }
+  }
+
+  void setSelected(id) {
+    setState(() {
+      if (isSelectedMode) {
+        if (!selected.contains(id)) {
+          selected.add(id);
+        } else {
+          selected.remove(id);
+        }
+        if (selected.isEmpty) setSelectedMode(false);
+      }
+      print(selected);
     });
   }
 
@@ -143,7 +185,7 @@ class _ChatScreenState extends State<ChatScreen> {
           title: InkWell(
             onTap: (){
               if (widget.dialogData == null || widget.dialogData?.chatType.p2p == 1) {
-                openUserProfileInfoPage(context: context, user: findPartnerUserProfile(widget.usersCubit, widget.partnerId));
+                openUserProfileInfoPage(context: context, user: findPartnerUserProfile(widget.usersCubit, widget.partnerId), partnerId: widget.partnerId);
               } else {
                 openGroupChatInfoPage(context: context, usersCubit: widget.usersCubit, dialogData: widget.dialogData, userId: null, dialogCubit: widget.dialogCubit, username: widget.username, partnerId: widget.partnerId, );
               }
@@ -156,11 +198,24 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           actions: [
+            if (isSelectedMode) GestureDetector(
+              onTap: (){
+                setSelectedMode(false);
+              },
+              child: Padding(
+                padding: EdgeInsets.only(right: 10),
+                child: Center(
+                  child: Text('Отменить',
+                    style: TextStyle(color: Colors.blueAccent, fontSize: 20, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+            ),
             // if (widget.dialogData == null || widget.dialogData?.chatType.p2p == 1 && !kIsWeb) IconButton(
             //   icon: const Icon(CupertinoIcons.video_camera, color: AppColors.secondary, size: 38,),
             //   onPressed: () {},
             // ),
-            if (!kIsWeb && ( widget.dialogData == null || widget.dialogData!.chatType.p2p == 1)) Padding(
+            if (!isSelectedMode && !kIsWeb && ( widget.dialogData == null || widget.dialogData!.chatType.p2p == 1)) Padding(
               padding: const EdgeInsets.only(right: 20),
               child: IconButton(
                 icon: const Icon(CupertinoIcons.phone, color: AppColors.secondary, size: 30,),
@@ -187,6 +242,10 @@ class _ChatScreenState extends State<ChatScreen> {
                               setReplyMessage: setReplyMessage,
                               usersCubit: widget.usersCubit,
                               partnerName: widget.username,
+                              setSelectedMode: setSelectedMode,
+                              isSelectedMode: isSelectedMode,
+                              selected: selected,
+                              setSelected: setSelected
                             )
                                 : const Center(child: Text('Нет сообщений'),)
                           ),
@@ -205,7 +264,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     ActionBar(userId: widget.userId, partnerId: widget.partnerId, dialogId: widget.dialogData?.dialogId,
                       setDialogData: setDialogData, rootWidget: widget, username: widget.username,
                       focusNode: focusNode, setRecording: setRecording, isRecording: isRecording, replyedMessageId: replyedMessageId, dialogData: widget.dialogData,
-                      dialogCubit: widget.dialogCubit, cancelReplyMessage: cancelReplyMessage, parentMessage: replyedParentMsg,),
+                      dialogCubit: widget.dialogCubit, cancelReplyMessage: cancelReplyMessage, parentMessage: replyedParentMsg, isSelectedMode: isSelectedMode,
+                      selected: selected, deleteMessages: deleteMessages
+                    ),
                   ],
                 ),
         ),
@@ -224,6 +285,10 @@ class _MessageList extends StatefulWidget {
     required this.setReplyMessage,
     required this.usersCubit,
     required this.partnerName,
+    required this.isSelectedMode,
+    required this.setSelectedMode,
+    required this.selected,
+    required this.setSelected,
   }) : super(key: key);
 
   final int userId;
@@ -232,6 +297,10 @@ class _MessageList extends StatefulWidget {
   final String partnerName;
   final  setReplyMessage;
   final UsersViewCubit usersCubit;
+  final bool isSelectedMode;
+  final Function setSelectedMode;
+  final List<int> selected;
+  final Function(int) setSelected;
 
   @override
   State<_MessageList> createState() => _MessageListState();
@@ -240,8 +309,6 @@ class _MessageList extends StatefulWidget {
 class _MessageListState extends State<_MessageList> {
 
   final messagesRepository = MessagesRepository();
-  List selected = [];
-  bool selectedMode = false;
   final ScrollController _scrollController = ScrollController();
   bool _shouldAutoscroll = true;
   int pageNumber = 1;
@@ -270,19 +337,6 @@ class _MessageListState extends State<_MessageList> {
     BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderLoadMessagesEvent(dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
     pageNumber++;
   }
-  void _setSelected(id) {
-    setState(() {
-      if (selectedMode) {
-        if (!selected.contains(id)) {
-          selected.add(id);
-        } else {
-          selected.remove(id);
-        }
-        if (selected.isEmpty) selectedMode = false;
-      }
-      print(selected);
-    });
-  }
 
   void setupScrollListener(
       {required ScrollController scrollController,
@@ -295,11 +349,6 @@ class _MessageListState extends State<_MessageList> {
         }
       }
     });
-  }
-
-
-  void _setSelectedMode() {
-    if (!selectedMode) selectedMode = true;
   }
 
   void onMessagesStateChange(BuildContext context, WsBlocState state) {
@@ -350,10 +399,10 @@ class _MessageListState extends State<_MessageList> {
                             index: index,
                             senderId: currentState.messages[index].senderId,
                             userId: widget.userId,
-                            selected: selected,
-                            selectedMode: selectedMode,
-                            setSelectedMode: _setSelectedMode,
-                            setSelected: _setSelected,
+                            selected: widget.selected,
+                            selectedMode: widget.isSelectedMode,
+                            setSelectedMode: widget.setSelectedMode,
+                            setSelected: widget.setSelected,
                             messageId: currentState.messages[index].messageId,
                             message: currentState.messages[index].message,
                             messageDate: currentState.messages[index].messageDate,

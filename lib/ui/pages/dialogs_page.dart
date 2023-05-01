@@ -33,11 +33,11 @@ class _MessagesPageState extends State<MessagesPage> {
     super.initState();
   }
 
+
   void _readUserId() async {
     final userIdFromStorage = await DataProvider().getUserId();
     setState(() {
-      final userIdRaw = userIdFromStorage;
-      userId = userIdRaw == null ? null : int.parse(userIdRaw);
+      userId = userIdFromStorage == null ? null : int.parse(userIdFromStorage);
     });
   }
 
@@ -51,7 +51,7 @@ class _MessagesPageState extends State<MessagesPage> {
       appBar: CustomAppBar(context),
       body: BlocBuilder<DialogsViewCubit, DialogsViewCubitState>(
         builder: (context, state) {
-          if (state is DialogsLoadedViewCubitState) {
+          if (state is DialogsLoadedViewCubitState && userId != null) {
             if (state.isError) return Container(
               width: MediaQuery.of(context).size.width,
               child: Column(
@@ -80,7 +80,7 @@ class _MessagesPageState extends State<MessagesPage> {
                       delegate: SliverChildBuilderDelegate(
                             (context, index) =>
                             !_isDialogActive(state.dialogs[index], userId!) ||
-                            state.dialogs[index].chatType.typeId == 4 && !(state.dialogs[index].messageCount > 0) ||
+                            // state.dialogs[index].chatType.typeId == 4 && !(state.dialogs[index].messageCount > 0) ||
                             state.dialogs[index].chatType.typeId == 3 && !(state.dialogs[index].messageCount > 0)
                             ? SizedBox.shrink()
                             : Container(
@@ -112,6 +112,7 @@ class _MessagesPageState extends State<MessagesPage> {
             }
           }
           else {
+            _readUserId();
             return const Center(child: CircularProgressIndicator(),);
           }
         }),

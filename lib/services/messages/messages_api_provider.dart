@@ -11,7 +11,7 @@ import 'dart:ui' as UI;
 import 'package:image/image.dart' as IMG;
 import 'dart:typed_data' as typedData;
 import 'dart:convert' as convert;
-
+import './icon_base64.dart';
 
 class MessagesProvider {
   final _secureStorage = DataProvider();
@@ -111,9 +111,12 @@ class MessagesProvider {
   }) async {
     print('DELETING MESSAGE');
     final String? token = await _secureStorage.getToken();
-    final postData = jsonEncode(<String, dynamic>{
-      'id': messageId,
+    final List data = messageId.map((id) => {
+      'id': id,
       'status_id': 5
+    }).toList();
+    final postData = jsonEncode(<String, Object>{
+      'data': data
     });
     print("DELETING MESSAGE data  $postData");
     final response = await http.post(
@@ -190,7 +193,7 @@ class MessagesProvider {
           'parent_id': parentMessageId,
           'file': {
             'name': '$uniq.$filetype',
-            'preview': '',
+            'preview': base64icon,
             'content': base64file
           }
         }
@@ -223,19 +226,20 @@ class MessagesProvider {
     final uniq = DateTime.now().microsecondsSinceEpoch.toString();
     String base64Image = base64Encode(bytes);
     final preview = resizeImage(bytes);
+    print("base64file   $base64Image");
 
-    print("base64Image   $base64Image");
     final postData = jsonEncode(<String, Object>{
       'data': {
         'message': '$messageText',
         'parent_id': parentMessageId,
         'file': {
           'name': '$uniq.$filetype',
-          'preview': preview,
+          'preview': preview ?? base64icon,
           'content': base64Image
         }
       }
     });
+    print("base64file postData   $postData");
     try {
       final response = await http.post(
           Uri.parse('https://erp.mcfef.com/api/chat/message/add/$dialogId'),
@@ -269,7 +273,7 @@ class MessagesProvider {
         'parent_id': parentMessageId,
         'file': {
           'name': '$uniq.$filetype',
-          'preview': preview ?? '',
+          'preview': preview ?? base64icon,
           'content': base64
         }
       }

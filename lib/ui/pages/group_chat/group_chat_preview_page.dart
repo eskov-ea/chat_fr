@@ -10,12 +10,14 @@ class GroupChatPreviewPage extends StatefulWidget {
   const GroupChatPreviewPage({
     required this.chatType,
     required this.usersList,
+    required this.isSecret,
     required this.bloc, Key? key
   }) : super(key: key);
 
   final List usersList;
   final UsersViewCubit bloc;
   final int chatType;
+  final bool isSecret;
 
   @override
   State<GroupChatPreviewPage> createState() => _GroupChatPreviewPageState();
@@ -33,8 +35,9 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
   void initState() {
     _makeGroupUsersList();
 
-    if (groupUsersList.length > 1) {
+    if (widget.isSecret) {
       currentChatType = 4;
+      // currentChatType = groupUsersList.length > 1 ? 4 : 3;
     } else {
       currentChatType = widget.chatType;
     }
@@ -85,7 +88,8 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
         leadingWidth: 100,
         // title: const Text('New message'),
       ),
-      body: SingleChildScrollView(
+      body: currentChatType != 3
+      ? SingleChildScrollView(
         child: ConstrainedBox(
           constraints: BoxConstraints(
             minHeight: MediaQuery.of(context).size.height,
@@ -169,6 +173,7 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
                   onPressed: () async {
                     //TODO: optimize
                     print("GROUPLIST  -->  $groupUsersList");
+                    print("GROUPLIST  -->  $currentChatType");
                     loadingInProgressModalWidget(context, "Загрузка");
                     final newGroup = await _dialogsProvider.createDialog(chatType: currentChatType, users: widget.usersList, chatName: _textNameFieldController.text, chatDescription: _textDescriptionFieldController.text, isPublic: isPublic);
                     if (newGroup != null) {
@@ -201,6 +206,42 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
             ],
           ),
         ),
+      )
+      : Center(
+        child: OutlinedButton(
+            onPressed: () async {
+              customToastMessage(context, "Секретный p2p чат пока не настроен");
+              // print("GROUPLIST  -->  $groupUsersList");
+              // print("GROUPLIST  -->  $currentChatType");
+              // loadingInProgressModalWidget(context, "Загрузка");
+              // final newGroup = await _dialogsProvider.createDialog(chatType: currentChatType, users: widget.usersList, chatName: _textNameFieldController.text, chatDescription: _textDescriptionFieldController.text, isPublic: isPublic);
+              // if (newGroup != null) {
+              //   Navigator.of(context).pushNamed(
+              //       MainNavigationRouteNames.homeScreen
+              //   );
+              // } else {
+              //   Navigator.of(context).pop();
+              //   customToastMessage(context, "Произошла ошибка. Попробуйте еще раз");
+              // }
+            },
+            style: ElevatedButton.styleFrom(
+              primary: Colors.blue,
+              minimumSize: Size(MediaQuery.of(context).size.width * 0.8, 60),
+              shape: const RoundedRectangleBorder(
+                  side: BorderSide(
+                      color: Colors.black54,
+                      width: 2,
+                      style: BorderStyle.solid),
+                  borderRadius: BorderRadius.all(Radius.circular(8))
+              ),
+            ),
+            child: const Text(
+              'Начать секретный чат',
+              style: TextStyle(
+                  color: Colors.white54,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600),
+            )),
       ),
     );
   }

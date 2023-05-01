@@ -138,9 +138,10 @@ sendMessageWithPayload(
         file: file,
         filetype: filetype,
         parentMessageId: parentMessageId);
+    print('sentMessage   $sentMessage');
     final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
-    BlocProvider.of<ChatsBuilderBloc>(context)
-        .add(ChatsBuilderAddMessageEvent(message: message, dialog: dialogId!));
+    // BlocProvider.of<ChatsBuilderBloc>(context)
+    //     .add(ChatsBuilderAddMessageEvent(message: message, dialog: dialogId!));
     BlocProvider.of<ChatsBuilderBloc>(context)
         .add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
     // TODO: Can be refactored to named route
@@ -209,37 +210,37 @@ MessageData createLocalMessage({
       ],
     );
 
-sendMessageFromGlobal({
-  required context,
-  required ParentMessage? parentMessage,
-  required String messageText,
-  required int? repliedMessageId,
-  required int dialogId,
-  required int userId,
-  required localMessage,
-}) async {
-  try {
-    BlocProvider.of<ChatsBuilderBloc>(context).add(
-        ChatsBuilderAddMessageEvent(message: localMessage, dialog: dialogId));
-    // TODO: if response status code is 200 else ..
-    final sentMessage = await MessagesRepository().sendMessage(
-        dialogId: dialogId,
-        messageText: messageText,
-        parentMessageId: repliedMessageId);
-    print("sentMessage response  $sentMessage");
-    final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
-    BlocProvider.of<ChatsBuilderBloc>(context).add(
-        ChatsBuilderUpdateLocalMessageEvent(
-            message: message,
-            dialogId: dialogId,
-            localMessageId: localMessage.messageId));
-    BlocProvider.of<DialogsViewCubit>(context)
-        .updateLastDialogMessage(localMessage);
-  } catch (err) {
-    throw Exception('Что-то пошло не так');
-  }
-  // BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId));
-}
+// sendMessageFromGlobal({
+//   required context,
+//   required ParentMessage? parentMessage,
+//   required String messageText,
+//   required int? repliedMessageId,
+//   required int dialogId,
+//   required int userId,
+//   required localMessage,
+// }) async {
+//   try {
+//     BlocProvider.of<ChatsBuilderBloc>(context).add(
+//         ChatsBuilderAddMessageEvent(message: localMessage, dialog: dialogId));
+//     // TODO: if response status code is 200 else ..
+//     final sentMessage = await MessagesRepository().sendMessage(
+//         dialogId: dialogId,
+//         messageText: messageText,
+//         parentMessageId: repliedMessageId);
+//     print("sentMessage response  $sentMessage");
+//     final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
+//     BlocProvider.of<ChatsBuilderBloc>(context).add(
+//         ChatsBuilderUpdateLocalMessageEvent(
+//             message: message,
+//             dialogId: dialogId,
+//             localMessageId: localMessage.messageId));
+//     BlocProvider.of<DialogsViewCubit>(context)
+//         .updateLastDialogMessage(localMessage);
+//   } catch (err) {
+//     throw Exception('Что-то пошло не так');
+//   }
+//   // BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId));
+// }
 
 loadFileAndSaveLocally({required String fileName, required attachmentId}) async {
   final Directory documentDirectory = await getApplicationDocumentsDirectory();

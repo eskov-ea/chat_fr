@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../ui/pages/call_info_page.dart';
 import '../ui/pages/group_chat/group_chat_info_page.dart';
 import '../ui/pages/own_profile_page.dart';
+import '../ui/pages/reset_password_page.dart';
 import '../ui/pages/user_profile_info_page.dart';
 import '../ui/screens/auth_screen.dart';
 import '../ui/screens/incoming_call_screen.dart';
@@ -62,6 +63,7 @@ class ScreenFactory {
   Widget makeUserProfileInfoPage(UserProfileArguments arguments) {
     return UserProfileInfoPage(
       user: arguments.user,
+      partnerId: arguments.partnerId,
     );
   }
 
@@ -118,9 +120,11 @@ class ScreenFactory {
   }
 
   Widget makeCallInfoPage(CallRenderData arguments) {
-    return CallInfoPage(callData: arguments,);
+    return CallInfoPage(callData: arguments);
   }
-  
 
+  Widget makeResetPasswordScreen() {
+    return ResetPasswordScreen();
+  }
 
 }

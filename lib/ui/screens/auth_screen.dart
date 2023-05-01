@@ -164,6 +164,23 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
         ),
         const SizedBox(height: 40),
+        GestureDetector(
+          onTap: (){
+            Navigator.of(context).pushNamed(MainNavigationRouteNames.resetPasswordScreen);
+          },
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            child: Text(
+              'Забыли пароль?',
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                color: Colors.blueAccent,
+                fontSize: 18
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 20,),
         ElevatedButton(
           child: cubit.state is AuthViewCubitAuthProgressState
             ? const SizedBox(

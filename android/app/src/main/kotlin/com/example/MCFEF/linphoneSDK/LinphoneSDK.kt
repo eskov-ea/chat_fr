@@ -31,16 +31,16 @@ class LinphoneSDK (context: Context) {
     init {
         Log.w("LinphoneSDK", "APP WAS STARTED")
         val factory = Factory.instance()
-//        factory.setDebugMode(true, "Hello Linphone")
-//        factory.enableLogcatLogs(true)
+        factory.setDebugMode(true, "Hello Linphone")
+        factory.enableLogcatLogs(true)
         MainActivity.core = factory.createCore(null, null, context)
 
-        nat = MainActivity.core.createNatPolicy()
-        nat.enableIce(true)
+//        nat = MainActivity.core.createNatPolicy()
+//        nat.enableIce(true)
 //        nat.stunServer = "stun.sip.us:3478"
 //        nat.enableTcpTurnTransport(true)
 //        nat.enableStun(true)
-        MainActivity.core.natPolicy = nat
+//        MainActivity.core.natPolicy = nat
 
 
         MainActivity.core.isPushNotificationEnabled = true
@@ -80,7 +80,7 @@ class LinphoneSDK (context: Context) {
 //        }
 
         if (!MainActivity.core.isPushNotificationAvailable) {
-//            Toast.makeText(context, "Something is wrong with the push setup!", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Something is wrong with the push setup!!!!", Toast.LENGTH_LONG).show()
             Log.w("PUSH", "${MainActivity.core.isVerifyServerCertificates}")
         }
 

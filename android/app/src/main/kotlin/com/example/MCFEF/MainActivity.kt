@@ -20,7 +20,7 @@ import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.MCFEF.MainActivity.Companion.core
-import com.example.MCFEF.linphoneSDK.LinphoneSDK
+//import com.example.MCFEF.linphoneSDK.LinphoneSDK
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import io.flutter.Log
@@ -35,6 +35,12 @@ import java.io.File
 import java.io.FileOutputStream
 import java.lang.Exception
 
+import com.example.MCFEF.calls_manager.Data
+import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver
+import android.view.View
+import android.widget.*
+
+
 
 class MainActivity: FlutterActivity() {
     private val METHOD_CHANNEL_NAME = "com.application.chat/method"
@@ -47,7 +53,7 @@ class MainActivity: FlutterActivity() {
 
     companion object {
         lateinit var core: Core
-        lateinit var linphoneLib: LinphoneSDK
+//        lateinit var linphoneLib: LinphoneSDK
         var eventSink: EventChannel.EventSink? = null
         var callServiceEventSink: EventChannel.EventSink? = null
     }
@@ -72,6 +78,7 @@ class MainActivity: FlutterActivity() {
             if (call.method == "getDeviceToken") {
                 lifecycleScope.launch {
                     val token =  getDeviceToken()
+                    Log.d("token:", "$token")
                     result.success( token )
                 }
             }
@@ -88,35 +95,6 @@ class MainActivity: FlutterActivity() {
                     putExtra(DocumentsContract.EXTRA_INITIAL_URI, "")
                 }
                 startActivityForResult(intent, CREATE_FILE)
-
-
-
-//                if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-//                        checkSelfPermission(Manifest.permission.MANAGE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-////                    val path = call.argument<String?>("path")
-//                    val folder = filesDir
-//                    val f = File(folder, "MCFEF")
-//                    if (f.mkdir()) {
-//                        Log.w("FILESAVER", "dir created")
-//                    }
-//                } else {
-//                    ActivityCompat.requestPermissions(
-//                            this,
-//                            arrayOf(WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE, MANAGE_EXTERNAL_STORAGE),
-//                            0
-//                    )
-//
-//                    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
-//                            checkSelfPermission(Manifest.permission.MANAGE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-//                        val folder = filesDir
-//                        val f = File(folder, "MCFEF")
-//                        if (f.mkdir()) {
-//                            Log.w("FILESAVER", "dir created")
-//                        }
-//                    } else {
-//                        Log.w("FILESAVER", "Permissions not granted")
-//                    }
-//                }
             }
             if (call.method == "CHECK_WRITE_FILES_PERMISSION") {
                 Log.w("SAVEFILE", "STARTED")
@@ -130,18 +108,6 @@ class MainActivity: FlutterActivity() {
                 } else {
                     result.success( false )
                 }
-
-//                lifecycleScope.launch {
-//                    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-//                        result.success( true )
-//                    } else {
-//                        Log.w("ASK PERMISSION", "TO WRITE TO EXTERNAL STORAGE ")
-//                        requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 0)
-////                        result.success( permissionGranted )
-//                    }
-//
-//
-//                }
             }
         }
 
@@ -149,14 +115,18 @@ class MainActivity: FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_SIP ).setMethodCallHandler {
             call, result ->
             if (call.method.equals("SIP_LOGIN")) {
-                val username = call.argument<String?>("username")
-                val password = call.argument<String?>("password")
-                val domain = call.argument<String?>("domain")
+//                val username = call.argument<String?>("username")
+//                val password = call.argument<String?>("password")
+//                val domain = call.argument<String?>("domain")
+                val username = "115"
+                val password = "1234"
+                val domain = "flexi.mcfef.com"
 
                 Log.w("SIP method channel:", "$username, $password, $domain")
 
                 if (username != null && password != null && domain != null) {
-                    linphoneLib.login(username, password, domain, this)
+//                    linphoneLib.login(username, password, domain, this)
+                    login(username, password, domain)
                 }
             } else if (call.method.equals("OUTGOING_CALL")) {
                 Log.w("OUTGOING", "Start event")
@@ -211,22 +181,22 @@ class MainActivity: FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.w("MAIN_ACTIVITY", "APP WAS STARTED")
-//        val factory = Factory.instance()
-//        factory.setDebugMode(true, "Hello Linphone")
-//        factory.enableLogcatLogs(true)
-//        core = factory.createCore(null, null, this)
-//
-//        nat = core.createNatPolicy()
-//        nat.enableIce(true)
-//        nat.stunServer = "stun.sip.us:3478"
-//        nat.enableTcpTurnTransport(true)
-//        nat.enableStun(true)
-//        core.natPolicy = nat
-//
-//
-//        core.isPushNotificationEnabled = true
-//        MyFirebaseMessagingService()
-        linphoneLib = LinphoneSDK(this)
+        val factory = Factory.instance()
+        factory.setDebugMode(true, "Hello Linphone")
+        factory.enableLogcatLogs(true)
+        core = factory.createCore(null, null, this)
+
+        nat = core.createNatPolicy()
+        nat.enableIce(true)
+        nat.stunServer = "stun.sip.us:3478"
+        nat.enableTcpTurnTransport(true)
+        nat.enableStun(true)
+        core.natPolicy = nat
+
+
+        core.isPushNotificationEnabled = true
+        MyFirebaseMessagingService()
+//        linphoneLib = LinphoneSDK(this)
         createNotificationChannel()
         lifecycleScope.launch {
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
@@ -263,13 +233,15 @@ class MainActivity: FlutterActivity() {
         accountParams.pushNotificationAllowed = true
 
         Log.w("Account setup params", accountParams.identityAddress.toString())
-        val account = core.createAccount(accountParams)
         core.addAuthInfo(authInfo)
+        val account = core.createAccount(accountParams)
         core.addAccount(account)
 
         core.defaultAccount = account
         core.addListener(
-                linphoneLib.coreListener)
+//                linphoneLib.coreListener
+                coreListener
+        )
 
         account.addListener { _, state, message ->
             Log.w("[Account] Registration state changed:", "$state, $message")
@@ -283,7 +255,7 @@ class MainActivity: FlutterActivity() {
         }
 
         if (!core.isPushNotificationAvailable) {
-//            Toast.makeText(this, "Something is wrong with the push setup!", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Something is wrong with the push setup!", Toast.LENGTH_LONG).show()
             Log.w("PUSH", "${core.isVerifyServerCertificates}")
         }
 
@@ -310,116 +282,121 @@ class MainActivity: FlutterActivity() {
         }
     }
 
-//    private val coreListener = object: CoreListenerStub() {
-//        override fun onAccountRegistrationStateChanged(core: Core, account: Account, state: RegistrationState?, message: String) {
-//
-//            if (state == RegistrationState.Failed || state == RegistrationState.Cleared) {
-//                Log.w("SIP RegistrationState status", "true")
-//            } else if (state == RegistrationState.Ok) {
-//                Log.w("SIP RegistrationState status", "false")
-//                val args = makePlatformEventPayload("REGISTRATION", null)
-//                callServiceEventSink?.success(args)
-////                Log.w("Account setup", account.params.contactUriParameters.toString())
-//                Log.w("Account setup 4", core.defaultAccount?.params?.identityAddress.toString())
-//            }
-//        }
-//
-//        override  fun onCallStateChanged(
-//                core: Core,
-//                call: Call,
-//                state: Call.State?,
-//                message: String
-//        ) {
-////        findViewById<TextView>(R.id.call_status).text = message
-//
-//            // When a call is received
-//            when (state) {
-//                Call.State.IncomingReceived -> {
-//
-//                    val args: Map<String, Any?> = mapOf(
-//                        "nameCaller" to call.remoteAddress.username,
-//                        "android" to android
-//                    )
-//
-//                    val data = Data(args).toBundle()
-//
-//                    sendBroadcast(
-//                        CallsManagerBroadcastReceiver.getIntentIncoming(
-//                            context,
-//                            data
-//                        )
-//                    )
-//                    val callArgs = makePlatformEventPayload("INCOMING", call.remoteAddress.username)
-//
-//                    callServiceEventSink?.success(callArgs)
-//
-//                }
-//                Call.State.Connected -> {
-//                    Log.w("ACTIVE_CALL", "Connected   ${call.remoteAddress.username}")
-//                    val args = makePlatformEventPayload("CONNECTED", call.remoteAddress.username)
-//
-//                    callServiceEventSink?.success(args)
-//
-//                    val dargs: Map<String, Any?> = mapOf(
-//                            "nameCaller" to call.remoteAddress.username,
-//                            "android" to android
-//                    )
-//
-//                    val data = Data(dargs).toBundle()
-//                    sendBroadcast(
-//                            CallsManagerBroadcastReceiver.getIntentDecline(
-//                                    context,
-//                                    data
-//                            )
-//                    )
-//
-////                    val intent = Intent(context, CurrentCall::class.java).apply {
-////                        flags =
-////                                Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-////                    }
-////                    context.startActivity(intent)
-//                }
-//                Call.State.Released -> {
-////                    sendBroadcast(CurrentCall.getIntentEnded())
-//                    val dargs: Map<String, Any?> = mapOf(
-//                            "nameCaller" to call.remoteAddress.username,
-//                            "android" to android
-//                    )
-//
-//                    val data = Data(dargs).toBundle()
-//                    sendBroadcast(
-//                            CallsManagerBroadcastReceiver.getIntentDecline(
-//                                    context,
-//                                    data
-//                            )
-//                    )
-//                    val args = makePlatformEventPayload("ENDED", call.remoteAddress.username)
-//
-//                    callServiceEventSink?.success(args)
-//                }
-//                Call.State.OutgoingInit -> {
-//                    Log.w("OUTGOING_CALL", "OutgoingInit")
-////                    val intent = Intent(context, RingingCall::class.java).apply {
-////                        flags =
-////                                Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-////                    }
-////                    context.startActivity(intent)
-//
-//                    val args = makePlatformEventPayload("OUTGOING", call.remoteAddress.username)
-//
-//                    callServiceEventSink?.success(args)
-//                }
-//                Call.State.OutgoingProgress  -> {
-//                    Log.w("OUTGOING_CALL", "OutgoingProgress")
-//                }
-//                Call.State.OutgoingRinging -> {
-//                    Log.w("OUTGOING_CALL", "OutgoingRinging")
-//                }
-//
-//            }
-//        }
-//
-//    }
+    private val coreListener = object: CoreListenerStub() {
+        override fun onAccountRegistrationStateChanged(core: Core, account: Account, state: RegistrationState?, message: String) {
+
+            if (state == RegistrationState.Failed || state == RegistrationState.Cleared) {
+                Log.w("SIP RegistrationState status", "true")
+            } else if (state == RegistrationState.Ok) {
+                Log.w("SIP RegistrationState status", "false")
+                val args = makePlatformEventPayload("REGISTRATION", null, null)
+                callServiceEventSink?.success(args)
+//                Log.w("Account setup", account.params.contactUriParameters.toString())
+                Log.w("Account setup 4", core.defaultAccount?.params?.identityAddress.toString())
+            }
+        }
+
+        override  fun onCallStateChanged(
+                core: Core,
+                call: Call,
+                state: Call.State?,
+                message: String
+        ) {
+//        findViewById<TextView>(R.id.call_status).text = message
+
+            // When a call is received
+            when (state) {
+                Call.State.IncomingReceived -> {
+
+                    val args: Map<String, Any?> = mapOf(
+                        "nameCaller" to call.remoteAddress.username,
+                        "android" to android
+                    )
+
+                    val data = Data(args).toBundle()
+
+                    sendBroadcast(
+                        CallsManagerBroadcastReceiver.getIntentIncoming(
+                            context,
+                            data
+                        )
+                    )
+                    val callArgs = makePlatformEventPayload("INCOMING", call.remoteAddress.username, null)
+
+                    callServiceEventSink?.success(callArgs)
+
+                }
+                Call.State.Connected -> {
+                    Log.w("ACTIVE_CALL", "Connected   ${call.remoteAddress.username}")
+                    val args = makePlatformEventPayload("CONNECTED", call.remoteAddress.username, null)
+
+                    callServiceEventSink?.success(args)
+
+                    val dargs: Map<String, Any?> = mapOf(
+                            "nameCaller" to call.remoteAddress.username,
+                            "android" to android
+                    )
+
+                    val data = Data(dargs).toBundle()
+                    sendBroadcast(
+                            CallsManagerBroadcastReceiver.getIntentDecline(
+                                    context,
+                                    data
+                            )
+                    )
+
+//                    val intent = Intent(context, CurrentCall::class.java).apply {
+//                        flags =
+//                                Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+//                    }
+//                    context.startActivity(intent)
+                }
+                Call.State.Released -> {
+//                    sendBroadcast(CurrentCall.getIntentEnded())
+                    val dargs: Map<String, Any?> = mapOf(
+                            "nameCaller" to call.remoteAddress.username,
+                            "android" to android
+                    )
+
+                    val data = Data(dargs).toBundle()
+                    sendBroadcast(
+                            CallsManagerBroadcastReceiver.getIntentDecline(
+                                    context,
+                                    data
+                            )
+                    )
+                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
+                        callStatus = if (call.callLog.status.name == "Success")  "ANSWERED" else "NO ANSWER",
+                        fromCaller = call.callLog.fromAddress.username,
+                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
+                        callId = call.callLog.callId)
+                    val args = makePlatformEventPayload("ENDED", call.remoteAddress.username, callData)
+
+                    callServiceEventSink?.success(args)
+                }
+                Call.State.OutgoingInit -> {
+                    Log.w("OUTGOING_CALL", "OutgoingInit")
+//                    val intent = Intent(context, RingingCall::class.java).apply {
+//                        flags =
+//                                Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+//                    }
+//                    context.startActivity(intent)
+
+                    val args = makePlatformEventPayload("OUTGOING", call.remoteAddress.username, null)
+
+                    callServiceEventSink?.success(args)
+                }
+                Call.State.OutgoingProgress  -> {
+                    Log.w("OUTGOING_CALL", "OutgoingProgress")
+                }
+                Call.State.OutgoingRinging -> {
+                    Log.w("OUTGOING_CALL", "OutgoingRinging")
+                }
+
+            }
+        }
+
+    }
 
     fun createNotificationChannel() {
         Log.w("MY_NOTIFICATION", "CREATING A NOTIFICATION CHANNEL")
@@ -526,4 +503,16 @@ private fun toggleMute(): Boolean {
     core.enableMic(!core.micEnabled())
 
     return !core.micEnabled()
+}
+
+fun makeCallDataPayload(duration: String?, callStatus: String?, fromCaller: String?, toCaller: String?,
+                        date: String?, callId: String?): Map<String, Any?> {
+    return mapOf(
+            "duration" to duration,
+            "disposition" to callStatus,
+            "dst" to toCaller,
+            "src" to fromCaller,
+            "calldate" to date,
+            "uniqueid" to callId
+    )
 }

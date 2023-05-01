@@ -30,6 +30,8 @@
 .pub-cache/
 .pub/
 /build/
+/MCFEF
+/ios-2
 
 # Web related
 

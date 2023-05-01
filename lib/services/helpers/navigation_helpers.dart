@@ -29,12 +29,14 @@ void openChatScreen({
 
 void openUserProfileInfoPage({
   required BuildContext context,
-  required user
+  required user,
+  required partnerId
 }) {
   Navigator.of(context).pushNamed(
     MainNavigationRouteNames.userProfileInfoPage,
     arguments: UserProfileArguments(
       user: user,
+      partnerId: partnerId
     )
   );
 }

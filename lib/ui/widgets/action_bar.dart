@@ -20,6 +20,7 @@ import '../../services/dialogs/dialogs_api_provider.dart';
 import '../../services/messages/messages_api_provider.dart';
 import '../../services/messages/messages_repository.dart';
 import '../../theme.dart';
+import '../../view_models/chats_builder_view/chat_view_cubit.dart';
 import '../pages/sending_image_object_options_page.dart';
 import 'glowing_action_button.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -45,6 +46,9 @@ class ActionBar extends StatefulWidget {
   final DialogData? dialogData;
   final DialogsViewCubit dialogCubit;
   final ParentMessage? parentMessage;
+  final List<int> selected;
+  final bool isSelectedMode;
+  final Function deleteMessages;
 
   ActionBar({
     required this.userId,
@@ -61,6 +65,9 @@ class ActionBar extends StatefulWidget {
     required this.dialogData,
     required this.dialogCubit,
     required this.parentMessage,
+    required this.selected,
+    required this.isSelectedMode,
+    required this.deleteMessages,
     Key? key,})
       : super(key: key);
 
@@ -200,8 +207,11 @@ class ActionBarState extends State<ActionBar> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.only(bottom: 20.0),
+      height: 88,
       color: AppColors.backgroundLight,
-      child: Row(
+      child: widget.isSelectedMode
+          ? _actionBarMessagesFunctions()
+          : Row(
               children: [
                 Container(
                   decoration: BoxDecoration(
@@ -326,6 +336,24 @@ class ActionBarState extends State<ActionBar> {
     );
   }
 
+  Widget _actionBarMessagesFunctions () {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          onPressed: (){
+            widget.deleteMessages();
+          },
+          icon: Icon(
+            Icons.delete,
+            color: Colors.blueAccent,
+            size: 40,
+          )
+        )
+      ],
+    );
+  }
+
   void openCameraOptions(createDialogFn) {
     showModalBottomSheet(
       isScrollControlled: true,
@@ -393,10 +421,11 @@ class ActionBarState extends State<ActionBar> {
           parentMessageId: widget.replyedMessageId);
       final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
       print("SENTMESSAGE  -->  ${message.file}");
-      BlocProvider.of<ChatsBuilderBloc>(context).add(
-          ChatsBuilderAddMessageEvent(message: message, dialog: widget.dialogId!)
-      );
+      // BlocProvider.of<ChatsBuilderBloc>(context).add(
+      //     ChatsBuilderAddMessageEvent(message: message, dialog: widget.dialogId!)
+      // );
     } catch (err) {
+      //TODO: add local message with error to save the data
       customToastMessage(context, "Ошибка: Произошла ошибка при отправке сообщения, попробуйте еще раз");
     }
 

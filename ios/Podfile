@@ -1,8 +1,7 @@
 # Uncomment this line to define a global platform for your project
-platform :ios, '12.0'
-source "https://github.com/CocoaPods/Specs.git"
+#platform :ios, '12.0'
 source "https://gitlab.linphone.org/BC/public/podspec.git"
-
+source "https://github.com/CocoaPods/Specs.git"
 
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
@@ -54,14 +53,3 @@ post_install do |installer|
     flutter_additional_ios_build_settings(target)
   end
 end
-
-#target 'LinphoneSDK' do
-#  # Comment the next line if you don't want to use dynamic frameworks
-#  use_frameworks!
-#
-#  # Pods for Helloworld
-#  basic_pods
-#
-#end
-
-

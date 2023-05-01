@@ -24,6 +24,7 @@ abstract class MainNavigationRouteNames {
   static const outgoingCallScreen = '/home_screen/outgoing_call_screen';
   static const incomingCallScreen = '/home_screen/incoming_call_screen';
   static const callInfoPage = '/home_screen/call_info_page';
+  static const resetPasswordScreen = '/auth/reset_password_screen';
 }
 
 
@@ -111,6 +112,12 @@ class MainNavigation {
         return MaterialPageRoute(
             settings: const RouteSettings(name: name),
             builder: (BuildContext context) => _screenFactory.makeCallInfoPage(arguments)
+        );
+      case MainNavigationRouteNames.resetPasswordScreen:
+        const String name = MainNavigationRouteNames.resetPasswordScreen;
+        return MaterialPageRoute(
+            settings: const RouteSettings(name: name),
+            builder: (BuildContext context) => _screenFactory.makeResetPasswordScreen()
         );
       default:
         const widget = Text('Navigation error!!!');

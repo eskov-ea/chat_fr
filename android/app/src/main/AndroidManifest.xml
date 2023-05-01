@@ -78,16 +78,16 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-       <service
-           android:exported="false"
-           android:name="com.example.MCFEF.MyFirebaseMessagingService"
-           android:directBootAware="true">
-           <intent-filter android:priority="1">
-               <action android:name="com.google.firebase.MESSAGING_EVENT"/>
-               <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
-               <action android:name="org.linphone.core.action.PUSH_RECEIVED"/>
-           </intent-filter>
-       </service>
+<!--       <service-->
+<!--           android:exported="false"-->
+<!--           android:name="com.example.MCFEF.MyFirebaseMessagingService"-->
+<!--           android:directBootAware="true">-->
+<!--           <intent-filter android:priority="1">-->
+<!--               <action android:name="com.google.firebase.MESSAGING_EVENT"/>-->
+<!--               <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>-->
+<!--               <action android:name="org.linphone.core.action.PUSH_RECEIVED"/>-->
+<!--           </intent-filter>-->
+<!--       </service>-->
        <service
            android:name="org.linphone.core.tools.service.CoreService"
            android:foregroundServiceType="phoneCall|camera|microphone"

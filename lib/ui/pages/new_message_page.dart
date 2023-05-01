@@ -19,6 +19,7 @@ class _NewMessagePageState extends State<NewMessagePage> {
 
   bool selectedMode = false;
   List selected = [];
+  bool isSecret = false;
 
   // 2 - групповой чат; 3 - р2р приватный чат; 4 - групповой приватный чат; 5 - групповой чат в режиме чтения;
   late int chatType;
@@ -86,10 +87,17 @@ class _NewMessagePageState extends State<NewMessagePage> {
                     ),
                     onPressed: (){
                       print(selected);
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => GroupChatPreviewPage(usersList: selected, bloc: widget.bloc, chatType: chatType,)));
-                      setState(() {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) =>
+                              GroupChatPreviewPage(
+                                usersList: selected,
+                                bloc: widget.bloc,
+                                chatType: chatType,
+                                isSecret: isSecret,
+                              )));
+                      // setState(() {
                         // selectedMode = false;
-                      });
+                      // });
                     },
                     child: const Text('Дальше'),
                   ),
@@ -136,6 +144,7 @@ class _NewMessagePageState extends State<NewMessagePage> {
                         setState(() {
                           selectedMode = true;
                           chatType = 3;
+                          isSecret = true;
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -162,7 +171,7 @@ class _NewMessagePageState extends State<NewMessagePage> {
                       onPressed: () {
                         setState(() {
                           selectedMode = true;
-                          chatType = 4;
+                          chatType = 5;
                         });
                       },
                       style: ElevatedButton.styleFrom(
@@ -171,9 +180,16 @@ class _NewMessagePageState extends State<NewMessagePage> {
                         shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.only(bottomLeft: Radius.circular(5), bottomRight: Radius.circular(5))),
                       ),
-                      child: const Text(
-                        'Новая секретная группа',
-                        style: TextStyle(color: Colors.black12, fontSize: 20),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                          Icon(Icons.volume_up, color: Colors.black54,),
+                          SizedBox(width: 15,),
+                          const Text(
+                            'Новый канал',
+                            style: TextStyle(color: Colors.black54, fontSize: 20),
+                          ),
+                        ]
                       )),
                 /**
                  * Show selected users to be added to a group chat
