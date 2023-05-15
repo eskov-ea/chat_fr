@@ -33,35 +33,6 @@
           ]
         }
       }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:671710503893:android:fd92dd2bc6280e9997535c",
-        "android_client_info": {
-          "package_name": "com.cashalot.chat_fr"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "671710503893-iq0bene920n2fs7kir6e5jsu8rb74540.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBesVvyI339DO5DenOxQaZC80W4kDu5OyA"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "671710503893-iq0bene920n2fs7kir6e5jsu8rb74540.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
     }
   ],
   "configuration_version": "1"

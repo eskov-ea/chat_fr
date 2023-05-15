@@ -21,8 +21,6 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.MCFEF.MainActivity.Companion.core
 //import com.example.MCFEF.linphoneSDK.LinphoneSDK
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.messaging.FirebaseMessaging
 import io.flutter.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -31,15 +29,15 @@ import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
 import org.linphone.core.*
-import java.io.File
-import java.io.FileOutputStream
 import java.lang.Exception
 
 import com.example.MCFEF.calls_manager.Data
 import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver
-import android.view.View
 import android.widget.*
-
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
+import com.google.firebase.iid.FirebaseInstanceId
+import org.linphone.core.tools.service.CoreService
 
 
 class MainActivity: FlutterActivity() {
@@ -53,9 +51,12 @@ class MainActivity: FlutterActivity() {
 
     companion object {
         lateinit var core: Core
-//        lateinit var linphoneLib: LinphoneSDK
+
+        //        lateinit var linphoneLib: LinphoneSDK
         var eventSink: EventChannel.EventSink? = null
         var callServiceEventSink: EventChannel.EventSink? = null
+        var mainService: MainService? = null
+
     }
     private val callServiceEventChannel = "event.channel/call_service"
 
@@ -122,11 +123,15 @@ class MainActivity: FlutterActivity() {
                 val password = "1234"
                 val domain = "flexi.mcfef.com"
 
+//                val username = "115cashalot"
+//                val password = "1234"
+//                val domain = "sip.linphone.org"
+
                 Log.w("SIP method channel:", "$username, $password, $domain")
 
                 if (username != null && password != null && domain != null) {
-//                    linphoneLib.login(username, password, domain, this)
                     login(username, password, domain)
+//                    mainService!!.login(username, password, domain)
                 }
             } else if (call.method.equals("OUTGOING_CALL")) {
                 Log.w("OUTGOING", "Start event")
@@ -172,32 +177,28 @@ class MainActivity: FlutterActivity() {
 
     private suspend fun getDeviceToken(): String? {
         val def = CompletableDeferred<String?>()
-        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-            def.complete(if (task.isSuccessful) task.result else null)
-        })
-        return def.await()
+//        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+//            def.complete(if (task.isSuccessful) task.result else null)
+//        })
+        return FirebaseInstanceId.getInstance().getToken()
+
+//        return def.await()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.w("MAIN_ACTIVITY", "APP WAS STARTED")
+//        mainService = MainService()
+//        mainService!!.initialize()
         val factory = Factory.instance()
         factory.setDebugMode(true, "Hello Linphone")
         factory.enableLogcatLogs(true)
         core = factory.createCore(null, null, this)
-
-        nat = core.createNatPolicy()
-        nat.enableIce(true)
-        nat.stunServer = "stun.sip.us:3478"
-        nat.enableTcpTurnTransport(true)
-        nat.enableStun(true)
-        core.natPolicy = nat
-
-
         core.isPushNotificationEnabled = true
-        MyFirebaseMessagingService()
-//        linphoneLib = LinphoneSDK(this)
+
+
         createNotificationChannel()
+
         lifecycleScope.launch {
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 
@@ -213,6 +214,7 @@ class MainActivity: FlutterActivity() {
     override fun onDestroy() {
         Log.w("MAIN_ACTIVITY", "APP WAS CLOSED")
         core.stop()
+//        mainService!!.stopCore()
         super.onDestroy()
     }
 
@@ -228,9 +230,20 @@ class MainActivity: FlutterActivity() {
 
         address?.transport = transportType
         accountParams.serverAddress = address
-        accountParams.contactUriParameters = "sip:$username@$domain"
         accountParams.registerEnabled = true
         accountParams.pushNotificationAllowed = true
+        accountParams.remotePushNotificationAllowed = true
+
+
+        accountParams.pushNotificationConfig.provider = "fcm"
+        accountParams.pushNotificationConfig.prid = "fzHsENASQWeyhDKriEVO14:APA91bFcdDCuIxguyAFKvFuTlahdGaJSGBTL05NW4bFIpytNb2EVInOzv5bE680hj2PL9-x9PTgsDhniXxM41itP_Fwwrk65DIgUNqmJXM5M35RjtpVuRQIyDYu_SWgOIHk6_x9srjQR"
+        accountParams.pushNotificationConfig.bundleIdentifier = "1:671710503893:android:9a8e318c84b6a0ad97535c"
+//        Log.w("pushNotificationConfig", accountParams.pushNotificationConfig.provider)
+//        Log.w("pushNotificationConfig", accountParams.pushNotificationConfig.prid)
+//        Log.w("pushNotificationConfig", accountParams.pushNotificationConfig.bundleIdentifier)
+
+
+        accountParams.contactUriParameters = "sip:$username@$domain"
 
         Log.w("Account setup params", accountParams.identityAddress.toString())
         core.addAuthInfo(authInfo)
@@ -243,9 +256,9 @@ class MainActivity: FlutterActivity() {
                 coreListener
         )
 
-        account.addListener { _, state, message ->
-            Log.w("[Account] Registration state changed:", "$state, $message")
-        }
+//        account.addListener { _, state, message ->
+//            Log.w("[Account] Registration state changed:", "$state, $message")
+//        }
 
         core.start()
 
@@ -258,6 +271,8 @@ class MainActivity: FlutterActivity() {
             Toast.makeText(this, "Something is wrong with the push setup!", Toast.LENGTH_LONG).show()
             Log.w("PUSH", "${core.isVerifyServerCertificates}")
         }
+
+        startCallService(context)
 
     }
 
@@ -291,7 +306,6 @@ class MainActivity: FlutterActivity() {
                 Log.w("SIP RegistrationState status", "false")
                 val args = makePlatformEventPayload("REGISTRATION", null, null)
                 callServiceEventSink?.success(args)
-//                Log.w("Account setup", account.params.contactUriParameters.toString())
                 Log.w("Account setup 4", core.defaultAccount?.params?.identityAddress.toString())
             }
         }
@@ -302,7 +316,6 @@ class MainActivity: FlutterActivity() {
                 state: Call.State?,
                 message: String
         ) {
-//        findViewById<TextView>(R.id.call_status).text = message
 
             // When a call is received
             when (state) {
@@ -395,6 +408,20 @@ class MainActivity: FlutterActivity() {
 
             }
         }
+
+    }
+
+    private fun startCallService(context: Context) {
+//        val intent = Intent(context, SipForegroundService::class.java)
+        Toast.makeText(context, "startCallService", Toast.LENGTH_LONG).show()
+        val request = OneTimeWorkRequest.Builder(SipForegroundService::class.java).build()
+        WorkManager.getInstance(context).enqueue(request)
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            context.startForegroundService(intent)
+//        } else {
+//            context.startService(intent)
+//        }
 
     }
 

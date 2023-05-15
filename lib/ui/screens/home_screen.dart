@@ -227,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => el.id.toString() == state.callerName);
           callerName = "${callerUser.firstname} ${callerUser.lastname}";
           // FAke data
-          // if (callerName == null) callerName = 'Undefined';
+          if (callerName == null) callerName = 'Undefined';
           if (Platform.isIOS) return;
           Navigator.of(context).pushNamed(
               MainNavigationRouteNames.incomingCallScreen,
