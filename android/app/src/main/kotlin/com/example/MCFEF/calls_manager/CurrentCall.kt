@@ -13,6 +13,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.example.MCFEF.MainActivity
 import com.example.MCFEF.R
+import com.example.MCFEF.linphoneSDK.CoreContext
 import io.flutter.Log
 import org.linphone.core.AudioDevice
 
@@ -29,6 +30,7 @@ class CurrentCall : Activity() {
     lateinit var speakerBtn : ImageView
     lateinit var muteBtn : ImageView
     var isSpeaker: Boolean = false
+    var core = CoreContext.core!!
 
     inner class EndedCallsManagerBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -59,15 +61,15 @@ class CurrentCall : Activity() {
     }
 
     private fun initView() {
-        findViewById<TextView>(R.id.tvNameCaller).text = MainActivity.core.currentCall?.toAddress?.username
+        findViewById<TextView>(R.id.tvNameCaller).text = core.currentCall?.toAddress?.username
         muteBtn = findViewById<ImageView>(R.id.ivMuteCallButton)
         muteBtn.setOnClickListener{
-            if (MainActivity.core.micEnabled()) {
+            if (core.micEnabled()) {
                 muteBtn.setBackgroundResource(R.drawable.bg_button_active)
             } else {
                 muteBtn.setBackgroundResource(R.drawable.bg_button)
             }
-            MainActivity.core.enableMic(!MainActivity.core.micEnabled())
+            core.enableMic(!core.micEnabled())
         }
 
         speakerBtn = findViewById<ImageView>(R.id.ivSpeakerCallButton)
@@ -80,7 +82,7 @@ class CurrentCall : Activity() {
     }
 
     private fun onDeclineClick() {
-        MainActivity.core.currentCall?.terminate()
+        core.currentCall?.terminate()
         val callTime = CallsTimer(timerTextView).getTime()
         MainActivity.eventSink?.success(callTime)
         if (!isFinishing) {
@@ -99,29 +101,29 @@ class CurrentCall : Activity() {
 
     private fun toggleSpeaker() {
         // Get the currently used audio device
-        val currentAudioDevice = MainActivity.core.currentCall?.outputAudioDevice
+        val currentAudioDevice = core.currentCall?.outputAudioDevice
         val speakerEnabled = currentAudioDevice?.type == AudioDevice.Type.Speaker
 
         Log.w("toggleSpeaker", speakerEnabled.toString())
 
         // We can get a list of all available audio devices using
         // Note that on tablets for example, there may be no Earpiece device
-        for (audioDevice in MainActivity.core.audioDevices) {
+        for (audioDevice in core.audioDevices) {
 //            Log.w("toggleSpeaker", audioDevice.type.toString())
 
             if (speakerEnabled && audioDevice.type == AudioDevice.Type.Earpiece) {
                 Log.w("toggleSpeaker", "AudioDevice.Type.Microphone")
 
-                MainActivity.core.currentCall?.outputAudioDevice = audioDevice
+                core.currentCall?.outputAudioDevice = audioDevice
                 isSpeaker = false
-                Log.w("toggleSpeaker", (MainActivity.core.currentCall?.outputAudioDevice?.type == AudioDevice.Type.Speaker).toString())
+                Log.w("toggleSpeaker", (core.currentCall?.outputAudioDevice?.type == AudioDevice.Type.Speaker).toString())
             } else if (!speakerEnabled && audioDevice.type == AudioDevice.Type.Speaker) {
                 Log.w("toggleSpeaker", "AudioDevice.Type.Speaker")
 
-                MainActivity.core.currentCall?.outputAudioDevice = audioDevice
+                core.currentCall?.outputAudioDevice = audioDevice
                 isSpeaker = true
             } else if (audioDevice.type == AudioDevice.Type.Bluetooth) {
-                MainActivity.core.currentCall?.outputAudioDevice = audioDevice
+                core.currentCall?.outputAudioDevice = audioDevice
                 isSpeaker = true
             }
             if (isSpeaker) {

@@ -24,6 +24,7 @@ import android.widget.TextView
 import androidx.annotation.StringRes
 import com.example.MCFEF.MainActivity
 import com.example.MCFEF.R
+import com.example.MCFEF.linphoneSDK.CoreContext
 import io.flutter.Log
 import java.io.IOException
 
@@ -44,8 +45,8 @@ class RingingCall: Activity() {
     }
 
     private var endedCallkitIncomingBroadcastReceiver = EndedCallsManagerBroadcastReceiver()
-
-    val name = MainActivity.core.currentCall?.toAddress?.username
+    var core = CoreContext.core!!
+    val name = core.currentCall?.toAddress?.username
     lateinit var tvCalling: TextView
     val mediaPlayer = MediaPlayer()
 
@@ -123,7 +124,7 @@ class RingingCall: Activity() {
     }
 
     private fun onDeclineClick() {
-        MainActivity.core.currentCall?.terminate()
+        core.currentCall?.terminate()
         stopMediaPlayer()
     }
 

@@ -30,7 +30,7 @@ apply plugin: 'com.android.application'
 
 
 android {
-    compileSdkVersion localProperties.getProperty('flutter.compileSdkVersion').toInteger()
+    compileSdkVersion 33
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -48,8 +48,8 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.cashalot.MCFEF"
-        minSdkVersion localProperties.getProperty('flutter.compileSdkVersion').toInteger()
-        targetSdkVersion localProperties.getProperty('flutter.minSdkVersion').toInteger()
+        minSdkVersion 25
+        targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
 

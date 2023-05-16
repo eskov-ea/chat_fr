@@ -1,29 +1,240 @@
 package com.example.MCFEF.linphoneSDK
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.core.app.ActivityCompat.requestPermissions
 import com.example.MCFEF.MainActivity
-import org.linphone.core.Core
-import org.linphone.core.Factory
+import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver
+import com.example.MCFEF.calls_manager.Data
+import com.example.MCFEF.makeCallDataPayload
+import com.example.MCFEF.makePlatformEventPayload
+import io.flutter.Log
+import org.linphone.core.*
 
-class LinphoneCore {
+class LinphoneCore constructor(var core: Core, var context: Context) {
 
-    var core: Core? = null
+    val android: Map<String, Any?> = mapOf(
+        "isCustomNotification" to true,
+        "isShowLogo" to false,
+        "isShowCallback" to false,
+        "isShowMissedCallNotification" to true,
+        "ringtonePath" to "system_ringtone_default",
+        "backgroundColor" to "#0955fa",
+        "backgroundUrl" to "https://i.pravatar.cc/500",
+        "actionColor" to "#4CAF50"
+    )
 
-    fun getSDKCore(): Core {
-        if (core == null) {
-            createCore()
+    public fun login(username: String, password: String, domain: String) {
+
+        val transportType = TransportType.Tcp
+        val authInfo = Factory.instance().createAuthInfo(username, null, password, null, null, domain, null)
+        val accountParams = core.createAccountParams()
+        val identity = Factory.instance().createAddress("sip:$username@$domain")
+        accountParams.identityAddress = identity
+        val address = Factory.instance().createAddress("sip:$domain")
+
+        address?.transport = transportType
+        accountParams.serverAddress = address
+        accountParams.registerEnabled = true
+        accountParams.pushNotificationAllowed = true
+        accountParams.remotePushNotificationAllowed = true
+
+        accountParams.pushNotificationConfig.provider = "fcm"
+        accountParams.pushNotificationConfig.prid = "fzHsENASQWeyhDKriEVO14:APA91bFcdDCuIxguyAFKvFuTlahdGaJSGBTL05NW4bFIpytNb2EVInOzv5bE680hj2PL9-x9PTgsDhniXxM41itP_Fwwrk65DIgUNqmJXM5M35RjtpVuRQIyDYu_SWgOIHk6_x9srjQR"
+        accountParams.pushNotificationConfig.bundleIdentifier = "1:671710503893:android:9a8e318c84b6a0ad97535c"
+
+        accountParams.contactUriParameters = "sip:$username@$domain"
+
+        Log.w("Account setup params", accountParams.identityAddress.toString())
+        core.addAuthInfo(authInfo)
+        val account = core.createAccount(accountParams)
+        core.addAccount(account)
+
+        core.defaultAccount = account
+        core.addListener(
+//                linphoneLib.coreListener
+            coreListener
+        )
+
+        account.addListener { _, state, message ->
+            Log.w("[Account] Registration state changed:", "$state, $message")
         }
-        return core!!
+
+        core.start()
+
+
+        if (!core.isPushNotificationAvailable) {
+            Toast.makeText(context, "Something is wrong with the push setup!", Toast.LENGTH_LONG).show()
+            Log.w("PUSH", "${core.isVerifyServerCertificates}")
+        }
+
     }
 
-    fun getInstance() {
+    private val coreListener = object: CoreListenerStub() {
+        override fun onAccountRegistrationStateChanged(core: Core, account: Account, state: RegistrationState?, message: String) {
+
+            if (state == RegistrationState.Failed || state == RegistrationState.Cleared) {
+                Log.w("SIP RegistrationState status", "true")
+            } else if (state == RegistrationState.Ok) {
+                Log.w("SIP RegistrationState status", "false")
+                val args = makePlatformEventPayload("REGISTRATION", null, null)
+                MainActivity.callServiceEventSink?.success(args)
+                Log.w("Account setup 4", core.defaultAccount?.params?.identityAddress.toString())
+            }
+        }
+
+        override  fun onCallStateChanged(
+            core: Core,
+            call: Call,
+            state: Call.State?,
+            message: String
+        ) {
+
+            // When a call is received
+            when (state) {
+                Call.State.IncomingReceived -> {
+
+                    val args: Map<String, Any?> = mapOf(
+                        "nameCaller" to call.remoteAddress.username,
+                        "android" to android
+                    )
+
+                    val data = Data(args).toBundle()
+
+                    context.sendBroadcast(
+                        CallsManagerBroadcastReceiver.getIntentIncoming(
+                            context,
+                            data
+                        )
+                    )
+                    val callArgs = makePlatformEventPayload("INCOMING", call.remoteAddress.username, null)
+
+                    MainActivity.callServiceEventSink?.success(callArgs)
+
+                }
+                Call.State.Connected -> {
+                    Log.w("ACTIVE_CALL", "Connected   ${call.remoteAddress.username}")
+                    val args = makePlatformEventPayload("CONNECTED", call.remoteAddress.username, null)
+
+                    MainActivity.callServiceEventSink?.success(args)
+
+                    val dargs: Map<String, Any?> = mapOf(
+                        "nameCaller" to call.remoteAddress.username,
+                        "android" to android
+                    )
+
+                    val data = Data(dargs).toBundle()
+                    context.sendBroadcast(
+                        CallsManagerBroadcastReceiver.getIntentDecline(
+                            context,
+                            data
+                        )
+                    )
+
+//                    val intent = Intent(context, CurrentCall::class.java).apply {
+//                        flags =
+//                                Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+//                    }
+//                    context.startActivity(intent)
+                }
+                Call.State.Released -> {
+//                    sendBroadcast(CurrentCall.getIntentEnded())
+                    val dargs: Map<String, Any?> = mapOf(
+                        "nameCaller" to call.remoteAddress.username,
+                        "android" to android
+                    )
+
+                    val data = Data(dargs).toBundle()
+                    context.sendBroadcast(
+                        CallsManagerBroadcastReceiver.getIntentDecline(
+                            context,
+                            data
+                        )
+                    )
+                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
+                        callStatus = if (call.callLog.status.name == "Success")  "ANSWERED" else "NO ANSWER",
+                        fromCaller = call.callLog.fromAddress.username,
+                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
+                        callId = call.callLog.callId)
+                    val args = makePlatformEventPayload("ENDED", call.remoteAddress.username, callData)
+
+                    MainActivity.callServiceEventSink?.success(args)
+                }
+                Call.State.OutgoingInit -> {
+                    Log.w("OUTGOING_CALL", "OutgoingInit")
+//                    val intent = Intent(context, RingingCall::class.java).apply {
+//                        flags =
+//                                Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+//                    }
+//                    context.startActivity(intent)
+
+                    val args = makePlatformEventPayload("OUTGOING", call.remoteAddress.username, null)
+
+                    MainActivity.callServiceEventSink?.success(args)
+                }
+                Call.State.OutgoingProgress  -> {
+                    Log.w("OUTGOING_CALL", "OutgoingProgress")
+                }
+                Call.State.OutgoingRinging -> {
+                    Log.w("OUTGOING_CALL", "OutgoingRinging")
+                }
+
+            }
+        }
 
     }
 
-    fun createCore() {
-        val factory = Factory.instance()
-        factory.setDebugMode(true, "Hello Linphone")
-        factory.enableLogcatLogs(true)
-        core = factory.createCore(null, null, this)
-        core!!.isPushNotificationEnabled = true
+    fun outgoingCall(remoteSipUri: String, context: Context) {
+        Log.w("OUTGOING", "$remoteSipUri")
+        val remoteAddress = Factory.instance().createAddress(remoteSipUri)
+        remoteAddress ?: return
+
+        val params = core.createCallParams(null)
+        params ?: return
+
+        params.mediaEncryption = MediaEncryption.None
+
+
+        core.inviteAddressWithParams(remoteAddress, params)
     }
+
+    fun toggleMute(): Boolean {
+        core.enableMic(!core.micEnabled())
+
+        return !core.micEnabled()
+    }
+
+    fun toggleSpeaker(): Boolean {
+        // Get the currently used audio device
+        val currentAudioDevice = core.currentCall?.outputAudioDevice
+        val speakerEnabled = currentAudioDevice?.type == AudioDevice.Type.Speaker
+
+        Log.w("toggleSpeaker", speakerEnabled.toString())
+
+        // We can get a list of all available audio devices using
+        // Note that on tablets for example, there may be no Earpiece device
+        for (audioDevice in core.audioDevices) {
+//            Log.w("toggleSpeaker", audioDevice.type.toString())
+
+            if (speakerEnabled && audioDevice.type == AudioDevice.Type.Earpiece) {
+                Log.w("toggleSpeaker", "AudioDevice.Type.Microphone")
+
+                core.currentCall?.outputAudioDevice = audioDevice
+                Log.w("toggleSpeaker", (core.currentCall?.outputAudioDevice?.type == AudioDevice.Type.Speaker).toString())
+                return false
+            } else if (!speakerEnabled && audioDevice.type == AudioDevice.Type.Speaker) {
+                Log.w("toggleSpeaker", "AudioDevice.Type.Speaker")
+
+                core.currentCall?.outputAudioDevice = audioDevice
+                return true
+            }
+//        else if (audioDevice.type == AudioDevice.Type.Bluetooth) {
+//            core.currentCall?.outputAudioDevice = audioDevice
+//        }
+        }
+        return false
+    }
+
 }

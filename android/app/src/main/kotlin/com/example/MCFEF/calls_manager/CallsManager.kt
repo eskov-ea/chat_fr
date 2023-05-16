@@ -20,6 +20,7 @@ import com.example.MCFEF.MainActivity
 import com.example.MCFEF.R
 import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.ACTION_CALL_INCOMING
 import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_INCOMING_DATA
+import com.example.MCFEF.linphoneSDK.CoreContext
 import com.hiennv.flutter_callkit_incoming.Utils
 import com.hiennv.flutter_callkit_incoming.widgets.RippleRelativeLayout
 import io.flutter.Log
@@ -75,7 +76,7 @@ class CallsManager : Activity() {
     private lateinit var ivDeclineCall: ImageView
     private lateinit var tvDecline: TextView
 
-    private val call = MainActivity.Companion.core
+    private val call = CoreContext.core
 
 
     public override fun onCreate(savedInstanceState: Bundle?) {

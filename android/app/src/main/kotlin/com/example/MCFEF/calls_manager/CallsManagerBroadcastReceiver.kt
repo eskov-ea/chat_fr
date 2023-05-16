@@ -8,12 +8,13 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import com.example.MCFEF.MainActivity
+import com.example.MCFEF.linphoneSDK.CoreContext
 
 import org.linphone.core.Reason
 
 class CallsManagerBroadcastReceiver : BroadcastReceiver() {
 
-    private val call = MainActivity.Companion.core
+    private val call = CoreContext.core
 
     companion object {
         const val ACTION_CALL_INCOMING =
@@ -113,7 +114,7 @@ class CallsManagerBroadcastReceiver : BroadcastReceiver() {
 //                                Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
 //                    }
 //                    context.startActivity(intent)
-                    call.currentCall?.accept()
+                    call!!.currentCall?.accept()
                 } catch (error: Exception) {
                     error.printStackTrace()
                     Log.w("ERROR CALL","$error")
@@ -123,7 +124,7 @@ class CallsManagerBroadcastReceiver : BroadcastReceiver() {
                 try {
                     Log.w("DECLINE_CALL", "$this")
                     context.stopService(Intent(context, CallsSoundPlayerService::class.java))
-                    call.currentCall?.decline(Reason.Declined)
+                    call!!.currentCall?.decline(Reason.Declined)
                     callkitNotificationManager.clearIncomingNotification(data)
                 } catch (error: Exception) {
                     error.printStackTrace()
