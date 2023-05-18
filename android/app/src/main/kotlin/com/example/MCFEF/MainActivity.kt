@@ -95,9 +95,9 @@ class MainActivity: FlutterActivity() {
 //                val username = call.argument<String?>("username")
 //                val password = call.argument<String?>("password")
 //                val domain = call.argument<String?>("domain")
-                val username = "115"
+                val username = "118"
                 val password = "1234"
-                val domain = "flexi.mcfef.com"
+                val domain = "aster.mcfef.com"
 
                 Log.w("SIP method channel:", "$username, $password, $domain")
 
