@@ -26,7 +26,9 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         "actionColor" to "#4CAF50"
     )
 
-    public fun login(username: String, password: String, domain: String) {
+    fun login(username: String, password: String, domain: String) {
+
+        writeSipAccountToStorage(username, password, domain)
 
         val transportType = TransportType.Tcp
         val authInfo = Factory.instance().createAuthInfo(username, null, password, null, null, domain, null)
@@ -72,6 +74,28 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
     }
 
+    private fun writeSipAccountToStorage(username: String, password: String, domain: String) {
+        val sharedPreference =  context.getSharedPreferences(CoreContext.PREFERENCE_FILENAME,Context.MODE_PRIVATE)
+        val editor = sharedPreference.edit()
+        editor.putString("username",username)
+        editor.putString("password",password)
+        editor.putString("domain",domain)
+        editor.apply()
+    }
+
+    fun readSipAccountFromStorageAndLogin() {
+        val sharedPreference =  context.getSharedPreferences(CoreContext.PREFERENCE_FILENAME,Context.MODE_PRIVATE)
+        val username = sharedPreference.getString("username", null)
+        val password = sharedPreference.getString("password", null)
+        val domain = sharedPreference.getString("domain", null)
+
+        if (username != null && password != null && domain != null) {
+            login(username, password, domain)
+        } else {
+            Toast.makeText(context, "Входящий вызов получен, но не может быть обработан. Запустите MCFEF вручную", Toast.LENGTH_LONG).show()
+        }
+    }
+
     private val coreListener = object: CoreListenerStub() {
         override fun onAccountRegistrationStateChanged(core: Core, account: Account, state: RegistrationState?, message: String) {
 
@@ -95,6 +119,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
             // When a call is received
             when (state) {
                 Call.State.IncomingReceived -> {
+                    Log.w("ACTIVE_CALL", "IncomingReceived   ${call.remoteAddress.username}")
 
                     val args: Map<String, Any?> = mapOf(
                         "nameCaller" to call.remoteAddress.username,
@@ -140,6 +165,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 //                    context.startActivity(intent)
                 }
                 Call.State.Released -> {
+                    Log.w("ACTIVE_CALL", "Released   ${call.remoteAddress.username}")
 //                    sendBroadcast(CurrentCall.getIntentEnded())
                     val dargs: Map<String, Any?> = mapOf(
                         "nameCaller" to call.remoteAddress.username,
@@ -158,6 +184,30 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                         fromCaller = call.callLog.fromAddress.username,
                         toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
                         callId = call.callLog.callId)
+                    val args = makePlatformEventPayload("ENDED", call.remoteAddress.username, callData)
+
+                    MainActivity.callServiceEventSink?.success(args)
+                }
+                Call.State.End -> {
+                    Log.w("ACTIVE_CALL", "Ended   ${call.remoteAddress.username}")
+//                    sendBroadcast(CurrentCall.getIntentEnded())
+                    val dargs: Map<String, Any?> = mapOf(
+                            "nameCaller" to call.remoteAddress.username,
+                            "android" to android
+                    )
+
+                    val data = Data(dargs).toBundle()
+                    context.sendBroadcast(
+                            CallsManagerBroadcastReceiver.getIntentDecline(
+                                    context,
+                                    data
+                            )
+                    )
+                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
+                            callStatus = if (call.callLog.status.name == "Success")  "ANSWERED" else "NO ANSWER",
+                            fromCaller = call.callLog.fromAddress.username,
+                            toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
+                            callId = call.callLog.callId)
                     val args = makePlatformEventPayload("ENDED", call.remoteAddress.username, callData)
 
                     MainActivity.callServiceEventSink?.success(args)

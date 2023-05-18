@@ -72,6 +72,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
 
 
+  Future<bool> isCallRunning () async {
+    return await sipChannel.invokeMethod('CHECK_FOR_RUNNING_CALL');
+  }
 
   Future<void> sipRegistration(UserProfileAsteriskSettings settings) async {
     try {
@@ -172,15 +175,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  void _onBlocProfileStateChanged(UserProfileState state){
+  Future<void> _onBlocProfileStateChanged(UserProfileState state) async {
     if (state is UserProfileLoadedState) {
       myUserName = "${state.user?.firstname} ${state.user?.lastname}";
       print("asterisk  --> ${state.user!.userProfileSettings!.asteriskUserPassword} ");
       if (kIsWeb) return;
-      if (state.user != null && state.user?.userProfileSettings != null
-          && state.user!.userProfileSettings!.asteriskUserPassword != null
-          && state.user!.userProfileSettings!.asteriskHost != null  ) {
-        sipRegistration(state.user!.userProfileSettings!);
+      if (!await isCallRunning()){
+        if (state.user != null && state.user?.userProfileSettings != null
+            && state.user!.userProfileSettings!.asteriskUserPassword != null
+            && state.user!.userProfileSettings!.asteriskHost != null) {
+          sipRegistration(state.user!.userProfileSettings!);
+        }
         getUserCallLog(state.user!.userProfileSettings!);
       } else {
         customToastMessage(context, "Не удалось получить настройки для Asterisk с сервера. Пожалуйста, сообщите об этой ошибке разработчикам");
@@ -224,9 +229,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       // _db = getSqfliteDatabase();
       callServiceBlocSubscription = BlocProvider.of<CallsBloc>(context).stream.listen((state) async {
         if (state is IncomingCallState) {
-          final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => el.id.toString() == state.callerName);
-          callerName = "${callerUser.firstname} ${callerUser.lastname}";
+          // final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => el.id.toString() == state.callerName);
+          // callerName = "${callerUser.firstname} ${callerUser.lastname}";
           // FAke data
+          callerName = null;
           if (callerName == null) callerName = 'Undefined';
           if (Platform.isIOS) return;
           Navigator.of(context).pushNamed(

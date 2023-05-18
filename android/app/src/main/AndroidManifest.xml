@@ -170,10 +170,10 @@
 
            android:exported="false">
        </activity>
-       <service
-           android:name="com.example.MCFEF.SipForegroundService"
-           android:enabled="true"
-           android:exported="true" />
+<!--       <service-->
+<!--           android:name="com.example.MCFEF.SipForegroundService"-->
+<!--           android:enabled="true"-->
+<!--           android:exported="true" />-->
 
    </application>
 </manifest>
