@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   SqfliteDatabase? _db;
   bool isUpdateAvailable = true;
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
-  final String prefix = "0";
+  final String prefix = "7";
 
 
   Future<bool> isCallRunning () async {
@@ -80,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future<void> sipRegistration(UserProfileAsteriskSettings settings) async {
     try {
       final String? userId = await _dataProvider.getUserId();
-      print("Trying to register to SIP with    $userId@${settings.asteriskHost} and password ${settings.asteriskUserPassword}");
+      print("Trying to register to SIP with    $prefix$userId@${settings.asteriskHost} and password ${settings.asteriskUserPassword}");
       await sipChannel.invokeMethod('SIP_LOGIN', {
         "username": "$prefix$userId",
         "password": settings.asteriskUserPassword,
@@ -229,6 +229,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!kIsWeb) {
       // _db = getSqfliteDatabase();
       callServiceBlocSubscription = BlocProvider.of<CallsBloc>(context).stream.listen((state) async {
+        print("callServiceBlocSubscription:  $state");
         if (state is IncomingCallState) {
           try {
             final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => "$prefix${el.id}" == state.callerName);
@@ -248,10 +249,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         } else if (state is OutgoingCallServiceState) {
           _isPushSent = false;
           try {
-            final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => "0${el.id}" == state.callerName);
+            final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => "$prefix${el.id}" == state.callerName);
             callerName = "${callerUser.firstname} ${callerUser.lastname}";
           } catch (err) {
-            print(err);
+            print("OutgoingCallServiceState Error:   $err");
           }
           Navigator.of(context).pushNamed(
               MainNavigationRouteNames.outgoingCallScreen,

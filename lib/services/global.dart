@@ -25,6 +25,7 @@ import 'messages/messages_repository.dart';
 import 'package:universal_html/html.dart' as html;
 
 AudioPlayer _player = AudioPlayer();
+const prefix = "7";
 
 Future<void> playAudio(
     {required AudioPlayer player, required AudioSource source}) async {
@@ -49,7 +50,7 @@ const sipChannel = MethodChannel("com.application.chat/sip");
 Future<void> callNumber(BuildContext context, String userId) async {
   print("OUTGOING CALL NUMBER");
   await sipChannel.invokeMethod(
-      "OUTGOING_CALL", {"number": "sip:0${userId}@aster.mcfef.com"});
+      "OUTGOING_CALL", {"number": "sip:$prefix${userId}@aster.mcfef.com"});
 }
 
 Future<void> declineCall() async {

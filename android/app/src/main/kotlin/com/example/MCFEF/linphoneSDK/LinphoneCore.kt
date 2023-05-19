@@ -43,10 +43,6 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         accountParams.pushNotificationAllowed = true
         accountParams.remotePushNotificationAllowed = true
 
-        accountParams.pushNotificationConfig.provider = "fcm"
-        accountParams.pushNotificationConfig.prid = "fzHsENASQWeyhDKriEVO14:APA91bFcdDCuIxguyAFKvFuTlahdGaJSGBTL05NW4bFIpytNb2EVInOzv5bE680hj2PL9-x9PTgsDhniXxM41itP_Fwwrk65DIgUNqmJXM5M35RjtpVuRQIyDYu_SWgOIHk6_x9srjQR"
-        accountParams.pushNotificationConfig.bundleIdentifier = "1:671710503893:android:9a8e318c84b6a0ad97535c"
-
         accountParams.contactUriParameters = "sip:$username@$domain"
 
         Log.w("Account setup params", accountParams.identityAddress.toString())
@@ -56,7 +52,6 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
         core.defaultAccount = account
         core.addListener(
-//                linphoneLib.coreListener
             coreListener
         )
 
@@ -68,7 +63,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
 
         if (!core.isPushNotificationAvailable) {
-            Toast.makeText(context, "Something is wrong with the push setup!", Toast.LENGTH_LONG).show()
+//            Toast.makeText(context, "Something is wrong with the push setup!", Toast.LENGTH_LONG).show()
             Log.w("PUSH", "${core.isVerifyServerCertificates}")
         }
 
@@ -237,7 +232,6 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
     }
 
     fun outgoingCall(remoteSipUri: String, context: Context) {
-        Log.w("OUTGOING", "$remoteSipUri")
         val remoteAddress = Factory.instance().createAddress(remoteSipUri)
         remoteAddress ?: return
 
@@ -246,6 +240,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
         params.mediaEncryption = MediaEncryption.None
 
+        Log.w("OUTGOING", "$remoteAddress, $params")
 
         core.inviteAddressWithParams(remoteAddress, params)
     }

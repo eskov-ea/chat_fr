@@ -102,8 +102,8 @@ class MainActivity: FlutterActivity() {
                     linphoneCore.login(username, password, domain)
                 }
             } else if (call.method.equals("OUTGOING_CALL")) {
-                Log.w("OUTGOING", "Start event")
                 val number = call.argument<String?>("number")
+                Log.w("OUTGOING", "Start event  $number")
                 if (number != null) {
                     linphoneCore.outgoingCall(number, context)
                 }
@@ -111,7 +111,6 @@ class MainActivity: FlutterActivity() {
                 Log.w("DESTROY_SIP", "DESTROY_SIP event")
                 linphoneCore.core.stop()
             } else if (call.method.equals("DECLINE_CALL")) {
-                Log.w("DECLINE_CALL", "DESTROY_SIP event")
                 linphoneCore.core.currentCall?.terminate()
             } else if (call.method.equals("ACCEPT_CALL")) {
                 Log.w("ACCEPT_CALL", "DESTROY_SIP event")
