@@ -70,6 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   SqfliteDatabase? _db;
   bool isUpdateAvailable = true;
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
+  final String prefix = "0";
 
 
   Future<bool> isCallRunning () async {
@@ -81,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       final String? userId = await _dataProvider.getUserId();
       print("Trying to register to SIP with    $userId@${settings.asteriskHost} and password ${settings.asteriskUserPassword}");
       await sipChannel.invokeMethod('SIP_LOGIN', {
-        "username": "$userId",
+        "username": "$prefix$userId",
         "password": settings.asteriskUserPassword,
         "domain": settings.asteriskHost
       });
@@ -229,11 +230,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       // _db = getSqfliteDatabase();
       callServiceBlocSubscription = BlocProvider.of<CallsBloc>(context).stream.listen((state) async {
         if (state is IncomingCallState) {
-          // final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => el.id.toString() == state.callerName);
-          // callerName = "${callerUser.firstname} ${callerUser.lastname}";
-          // FAke data
-          callerName = null;
-          if (callerName == null) callerName = 'Undefined';
+          try {
+            final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => "$prefix${el.id}" == state.callerName);
+            callerName = "${callerUser.firstname} ${callerUser.lastname}";
+          } catch (err) {
+            callerName = "${state.callerName}";
+          }
           if (Platform.isIOS) return;
           Navigator.of(context).pushNamed(
               MainNavigationRouteNames.incomingCallScreen,
@@ -245,8 +247,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           );
         } else if (state is OutgoingCallServiceState) {
           _isPushSent = false;
-          final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => el.id.toString() == state.callerName);
-          callerName = "${callerUser.firstname} ${callerUser.lastname}";
+          try {
+            final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => "0${el.id}" == state.callerName);
+            callerName = "${callerUser.firstname} ${callerUser.lastname}";
+          } catch (err) {
+            print(err);
+          }
           Navigator.of(context).pushNamed(
               MainNavigationRouteNames.outgoingCallScreen,
               arguments: CallScreenArguments(

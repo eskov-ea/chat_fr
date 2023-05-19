@@ -92,12 +92,9 @@ class MainActivity: FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_SIP ).setMethodCallHandler {
             call, result ->
             if (call.method.equals("SIP_LOGIN")) {
-//                val username = call.argument<String?>("username")
-//                val password = call.argument<String?>("password")
-//                val domain = call.argument<String?>("domain")
-                val username = "118"
-                val password = "1234"
-                val domain = "aster.mcfef.com"
+                val username = call.argument<String?>("username")
+                val password = call.argument<String?>("password")
+                val domain = call.argument<String?>("domain")
 
                 Log.w("SIP method channel:", "$username, $password, $domain")
 
