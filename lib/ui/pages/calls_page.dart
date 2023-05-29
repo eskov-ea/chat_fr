@@ -34,10 +34,17 @@ class _CallsPageState extends State<CallsPage> {
     _errorSubscription = BlocProvider.of<CallLogsBloc>(context).stream.listen((state) {
       _onState(state);
     });
+    _usersSubscription = BlocProvider.of<UsersViewCubit>(context).stream.listen((state) {
+      setState(() {
+        users = state.usersDictionary ;
+      });
+    });
     super.initState();
   }
 
+  late final StreamSubscription _usersSubscription;
   String? userId;
+  Map<String, UserContact> users = {};
   late final StreamSubscription _errorSubscription;
   bool isError = false;
   void _onState(state) {
@@ -66,25 +73,31 @@ class _CallsPageState extends State<CallsPage> {
   }
 
   Widget getCallInfo(Map<String, UserContact>  users, CallModel call, int index) {
-    try {
+    // try {
       CallRenderData? data;
-      if (call.toCaller == userId) {
-        final user = users["${call.fromCaller}"]!;
+      final toCaller = call.toCaller.replaceAll(new RegExp(r'[^0-9]'), '').substring(1);
+      final fromCaller = call.fromCaller.replaceAll(new RegExp(r'[^0-9]'), '').substring(1);
+      if (toCaller == userId) {
+        print("call user:   $fromCaller  $users");
+        final user = users["$fromCaller"]!;
+        print("call user:  $user");
         data = CallRenderData(
             userId: int.parse(userId!),
             callName:
                 call.callStatus == "ANSWERED" ? "Входящий" : "Пропущенный",
             callerName: "${user.firstname} ${user.lastname}",
-            callerNumber: call.fromCaller,
+            callerNumber: fromCaller,
             callDate: DateTime.parse(call.date),
             callDuration: call.duration);
       } else {
-        final user = users["${call.toCaller}"]!;
+        print("call user:  $toCaller  $users");
+        final user = users["$toCaller"]!;
+        print("call user:  $user");
         data = CallRenderData(
             userId: int.parse(userId!),
             callName: "Исходящий",
             callerName: "${user.firstname} ${user.lastname}",
-            callerNumber: call.toCaller,
+            callerNumber: toCaller,
             callDate: DateTime.parse(call.date),
             callDuration: call.duration);
       }
@@ -154,12 +167,13 @@ class _CallsPageState extends State<CallsPage> {
           ]),
         ),
       );
-    } catch (err) {
-      return Container(
-        child: Text(err.toString()),
-      );
     }
-  }
+    // catch (err) {
+    //   return Container(
+    //     child: Text(err.toString()),
+    //   );
+    // }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -172,8 +186,8 @@ class _CallsPageState extends State<CallsPage> {
           : BlocBuilder<CallLogsBloc, CallLogsBlocState>(
               builder: (context, state) {
                 final usersState = BlocProvider.of<UsersViewCubit>(context).state;
-                if (state is CallsLoadedLogState && usersState is UsersViewCubitLoadedState) {
-                  final users = usersState.usersDictionary;
+                print("call users:  $usersState, ${usersState.usersDictionary}");
+                if (state is CallsLoadedLogState && users.isNotEmpty) {
                   if (state.callLog.isEmpty) {
                     return Center(
                       child: Text("Нет истории звонков"),

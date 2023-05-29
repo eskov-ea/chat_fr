@@ -110,7 +110,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
             state: Call.State?,
             message: String
         ) {
-
+            Log.i("onCallStateChanged", state.toString())
             // When a call is received
             when (state) {
                 Call.State.IncomingReceived -> {
@@ -159,30 +159,30 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 //                    }
 //                    context.startActivity(intent)
                 }
-                Call.State.Released -> {
-                    Log.w("ACTIVE_CALL", "Released   ${call.remoteAddress.username}")
-//                    sendBroadcast(CurrentCall.getIntentEnded())
-                    val dargs: Map<String, Any?> = mapOf(
-                        "nameCaller" to call.remoteAddress.username,
-                        "android" to android
-                    )
-
-                    val data = Data(dargs).toBundle()
-                    context.sendBroadcast(
-                        CallsManagerBroadcastReceiver.getIntentDecline(
-                            context,
-                            data
-                        )
-                    )
-                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
-                        callStatus = if (call.callLog.status.name == "Success")  "ANSWERED" else "NO ANSWER",
-                        fromCaller = call.callLog.fromAddress.username,
-                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
-                        callId = call.callLog.callId)
-                    val args = makePlatformEventPayload("ENDED", call.remoteAddress.username, callData)
-
-                    MainActivity.callServiceEventSink?.success(args)
-                }
+//                Call.State.Released -> {
+//                    Log.w("ACTIVE_CALL", "Released   ${call.remoteAddress.username}")
+////                    sendBroadcast(CurrentCall.getIntentEnded())
+//                    val dargs: Map<String, Any?> = mapOf(
+//                        "nameCaller" to call.remoteAddress.username,
+//                        "android" to android
+//                    )
+//
+//                    val data = Data(dargs).toBundle()
+//                    context.sendBroadcast(
+//                        CallsManagerBroadcastReceiver.getIntentDecline(
+//                            context,
+//                            data
+//                        )
+//                    )
+//                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
+//                        callStatus = if (call.callLog.status.name == "Success")  "ANSWERED" else "NO ANSWER",
+//                        fromCaller = call.callLog.fromAddress.username,
+//                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
+//                        callId = call.callLog.callId)
+//                    val args = makePlatformEventPayload("ENDED", call.remoteAddress.username, callData)
+//
+//                    MainActivity.callServiceEventSink?.success(args)
+//                }
                 Call.State.End -> {
                     Log.w("ACTIVE_CALL", "Ended   ${call.remoteAddress.username}")
 //                    sendBroadcast(CurrentCall.getIntentEnded())

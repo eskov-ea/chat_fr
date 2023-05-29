@@ -257,10 +257,10 @@ fun makeCallDataPayload(duration: String?, callStatus: String?, fromCaller: Stri
                         date: String?, callId: String?): Map<String, Any?> {
     return mapOf(
             "duration" to duration,
-            "disposition" to callStatus,
-            "dst" to toCaller,
-            "src" to fromCaller,
-            "calldate" to date,
-            "uniqueid" to callId
+            "reason" to callStatus,
+            "sip_to" to toCaller,
+            "sip_from" to fromCaller,
+            "date" to date,
+            "call_id" to callId
     )
 }

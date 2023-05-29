@@ -20,13 +20,15 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
         try {
           final logs = await _callLogService.getCallLogs(passwd: event.passwd);
           logs.forEach((call) {
+            print("onLoadCallLogsEvent  $call    ${call.id}");
             state.logsDictionary[call.id] = true;
           });
           final _asteriskPasswd = event.passwd;
-          final newState = CallsLoadedLogState(callLog: logs);
+          final newState = CallsLoadedLogState(callLog: logs, logsDictionary: state.logsDictionary);
+          print("onLoadCallLogsEvent last    ${state.logsDictionary}");
           emit(newState);
         } catch (err) {
-          print(err);
+          print("Calls log error:  $err");
           final e = err as AppErrorException;
           errorHandlerBloc.add(ErrorHandlerWithErrorEvent(error: err, errorStack: e.message));
           final errorState = CallLogErrorState();
@@ -39,7 +41,7 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
           logs.forEach((call) {
             state.logsDictionary[call.id] = true;
           });
-          final newState = CallsLoadedLogState(callLog: logs);
+          final newState = CallsLoadedLogState(callLog: logs, logsDictionary: state.logsDictionary);
           emit(newState);
         } catch (err) {
           final e = err as AppErrorException;
@@ -48,11 +50,11 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
           emit(errorState);
         }
       } else if (event is AddCallToLogEvent) {
-        print("IS_CALL_LOGGED  ${state.logsDictionary}");
+        print("IS_CALL_LOGGED  ${state.logsDictionary}  ${event.call.id}");
         if(state.logsDictionary[event.call.id]  != true) {
           final newLogState = [event.call, ...state.callLog];
           state.logsDictionary[event.call.id] = true;
-          emit(CallsLoadedLogState(callLog: newLogState));
+          emit(CallsLoadedLogState(callLog: newLogState, logsDictionary: state.logsDictionary));
         }
       }
     });

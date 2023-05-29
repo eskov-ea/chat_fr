@@ -50,7 +50,7 @@ const sipChannel = MethodChannel("com.application.chat/sip");
 Future<void> callNumber(BuildContext context, String userId) async {
   print("OUTGOING CALL NUMBER");
   await sipChannel.invokeMethod(
-      "OUTGOING_CALL", {"number": "sip:$prefix${userId}@aster.mcfef.com"});
+      "OUTGOING_CALL", {"number": "sip:1${userId}@aster.mcfef.com"});
 }
 
 Future<void> declineCall() async {

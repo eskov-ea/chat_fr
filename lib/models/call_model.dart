@@ -17,17 +17,18 @@ class CallModel {
   });
 
   static CallModel fromJson(json) => CallModel(
-      date: getDateFromUnix(json["calldate"]),
-      fromCaller: json["src"],
-      toCaller: json["dst"],
-      duration: json["duration"],
-      callStatus: json["disposition"],
-      id: json["uniqueid"],
+      date: getDateFromUnix(json["date"]),
+      fromCaller: json["sip_from"],
+      toCaller: json["sip_to"],
+      duration: json["duration"] ?? "00:00:00",
+      callStatus: json["reason"],
+      id: json["call_id"],
   );
 
 }
 
 String getDateFromUnix(json) {
+  print("getDateFromUnix   $json");
   try {
     final seconds = int.parse(json);
     final date =  DateTime.fromMillisecondsSinceEpoch(seconds * 1000).toString();

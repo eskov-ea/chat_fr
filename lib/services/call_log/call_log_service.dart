@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:chat/models/call_model.dart';
+import 'package:chat/services/global.dart';
 
 import '../../bloc/error_handler_bloc/error_types.dart';
 import '../../storage/data_storage.dart';
@@ -12,7 +13,7 @@ class CallLogService {
   Future<List<CallModel>> getCallLogs({required passwd}) async {
     final String? userId = await _secureStorage.getUserId();
     final postData = jsonEncode({
-      "id": userId,
+      "id": "$prefix$userId",
       "password": passwd
     });
     try {
