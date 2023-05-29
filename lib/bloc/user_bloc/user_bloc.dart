@@ -34,7 +34,6 @@ class UsersBloc extends Bloc<UsersEvent, UsersLoadedState> {
     final String? token = await _secureStorage.getToken();
     List<UserContact> users = await usersRepository.getAllUsers(token);
     users.sort((a, b) => a.lastname.compareTo(b.lastname));
-    print(users);
     if (state.isSearchMode) {
       print('state.isSearchMode');
       final query = state.searchQuery.toLowerCase();

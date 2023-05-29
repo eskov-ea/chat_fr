@@ -28,7 +28,6 @@ class MessagesProvider {
       );
       if (response.statusCode == 200) {
         List<dynamic> collection = jsonDecode(response.body)["data"];
-        print("collection     -.   $collection");
         List<MessageData> messages = collection.map((message) => MessageData.fromJson(message)).toList();
         return messages;
       } else if (response.statusCode == 401) {
@@ -55,7 +54,7 @@ class MessagesProvider {
       );
       if (response.statusCode == 200) {
         Map<String, dynamic> collection = jsonDecode(response.body)["data"];
-        print("update collection     -.   $collection");
+        // print("update collection     -.   $collection");
         return collection;
       } else if (response.statusCode == 401) {
         // TODO: implement logout

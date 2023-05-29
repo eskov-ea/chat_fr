@@ -13,6 +13,8 @@ enum LinphoneError: Error {
     case loggingServiceUninitialized
 }
 
+//var APP_GROUP_ID = "group.com.application.chat.notification"
+
 class LinphoneLoggingServiceManager: LoggingServiceDelegate {
     init(config: Config, log: LoggingService?, domain: String) throws {
         if let log = log {

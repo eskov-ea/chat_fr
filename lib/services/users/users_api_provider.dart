@@ -16,7 +16,6 @@ class UsersProvider {
         },
       );
       List<dynamic> collection = jsonDecode(response.body)["data"];
-      print("users  $collection");
       List<UserContact> users = collection.map((user) => UserContact.fromJson(user)).toList();
       print(users);
       return users;

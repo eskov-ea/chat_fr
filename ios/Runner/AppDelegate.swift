@@ -82,7 +82,7 @@ import PushKit
               let domain = args!["domain"] as? String
               let password = args!["password"] as? String
               let username = args!["username"] as? String
-//              print("loginData \(type(of: domain))")
+              print("loginData \(domain) \(username) \(password)")
               if (domain != nil && password != nil && username != nil) {
                   self!.linphoneSDK.login(domain: domain!, password: password!, username: username!)
               } else {
@@ -107,6 +107,8 @@ import PushKit
               self?.linphoneSDK.muteMicrophone()
             case "TOGGLE_SPEAKER":
               self?.linphoneSDK.toggleSpeaker()
+            case "CHECK_FOR_RUNNING_CALL":
+              result(false)
             default:
               result(FlutterMethodNotImplemented)
               return

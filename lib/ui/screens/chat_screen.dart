@@ -363,8 +363,6 @@ class _MessageListState extends State<_MessageList> {
           builder: (context, state) {
             if (state is ChatsBuilderState) {
               final ChatsData? currentState = findChat(state.chats, widget.dialogData.dialogId);
-              print("Current state   ${state.chats},   ${state.chats.length} ${state.messagesDictionary}");
-              print("Current chat   $currentState,  ${currentState?.messages.length} ${widget.dialogData.messageCount}");
               if (currentState == null) {
                 BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderLoadMessagesEvent(dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
                 pageNumber++;
