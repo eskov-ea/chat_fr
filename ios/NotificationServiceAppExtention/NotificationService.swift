@@ -43,6 +43,8 @@ class NotificationService: UNNotificationServiceExtension {
         self.contentHandler = contentHandler
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         
+        print("We got push message2")
+        
         if let bestAttemptContent = bestAttemptContent {
             
             NSLog("[notificationServiceAppExtension] create core")

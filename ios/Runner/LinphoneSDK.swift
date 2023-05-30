@@ -201,17 +201,17 @@ class LinphoneSDK : ObservableObject
                 try accountParams.setServeraddress(newValue: address)
                 accountParams.registerEnabled = true
                 accountParams.pushNotificationAllowed = true
-                accountParams.pushNotificationConfig?.provider = "apns.dev"
+                accountParams.pushNotificationConfig?.provider = "apns"
                 let account = try mCore.createAccount(params: accountParams)
                 
                 
-                account.core?.stunServer = "stun.sip.us:3478"
-                mCore?.natPolicy?.iceEnabled = true
-                mCore?.natPolicy?.stunServer = "stun.sip.us:3478"
-                mCore?.natPolicy?.tcpTurnTransportEnabled = true
-                mCore?.natPolicy?.stunEnabled = true
-                account.core?.stunServer = "stun.sip.us:3478"
-                mCore?.natPolicy?.stunServer = "stun.sip.us:3478"
+//                account.core?.stunServer = "stun.sip.us:3478"
+//                mCore?.natPolicy?.iceEnabled = true
+//                mCore?.natPolicy?.stunServer = "stun.sip.us:3478"
+//                mCore?.natPolicy?.tcpTurnTransportEnabled = true
+//                mCore?.natPolicy?.stunEnabled = true
+//                account.core?.stunServer = "stun.sip.us:3478"
+//                mCore?.natPolicy?.stunServer = "stun.sip.us:3478"
                 
                 mCore.addAuthInfo(info: authInfo)
                 try mCore.addAccount(account: account)

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,14 +11,12 @@
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		520BCC7D2A242CDE001C98E2 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520BCC7C2A242CDE001C98E2 /* NotificationService.swift */; };
 		520BCC812A242CDE001C98E2 /* NotificationServiceAppExtention.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 520BCC7A2A242CDE001C98E2 /* NotificationServiceAppExtention.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		520BCC922A24464B001C98E2 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520BCC7C2A242CDE001C98E2 /* NotificationService.swift */; };
 		520BCCA12A245BB5001C98E2 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D9CB0E5727BFBE1D205213A /* Pods_Runner.framework */; };
-		520BCCA22A245BB5001C98E2 /* Pods_Runner.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3D9CB0E5727BFBE1D205213A /* Pods_Runner.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		520BCCB12A248434001C98E2 /* LoginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529E5B562884354C009AF27B /* LoginService.swift */; };
 		529E5B5328840F6C009AF27B /* CallKitProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529E5B5228840F6C009AF27B /* CallKitProviderDelegate.swift */; };
 		529E5B572884354C009AF27B /* LoginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529E5B562884354C009AF27B /* LoginService.swift */; };
 		52D8C86A2880262700BA405F /* LinphoneSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52D8C8692880262700BA405F /* LinphoneSDK.swift */; };
-		641A2A3AC67FD3C30F3C00B0 /* Pods_NotificationServiceAppExtention.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 221C0F1F6CD26A19F49AC519 /* Pods_NotificationServiceAppExtention.framework */; };
+		71540BE12A2584F500DD553C /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 520BCC7C2A242CDE001C98E2 /* NotificationService.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
@@ -45,27 +43,6 @@
 				520BCC812A242CDE001C98E2 /* NotificationServiceAppExtention.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		520BCCA02A245AE0001C98E2 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		520BCCA32A245BB5001C98E2 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				520BCCA22A245BB5001C98E2 /* Pods_Runner.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -111,7 +88,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				641A2A3AC67FD3C30F3C00B0 /* Pods_NotificationServiceAppExtention.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -224,7 +200,6 @@
 				520BCC762A242CDE001C98E2 /* Sources */,
 				520BCC772A242CDE001C98E2 /* Frameworks */,
 				520BCC782A242CDE001C98E2 /* Resources */,
-				520BCCA02A245AE0001C98E2 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -247,7 +222,6 @@
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				3D229BA52DFFE11D91F1E762 /* [CP] Embed Pods Frameworks */,
 				520BCC862A242CDE001C98E2 /* Embed Foundation Extensions */,
-				520BCCA32A245BB5001C98E2 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -279,7 +253,7 @@
 				};
 			};
 			buildConfigurationList = 97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */;
-			compatibilityVersion = "Xcode 10.0";
+			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -428,7 +402,7 @@
 				529E5B572884354C009AF27B /* LoginService.swift in Sources */,
 				52D8C86A2880262700BA405F /* LinphoneSDK.swift in Sources */,
 				529E5B5328840F6C009AF27B /* CallKitProviderDelegate.swift in Sources */,
-				520BCC922A24464B001C98E2 /* NotificationService.swift in Sources */,
+				71540BE12A2584F500DD553C /* NotificationService.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -665,7 +639,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = NotificationServiceAppExtention/NotificationServiceAppExtention.entitlements;
+				CODE_SIGN_ENTITLEMENTS = NotificationServiceAppExtention;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8T287D8PYU;
@@ -703,7 +677,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = NotificationServiceAppExtention/NotificationServiceAppExtention.entitlements;
+				CODE_SIGN_ENTITLEMENTS = NotificationServiceAppExtention;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8T287D8PYU;
@@ -738,7 +712,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = NotificationServiceAppExtention/NotificationServiceAppExtention.entitlements;
+				CODE_SIGN_ENTITLEMENTS = NotificationServiceAppExtention;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 8T287D8PYU;
