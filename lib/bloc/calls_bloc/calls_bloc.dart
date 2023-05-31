@@ -20,9 +20,11 @@ class CallsBloc
         .listen((dynamic event)  {
       print("CALL_SERVICE_EVENT    ${event}") ;
       final callEvent = CallServiceEventModel.fromJson(event);
-      if (callEvent.event == "REGISTRATION") {
+      if (callEvent.event == "REGISTRATION_SUCCESS") {
         add(ConnectingCallServiceEvent());
-      } else if (callEvent.event == "CONNECTED") {
+      } else if (callEvent.event == "REGISTRATION_FAILED") {
+        add(ConnectionFailedCallEvent());
+      }  else if (callEvent.event == "CONNECTED") {
         add(ConnectedCallEvent());
       } else if (callEvent.event == "ENDED") {
         final callData = CallModel.fromJson(callEvent.callData);
@@ -40,6 +42,8 @@ class CallsBloc
       on<CallsEvent>((event, emit) async {
         if (event is ConnectingCallServiceEvent) {
           emit(ConnectedCallServiceState());
+        } else if (event is ConnectionFailedCallEvent) {
+          emit(UnconnectedCallServiceState());
         } else if (event is IncomingCallEvent) {
           emit(IncomingCallState(callerName: event.callerId));
         } else if (event is EndedCallServiceEvent) {

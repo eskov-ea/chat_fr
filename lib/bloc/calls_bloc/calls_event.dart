@@ -14,6 +14,8 @@ class MissedCallEvent extends CallsEvent {}
 
 class ConnectedCallEvent extends CallsEvent {}
 
+class ConnectionFailedCallEvent extends CallsEvent {}
+
 class OutgoingCallEvent extends CallsEvent {
   final String callerId;
 

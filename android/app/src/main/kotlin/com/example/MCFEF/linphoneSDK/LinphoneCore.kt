@@ -96,9 +96,11 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
             if (state == RegistrationState.Failed || state == RegistrationState.Cleared) {
                 Log.w("SIP RegistrationState status", "true")
+                val args = makePlatformEventPayload("REGISTRATION_FAILED", null, null)
+                MainActivity.callServiceEventSink?.success(args)
             } else if (state == RegistrationState.Ok) {
                 Log.w("SIP RegistrationState status", "false")
-                val args = makePlatformEventPayload("REGISTRATION", null, null)
+                val args = makePlatformEventPayload("REGISTRATION_SUCCESS", null, null)
                 MainActivity.callServiceEventSink?.success(args)
                 Log.w("Account setup 4", core.defaultAccount?.params?.identityAddress.toString())
             }
