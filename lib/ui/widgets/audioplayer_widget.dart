@@ -1,25 +1,24 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_sound/public/flutter_sound_player.dart';
 import 'package:flutter_sound_platform_interface/flutter_sound_platform_interface.dart';
-import 'package:path_provider/path_provider.dart';
 import '../../services/global.dart';
 import '../../services/messages/messages_repository.dart';
-import 'app_bar.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   const AudioPlayerWidget({
     required this.attachmentId,
     required this.fileName,
+    required this.isMe,
     Key? key,
   }) : super(key: key);
 
   final int attachmentId;
   final String fileName;
+  final bool isMe;
 
   @override
   State<AudioPlayerWidget> createState() => _AudioPlayerWidgetState();
@@ -27,7 +26,6 @@ class AudioPlayerWidget extends StatefulWidget {
 
 class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
-  final MessagesRepository _messagesRepository = MessagesRepository();
   StreamSubscription? _mPlayerSubscription;
   String pos = '0:00';
   Duration position = Duration.zero;
@@ -87,7 +85,6 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
           }
       );
     }
-    // player.startPlayer(fromURI: "https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.mp4", codec: Codec.aacMP4);
     setState(() {
       isPlaying = true;
     });
@@ -151,107 +148,52 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     //TODO: fix it. It is temporary solution to have audio messaging feature.
-    return Scaffold(
-      appBar: AppBar(
-        iconTheme: Theme
-            .of(context)
-            .iconTheme,
-        backgroundColor: Colors.blue,
-        automaticallyImplyLeading: true,
-        elevation: 0,
-        leadingWidth: 100,
-        leading: Align(
-          child: GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-            },
-            child: Padding(
-              padding: EdgeInsets.only(left: 10),
-              child: Row(
-                children: const [
-                  Padding(padding:EdgeInsets.only(bottom: 5), child: Icon( CupertinoIcons.back, color: Colors.white,)),
-                  Padding(padding:EdgeInsets.only(bottom: 5), child: Text('Назад', style: TextStyle(fontSize: 20), textAlign: TextAlign.center,)),
-                ],
-              ),
-            ),
-          ),
-        ),
-        title: Padding(
-          padding: const EdgeInsets.only(bottom: 4, right: 50),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Text("Audio message",
-                style: TextStyle(fontSize: 22),)
-            ],
-          ),
-        ),
-      ),
-      body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _playerIsInited && _dataIsLoaded
-                ? Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  _controlButtons(),
-                  Slider(
-                    value: position.inSeconds.toDouble(),
-                    min: 0,
-                    max: duration.inSeconds.toDouble(),
-                    onChanged: setSubscriptionDuration,
-                    // divisions: 100
-                  ),
-                  // _slider(_mSubscriptionDuration, setSubscriptionDuration),
-                  // _timing(snapshot.data),
-                  Text(
-                    getAudioMessageDuration(duration.inSeconds),
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  )
-                ],
-              ),
-            )
-                : const Expanded(
-                child: Center(
-                    child: CircularProgressIndicator()
-                )
-            ),
-            Container(
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width,
-              height: 60,
-              color: Colors.blue,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Center(
-                    child: Text(
-                      "Готово",
-                      style: TextStyle(fontSize: 26,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold),
-                    )
-                ),
-              ),
-            )
-          ]),
-    );
+    return audioWidget();
   }
 
   Widget _slider(duration, durationCallback) {
     print("SLIDER   $duration, $durationCallback");
-    return Slider(
-      value: duration,
-      min: 0.0,
-      max: 10.0,
-      onChanged: durationCallback,
-      divisions: 1
+    return SizedBox(
+      width: 100,
+      child: Slider(
+        value: duration,
+        min: 0.0,
+        max: 10.0,
+        onChanged: durationCallback,
+        divisions: 1
+      ),
+    );
+  }
+
+  Widget audioWidget() {
+    return Container(
+      child: _playerIsInited && _dataIsLoaded
+          ? Row(
+            mainAxisAlignment: widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              _controlButtons(),
+              SizedBox(
+                width: 150,
+                child: Slider(
+                  value: position.inSeconds.toDouble(),
+                  min: 0,
+                  max: duration.inSeconds.toDouble(),
+                  onChanged: setSubscriptionDuration,
+                  // divisions: 100
+                ),
+              ),
+              // _slider(_mSubscriptionDuration, setSubscriptionDuration),
+              // _timing(snapshot.data),
+              Text(
+                getAudioMessageDuration(duration.inSeconds),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              )
+            ],
+          )
+          : Center(
+              child: CircularProgressIndicator()
+          ),
     );
   }
 
@@ -262,7 +204,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Padding(
-          padding: const EdgeInsets.all(4.0),
+          padding: const EdgeInsets.all(0),
           child: GestureDetector(
             onTap: () {
               if (isPlaying) {
@@ -272,9 +214,9 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
               }
             },
             child: SizedBox(
-              width: 60,
-              height: 60,
-              child: Icon(icon, color: color, size: 60),
+              width: 30,
+              height: 35,
+              child: Icon(icon, color: color, size: 35),
             ),
           ),
         )

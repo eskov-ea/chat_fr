@@ -154,6 +154,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
           channels.add(dialogChannel);
           StreamSubscription dialogEventSubscription =
             dialogChannel.bind('update').listen((event) {
+              print("DialogChannel event:  $event");
               final data = jsonDecode(event.data);
               if (data["message"] != null) {
                 final newMessage = MessageData.fromJson(data["message"]);

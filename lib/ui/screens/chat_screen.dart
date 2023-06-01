@@ -399,6 +399,11 @@ class _MessageListState extends State<_MessageList> {
                                 ),
                               ),
                             ),
+                          if (index == currentState.messages.length -1 || (index < currentState.messages.length -1 &&
+                              currentState.messages[index].messageDate != currentState.messages[index+1].messageDate))
+                            SizedBox(
+                              height: 8,
+                            ),
                           MessageWidget(
                             key: ValueKey<int>(currentState.messages[index].messageId),
                             index: index,

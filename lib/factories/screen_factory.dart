@@ -116,7 +116,7 @@ class ScreenFactory {
   }
 
   Widget makeAudioMessagePage(AttachmentViewPageArguments arguments) {
-    return AudioPlayerWidget(key: UniqueKey(), attachmentId: arguments.attachmentId, fileName: arguments.fileName,);
+    return AudioPlayerWidget(key: UniqueKey(), attachmentId: arguments.attachmentId, fileName: arguments.fileName, isMe: true);
   }
 
   Widget makeCallInfoPage(CallRenderData arguments) {

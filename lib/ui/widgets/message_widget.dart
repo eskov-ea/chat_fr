@@ -19,6 +19,7 @@ import '../../services/messages/messages_repository.dart';
 import '../../theme.dart';
 import '../../view_models/dialogs_page/dialogs_view_cubit.dart';
 import '../navigation/main_navigation.dart';
+import 'audioplayer_widget.dart';
 
 class MessageWidget extends StatefulWidget {
   const MessageWidget({
@@ -331,31 +332,59 @@ class _MessageTile extends StatelessWidget {
                       children: [
                         //TODO: refactor 3 widgets with one function/widget to avoid unnecessary code
                         file != null && file!.filetype == "jpg" || file != null && file!.filetype == "jpeg" || file != null && file!.filetype == "png"
-                          ? ImagePreviewWidget(
-                              key: ValueKey<int>(file!.attachmentId),
-                              p2p: p2p,
-                              isMe: isMe,
-                              senderName: senderName,
-                              borderRadius: _borderRadius,
-                              file: file, localFileAttachment:
-                              fileAttachment,
-                              authorNameWidgetGroupChat: _authorNameWidgetGroupChat,
-                              messageTime: messageTime,
-                              status: _StatusWidget(status),
-                            )
+                          ? Container(
+                            height: 240,
+                            width: 186,
+                            child: ImagePreviewWidget(
+                                key: ValueKey<int>(file!.attachmentId),
+                                p2p: p2p,
+                                isMe: isMe,
+                                senderName: senderName,
+                                borderRadius: _borderRadius,
+                                file: file, localFileAttachment:
+                                fileAttachment,
+                                authorNameWidgetGroupChat: _authorNameWidgetGroupChat,
+                                messageTime: messageTime,
+                                status: _StatusWidget(status),
+                              ),
+                          )
                           : const SizedBox.shrink(),
                         file != null && file!.filetype == "mp4"
-                          // ? AudioPlayerWidget(base64file: file!.preview, key: UniqueKey(),)
-                          ? Column(
+                          ? Container(
+                            height: 80,
+                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8 ),
+                            decoration: BoxDecoration(
+                              color: isMe ? AppColors.myMessageBackground : Theme.of(context).cardColor,
+                              borderRadius:  BorderRadius.only(
+                                topLeft: const Radius.circular(_borderRadius),
+                                topRight: const Radius.circular(_borderRadius),
+                                bottomRight: isMe ? const Radius.circular(0.0) : const Radius.circular(_borderRadius),
+                                bottomLeft: !isMe ? const Radius.circular(0.0) : const Radius.circular(_borderRadius),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: isMe? CrossAxisAlignment.end : CrossAxisAlignment.start,
                               children: [
                                 if (p2p != 1 && !isMe) _authorNameWidgetGroupChat(senderName, _borderRadius),
-                                fileIconWidget(
-                                  context: context,
-                                  iconPath: "assets/audio_icon.png",
-                                  width: 64,
-                                  callback: audioMessCallback
+                                AudioPlayerWidget(
+                                    attachmentId: file!.attachmentId,
+                                    fileName: file!.name,
+                                    isMe: isMe
                                 ),
-                              ],
+                                Expanded(
+                                  flex: 0,
+                                  child: Text(
+                                    messageTime,
+                                    textAlign: TextAlign.start,
+                                    style: const TextStyle(
+                                      color:AppColors.textFaded,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                )
+                              ]
+                            ),
                           )
                           : const SizedBox.shrink(),
                             file != null && file!.filetype != "mp4" && file!.filetype != "jpeg" && file!.filetype != "jpg" && file!.filetype != "png"
