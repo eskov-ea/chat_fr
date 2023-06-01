@@ -229,11 +229,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!kIsWeb) {
       // _db = getSqfliteDatabase();
       callServiceBlocSubscription = BlocProvider.of<CallsBloc>(context).stream.listen((state) async {
-        print("callServiceBlocSubscription:  $state");
         if (state is UnconnectedCallServiceState) {
           customToastMessage(context, "Произошла ошибка при подключении к SIP-серверу");
-        }
-        else if (state is IncomingCallState) {
+        } else if (state is IncomingCallState) {
           try {
             final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => "$prefix${el.id}" == state.callerName);
             callerName = "${callerUser.firstname} ${callerUser.lastname}";

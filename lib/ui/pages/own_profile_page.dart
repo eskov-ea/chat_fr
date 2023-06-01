@@ -3,7 +3,9 @@ import 'package:chat/bloc/chats_builder_bloc/chats_builder_event.dart';
 import 'package:chat/bloc/profile_bloc/profile_bloc.dart';
 import 'package:chat/bloc/profile_bloc/profile_events.dart';
 import 'package:chat/bloc/profile_bloc/profile_state.dart';
+import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
 import 'package:chat/theme.dart';
+import 'package:dart_pusher_channels/dart_pusher_channels.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -126,7 +128,31 @@ class ProfilePage extends StatelessWidget {
                             style: TextStyle(color: Colors.red, fontSize: 20, fontWeight: FontWeight.w600),
                           )
                       ),
-                      SizedBox(height: 5,)
+                      SizedBox(height: 5,),
+                      // OutlinedButton(
+                      //     onPressed: () async {
+                      //       final pc = BlocProvider.of<WsBloc>(context).presenceChannel;
+                      //       print(pc);
+                      //       print(pc.name);
+                      //       print(pc.currentStatus);
+                      //       print(pc.state?.subscriptionCount);
+                      //       print(pc.state?.status);
+                      //       print(pc.state?.members);
+                      //       pc.trigger(eventName: "join", data: "Hello");
+                      //     },
+                      //     style: ElevatedButton.styleFrom(
+                      //       backgroundColor: LightColors.profilePageButton,
+                      //       minimumSize: const Size.fromHeight(50),
+                      //       shape: const RoundedRectangleBorder(
+                      //           side: BorderSide(color: Colors.black54, width: 2, style: BorderStyle.solid),
+                      //           borderRadius: BorderRadius.zero),
+                      //     ),
+                      //     child: const Text(
+                      //       'Выйти из аккаунта',
+                      //       style: TextStyle(color: Colors.red, fontSize: 20, fontWeight: FontWeight.w600),
+                      //     )
+                      // ),
+                      // SizedBox(height: 5,)
                     ]
                 ),
               ),

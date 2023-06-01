@@ -227,7 +227,57 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                 Call.State.OutgoingRinging -> {
                     Log.w("OUTGOING_CALL", "OutgoingRinging")
                 }
+                Call.State.PushIncomingReceived -> {
 
+                }
+                Call.State.Idle -> {
+
+                }
+                Call.State.OutgoingEarlyMedia -> {
+
+                }
+                Call.State.StreamsRunning -> {
+
+                }
+                Call.State.Pausing -> {
+
+                }
+                Call.State.Paused -> {
+
+                }
+                Call.State.Resuming -> {
+
+                }
+                Call.State.Referred -> {
+
+                }
+                Call.State.Error -> {
+
+                }
+                Call.State.PausedByRemote -> {
+
+                }
+                Call.State.UpdatedByRemote -> {
+
+                }
+                Call.State.IncomingEarlyMedia -> {
+
+                }
+                Call.State.Updating -> {
+
+                }
+                Call.State.Released -> {
+
+                }
+                Call.State.EarlyUpdatedByRemote -> {
+
+                }
+                Call.State.EarlyUpdating -> {
+
+                }
+                null -> {
+
+                }
             }
         }
 

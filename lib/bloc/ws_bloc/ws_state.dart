@@ -1,6 +1,6 @@
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
-import 'package:dart_pusher_channels/api.dart';
+import 'package:dart_pusher_channels/dart_pusher_channels.dart';
 import 'package:equatable/equatable.dart';
 import '../../models/message_model.dart';
 

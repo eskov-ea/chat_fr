@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:chat/storage/data_storage.dart';
-import 'package:chat/view_models/auth/auth_exceptions.dart';
+import 'package:chat/services/exeptions/api_client_exceptions.dart';
 import 'package:chat/models/auth_user_model.dart';
 import 'package:http/http.dart' as http;
 import '../../models/user_profile_model.dart';

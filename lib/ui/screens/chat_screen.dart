@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:chat/bloc/calls_bloc/calls_bloc.dart';
 import 'package:chat/helpers.dart';
 import 'package:chat/models/chat_builder_model.dart';
 import 'package:chat/models/dialog_model.dart';
@@ -8,9 +9,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import '../../../bloc/ws_bloc/ws_state.dart';
 import '../../../services/messages/messages_repository.dart';
+import '../../bloc/calls_bloc/calls_state.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_state.dart';
@@ -19,7 +20,6 @@ import '../../models/message_model.dart';
 import '../../services/global.dart';
 import '../../services/helpers/navigation_helpers.dart';
 import '../../services/messages/messages_api_provider.dart';
-import '../../view_models/chats_builder_view/chat_view_cubit.dart';
 import '../../view_models/user/users_view_cubit.dart';
 import '../../view_models/user/users_view_cubit_state.dart';
 import '../widgets/action_bar.dart';
@@ -72,8 +72,11 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
 
+  bool isSipServiceConnected = false;
+
   @override
   void initState() {
+    isSipServiceConnected = BlocProvider.of<CallsBloc>(context).state is ConnectedCallServiceState;
     super.initState();
   }
 
@@ -220,7 +223,11 @@ class _ChatScreenState extends State<ChatScreen> {
               child: IconButton(
                 icon: const Icon(CupertinoIcons.phone, color: AppColors.secondary, size: 30,),
                 onPressed: () {
-                  callNumber(context ,widget.partnerId.toString());
+                  if (!isSipServiceConnected) {
+                    customToastMessage(context, "Не удалось подключиться к Sip-серверу, попробуйте еще раз");
+                  } else {
+                    callNumber(context ,widget.partnerId.toString());
+                  }
                 },
               ),
             ),

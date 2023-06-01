@@ -68,11 +68,13 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
     if (rawFile != null) {
       setState(() {
         imageFile = rawFile;
+        isDownloading = false;
+      });
+    } else {
+      setState(() {
+        isDownloading = false;
       });
     }
-    setState(() {
-      isDownloading = false;
-    });
   }
 
   checkIfAttachmentLoaded() async {

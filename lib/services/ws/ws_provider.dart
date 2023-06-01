@@ -1,28 +1,41 @@
-import 'package:dart_pusher_channels/api.dart';
-import 'package:dart_pusher_channels/base.dart';
+import 'package:dart_pusher_channels/dart_pusher_channels.dart';
+
+import '../../bloc/ws_bloc/ws_event.dart';
 
 
 class WebSocketProvider {
 
-  Channel? channel;
-  final token = "141|WGFNsqbOXbhDikE0UFWqRSMTX9aKUWdbpI62ps32";
-  static const options = PusherChannelOptions.wss(
-      host: 'erp.mcfef.com',
-      port: 6001,
-      key: 'key',
-      protocol: 7,
-      version: '7.0.3');
+  static const options = PusherChannelsOptions.fromHost(
+    scheme: 'wss',
+    key: 'key',
+    host: 'erp.mcfef.com',
+    shouldSupplyMetadataQueries: true,
+    metadata: PusherChannelsOptionsMetadata.byDefault(),
+    port: 6001,
+  );
 
   PusherChannelsClient? connect() {
-    try{
+
       final client = PusherChannelsClient.websocket(
-          reconnectTries: 2,
-          options: options,
-          onConnectionErrorHandle: (error, trace, refresh) {});
+        options: options,
+        connectionErrorHandler: (error, trace, refresh) {
+          print("SocketError:  ${error}");
+          refresh();
+        },
+        minimumReconnectDelayDuration: const Duration(
+          seconds: 1,
+        ),
+        defaultActivityDuration: const Duration(
+          seconds: 15,
+        ),
+        activityDurationOverride: const Duration(
+          seconds: 15,
+        ),
+        waitForPongDuration: const Duration(
+          seconds: 5,
+        )
+      );
       return client;
-    } catch (err) {
-      print(err);
-    }
   }
 
 }

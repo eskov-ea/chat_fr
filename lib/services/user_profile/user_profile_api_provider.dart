@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:chat/view_models/auth/auth_exceptions.dart';
+import 'package:chat/services/exeptions/api_client_exceptions.dart';
 import 'package:http/http.dart' as http;
 
 import '../../models/user_profile_model.dart';
