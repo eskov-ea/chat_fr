@@ -10,6 +10,7 @@ import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver
 import com.example.MCFEF.calls_manager.Data
 import com.example.MCFEF.makeCallDataPayload
 import com.example.MCFEF.makePlatformEventPayload
+import com.google.firebase.messaging.FirebaseMessaging
 import io.flutter.Log
 import org.linphone.core.*
 
@@ -44,6 +45,12 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         accountParams.remotePushNotificationAllowed = true
 
         accountParams.contactUriParameters = "sip:$username@$domain"
+
+        val token = MainActivity.deviceToken
+        if (token != null) {
+            accountParams.pushNotificationConfig.prid = token
+            accountParams.pushNotificationConfig.bundleIdentifier = "cashalot-fl"
+        }
 
         Log.w("Account setup params", accountParams.identityAddress.toString())
         core.addAuthInfo(authInfo)

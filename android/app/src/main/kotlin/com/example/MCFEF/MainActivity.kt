@@ -14,21 +14,21 @@ import android.media.RingtoneManager
 import android.os.*
 import android.provider.DocumentsContract
 import android.util.Base64
+import android.widget.*
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import com.example.MCFEF.linphoneSDK.CoreContext
+import com.example.MCFEF.linphoneSDK.LinphoneCore
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import io.flutter.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
-import kotlinx.coroutines.launch
 import org.linphone.core.*
-import java.lang.Exception
-import android.widget.*
-import com.example.MCFEF.linphoneSDK.CoreContext
-import com.example.MCFEF.linphoneSDK.LinphoneCore
-import com.google.firebase.iid.FirebaseInstanceId
 
 
 class MainActivity: FlutterActivity() {
@@ -38,11 +38,14 @@ class MainActivity: FlutterActivity() {
     val CREATE_FILE = 0
     var arrayBytesToWrite: String? = null
     lateinit var linphoneCore : LinphoneCore
+    val PERMISSION_REQUEST_CODE = 112
+
 
     companion object {
 
         var eventSink: EventChannel.EventSink? = null
         var callServiceEventSink: EventChannel.EventSink? = null
+        var deviceToken: String? = null
 
     }
     private val callServiceEventChannel = "event.channel/call_service"
@@ -54,7 +57,7 @@ class MainActivity: FlutterActivity() {
             call, result ->
             if (call.method == "getDeviceToken") {
                 lifecycleScope.launch {
-                    val token =  getDeviceToken()
+                    val token = deviceToken
                     Log.d("token:", "$token")
                     result.success( token )
                 }
@@ -151,19 +154,32 @@ class MainActivity: FlutterActivity() {
     }
 
 
-    private fun getDeviceToken(): String? {
+    private fun getDeviceToken() {
 
-        return FirebaseInstanceId.getInstance().getToken()
-
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener {
+            task -> if (!task.isSuccessful) {
+            Log.w("GET_PUSH", "Failed getting push")
+        }
+            deviceToken = task.result
+        })
+//        return await token
+//        return FirebaseInstanceId.getInstance().getToken()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if (Build.VERSION.SDK_INT > 32) {
+            if (!shouldShowRequestPermissionRationale("112")){
+                getNotificationPermission();
+            }
+        }
+
         val core = CoreContext(context).getInstance()
         linphoneCore = LinphoneCore(core, context)
 
         createNotificationChannel()
+        getDeviceToken()
 
         lifecycleScope.launch {
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
@@ -184,7 +200,16 @@ class MainActivity: FlutterActivity() {
     }
 
 
-
+    fun getNotificationPermission() {
+        try {
+            if (Build.VERSION.SDK_INT > 32) {
+                ActivityCompat.requestPermissions(this, arrayOf(POST_NOTIFICATIONS),
+                        PERMISSION_REQUEST_CODE)
+            }
+        } catch (e: Exception) {
+            Log.d("REQUEST_PUSH_PERMISION", e.toString())
+        }
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

@@ -213,8 +213,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> showId () async {
-    final id = await _dataProvider.getDeviceID();
-    await MethodChannel("com.application.chat/method").invokeMethod('getDeviceToken');
+    // final id = await _dataProvider.getDeviceID();
+    final id = await MethodChannel("com.application.chat/method").invokeMethod('getDeviceToken');
     print('token:  $id');
   }
   @override
