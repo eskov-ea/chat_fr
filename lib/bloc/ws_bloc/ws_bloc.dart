@@ -26,6 +26,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
   String? token;
   int? userId;
   late PresenceChannel presenceChannel;
+  StreamSubscription<ChannelReadEvent>? presenceChannelSubs;
 
   static const options = PusherChannelsOptions.fromHost(
     scheme: 'wss',
@@ -131,19 +132,26 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
 
       presenceChannel = clientSubscribeToPresenceChannel(
         client: socket,
-        channelName: 'presence-channel',
+        channelName: 'presence-onlineinfo',
         authToken: token
       );
       presenceChannel.subscribeIfNotUnsubscribed();
-      print("presenceChannel  ${presenceChannel.state?.status} ${presenceChannel.state?.subscriptionCount}");
-      presenceChannel.trigger(eventName: 'join', data: {'userId' : 40});
+      presenceChannel.trigger(eventName: 'join', data: {'userId' : userId});
       presenceChannel.whenMemberAdded().listen((event) {
-        print('Member added, now members count is ${presenceChannel.state?.members?.membersCount}');
+        print('presenceChannel | Member added, rootObject is ${event.rootObject}');
+        print('presenceChannel | Member added, userId is ${event.userId}');
+      });
+      presenceChannel.whenMemberRemoved().listen((event) {
+        print('presenceChannel | Member added, rootObject is ${event.rootObject}');
+        print('presenceChannel | Member added, userId is ${event.userId}');
+      });
+      presenceChannelSubs = presenceChannel.bindToAll().listen((event) {
+        print("presenceChannel event.data:  ${event.data}");
+        print("presenceChannel event.userId:  ${event.userId}");
+        print("presenceChannel event.rootObject:  ${event.rootObject}");
+
       });
 
-      StreamSubscription<ChannelReadEvent> presenceChannelSubs = presenceChannel.bindToAll().listen((event) {
-        print("presenceChannel event:  ${event}");
-      });
 
       if (dialogs != null) {
         for (var dialog in dialogs) {

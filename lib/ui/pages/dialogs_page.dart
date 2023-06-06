@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
 import 'package:chat/helpers.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/theme.dart';
@@ -24,15 +27,23 @@ class MessagesPage extends StatefulWidget {
 
 class _MessagesPageState extends State<MessagesPage> {
 
-
+  List<String> onlineMembers = [];
+  late final StreamSubscription presenceOnlineInfoChannelSubscription;
   int? userId;
 
   @override
   void initState() {
     _readUserId();
+    // presenceOnlineInfoChannelSubscription = BlocProvider.of<WsBloc>(context).
+    // _readOnlineMembers();
     super.initState();
   }
 
+
+  void _readOnlineMembers() {
+    final WSBlocChannels = BlocProvider.of<WsBloc>(context).channels;
+    print("WSBlocChannels:  ${WSBlocChannels}  ${WSBlocChannels.length}");
+  }
 
   void _readUserId() async {
     final userIdFromStorage = await DataProvider().getUserId();

@@ -44,6 +44,15 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         accountParams.pushNotificationAllowed = true
         accountParams.remotePushNotificationAllowed = true
 
+        val nat = core.createNatPolicy()
+        nat.stunServer = "aster.mcfef.com:3478"
+        nat.enableStun(true)
+        nat.enableTurn(true)
+        nat.enableIce(true)
+        core.natPolicy = nat
+        accountParams.natPolicy = nat
+
+
         accountParams.contactUriParameters = "sip:$username@$domain"
 
         val token = MainActivity.deviceToken

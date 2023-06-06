@@ -53,13 +53,19 @@ class AuthBloc
       AuthCheckStatusEvent event,
       Emitter<AuthState> emit,
     ) async {
-      final String? token = await _dataProvider.getToken();
-      print("AuthCheckStatusEvent  $token");
-      final bool auth = await authRepo.checkAuthStatus(token);
-      if (!auth) await _dataProvider.deleteToken();
-      final newState =
-      auth == true ? const Authenticated() : Unauthenticated();
-      emit(newState);
+      try {
+        final String? token = await _dataProvider.getToken();
+        print("AuthCheckStatusEvent  $token");
+        final bool auth = await authRepo.checkAuthStatus(token);
+        if (!auth) await _dataProvider.deleteToken();
+        final newState =
+        auth == true ? const Authenticated() : Unauthenticated();
+        emit(newState);
+      } catch (err) {
+        print("Platform error: $err");
+        await _dataProvider.deleteToken();
+        emit(Unauthenticated());
+      }
     }
 
 }

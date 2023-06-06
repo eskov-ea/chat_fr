@@ -18,6 +18,8 @@ class WsEventUpdateStatus extends WsBlocEvent{
   WsEventUpdateStatus({required this.statuses});
 }
 
+
+
 class WsUserJoinChatEvent extends WsBlocEvent{
   final ChatUser user;
   final int dialogId;
