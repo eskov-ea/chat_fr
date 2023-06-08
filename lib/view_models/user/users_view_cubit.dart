@@ -27,6 +27,8 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
         usersDictionary["${user.id}"] = user;
       });
       emit(UsersViewCubitLoadedState(users: users, searchQuery: '', usersDictionary: usersDictionary));
+    } else if (state is UsersErrorState) {
+      emit(UsersViewCubitEErrorState());
     }
   }
 

@@ -4,15 +4,17 @@ import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:http/http.dart' as http;
 import '../../models/dialog_model.dart';
 import '../../storage/data_storage.dart';
+import '../logger/logger_service.dart';
 
 
 class DialogsProvider {
   final _secureStorage = DataProvider();
+  final _logger = Logger.getInstance();
 
   Future<List<DialogData>> getDialogs() async {
-    final String? token = await _secureStorage.getToken();
 
     try {
+      final String? token = await _secureStorage.getToken();
       final response = await http.get(
         Uri.parse('https://erp.mcfef.com/api/chat/chats'),
         headers: <String, String>{
@@ -33,14 +35,15 @@ class DialogsProvider {
     } on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, loading dialogs");
     } catch(err) {
+      _logger.sendErrorTrace(message: "DialogsProvider.getDialogs", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, err.toString(), "DialogsProvider, loading dialogs");
     }
   }
 
   Future<List<DialogData>> getPublicDialogs() async {
-    final String? token = await _secureStorage.getToken();
 
     try {
+      final String? token = await _secureStorage.getToken();
       final response = await http.get(
         Uri.parse('https://erp.mcfef.com/api/chat/chats/public'),
         headers: <String, String>{
@@ -61,6 +64,7 @@ class DialogsProvider {
     } on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, loading dialogs");
     } catch(err) {
+      _logger.sendErrorTrace(message: "DialogsProvider.getPublicDialogs", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, err.toString(), "DialogsProvider, loading dialogs");
     }
   }
@@ -68,8 +72,8 @@ class DialogsProvider {
 
 
   Future<DialogData> createDialog({required chatType, required users, required chatName, required chatDescription, required isPublic}) async {
-    final String? token = await _secureStorage.getToken();
     try {
+      final String? token = await _secureStorage.getToken();
       final response = await http.post(
         Uri.parse('https://erp.mcfef.com/api/chat/add'),
         headers: <String, String>{
@@ -100,14 +104,15 @@ class DialogsProvider {
     } on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, creating dialogs");
     } catch(err) {
+      _logger.sendErrorTrace(message: "DialogsProvider.createDialog", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, err.toString(), "DialogsProvider, creating dialogs");
     }
   }
 
   Future<ChatUser> joinDialog(userId, dialogId) async {
-    final String? token = await _secureStorage.getToken();
     print("JOINDIALOG SERVICE  START");
     try {
+      final String? token = await _secureStorage.getToken();
       final response = await http.get(
         Uri.parse('https://erp.mcfef.com/api/chat/join/$dialogId/$userId}'),
         headers: <String, String>{
@@ -120,6 +125,7 @@ class DialogsProvider {
     } on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, joining user to dialog $dialogId");
     } catch(err) {
+      _logger.sendErrorTrace(message: "DialogsProvider.joinDialog", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, err.toString(), "DialogsProvider, joining user to dialog $dialogId");
     }
   }
@@ -139,6 +145,7 @@ class DialogsProvider {
     } on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, exiting user to dialog $dialogId");
     } catch(err) {
+      _logger.sendErrorTrace(message: "DialogsProvider.exitDialog", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, null, "DialogsProvider, exiting user to dialog $dialogId");
     }
   }

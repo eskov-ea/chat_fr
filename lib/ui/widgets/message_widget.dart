@@ -572,6 +572,10 @@ class _MessageTile extends StatelessWidget {
           messageText: messageText,
           parentMessageId: repliedMessageId);
       print("sentMessage response  $sentMessage");
+      if (sentMessage == null) {
+        customToastMessage(context, "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");
+        return;
+      }
       final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
       BlocProvider.of<ChatsBuilderBloc>(context).add(
           ChatsBuilderUpdateLocalMessageEvent(

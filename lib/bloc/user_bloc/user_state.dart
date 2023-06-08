@@ -53,3 +53,7 @@ class UsersLoadedState extends UsersState {
     );
   }
 }
+
+class UsersErrorState extends UsersState {
+
+}

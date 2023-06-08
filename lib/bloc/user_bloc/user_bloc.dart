@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:chat/bloc/user_bloc/user_event.dart';
 import 'package:chat/bloc/user_bloc/user_state.dart';
 import 'package:chat/bloc/user_bloc/users_list_container.dart';
+import 'package:chat/services/logger/logger_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/contact_model.dart';
 import '../../services/users/users_repository.dart';
@@ -14,6 +15,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersLoadedState> {
   late final StreamSubscription usersSubscription;
   final WsBloc webSocketBloc;
   final _secureStorage = DataProvider();
+  final _logger = Logger.getInstance();
 
 
   UsersBloc({
@@ -29,22 +31,27 @@ class UsersBloc extends Bloc<UsersEvent, UsersLoadedState> {
   }
 
   void onUsersLoadEvent (
-      UsersLoadEvent event, Emitter<UsersLoadedState> emit
+      UsersLoadEvent event, Emitter<UsersState> emit
       ) async {
-    final String? token = await _secureStorage.getToken();
-    List<UserContact> users = await usersRepository.getAllUsers(token);
-    users.sort((a, b) => a.lastname.compareTo(b.lastname));
-    if (state.isSearchMode) {
-      print('state.isSearchMode');
-      final query = state.searchQuery.toLowerCase();
-      final container = state.searchUsersContainer;
-      final filteredUsers = filterUsersBySearchQuery(users, query);
-      final newContainer = container.copyWith(users: filteredUsers);
-      emit(UsersLoadedState(usersContainer: state.usersContainer, searchQuery: query, searchUsersContainer: newContainer));
-    } else {
-    final container = state.usersContainer;
-    final newContainer = container.copyWith(users: users);
-    emit(UsersLoadedState(usersContainer: newContainer, searchQuery: '', searchUsersContainer: state.searchUsersContainer));
+    try {
+      final String? token = await _secureStorage.getToken();
+      List<UserContact> users = await usersRepository.getAllUsers(token);
+      users.sort((a, b) => a.lastname.compareTo(b.lastname));
+      if (state.isSearchMode) {
+        print('state.isSearchMode');
+        final query = state.searchQuery.toLowerCase();
+        final container = state.searchUsersContainer;
+        final filteredUsers = filterUsersBySearchQuery(users, query);
+        final newContainer = container.copyWith(users: filteredUsers);
+        emit(UsersLoadedState(usersContainer: state.usersContainer, searchQuery: query, searchUsersContainer: newContainer));
+      } else {
+        final container = state.usersContainer;
+        final newContainer = container.copyWith(users: users);
+        emit(UsersLoadedState(usersContainer: newContainer, searchQuery: '', searchUsersContainer: state.searchUsersContainer));
+      }
+    } catch (err) {
+      _logger.sendErrorTrace(message: "UsersBloc.onUsersLoadEvent", err: err.toString());
+      emit(UsersErrorState());
     }
   }
 

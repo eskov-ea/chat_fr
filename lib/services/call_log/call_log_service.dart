@@ -6,17 +6,20 @@ import '../../bloc/error_handler_bloc/error_types.dart';
 import '../../storage/data_storage.dart';
 import 'package:http/http.dart' as http;
 
+import '../logger/logger_service.dart';
+
 
 class CallLogService {
   final _secureStorage = DataProvider();
 
   Future<List<CallModel>> getCallLogs({required passwd}) async {
-    final String? userId = await _secureStorage.getUserId();
-    final postData = jsonEncode({
-      "id": "$prefix$userId",
-      "password": passwd
-    });
     try {
+      final String? userId = await _secureStorage.getUserId();
+      final postData = jsonEncode({
+        "id": "$prefix$userId",
+        "password": passwd
+      });
+
       final response = await http.post(
           Uri.parse('http://aster.mcfef.com/logs/user/last/'),
           body: postData);
@@ -31,6 +34,7 @@ class CallLogService {
         throw AppErrorException(AppErrorExceptionType.getData, null, "Call logs service, loading call logs");
       }
     } catch (err) {
+      Logger.getInstance().sendErrorTrace(message: "CallLogService.getCallLogs", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, err.toString(), "Call logs service, loading call logs");
     }
   }

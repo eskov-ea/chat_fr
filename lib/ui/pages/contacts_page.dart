@@ -18,6 +18,13 @@ class ContactsPage extends StatelessWidget {
         appBar: CustomAppBar(context),
         body: BlocBuilder<UsersViewCubit, UsersViewCubitState>(
           builder: (context, state) {
+            if (state is UsersViewCubitEErrorState) {
+              return Container(
+                child: Text(
+                  'Произошла ошибка при загрузке пользователей, попробуйте еще раз'
+                ),
+              );
+            }
             if ( state is UsersViewCubitLoadingState) {
               return const Center(child: CircularProgressIndicator());
             }

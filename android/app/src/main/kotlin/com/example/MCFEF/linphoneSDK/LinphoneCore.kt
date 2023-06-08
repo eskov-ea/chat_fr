@@ -44,6 +44,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         accountParams.pushNotificationAllowed = true
         accountParams.remotePushNotificationAllowed = true
 
+        Log.d("NAT", "NAT 1:  ${accountParams.natPolicy?.iceEnabled()}")
         val nat = core.createNatPolicy()
         nat.stunServer = "aster.mcfef.com:3478"
         nat.enableStun(true)
@@ -51,14 +52,17 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         nat.enableIce(true)
         core.natPolicy = nat
         accountParams.natPolicy = nat
-
+        Log.d("NAT", "NAT 2:  ${accountParams.natPolicy?.iceEnabled()}")
 
         accountParams.contactUriParameters = "sip:$username@$domain"
 
         val token = MainActivity.deviceToken
         if (token != null) {
+            accountParams.pushNotificationConfig.remoteToken = token
+            accountParams.pushNotificationConfig.param = "671710503893"
+            accountParams.pushNotificationConfig.provider = "fcm"
             accountParams.pushNotificationConfig.prid = token
-            accountParams.pushNotificationConfig.bundleIdentifier = "cashalot-fl"
+            accountParams.pushNotificationConfig.bundleIdentifier = "671710503893"
         }
 
         Log.w("Account setup params", accountParams.identityAddress.toString())

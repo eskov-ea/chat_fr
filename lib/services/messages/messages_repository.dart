@@ -6,7 +6,7 @@ class MessagesRepository  {
 
   Future <List<MessageData>> getAllMessages(userId, dialogId, pageNumber) => messagesProvider.getMessages(userId, dialogId, pageNumber);
   Future <Map<String, dynamic>?> getNewMessagesOnResume(userId, dialogId, pageNumber) => messagesProvider.getNewUpdatesOnResume();
-  Future <String> sendMessage({required dialogId, required messageText, required parentMessageId}) => messagesProvider.sendMessage(dialogId: dialogId, messageText: messageText, parentMessageId: parentMessageId);
+  Future <String?> sendMessage({required dialogId, required messageText, required parentMessageId}) => messagesProvider.sendMessage(dialogId: dialogId, messageText: messageText, parentMessageId: parentMessageId);
   Future <String> sendMessageWithFile({required dialogId, required messageText, required file, required filetype, required parentMessageId}) => messagesProvider.sendMessageWithFileBase64(dialogId: dialogId, messageText: messageText, filePath: file, filetype: filetype, parentMessageId: parentMessageId);
   Future <bool> deleteMessage({required userId, required messageId}) => messagesProvider.deleteMessage(messageId: messageId);
   Future <void> updateMessageStatuses({required dialogId}) => messagesProvider.updateMessageStatuses(dialogId: dialogId);

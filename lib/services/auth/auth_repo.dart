@@ -5,6 +5,7 @@ import 'package:chat/services/exeptions/api_client_exceptions.dart';
 import 'package:chat/models/auth_user_model.dart';
 import 'package:http/http.dart' as http;
 import '../../models/user_profile_model.dart';
+import '../logger/logger_service.dart';
 import '../user_profile/user_profile_api_provider.dart';
 
 
@@ -12,6 +13,7 @@ import '../user_profile/user_profile_api_provider.dart';
 class AuthRepository {
   final _secureStorage = DataProvider();
   final _profileProvider = UserProfileProvider();
+  final _logger = Logger.getInstance();
 
   Future<AuthToken> login(username, password, platform, token) async {
     final String device_name = platform ?? "browser";
@@ -50,24 +52,29 @@ class AuthRepository {
         rethrow;
     } catch (err) {
         print("auth err  -->  $err");
+        _logger.sendErrorTrace(message: "AuthRepository.login", err: err.toString());
         throw ApiClientException(ApiClientExceptionType.other);
     }
   }
 
   Future<void> logout() async {
-    final token = await _secureStorage.getToken();
-    final res = await http.get(
-      Uri.parse('https://erp.mcfef.com/api/logout'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $token',
-      },
-    );
-    await _secureStorage.deleteUserId();
-    await _secureStorage.deleteToken();
-    await _secureStorage.deleteDeviceID();
-    final token2 = await _secureStorage.getToken();
-    // TODO: function to delete deviceId for notifications from db
+    try {
+      final token = await _secureStorage.getToken();
+      final res = await http.get(
+        Uri.parse('https://erp.mcfef.com/api/logout'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      await _secureStorage.deleteUserId();
+      await _secureStorage.deleteToken();
+      await _secureStorage.deleteDeviceID();
+      final token2 = await _secureStorage.getToken();
+      // TODO: function to delete deviceId for notifications from db
+    } catch (err) {
+      _logger.sendErrorTrace(message: "AuthRepository.logout", err: err.toString());
+    }
   }
 
   Future<bool> checkAuthStatus(String? token) async {
@@ -102,6 +109,7 @@ class AuthRepository {
       );
       print('RESET_PASSWORD_RESPONSE   ${response.body}');
     } catch (err) {
+      _logger.sendErrorTrace(message: "AuthRepository.resetPassword", err: err.toString());
       print('RESET_PASSWORD_ERROR   $err');
     }
   }

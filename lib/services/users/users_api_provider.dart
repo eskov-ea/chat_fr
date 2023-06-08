@@ -2,6 +2,7 @@ import 'dart:convert';
 import '../../models/contact_model.dart';
 import 'package:http/http.dart' as http;
 import '../../models/user_profile_model.dart';
+import '../exeptions/api_client_exceptions.dart';
 
 
 class UsersProvider {
@@ -20,21 +21,7 @@ class UsersProvider {
       print(users);
       return users;
     } catch (err) {
-      print("ERRRRRR   $err");
-      return [
-        //TODO: fix the problems with incorrect user list
-        UserContact(
-          id: 121,
-          firstname: "Slava",
-          lastname: "Panarin",
-          middlename: "Olegovich",
-          company: "AO Kashalot",
-          position: "Programmist",
-          phone: "9991231315",
-          dept: "IT",
-          email: "slava@uma.ru"
-        )
-      ];
+      throw ApiClientExceptionType.other;
     }
   }
 }

@@ -423,6 +423,10 @@ _sendMessage({required context, required userId, required dialogId}) async {
     // TODO: if response status code is 200 else ..
     final sentMessage = await MessagesRepository().sendMessage(dialogId: dialogId!, messageText: messageText, parentMessageId: null);
     print("sentMessage  $sentMessage");
+    if (sentMessage == null) {
+      customToastMessage(context, "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");
+      return;
+    }
     final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
     BlocProvider.of<ChatsBuilderBloc>(context).add(
         ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: dialogId!, localMessageId: localMessage.messageId)

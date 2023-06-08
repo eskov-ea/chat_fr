@@ -390,6 +390,10 @@ class ActionBarState extends State<ActionBar> {
       // TODO: if response status code is 200 else ..
       final sentMessage = await MessagesRepository().sendMessage(dialogId: widget.dialogId!, messageText: messageText, parentMessageId: widget.replyedMessageId);
       print("sentMessage response  $sentMessage");
+      if (sentMessage == null) {
+        customToastMessage(context, "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");
+        return;
+      }
       final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
       BlocProvider.of<ChatsBuilderBloc>(context).add(
           ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: widget.dialogId!, localMessageId: localMessage.messageId)
