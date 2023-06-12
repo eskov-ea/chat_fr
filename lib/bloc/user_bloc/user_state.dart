@@ -3,7 +3,12 @@ import '../../models/contact_model.dart';
 import '../../models/user_profile_model.dart';
 
 class UsersState {
-  const UsersState();
+  final UsersListContainer usersContainer = UsersListContainer.initial();
+  final UsersListContainer searchUsersContainer = UsersListContainer.initial();
+  final String searchQuery = "";
+  final bool isSearchMode = false;
+  copyWith(){}
+  List<UserContact> get users => usersContainer.users;
 }
 
 class UsersLoadedState extends UsersState {
@@ -15,12 +20,12 @@ class UsersLoadedState extends UsersState {
   List<UserContact> get users =>
       isSearchMode ? searchUsersContainer.users : usersContainer.users;
 
-  const UsersLoadedState.initial()
+  UsersLoadedState.initial()
       : usersContainer = const UsersListContainer.initial(),
         searchUsersContainer = const UsersListContainer.initial(),
         searchQuery = "";
 
-  const UsersLoadedState({
+  UsersLoadedState({
     required this.usersContainer,
     required this.searchUsersContainer,
     required this.searchQuery

@@ -18,10 +18,14 @@ class ContactsPage extends StatelessWidget {
         appBar: CustomAppBar(context),
         body: BlocBuilder<UsersViewCubit, UsersViewCubitState>(
           builder: (context, state) {
-            if (state is UsersViewCubitEErrorState) {
+            if (state is UsersViewCubitErrorState) {
               return Container(
-                child: Text(
-                  'Произошла ошибка при загрузке пользователей, попробуйте еще раз'
+                child: Center(
+                  child: Text(
+                    'Произошла ошибка при загрузке пользователей, попробуйте еще раз',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 18),
+                  ),
                 ),
               );
             }
@@ -59,7 +63,7 @@ class ContactsPage extends StatelessWidget {
             }
             return const Center(
               child: Text(
-                'Error fetching users',
+                'Произошла ошибка при загрузке пользователей, попробуйте еще раз',
                 style: TextStyle(fontSize: 20.0),
               ),
             );

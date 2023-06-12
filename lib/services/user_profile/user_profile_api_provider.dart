@@ -17,7 +17,7 @@ class UserProfileProvider {
       final UserProfileData profile = UserProfileData.fromJson(jsonDecode(response.body)["data"]);
       return profile;
     } else {
-      throw ApiClientException(ApiClientExceptionType.auth);
+      throw ApiClientException(ApiClientExceptionType.auth, "");
     }
   }
 }

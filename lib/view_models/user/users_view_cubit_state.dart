@@ -42,4 +42,4 @@ class UsersViewCubitLoadedState extends UsersViewCubitState {
 
 class UsersViewCubitLoadingState extends UsersViewCubitState{}
 
-class UsersViewCubitEErrorState extends UsersViewCubitState{}
+class UsersViewCubitErrorState extends UsersViewCubitState{}

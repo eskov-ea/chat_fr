@@ -42,18 +42,18 @@ class AuthRepository {
         await _secureStorage.setUserId(userId);
         return authToken;
       } else if (response.statusCode == 403) {
-        throw ApiClientException(ApiClientExceptionType.access);
+        throw ApiClientException(ApiClientExceptionType.access, "403: do not have permission");
       } else {
-        throw ApiClientException(ApiClientExceptionType.auth);
+        throw ApiClientException(ApiClientExceptionType.auth, "not authorized");
       }
     } on SocketException {
-        throw ApiClientException(ApiClientExceptionType.network);
+        throw ApiClientException(ApiClientExceptionType.network, "connection problems");
     } on ApiClientException {
         rethrow;
     } catch (err) {
         print("auth err  -->  $err");
         _logger.sendErrorTrace(message: "AuthRepository.login", err: err.toString());
-        throw ApiClientException(ApiClientExceptionType.other);
+        throw ApiClientException(ApiClientExceptionType.other, err.toString());
     }
   }
 

@@ -10,7 +10,7 @@ import '../../storage/data_storage.dart';
 import '../ws_bloc/ws_bloc.dart';
 
 
-class UsersBloc extends Bloc<UsersEvent, UsersLoadedState> {
+class UsersBloc extends Bloc<UsersEvent, UsersState> {
   final UsersRepository usersRepository;
   late final StreamSubscription usersSubscription;
   final WsBloc webSocketBloc;
@@ -21,7 +21,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersLoadedState> {
   UsersBloc({
     required this.usersRepository,
     required this.webSocketBloc,
-  }) :  super(const UsersLoadedState.initial()) {
+  }) :  super(UsersState()) {
     usersSubscription = webSocketBloc.stream.listen((streamState) {
 
     });
@@ -36,6 +36,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersLoadedState> {
     try {
       final String? token = await _secureStorage.getToken();
       List<UserContact> users = await usersRepository.getAllUsers(token);
+      print('Users:  $users');
       users.sort((a, b) => a.lastname.compareTo(b.lastname));
       if (state.isSearchMode) {
         print('state.isSearchMode');
@@ -50,16 +51,18 @@ class UsersBloc extends Bloc<UsersEvent, UsersLoadedState> {
         emit(UsersLoadedState(usersContainer: newContainer, searchQuery: '', searchUsersContainer: state.searchUsersContainer));
       }
     } catch (err) {
+      print("ERROR: onUsersLoadEvent ${err}");
       _logger.sendErrorTrace(message: "UsersBloc.onUsersLoadEvent", err: err.toString());
       emit(UsersErrorState());
     }
   }
 
   void onUsersSearchEvent(
-      UsersSearchEvent event, Emitter<UsersLoadedState> emit
+      UsersSearchEvent event, Emitter<UsersState> emit
       ) async {
     if (state.searchQuery == event.searchQuery) return;
-    final newState = state.copyWith(
+    final newState = state as UsersLoadedState;
+    newState.copyWith(
       searchQuery: event.searchQuery,
       searchUsersContainer: const UsersListContainer.initial()
     );
@@ -70,7 +73,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersLoadedState> {
   void onUsersDeleteEvent(
       UsersDeleteEvent event, emit
       ) {
-   emit(UsersLoadedState.initial());
+   emit(UsersState());
   }
 
 

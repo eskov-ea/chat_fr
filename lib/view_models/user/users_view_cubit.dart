@@ -28,7 +28,7 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
       });
       emit(UsersViewCubitLoadedState(users: users, searchQuery: '', usersDictionary: usersDictionary));
     } else if (state is UsersErrorState) {
-      emit(UsersViewCubitEErrorState());
+      emit(UsersViewCubitErrorState());
     }
   }
 

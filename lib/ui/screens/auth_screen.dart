@@ -87,7 +87,6 @@ class _AuthScreenState extends State<AuthScreen> {
     return  BlocListener<AuthViewCubit, AuthViewCubitState>(
         listener: _onAuthViewCubitStateChange,
         child:  Scaffold(
-          // backgroundColor: Color(0xFF1B1E1F),
           body: SafeArea(
                 child: SingleChildScrollView(
                   child: GestureDetector(
