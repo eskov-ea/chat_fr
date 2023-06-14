@@ -44,7 +44,6 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         accountParams.pushNotificationAllowed = true
         accountParams.remotePushNotificationAllowed = true
 
-        Log.d("NAT", "NAT 1:  ${accountParams.natPolicy?.iceEnabled()}")
         val nat = core.createNatPolicy()
         nat.stunServer = "aster.mcfef.com:3478"
         nat.enableStun(true)
@@ -52,7 +51,6 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         nat.enableIce(true)
         core.natPolicy = nat
         accountParams.natPolicy = nat
-        Log.d("NAT", "NAT 2:  ${accountParams.natPolicy?.iceEnabled()}")
 
         accountParams.contactUriParameters = "sip:$username@$domain"
 
@@ -122,7 +120,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                 Log.w("SIP RegistrationState status", "false")
                 val args = makePlatformEventPayload("REGISTRATION_SUCCESS", null, null)
                 MainActivity.callServiceEventSink?.success(args)
-                Log.w("Account setup 4", core.defaultAccount?.params?.identityAddress.toString())
+                Log.w("Account setup 4", core.defaultAccount?.params?.identityAddress?.displayName.toString())
             }
         }
 
@@ -136,10 +134,14 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
             // When a call is received
             when (state) {
                 Call.State.IncomingReceived -> {
-                    Log.w("ACTIVE_CALL", "IncomingReceived   ${call.remoteAddress.username}")
-
+                    val caller = if(call.remoteAddress.displayName != null) {
+                        call.remoteAddress.displayName!!
+                    } else {
+                        call.remoteAddress.username.toString()
+                    }
+                    Log.w("ACTIVE_CALL", "IncomingReceived   $caller, ${call.remoteAddress.domain}, ${call.remoteAddress.scheme}, ${call.remoteAddress.displayName}, ${call.remoteAddress.transport}")
                     val args: Map<String, Any?> = mapOf(
-                        "nameCaller" to call.remoteAddress.username,
+                        "nameCaller" to caller,
                         "android" to android
                     )
 
@@ -158,12 +160,17 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                 }
                 Call.State.Connected -> {
                     Log.w("ACTIVE_CALL", "Connected   ${call.remoteAddress.username}")
+                    val caller = if(call.remoteAddress.displayName != null) {
+                        call.remoteAddress.displayName!!
+                    } else {
+                        call.remoteAddress.username.toString()
+                    }
                     val args = makePlatformEventPayload("CONNECTED", call.remoteAddress.username, null)
 
                     MainActivity.callServiceEventSink?.success(args)
 
                     val dargs: Map<String, Any?> = mapOf(
-                        "nameCaller" to call.remoteAddress.username,
+                        "nameCaller" to caller,
                         "android" to android
                     )
 
@@ -174,42 +181,16 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                             data
                         )
                     )
-
-//                    val intent = Intent(context, CurrentCall::class.java).apply {
-//                        flags =
-//                                Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-//                    }
-//                    context.startActivity(intent)
                 }
-//                Call.State.Released -> {
-//                    Log.w("ACTIVE_CALL", "Released   ${call.remoteAddress.username}")
-////                    sendBroadcast(CurrentCall.getIntentEnded())
-//                    val dargs: Map<String, Any?> = mapOf(
-//                        "nameCaller" to call.remoteAddress.username,
-//                        "android" to android
-//                    )
-//
-//                    val data = Data(dargs).toBundle()
-//                    context.sendBroadcast(
-//                        CallsManagerBroadcastReceiver.getIntentDecline(
-//                            context,
-//                            data
-//                        )
-//                    )
-//                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
-//                        callStatus = if (call.callLog.status.name == "Success")  "ANSWERED" else "NO ANSWER",
-//                        fromCaller = call.callLog.fromAddress.username,
-//                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
-//                        callId = call.callLog.callId)
-//                    val args = makePlatformEventPayload("ENDED", call.remoteAddress.username, callData)
-//
-//                    MainActivity.callServiceEventSink?.success(args)
-//                }
                 Call.State.End -> {
                     Log.w("ACTIVE_CALL", "Ended   ${call.remoteAddress.username}")
-//                    sendBroadcast(CurrentCall.getIntentEnded())
+                    val caller = if(call.remoteAddress.displayName != null) {
+                        call.remoteAddress.displayName!!
+                    } else {
+                        call.remoteAddress.username.toString()
+                    }
                     val dargs: Map<String, Any?> = mapOf(
-                            "nameCaller" to call.remoteAddress.username,
+                            "nameCaller" to caller,
                             "android" to android
                     )
 
@@ -231,12 +212,12 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                 }
                 Call.State.OutgoingInit -> {
                     Log.w("OUTGOING_CALL", "OutgoingInit")
-//                    val intent = Intent(context, RingingCall::class.java).apply {
-//                        flags =
-//                                Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-//                    }
-//                    context.startActivity(intent)
 
+                    val caller = if(call.remoteAddress.displayName != null) {
+                        call.remoteAddress.displayName!!
+                    } else {
+                        call.remoteAddress.username.toString()
+                    }
                     val args = makePlatformEventPayload("OUTGOING", call.remoteAddress.username, null)
 
                     MainActivity.callServiceEventSink?.success(args)

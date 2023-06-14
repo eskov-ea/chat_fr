@@ -12,7 +12,7 @@ class UsersProvider {
   Future <List<UserContact>> getUsers(String? token) async {
     try {
       final response = await http.get(
-        Uri.parse('https://erp.mcfef.com/api/users2'),
+        Uri.parse('https://erp.mcfef.com/api/users'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token'

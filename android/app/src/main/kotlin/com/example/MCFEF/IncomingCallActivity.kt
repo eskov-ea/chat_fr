@@ -3,7 +3,6 @@ package com.example.MCFEF
 import android.app.KeyguardManager
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.view.ViewGroup
@@ -13,7 +12,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.MCFEF.calls_manager.CallsManager
 import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver
 import com.example.MCFEF.calls_manager.TransparentActivity
 import com.hiennv.flutter_callkit_incoming.Utils

@@ -136,23 +136,12 @@ class CallsManager : Activity() {
     private fun incomingData(intent: Intent) {
         val data = intent.extras?.getBundle(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_INCOMING_DATA)
         val caller = intent.getStringExtra("CALLS_MANAGER_EXTRAS_CALLERNAME")
-//        if (data == null) finish()
+
         tvNameCaller.text = caller
         tvNumber.text = data?.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_HANDLE, "")
 
         val isShowLogo = data?.getBoolean(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_IS_SHOW_LOGO, false)
         ivLogo.visibility = if (isShowLogo == true) View.VISIBLE else View.INVISIBLE
-
-        val avatarUrl = data?.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_AVATAR, "")
-//        if (avatarUrl != null && avatarUrl.isNotEmpty()) {
-//            ivAvatar.visibility = View.VISIBLE
-//            val headers = data.getSerializable(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
-//            getPicassoInstance(this, headers)
-//                    .load(avatarUrl)
-//                    .placeholder(R.drawable.ic_default_avatar)
-//                    .error(R.drawable.ic_default_avatar)
-//                    .into(ivAvatar)
-//        }
 
         val callType = data?.getInt(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_TYPE, 0) ?: 0
         if (callType > 0) {
@@ -172,16 +161,8 @@ class CallsManager : Activity() {
         try {
             ivBackground.setBackgroundColor(Color.parseColor(backgroundColor))
         } catch (error: Exception) {
+            Log.e("ERROR", "Error on incoming received  $error")
         }
-        val backgroundUrl = data?.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_BACKGROUND_URL, "")
-//        if (backgroundUrl != null && backgroundUrl.isNotEmpty()) {
-//            val headers = data.getSerializable(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
-//            getPicassoInstance(this@CallkitIncomingActivity, headers)
-//                    .load(backgroundUrl)
-//                    .placeholder(R.drawable.transparent)
-//                    .error(R.drawable.transparent)
-//                    .into(ivBackground)
-//        }
     }
     private fun wakeLockRequest(duration: Long) {
 

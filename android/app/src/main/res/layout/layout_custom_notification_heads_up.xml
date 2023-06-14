@@ -23,17 +23,35 @@
                 android:textAppearance="@style/TextAppearance.Compat.Notification.Title"
                 android:textSize="@dimen/size_text_action" />
 
-
-<!--            <TextView-->
-<!--                android:id="@+id/tvNumber"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:textAppearance="@style/TextAppearance.Compat.Notification.Line2"-->
-<!--                android:textSize="@dimen/size_text_action" />-->
-
         </LinearLayout>
 
     </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48sp"
+        android:layout_marginTop="@dimen/base_margin_half"
+        android:layout_marginLeft="@dimen/base_margin_half"
+        android:orientation="vertical">
+
+        <TextView
+            android:text="Входящий звонок"
+            android:textColor="@android:color/black"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Compat.Notification.Title"
+            android:textSize="@dimen/size_text_action" />
+
+        <TextView
+            android:text="12:34"
+            android:textColor="@android:color/black"
+            android:textFontWeight="400"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.Compat.Notification.Title"
+            android:textSize="@dimen/size_text_action" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -111,24 +129,5 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/base_margin_half"
-        android:layout_marginLeft="@dimen/base_margin_half"
-        android:orientation="vertical">
-
-        <TextView
-            android:text="Входящий звонок"
-            android:textColor="@android:color/black"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.Compat.Notification.Title"
-            android:textSize="@dimen/size_text_action" />
-
-    </LinearLayout>
-
 
 </LinearLayout>
-
-    <!--style="@style/Widget.Compat.NotificationActionText"-->
