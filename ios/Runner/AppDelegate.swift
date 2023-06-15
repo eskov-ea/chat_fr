@@ -69,6 +69,27 @@ import PushKit
                     print(error)
                 }
             }
+            if call.method == "SAVE_SIP_CONTACTS" {
+                print("SAVE_SIP_CONTACTS")
+                let args = call.arguments as? Dictionary<String, Any>
+                let type = args!["type"] as? String
+                let data = args!["data"] as? Dictionary<String, String>
+                let sm = StorageManager()
+                if (data != nil) {
+//                    let sm = StorageManager()
+                    sm.saveDataToDocuments(data!, jsonFilename: sm.filename)
+                } else {
+                    print("Data error:  \(args)  \(type)")
+                }
+                print("Read file:  start")
+                do {
+                    let result = sm.readDataFromDocuments(jsonFilename: sm.filename)
+                    let contact = result?.contacts["760"]
+                    print("Read file:  \(contact)")
+                } catch {
+                    print("Read file error:  \(error)")
+                }
+            }
         })
         
         sipChannel.setMethodCallHandler({

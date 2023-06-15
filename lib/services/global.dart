@@ -22,7 +22,7 @@ import 'package:chat/view_models/auth/auth_view_cubit.dart';
 import 'package:chat/models/message_model.dart' as parseTime;
 import '../view_models/chats_builder_view/chat_view_cubit.dart';
 import 'messages/messages_repository.dart';
-import 'package:universal_html/html.dart' as html;
+// import 'package:universal_html/html.dart' as html;
 
 AudioPlayer _player = AudioPlayer();
 const prefix = "7";
@@ -277,18 +277,18 @@ Future<File?> isLocalFileExist({required String fileName}) async {
 webPlatformSaveFile({required bytes, required filename}) async {
 
   if(kIsWeb) {
-    final blob = html.Blob([bytes]);
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    final anchor = html.document.createElement('a') as html.AnchorElement
-      ..href = url
-      ..style.display = 'none'
-      ..download = '$filename';
-    html.document.body?.children.add(anchor);
-
-    anchor.click();
-
-    html.document.body?.children.remove(anchor);
-    html.Url.revokeObjectUrl(url);
+    // final blob = html.Blob([bytes]);
+    // final url = html.Url.createObjectUrlFromBlob(blob);
+    // final anchor = html.document.createElement('a') as html.AnchorElement
+    //   ..href = url
+    //   ..style.display = 'none'
+    //   ..download = '$filename';
+    // html.document.body?.children.add(anchor);
+    //
+    // anchor.click();
+    //
+    // html.document.body?.children.remove(anchor);
+    // html.Url.revokeObjectUrl(url);
   } else {
     throw Exception("Should be called on web only");
   }

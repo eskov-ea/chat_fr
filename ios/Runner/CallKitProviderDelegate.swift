@@ -41,7 +41,21 @@ class CallKitProviderDelegate : NSObject
         incomingCallUUID = UUID()
         print("INCOMING UUID  ->  \(String(describing: incomingCallUUID))")
         let update = CXCallUpdate()
-        update.remoteHandle = CXHandle(type:.generic, value: callkitContext.incomingCallName)
+        var callerName: String?
+        if (callkitContext.mCall?.remoteAddress?.username != nil && callkitContext.incomingCallName == "Unknown") {
+            print("Name error:  start")
+            do {
+                let sm = StorageManager()
+                let storageContacts = sm.readDataFromDocuments(jsonFilename: sm.filename)
+                callerName = storageContacts?.contacts[callkitContext.mCall!.remoteAddress!.username]
+            } catch {
+                print("Name error:  \(eroor)")
+                callerName = callkitContext.incomingCallName
+            }
+        } else {
+            callerName = callkitContext.incomingCallName
+        }
+        update.remoteHandle = CXHandle(type:.generic, value: callerName)
         
         provider.reportNewIncomingCall(with: incomingCallUUID, update: update, completion: { error in }) // Report to CallKit a call is incoming
     }

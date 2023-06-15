@@ -35,7 +35,7 @@ class LinphoneSDK : ObservableObject
         @Published var canChangeCamera : Bool = false
     
         // CallKit related variables
-        var incomingCallName = "Incoming call example"
+        var incomingCallName = "Unknown"
         var mCall : Call?
         var mProviderDelegate : CallKitProviderDelegate!
         var mCallAlreadyStopped : Bool = false;
@@ -57,13 +57,6 @@ class LinphoneSDK : ObservableObject
         mCore.callkitEnabled = true
         mCore.pushNotificationEnabled = true
         
-//        mCore?.natPolicy?.iceEnabled = true
-//        mCore?.natPolicy?.stunServer = "stun.zoiper.com:3478"
-//        mCore?.natPolicy?.tcpTurnTransportEnabled = true
-//        mCore?.natPolicy?.stunEnabled = true
-//        mCore.stunServer = "stun.zoiper.com:3478"
-        
-        
         try? mCore.start()
         
         print("push status \(mCore.isPushNotificationAvailable)")
@@ -78,7 +71,16 @@ class LinphoneSDK : ObservableObject
                 } else if (state == .IncomingReceived) { // When a call is received
                     if (!self.isCallIncoming) {
                         self.mCall = call
-                        self.incomingCallName = call.remoteAddress?.username ?? "Unknown"
+                        
+                        do {
+                            let sm = StorageManager()
+                            let storedContacts = sm.readDataFromDocuments(jsonFilename: sm.filename)
+                            let callerName = storedContacts?.contacts[call.remoteAddress!.username]
+                            self.incomingCallName = callerName!
+                        } catch {
+                            self.incomingCallName = "Неизвестен"
+                        }
+                        
                         self.isCallIncoming = true
                         let payload = makeEventPayload(event: "INCOMING", callerId: call.remoteAddress?.username, callData: nil)
                         self.eventSink?(payload)
@@ -204,18 +206,17 @@ class LinphoneSDK : ObservableObject
                 accountParams.pushNotificationConfig?.provider = "apns"
                 let account = try mCore.createAccount(params: accountParams)
                 
-                
-//                account.core?.stunServer = "stun.sip.us:3478"
-//                mCore?.natPolicy?.iceEnabled = true
-//                mCore?.natPolicy?.stunServer = "stun.sip.us:3478"
-//                mCore?.natPolicy?.tcpTurnTransportEnabled = true
-//                mCore?.natPolicy?.stunEnabled = true
-//                account.core?.stunServer = "stun.sip.us:3478"
-//                mCore?.natPolicy?.stunServer = "stun.sip.us:3478"
+                let nat = try? mCore.createNatPolicy()
+                nat?.stunServer = "aster.mcfef.com:3478"
+                nat?.stunEnabled = true
+                nat?.turnEnabled = true
+                nat?.iceEnabled = true
                 
                 mCore.addAuthInfo(info: authInfo)
                 try mCore.addAccount(account: account)
                 mCore.defaultAccount = account
+                mCore.natPolicy = nat
+                accountParams.natPolicy = nat
             } catch { NSLog(error.localizedDescription) }
         }
     

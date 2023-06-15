@@ -3,6 +3,7 @@ import 'package:chat/bloc/user_bloc/user_event.dart';
 import 'package:chat/bloc/user_bloc/user_state.dart';
 import 'package:chat/bloc/user_bloc/users_list_container.dart';
 import 'package:chat/services/logger/logger_service.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/contact_model.dart';
 import '../../services/users/users_repository.dart';
@@ -17,6 +18,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   final _secureStorage = DataProvider();
   final _logger = Logger.getInstance();
 
+  final _methodChannel = const MethodChannel("com.application.chat/write_files_method");
+  final _eventChannel = const EventChannel("event.channel/write_files_service");
 
   UsersBloc({
     required this.usersRepository,
@@ -36,9 +39,11 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
     try {
       final String? token = await _secureStorage.getToken();
       List<UserContact> users = await usersRepository.getAllUsers(token);
-      print('Users:  $users');
+      final usersMap = usersRepository.getSipContacts(users);
+      _methodChannel.invokeMethod("SAVE_SIP_CONTACTS", {
+        "data" : usersMap
+      });
       users.sort((a, b) => a.lastname.compareTo(b.lastname));
-      usersRepository.setSipContacts(users);
       if (state.isSearchMode) {
         print('state.isSearchMode');
         final query = state.searchQuery.toLowerCase();

@@ -30,17 +30,11 @@ class UsersProvider {
     }
   }
 
-  Future<void> setSipContacts(List<UserContact> users) async {
-    try {
-      final Map<String, String> map = {};
-      users.forEach((user) {
-        map["$prefix${user.id}"] = "${user.lastname} ${user.firstname}";
-      });
-      await DataProvider().setSipContacts(map);
-      final result = await DataProvider().getSipContacts();
-      print("setSipContacts  -->  $result");
-    } catch (err) {
-      print("Error: setSipContacts, $err");
-    }
+  Map<String, String> setSipContacts(List<UserContact> users) {
+    final Map<String, String> map = {};
+    users.forEach((user) {
+      map["$prefix${user.id}"] = "${user.lastname} ${user.firstname}";
+    });
+    return map;
   }
 }
