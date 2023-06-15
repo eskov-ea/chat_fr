@@ -91,10 +91,10 @@ class MainActivity: FlutterActivity() {
                 }
             }
             if (call.method == "SAVE_SIP_CONTACTS") {
-//                var data: String? = call.argument<String?>("data")
-//                var sm = StorageManager(context)
-//                data = data.
-//                sm.writeData(data!.toByteArray())
+                var data: String? = call.argument<String?>("data")
+                var sm = StorageManager(context)
+                data =
+                sm.writeData(data!.toByteArray())
             }
         }
 
