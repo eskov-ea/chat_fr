@@ -72,7 +72,7 @@ class IncomingCallScreen extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.all(22),
                             child: Image.asset(
-                              'assets/images/decline_icon.png',
+                              'assets/images/accept_icon.png',
                               fit: BoxFit.fill,
                             ),
                           ),

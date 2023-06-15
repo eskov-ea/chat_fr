@@ -18,19 +18,19 @@ class CallsManagerBroadcastReceiver : BroadcastReceiver() {
 
     companion object {
         const val ACTION_CALL_INCOMING =
-                "com.example.chat_fr.calls_manager.ACTION_CALL_INCOMING"
+                "com.example.MCFEF.calls_manager.ACTION_CALL_INCOMING"
         const val ACTION_CALL_ACCEPT =
-                "com.example.chat_fr.calls_manager.ACTION_CALL_ACCEPT"
+                "com.example.MCFEF.calls_manager.ACTION_CALL_ACCEPT"
         const val ACTION_CALL_DECLINE =
-                "com.example.chat_fr.calls_manager.ACTION_CALL_DECLINE"
+                "com.example.MCFEF.calls_manager.ACTION_CALL_DECLINE"
         const val ACTION_CALL_ENDED =
-                "com.example.chat_fr.calls_manager.ACTION_CALL_ENDED"
+                "com.example.MCFEF.calls_manager.ACTION_CALL_ENDED"
         const val ACTION_CALL_TIMEOUT =
-                "com.example.chat_fr.calls_manager.ACTION_CALL_TIMEOUT"
+                "com.example.MCFEF.calls_manager.ACTION_CALL_TIMEOUT"
         const val ACTION_CALL_CALLBACK =
-                "com.example.chat_fr.calls_manager.ACTION_CALL_CALLBACK"
+                "com.example.MCFEF.calls_manager.ACTION_CALL_CALLBACK"
         const val ACTION_CALL_ACCEPTED =
-                "com.example.chat_fr.calls_manager.ACTION_CALL_ACCEPTED"
+                "com.example.MCFEF.calls_manager.ACTION_CALL_ACCEPTED"
 
 
         const val EXTRA_CALLKIT_INCOMING_DATA = "EXTRA_CALLKIT_INCOMING_DATA"

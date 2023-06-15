@@ -8,5 +8,6 @@ class UsersRepository  {
   UsersProvider usersProvider = UsersProvider();
 
   Future <List<UserContact>> getAllUsers(token) => usersProvider.getUsers(token);
+  Future <void> setSipContacts(List<UserContact> users) => usersProvider.setSipContacts(users);
 
 }

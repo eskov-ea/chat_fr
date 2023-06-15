@@ -1,9 +1,6 @@
 package com.example.MCFEF.calls_manager
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -24,10 +21,10 @@ import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.E
 import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_IS_SHOW_CALLBACK
 import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_NAME_CALLER
 import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_TEXT_CALLBACK
-import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver
 import com.example.MCFEF.R
+import com.hiennv.flutter_callkit_incoming.CallkitIncomingActivity
 
-import io.flutter.Log
+import android.app.KeyguardManager as KeyguardManager1
 
 class CallsNotificationManager(private val context: Context) {
 
@@ -299,7 +296,7 @@ class CallsNotificationManager(private val context: Context) {
         }
     }
     fun clearIncomingNotification(data: Bundle) {
-        context.sendBroadcast(CallsManager.getIntentEnded())
+        context.sendBroadcast(IncomingCallActivity.getIntentEnded())
         notificationId = data.getString(EXTRA_CALLKIT_ID, "mcfef_calls").hashCode()
         getNotificationManager().cancel(notificationId)
     }
@@ -364,9 +361,12 @@ class CallsNotificationManager(private val context: Context) {
     }
 
     private fun getActivityPendingIntent(id: Int, data: Bundle): PendingIntent {
-        val intent = CallsManager.getIntent(data)
+        val km = context.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager1
+//        val intent = CallkitIncomingActivity.getIntent(data)
+        val intent = IncomingCallActivity.getIntent(data)
         return PendingIntent.getActivity(context, id, intent, getFlagPendingIntent())
     }
+
     private fun getTimeOutPendingIntent(id: Int, data: Bundle): PendingIntent {
         val timeOutIntent = CallsManagerBroadcastReceiver.getIntentTimeout(context, data)
         return PendingIntent.getBroadcast(

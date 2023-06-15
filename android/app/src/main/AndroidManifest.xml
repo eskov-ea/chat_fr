@@ -106,52 +106,52 @@
 
 
        <activity
-           android:name="com.example.MCFEF.calls_manager.CallsManager"
+           android:name="com.example.MCFEF.calls_manager.IncomingCallActivity"
            android:excludeFromRecents="true"
            android:showOnLockScreen="true"
            android:turnScreenOn="true"
            android:resizeableActivity="true"
+           android:launchMode="singleTask"
 
-           android:exported="false">
+           android:exported="true">
            <intent-filter>
                <action android:name="com.example.MCFEF.calls_manager.ACTION_CALL_INCOMING" />
-               <action android:name="com.example.MCFEF.calls_manager.ACTION_CALL_ACCEPTED" />
                <category android:name="android.intent.category.DEFAULT" />
            </intent-filter>
        </activity>
 
-       <activity
-           android:name="com.example.MCFEF.calls_manager.CurrentCall"
-           android:excludeFromRecents="true"
-           android:showOnLockScreen="true"
-           android:exported="false">
-           <intent-filter>
-               <action android:name="com.example.MCFEF.calls_manager.ACTION_ENDED_CALL" />
-               <category android:name="android.intent.category.DEFAULT" />
-           </intent-filter>
-       </activity>
 
-       <activity
-           android:name="com.example.MCFEF.calls_manager.RingingCall"
-           android:excludeFromRecents="true"
-           android:showOnLockScreen="true"
-           android:exported="false">
-           <intent-filter>
-               <action android:name="com.example.MCFEF.calls_manager.ACTION_ENDED_CALL" />
-               <category android:name="android.intent.category.DEFAULT" />
-           </intent-filter>
-       </activity>
+<!--       <activity-->
+<!--           android:name="com.example.MCFEF.calls_manager.CurrentCall"-->
+<!--           android:excludeFromRecents="true"-->
+<!--           android:showOnLockScreen="true"-->
+<!--           android:exported="false">-->
+<!--           <intent-filter>-->
+<!--               <action android:name="com.example.MCFEF.calls_manager.ACTION_ENDED_CALL" />-->
+<!--               <category android:name="android.intent.category.DEFAULT" />-->
+<!--           </intent-filter>-->
+<!--       </activity>-->
+
+<!--       <activity-->
+<!--           android:name="com.example.MCFEF.calls_manager.RingingCall"-->
+<!--           android:excludeFromRecents="true"-->
+<!--           android:showOnLockScreen="true"-->
+<!--           android:exported="false">-->
+<!--           <intent-filter>-->
+<!--               <action android:name="com.example.MCFEF.calls_manager.ACTION_ENDED_CALL" />-->
+<!--               <category android:name="android.intent.category.DEFAULT" />-->
+<!--           </intent-filter>-->
+<!--       </activity>-->
 
        <activity
            android:exported="false"
            android:name="com.example.MCFEF.calls_manager.TransparentActivity"
-           android:process=":CallView">
-       </activity>
+           android:process=":CallView"/>
 
        <receiver
            android:name="com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver"
            android:enabled="true"
-           android:exported="false">
+           android:exported="true">
            <intent-filter>
                <action android:name="com.example.MCFEF.calls_manager.ACTION_CALL_INCOMING" />
                <action android:name="com.example.MCFEF.calls_manager.ACTION_CALL_ACCEPT" />
@@ -160,16 +160,5 @@
                <action android:name="com.example.MCFEF.calls_manager.ACTION_CALL_TIMEOUT" />
            </intent-filter>
        </receiver>
-
-       <activity
-           android:name="com.example.MCFEF.IncomingCallActivity"
-           android:excludeFromRecents="true"
-           android:showOnLockScreen="true"
-           android:turnScreenOn="true"
-           android:resizeableActivity="true"
-
-           android:exported="false">
-       </activity>
-
    </application>
 </manifest>

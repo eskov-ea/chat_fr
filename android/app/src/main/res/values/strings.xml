@@ -6,4 +6,5 @@
     <string name="text_mute_btn">Mute</string>
     <string name="text_speaker_btn">Speaker</string>
     <string name="text_message_btn">Message</string>
+    <string name="text_accept">Accept</string>
 </resources>

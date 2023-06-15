@@ -6,6 +6,7 @@ abstract class _Keys {
   static const userId = 'user_id';
   static const deviceID = 'device_id';
   static const os = 'os';
+  static const sipContacts = 'sip_contacts';
 }
 
 class DataProvider {
@@ -51,6 +52,18 @@ class DataProvider {
 
   Future<void> deleteDeviceID() {
     return _secureStorage.delete(key: _Keys.deviceID);
+  }
+
+  Future<void> setSipContacts(Map<String, String> value) {
+    return _secureStorage.write(key: _Keys.sipContacts, value: value.toString());
+  }
+
+  Future<String?> getSipContacts() {
+    return _secureStorage.read(key: _Keys.sipContacts);
+  }
+
+  Future<void> deleteSipContacts() {
+    return _secureStorage.delete(key: _Keys.sipContacts);
   }
 
 }

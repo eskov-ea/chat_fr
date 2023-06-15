@@ -11,29 +11,36 @@ import android.os.*
 import android.text.TextUtils
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.example.MCFEF.MainActivity
 import com.example.MCFEF.R
 import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.ACTION_CALL_INCOMING
+import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_TEXT_ACCEPT
+import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_TEXT_DECLINE
+import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_BACKGROUND_COLOR
+import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_DURATION
 import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_INCOMING_DATA
+import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_NAME_CALLER
+import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_HANDLE
+import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_HEADERS
+import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_IS_SHOW_LOGO
+import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_TYPE
 import com.example.MCFEF.linphoneSDK.CoreContext
-import com.hiennv.flutter_callkit_incoming.Utils
-import com.hiennv.flutter_callkit_incoming.widgets.RippleRelativeLayout
+import com.example.MCFEF.calls_manager.widgets.RippleRelativeLayout
+import com.hiennv.flutter_callkit_incoming.CallkitIncomingBroadcastReceiver
 import io.flutter.Log
 import kotlin.math.abs
 
-class CallsManager : Activity() {
+class IncomingCallActivity : Activity() {
 
     companion object {
 
         const val ACTION_ENDED_CALL_INCOMING =
-                "com.example.chat_fr.calls_manager.ACTION_ENDED_CALL_INCOMING"
-        const val ACTION_CALL_ACCEPTED =
-                "com.example.chat_fr.calls_manager.ACTION_CALL_ACCEPTED"
+                "com.example.MCFEF.calls_manager.ACTION_ENDED_CALL_INCOMING"
 
         fun getIntent(data: Bundle) = Intent(ACTION_CALL_INCOMING).apply {
             action = ACTION_CALL_INCOMING
@@ -46,7 +53,7 @@ class CallsManager : Activity() {
                 Intent(ACTION_ENDED_CALL_INCOMING)
     }
 
-    inner class EndedCallsManagerBroadcastReceiver : BroadcastReceiver() {
+    inner class EndedIncomingCallActivityBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (!isFinishing) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -58,30 +65,17 @@ class CallsManager : Activity() {
         }
     }
 
-    private var endedCallkitIncomingBroadcastReceiver = EndedCallsManagerBroadcastReceiver()
-
-
-    private lateinit var ivBackground: ImageView
-    private lateinit var llBackgroundAnimation: RippleRelativeLayout
+    private var endedIncomingCallActivityBroadcastReceiver = EndedIncomingCallActivityBroadcastReceiver()
 
     private lateinit var tvNameCaller: TextView
-    private lateinit var tvNumber: TextView
-    private lateinit var ivLogo: ImageView
-//    private lateinit var ivAvatar: MyCircleImageView
-
-    private lateinit var llAction: LinearLayout
-    private lateinit var ivAcceptCall: ImageView
+    private lateinit var ivAcceptCallButton: ImageView
     private lateinit var tvAccept: TextView
-
-    private lateinit var ivDeclineCall: ImageView
+    private lateinit var ivDeclineCallButton: ImageView
     private lateinit var tvDecline: TextView
-
-    private val call = CoreContext.core
 
 
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.w("onCreate", "listen")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             setTurnScreenOn(true)
@@ -92,77 +86,43 @@ class CallsManager : Activity() {
             window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED)
             window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
         }
-        setContentView(R.layout.activity_callkit_incoming)
+
+        setContentView(R.layout.incoming_call)
         initView()
         incomingData(intent)
         registerReceiver(
-                endedCallkitIncomingBroadcastReceiver,
-                IntentFilter(ACTION_ENDED_CALL_INCOMING)
+            endedIncomingCallActivityBroadcastReceiver,
+            IntentFilter(ACTION_ENDED_CALL_INCOMING)
         )
     }
 
     private fun initView() {
-        ivBackground = findViewById(R.id.ivBackground)
-        llBackgroundAnimation = findViewById(R.id.llBackgroundAnimation)
-        llBackgroundAnimation.layoutParams.height =
-                Utils.getScreenWidth() + Utils.getStatusBarHeight(this)
-        llBackgroundAnimation.startRippleAnimation()
-
         tvNameCaller = findViewById(R.id.tvNameCaller)
-        tvNumber = findViewById(R.id.tvNumber)
-        ivLogo = findViewById(R.id.ivLogo)
-//        ivAvatar = findViewById(R.id.ivAvatar)
-
-        llAction = findViewById(R.id.llAction)
-
-        val params = llAction.layoutParams as ViewGroup.MarginLayoutParams
-        params.setMargins(0,0,0, Utils.getNavigationBarHeight(this))
-        llAction.layoutParams = params
-
-        ivAcceptCall = findViewById(R.id.ivAcceptCall)
+        ivAcceptCallButton = findViewById(R.id.ivAcceptCallButton)
         tvAccept = findViewById(R.id.tvAccept)
-        ivDeclineCall = findViewById(R.id.ivDeclineCall)
+        ivDeclineCallButton = findViewById(R.id.ivDeclineCallButton)
         tvDecline = findViewById(R.id.tvDecline)
-        animateAcceptCall()
 
-        ivAcceptCall.setOnClickListener {
+        ivAcceptCallButton.setOnClickListener {
             onAcceptClick()
         }
-        ivDeclineCall.setOnClickListener {
+        ivDeclineCallButton.setOnClickListener {
             onDeclineClick()
         }
     }
 
     private fun incomingData(intent: Intent) {
-        val data = intent.extras?.getBundle(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_INCOMING_DATA)
-        val caller = intent.getStringExtra("CALLS_MANAGER_EXTRAS_CALLERNAME")
+        val data = intent.extras?.getBundle(EXTRA_CALLKIT_INCOMING_DATA)
+        if (data == null) finish()
+        val caller = intent.extras?.getBundle(EXTRA_CALLKIT_NAME_CALLER)
 
-        tvNameCaller.text = caller
-        tvNumber.text = data?.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_HANDLE, "")
+        tvNameCaller.text = data?.getString(EXTRA_CALLKIT_NAME_CALLER)
 
-        val isShowLogo = data?.getBoolean(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_IS_SHOW_LOGO, false)
-        ivLogo.visibility = if (isShowLogo == true) View.VISIBLE else View.INVISIBLE
-
-        val callType = data?.getInt(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_TYPE, 0) ?: 0
-        if (callType > 0) {
-            ivAcceptCall.setImageResource(R.drawable.ic_video)
-        }
-        val duration = data?.getLong(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_DURATION, 0L) ?: 0L
+        val duration = data?.getLong(EXTRA_CALLKIT_DURATION, 0L) ?: 0L
         wakeLockRequest(duration)
-//
+
         finishTimeout(data, duration)
 
-        val textAccept = data?.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_TEXT_ACCEPT, "")
-        tvAccept.text = if(TextUtils.isEmpty(textAccept)) getString(R.string.text_accept) else textAccept
-        val textDecline = data?.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_TEXT_DECLINE, "")
-        tvDecline.text = if(TextUtils.isEmpty(textDecline)) getString(R.string.text_decline) else textDecline
-
-        val backgroundColor = data?.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_BACKGROUND_COLOR, "#0955fa")
-        try {
-            ivBackground.setBackgroundColor(Color.parseColor(backgroundColor))
-        } catch (error: Exception) {
-            Log.e("ERROR", "Error on incoming received  $error")
-        }
     }
     private fun wakeLockRequest(duration: Long) {
 
@@ -192,8 +152,40 @@ class CallsManager : Activity() {
         }, timeOut)
     }
 
+    private fun transparentStatusAndNavigation() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            setWindowFlag(
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
+                            or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION, true
+            )
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            setWindowFlag(
+                    (WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
+                            or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION), false
+            )
+            window.statusBarColor = Color.TRANSPARENT
+            window.navigationBarColor = Color.TRANSPARENT
+        }
+    }
+
+    private fun setWindowFlag(bits: Int, on: Boolean) {
+        val win: Window = window
+        val winParams: WindowManager.LayoutParams = win.attributes
+        if (on) {
+            winParams.flags = winParams.flags or bits
+        } else {
+            winParams.flags = winParams.flags and bits.inv()
+        }
+        win.attributes = winParams
+    }
+
     private fun onAcceptClick(){
-//        getIntentAccepted()
         val data = intent.extras?.getBundle(EXTRA_CALLKIT_INCOMING_DATA)
         val intent = packageManager.getLaunchIntentForPackage(packageName)?.cloneFilter()
         if (isTaskRoot) {
@@ -225,20 +217,13 @@ class CallsManager : Activity() {
 //    }
     private fun onDeclineClick() {
         val data = intent.extras?.getBundle(EXTRA_CALLKIT_INCOMING_DATA)
-        Log.w("ACTION_CALL_DECLINE", "$data")
         val intent =
                 CallsManagerBroadcastReceiver.getIntentDecline(this, data)
         sendBroadcast(intent)
     }
 
-    private fun animateAcceptCall() {
-        val shakeAnimation =
-                AnimationUtils.loadAnimation(this, R.anim.shake_anim)
-        ivAcceptCall.animation = shakeAnimation
-    }
-
     override fun onDestroy() {
-        unregisterReceiver(endedCallkitIncomingBroadcastReceiver)
+        unregisterReceiver(endedIncomingCallActivityBroadcastReceiver)
         super.onDestroy()
     }
 

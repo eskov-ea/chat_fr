@@ -16,7 +16,6 @@ class PushBroadcastReceiver: BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
 
         val core = CoreContext(context).getInstance()
-//        core.isReady?
         LinphoneCore(core, context).readSipAccountFromStorageAndLogin()
 
     }

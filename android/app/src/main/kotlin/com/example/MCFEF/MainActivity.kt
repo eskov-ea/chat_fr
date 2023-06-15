@@ -22,6 +22,7 @@ import kotlinx.coroutines.launch
 import com.example.MCFEF.linphoneSDK.CoreContext
 import com.example.MCFEF.linphoneSDK.LinphoneCore
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.common.base.Charsets
 import com.google.firebase.messaging.FirebaseMessaging
 import io.flutter.Log
 import io.flutter.embedding.android.FlutterActivity
@@ -88,6 +89,12 @@ class MainActivity: FlutterActivity() {
                 } else {
                     result.success( false )
                 }
+            }
+            if (call.method == "SAVE_SIP_CONTACTS") {
+//                var data: String? = call.argument<String?>("data")
+//                var sm = StorageManager(context)
+//                data = data.
+//                sm.writeData(data!.toByteArray())
             }
         }
 

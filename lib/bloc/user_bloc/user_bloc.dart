@@ -38,6 +38,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
       List<UserContact> users = await usersRepository.getAllUsers(token);
       print('Users:  $users');
       users.sort((a, b) => a.lastname.compareTo(b.lastname));
+      usersRepository.setSipContacts(users);
       if (state.isSearchMode) {
         print('state.isSearchMode');
         final query = state.searchQuery.toLowerCase();

@@ -5,8 +5,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.widget.ImageView
@@ -21,10 +19,10 @@ class CurrentCall : Activity() {
 
     companion object {
         const val ACTION_ENDED_CALL_INCOMING =
-                "com.example.chat_fr.calls_manager.ACTION_ENDED_CALL_INCOMING"
+                "com.example.MCFEF.calls_manager.ACTION_ENDED_CALL_INCOMING"
 
         fun getIntentEnded() =
-                Intent(CallsManager.ACTION_ENDED_CALL_INCOMING)
+                Intent(IncomingCallActivity.ACTION_ENDED_CALL_INCOMING)
     }
     lateinit var timerTextView: TextView
     lateinit var speakerBtn : ImageView

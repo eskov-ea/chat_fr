@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:chat/services/global.dart';
 import 'package:chat/services/logger/logger_service.dart';
+import 'package:chat/storage/data_storage.dart';
 
 import '../../models/contact_model.dart';
 import 'package:http/http.dart' as http;
@@ -25,6 +27,20 @@ class UsersProvider {
       print("ERROR: $err");
       Logger.getInstance().sendErrorTrace(message: "UsersProvider.getUsers", err: err.toString());
       throw ApiClientException(ApiClientExceptionType.other, err.toString());
+    }
+  }
+
+  Future<void> setSipContacts(List<UserContact> users) async {
+    try {
+      final Map<String, String> map = {};
+      users.forEach((user) {
+        map["$prefix${user.id}"] = "${user.lastname} ${user.firstname}";
+      });
+      await DataProvider().setSipContacts(map);
+      final result = await DataProvider().getSipContacts();
+      print("setSipContacts  -->  $result");
+    } catch (err) {
+      print("Error: setSipContacts, $err");
     }
   }
 }
