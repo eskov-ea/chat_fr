@@ -90,6 +90,17 @@ import PushKit
                     print("Read file error:  \(error)")
                 }
             }
+            if call.method == "SAVE_SIP_CONTACTS" {
+                let args = call.arguments as? Dictionary<String, Any>
+                let type = args!["type"] as? String
+                let data = args!["data"] as? Dictionary<String, String>
+                if (data != nil) {
+                    let sm = StorageManager()
+                    sm.saveDataToDocuments(data!, jsonFilename: sm.filename)
+                } else {
+                    print("Data error:  \(args)  \(type)")
+                }
+            }
         })
         
         sipChannel.setMethodCallHandler({
@@ -127,7 +138,8 @@ import PushKit
             case "TOGGLE_SPEAKER":
                 self?.linphoneSDK.toggleSpeaker()
             case "CHECK_FOR_RUNNING_CALL":
-                result(false)
+                let result = self?.linphoneSDK.checkForRunningCall()
+                self?.sipResultCallback?(result)
             default:
                 result(FlutterMethodNotImplemented)
                 return

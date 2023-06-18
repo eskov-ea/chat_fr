@@ -3,7 +3,7 @@ description: MCFEF chat app.
 
 publish_to: 'none'
 
-version: 0.0.1
+version: 1.0.0
 
 environment:
   sdk: ">=2.16.1"

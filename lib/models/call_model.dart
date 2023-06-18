@@ -1,3 +1,5 @@
+const time_zone = 10;
+
 class CallModel {
   final String date;
   final String fromCaller;
@@ -25,15 +27,26 @@ class CallModel {
       id: json["call_id"],
   );
 
+  static CallModel fromJsonOnEndedCall(json) => CallModel(
+    date: getDateFromUnix(json["calldate"]),
+    fromCaller: json["src"],
+    toCaller: json["dst"],
+    duration: json["duration"] ?? "00:00:00",
+    callStatus: json["disposition"],
+    id: json["uniqueid"],
+  );
+
 }
 
 String getDateFromUnix(json) {
-  print("getDateFromUnix   $json");
   try {
     final seconds = int.parse(json);
     final date =  DateTime.fromMillisecondsSinceEpoch(seconds * 1000).toString();
     return date;
   } catch (_) {
+    final dateP = DateTime.parse(json);
+    final date =  dateP.add(Duration(hours: time_zone));
+    return date.toString();
     return json;
   }
 }

@@ -41,6 +41,7 @@ class LinphoneSDK : ObservableObject
         var mCallAlreadyStopped : Bool = false;
         var outgoingNumber = ""
         var isOutgoingCallInited: Bool = false
+        var sm: StorageManager!
 
 
     
@@ -48,6 +49,7 @@ class LinphoneSDK : ObservableObject
     {
 //        LoggingService.Instance.logLevel = LogLevel.Debug
         eventSink = sink
+        sm = StorageManager()
         let factory = Factory.Instance
         let configDir = factory.getConfigDir(context: nil)
         
@@ -67,20 +69,14 @@ class LinphoneSDK : ObservableObject
                     // We're being called by someone (and app is in background)
                     self.mCall = call
                     self.isCallIncoming = true
+//                    self.incomingCallName = self.getCallerName()
+                    self.incomingCallName = call.remoteAddress?.username ?? "Неизвестен"
                     self.mProviderDelegate.incomingCall()
                 } else if (state == .IncomingReceived) { // When a call is received
                     if (!self.isCallIncoming) {
                         self.mCall = call
                         
-                        do {
-                            let sm = StorageManager()
-                            let storedContacts = sm.readDataFromDocuments(jsonFilename: sm.filename)
-                            let callerName = storedContacts?.contacts[call.remoteAddress!.username]
-                            self.incomingCallName = callerName!
-                        } catch {
-                            self.incomingCallName = "Неизвестен"
-                        }
-                        
+                        self.incomingCallName = self.getCallerName()
                         self.isCallIncoming = true
                         let payload = makeEventPayload(event: "INCOMING", callerId: call.remoteAddress?.username, callData: nil)
                         self.eventSink?(payload)
@@ -96,6 +92,7 @@ class LinphoneSDK : ObservableObject
                     let callData = CallData(duration: call.callLog?.duration.description, disposition: callStatus, dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId   )
                         print("CALL_STATUS  \(callData)")
                     let payload = makeEventPayload(event: "ENDED", callerId: call.remoteAddress?.username, callData: callData)
+                    print("CALL_ENDED IOS  \(callData)")
                     self.eventSink?(payload)
                     if (self.isCallRunning) {
                         self.mProviderDelegate.stopCall()
@@ -158,6 +155,26 @@ class LinphoneSDK : ObservableObject
 
         mCore.addDelegate(delegate: mCoreDelegate)
 
+    }
+    
+    func getCallerName() -> String {
+        let callerId: String = mCall?.remoteAddress?.username ?? "Неизвестен"
+        do {
+            let storedContacts = sm.readDataFromDocuments(jsonFilename: sm.filename)
+            let callerName = try storedContacts!.contacts[callerId]
+            return callerName!
+        } catch {
+            return callerId
+        }
+    }
+    
+    func checkForRunningCall() -> Bool {
+        if (self.isCallRunning) {
+            let payload = makeEventPayload(event: "CONNECTED", callerId: mCore!.currentCall?.remoteAddress?.username, callData: nil)
+            self.eventSink?(payload)
+            return true
+        }
+        return false
     }
     
     func outgoingCall(number: String) {

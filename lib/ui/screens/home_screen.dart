@@ -272,9 +272,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           );
         } else if(state is EndedCallServiceState) {
           print("NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
-          Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
-          print("CALL_ENDED  ${state.callData.callStatus}");
+          print("CALL_ENDED  ${state.callData.id}");
           BlocProvider.of<CallLogsBloc>(context).add(AddCallToLogEvent(call: state.callData));
+          Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
         } else if(state is ErrorCallServiceState) {
           final List<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs;
           int? dialogId;

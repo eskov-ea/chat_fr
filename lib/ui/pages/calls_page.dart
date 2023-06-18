@@ -78,9 +78,7 @@ class _CallsPageState extends State<CallsPage> {
       final toCaller = call.toCaller.replaceAll(new RegExp(r'[^0-9]'), '').substring(1);
       final fromCaller = call.fromCaller.replaceAll(new RegExp(r'[^0-9]'), '').substring(1);
       if (toCaller == userId) {
-        print("call user:   $fromCaller  $users");
         final user = users["$fromCaller"]!;
-        print("call user:  $user");
         data = CallRenderData(
             userId: int.parse(userId!),
             callName:
@@ -90,9 +88,7 @@ class _CallsPageState extends State<CallsPage> {
             callDate: DateTime.parse(call.date),
             callDuration: call.duration);
       } else {
-        print("call user toCaller:  $toCaller  $users");
         final user = users["$toCaller"]!;
-        print("call user:  $user");
         data = CallRenderData(
             userId: int.parse(userId!),
             callName: "Исходящий",
@@ -213,6 +209,8 @@ class _CallsPageState extends State<CallsPage> {
                           child: ListView.builder(
                             itemCount: state.callLog.length,
                             itemBuilder: (context, index) {
+                              print("Build calls log page");
+
                               return getCallInfo(users, state.callLog[index], index);
                           }),
                         ),
