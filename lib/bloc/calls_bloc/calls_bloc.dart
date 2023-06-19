@@ -27,8 +27,8 @@ class CallsBloc
       }  else if (callEvent.event == "CONNECTED") {
         add(ConnectedCallEvent());
       } else if (callEvent.event == "ENDED") {
+        print("CALL_ENDED event:    ${callEvent.callData}");
         final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
-        print("CALL_ENDED event  ${callData.toCaller}  ${callData.fromCaller}");
         add(EndedCallServiceEvent(callData: callData));
       } else if (callEvent.event == "INCOMING") {
         add(IncomingCallEvent(callerId: callEvent.callerId!));
@@ -64,7 +64,6 @@ class CallsBloc
 
   @override
   Future<void> close() {
-    print("CALL_SERVICE_EVENT           CLOSE EVENT");
     callServiceEventChannelSubscription.cancel();
     return super.close();
   }

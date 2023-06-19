@@ -114,7 +114,10 @@ class _CallsPageState extends State<CallsPage> {
                     data.callerName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: data.callName == "Пропущенный" ? Colors.red[500] : Colors.grey[700]
+                    ),
                   ),
                   SizedBox(
                     height: 5,
@@ -132,12 +135,7 @@ class _CallsPageState extends State<CallsPage> {
                       Text(
                         data.callName,
                         style: TextStyle(
-                          color: call.callStatus == "NO ANSWER" &&
-                                      call.toCaller == userId ||
-                                  call.callStatus == "FAILED" &&
-                                      call.toCaller == userId
-                              ? Colors.red[500]
-                              : Colors.grey[700],
+                          color: Colors.grey[700]
                         ),
                       )
                     ],
@@ -182,7 +180,6 @@ class _CallsPageState extends State<CallsPage> {
           : BlocBuilder<CallLogsBloc, CallLogsBlocState>(
               builder: (context, state) {
                 final usersState = BlocProvider.of<UsersViewCubit>(context).state;
-                print("call users:  $usersState, ${usersState.usersDictionary}");
                 if (state is CallsLoadedLogState && users.isNotEmpty) {
                   if (state.callLog.isEmpty) {
                     return Center(
@@ -209,8 +206,6 @@ class _CallsPageState extends State<CallsPage> {
                           child: ListView.builder(
                             itemCount: state.callLog.length,
                             itemBuilder: (context, index) {
-                              print("Build calls log page");
-
                               return getCallInfo(users, state.callLog[index], index);
                           }),
                         ),

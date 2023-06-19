@@ -27,6 +27,7 @@ class CallLogService {
         List<dynamic> collection = jsonDecode(response.body)["data"];
         List<CallModel> callLog =
         collection.map((call) => CallModel.fromJson(call)).toList();
+        print("CALL_ENDED  a:   ${collection.first}");
         return callLog;
       } else if(response.statusCode == 403) {
         throw AppErrorException(AppErrorExceptionType.access, null, "Call logs service, loading call logs");

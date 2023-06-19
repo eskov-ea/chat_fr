@@ -23,7 +23,7 @@ class CallModel {
       fromCaller: json["sip_from"],
       toCaller: json["sip_to"],
       duration: json["duration"] ?? "00:00:00",
-      callStatus: json["reason"],
+      callStatus: gerCallReason(json["reason"]),
       id: json["call_id"],
   );
 
@@ -38,6 +38,10 @@ class CallModel {
 
 }
 
+String gerCallReason(String reason) {
+  return reason == "Decline" ? "NO ANSWER" : "ANSWERED";
+}
+
 String getDateFromUnix(json) {
   try {
     final seconds = int.parse(json);
@@ -47,6 +51,5 @@ String getDateFromUnix(json) {
     final dateP = DateTime.parse(json);
     final date =  dateP.add(Duration(hours: time_zone));
     return date.toString();
-    return json;
   }
 }

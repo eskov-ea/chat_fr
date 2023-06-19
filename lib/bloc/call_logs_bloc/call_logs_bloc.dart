@@ -20,12 +20,10 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
         try {
           final logs = await _callLogService.getCallLogs(passwd: event.passwd);
           logs.forEach((call) {
-            print("onLoadCallLogsEvent  $call    ${call.id}");
             state.logsDictionary[call.id] = true;
           });
           final _asteriskPasswd = event.passwd;
           final newState = CallsLoadedLogState(callLog: logs, logsDictionary: state.logsDictionary);
-          print("onLoadCallLogsEvent last    ${state.logsDictionary}");
           emit(newState);
         } catch (err) {
           print("Calls log error:  $err");
