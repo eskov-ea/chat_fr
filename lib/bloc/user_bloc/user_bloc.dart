@@ -44,6 +44,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
         "data" : usersMap
       });
       users.sort((a, b) => a.lastname.compareTo(b.lastname));
+      print("STATE:   $state  ${state.searchQuery}");
       if (state.isSearchMode) {
         print('state.isSearchMode');
         final query = state.searchQuery.toLowerCase();
@@ -52,6 +53,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
         final newContainer = container.copyWith(users: filteredUsers);
         emit(UsersLoadedState(usersContainer: state.usersContainer, searchQuery: query, searchUsersContainer: newContainer));
       } else {
+        print('not state.isSearchMode');
         final container = state.usersContainer;
         final newContainer = container.copyWith(users: users);
         emit(UsersLoadedState(usersContainer: newContainer, searchQuery: '', searchUsersContainer: state.searchUsersContainer));
@@ -64,16 +66,20 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   }
 
   void onUsersSearchEvent(
-      UsersSearchEvent event, Emitter<UsersState> emit
-      ) async {
-    if (state.searchQuery == event.searchQuery) return;
-    final newState = state as UsersLoadedState;
-    newState.copyWith(
-      searchQuery: event.searchQuery,
-      searchUsersContainer: const UsersListContainer.initial()
-    );
-    emit(newState);
-    add(UsersLoadEvent());
+    UsersSearchEvent event, Emitter<UsersState> emit
+    ) async {
+      if (event.searchQuery != "") {
+        final query = event.searchQuery.toLowerCase();
+        final container = state.usersContainer;
+        final filteredUsers = filterUsersBySearchQuery(state.users, query);
+        final newContainer = container.copyWith(users: filteredUsers);
+        print("SEARCHWIGET   ${container.users}");
+        emit(UsersLoadedState(usersContainer: container, searchQuery: query, searchUsersContainer: newContainer));
+      } else {
+        final container = state.usersContainer;
+        final newContainer = container.copyWith(users: container.users);
+        emit(UsersLoadedState(usersContainer: newContainer, searchQuery: '', searchUsersContainer: state.searchUsersContainer));
+      }
   }
 
   void onUsersDeleteEvent(

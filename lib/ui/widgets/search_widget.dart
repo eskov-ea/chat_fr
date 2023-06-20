@@ -25,7 +25,6 @@ class _SearchWidgetState extends State<SearchWidget> {
         style: const TextStyle(fontSize: 18),
         onChanged: (string){
           widget.cubit.searchContact(string);
-          print("SEARCHWIGET   ${widget.cubit.state.users}");
         },
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
