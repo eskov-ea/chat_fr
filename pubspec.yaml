@@ -82,6 +82,7 @@ flutter:
    - assets/images/speaker_icon.png
    - assets/images/decline_icon.png
    - assets/images/accept_icon.png
+   - assets/images/chat_background.jpg
    - assets/PDF_file_icon.png
    - assets/audio_icon.png
    - assets/image_icon.png

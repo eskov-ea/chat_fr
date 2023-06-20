@@ -234,7 +234,15 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
         body: Container(
-          color: AppColors.backgroundChatScreen,
+          // color: AppColors.backgroundChatScreen,
+          height: double.infinity,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("assets/images/chat_background.jpg"),
+              fit: BoxFit.cover,
+            ),
+          ),
           child: Column(
                   children: [
                     Expanded(
