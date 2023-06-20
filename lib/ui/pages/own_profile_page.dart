@@ -4,6 +4,7 @@ import 'package:chat/bloc/profile_bloc/profile_bloc.dart';
 import 'package:chat/bloc/profile_bloc/profile_events.dart';
 import 'package:chat/bloc/profile_bloc/profile_state.dart';
 import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
+import 'package:chat/services/global.dart';
 import 'package:chat/theme.dart';
 import 'package:dart_pusher_channels/dart_pusher_channels.dart';
 import 'package:flutter/foundation.dart';
@@ -41,50 +42,51 @@ class ProfilePage extends StatelessWidget {
                 child: Column(
                     children: [
                       Expanded(
-                        child: ListView(
-                          children: [
-                            const SizedBox(height: 20,),
-                            CircleAvatar(
-                              radius: 70,
-                              backgroundColor: Colors.grey,
-                              child: Padding(
-                                padding: const EdgeInsets.all(4), // Border radius
-                                child: ClipOval(
-                                    child: state.user?.image != null
-                                        ? Image.network(state.user!.image!)
-                                        : Image.asset('assets/images/no_avatar.png')
+                        child: CustomSizeContainer(
+                          ListView(
+                            children: [
+                              const SizedBox(height: 20,),
+                              CircleAvatar(
+                                radius: 70,
+                                backgroundColor: Colors.grey,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4), // Border radius
+                                  child: ClipOval(
+                                      child: state.user?.image != null
+                                          ? Image.network(state.user!.image!)
+                                          : Image.asset('assets/images/no_avatar.png')
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 20,),
-                            Text(state.user!.lastname + " " + state.user!.firstname + " " + state.user!.middlename,
+                              const SizedBox(height: 20,),
+                              Text(state.user!.lastname + " " + state.user!.firstname + " " + state.user!.middlename,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 25,)
+                              ),
+                              const SizedBox(height: 5,),
+                              Text(state.user!.company + ", " + state.user!.dept,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 18,)
+                              ),
+                              Text(state.user!.position,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontSize: 18,)
+                              ),
+                              const SizedBox(height: 5,),
+                              SelectableText(
+                                state.user!.phone,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 25,)
-                            ),
-                            const SizedBox(height: 5,),
-                            Text(state.user!.company + ", " + state.user!.dept,
+                                style: const TextStyle(fontSize: 18,),
+                              ),
+                              const SizedBox(height: 5,),
+                              SelectableText(
+                                state.user!.email,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 18,)
-                            ),
-                            Text(state.user!.position,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 18,)
-                            ),
-                            const SizedBox(height: 5,),
-                            SelectableText(
-                              state.user!.phone,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(fontSize: 18,),
-                            ),
-                            const SizedBox(height: 5,),
-                            SelectableText(
-                              state.user!.email,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(fontSize: 18,),
-                            ),
-                          ],
+                                style: const TextStyle(fontSize: 18,),
+                              ),
+                            ],
+                          ), context),
                         ),
-                      ),
                       !kIsWeb && Platform.isAndroid
                           ? OutlinedButton(
                               onPressed: () async {
@@ -129,34 +131,10 @@ class ProfilePage extends StatelessWidget {
                           )
                       ),
                       SizedBox(height: 5,),
-                      // OutlinedButton(
-                      //     onPressed: () async {
-                      //       final pc = BlocProvider.of<WsBloc>(context).presenceChannel;
-                      //       print(pc);
-                      //       print(pc.name);
-                      //       print(pc.currentStatus);
-                      //       print(pc.state?.subscriptionCount);
-                      //       print(pc.state?.status);
-                      //       print(pc.state?.members);
-                      //       pc.trigger(eventName: "join", data: "Hello");
-                      //     },
-                      //     style: ElevatedButton.styleFrom(
-                      //       backgroundColor: LightColors.profilePageButton,
-                      //       minimumSize: const Size.fromHeight(50),
-                      //       shape: const RoundedRectangleBorder(
-                      //           side: BorderSide(color: Colors.black54, width: 2, style: BorderStyle.solid),
-                      //           borderRadius: BorderRadius.zero),
-                      //     ),
-                      //     child: const Text(
-                      //       'Выйти из аккаунта',
-                      //       style: TextStyle(color: Colors.red, fontSize: 20, fontWeight: FontWeight.w600),
-                      //     )
-                      // ),
-                      // SizedBox(height: 5,)
                     ]
                 ),
               ),
-            ),
+            )
           );
         } else {
           return Column(children: [

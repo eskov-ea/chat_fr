@@ -43,7 +43,7 @@ class _OutgoingCallScreenState extends State<OutgoingCallScreen> {
     return Scaffold(
       // appBar: ,
         backgroundColor: const Color(0xFF474747),
-        body: Column(
+        body: CustomSizeContainer(Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
@@ -122,6 +122,6 @@ class _OutgoingCallScreenState extends State<OutgoingCallScreen> {
               height: 50,
             ),
           ],
-        ));
+        ), context));
   }
 }

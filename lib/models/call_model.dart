@@ -45,9 +45,10 @@ String gerCallReason(String reason) {
 String getDateFromUnix(json) {
   try {
     final seconds = int.parse(json);
-    final date =  DateTime.fromMillisecondsSinceEpoch(seconds * 1000).toString();
+    final date =  DateTime.fromMillisecondsSinceEpoch(seconds * 1000).add(Duration(hours: time_zone)).toString();
     return date;
   } catch (_) {
+    print("getDateFromUnix   $json");
     final dateP = DateTime.parse(json);
     final date =  dateP.add(Duration(hours: time_zone));
     return date.toString();

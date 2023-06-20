@@ -14,7 +14,7 @@ class IncomingCallScreen extends StatelessWidget {
     return Scaffold(
         // appBar: ,
         backgroundColor: const Color(0xFF474747),
-        body: Column(
+        body: CustomSizeContainer(Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
@@ -53,36 +53,36 @@ class IncomingCallScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                  GestureDetector(
-                    onTap: () {
-                      print(
-                          "NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
-                      acceptCall();
-                    },
-                    child: Column(
-                      // A button
-                      children: [
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: const BoxDecoration(
-                              color: Colors.green,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(50))),
-                          child: Padding(
-                            padding: const EdgeInsets.all(22),
-                            child: Image.asset(
-                              'assets/images/accept_icon.png',
-                              fit: BoxFit.fill,
-                            ),
+                GestureDetector(
+                  onTap: () {
+                    print(
+                        "NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
+                    acceptCall();
+                  },
+                  child: Column(
+                    // A button
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: const BoxDecoration(
+                            color: Colors.green,
+                            borderRadius:
+                            BorderRadius.all(Radius.circular(50))),
+                        child: Padding(
+                          padding: const EdgeInsets.all(22),
+                          child: Image.asset(
+                            'assets/images/accept_icon.png',
+                            fit: BoxFit.fill,
                           ),
                         ),
-                        const Text("Accept",
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 14)),
-                      ],
-                    ),
+                      ),
+                      const Text("Accept",
+                          style:
+                          TextStyle(color: Colors.white, fontSize: 14)),
+                    ],
                   ),
+                ),
                 GestureDetector(
                   onTap: () {
                     print(
@@ -98,7 +98,7 @@ class IncomingCallScreen extends StatelessWidget {
                         decoration: const BoxDecoration(
                             color: Colors.red,
                             borderRadius:
-                                BorderRadius.all(Radius.circular(50))),
+                            BorderRadius.all(Radius.circular(50))),
                         child: Padding(
                           padding: const EdgeInsets.all(22),
                           child: Image.asset(
@@ -118,6 +118,6 @@ class IncomingCallScreen extends StatelessWidget {
               height: 50,
             ),
           ],
-        ));
+        ), context));
   }
 }

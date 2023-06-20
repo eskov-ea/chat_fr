@@ -24,7 +24,15 @@ class DataProvider {
     return _secureStorage.write(key: _Keys.os, value: value);
   }
 
-  Future<void> deleteToken() {
+  Future<void> deleteToken() async {
+    try {
+      await _deleteToken();
+    } catch (err) {
+      print("Error deleting token: /n  $err");
+    }
+  }
+
+  Future<void> _deleteToken() {
     return _secureStorage.delete(key: _Keys.token);
   }
 

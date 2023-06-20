@@ -1,3 +1,4 @@
+import 'package:chat/services/global.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -89,7 +90,7 @@ class _AuthScreenState extends State<AuthScreen> {
         child:  Scaffold(
           body: SafeArea(
                 child: SingleChildScrollView(
-                  child: GestureDetector(
+                  child: CustomSizeContainer(GestureDetector(
                     onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
                     child: Column(
                       children: [
@@ -107,7 +108,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                       ],
                     ),
-                  ),
+                  ), context),
                 ),
               ),
         )
