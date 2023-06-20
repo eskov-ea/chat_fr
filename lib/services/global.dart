@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 import '../bloc/chats_builder_bloc/chats_builder_bloc.dart';
@@ -26,6 +27,7 @@ import 'messages/messages_repository.dart';
 
 AudioPlayer _player = AudioPlayer();
 const prefix = "7";
+const time_zone = 10;
 
 Future<void> playAudio(
     {required AudioPlayer player, required AudioSource source}) async {
@@ -375,4 +377,43 @@ Widget CustomSizeContainer(Widget child, BuildContext context) {
       child: child,
     ),
   );
+}
+
+String dateFormater(DateTime rawDate) {
+  final now = DateTime.now();
+  final lastMidnight = DateTime(now.year, now.month,  now.day);
+  final diffTime = rawDate.millisecondsSinceEpoch - lastMidnight.millisecondsSinceEpoch;
+
+  // get days since last midnight
+  final days = diffTime.abs() / 1000 / 60 / 60 / 24;
+  if (days < 1) {
+    return DateFormat.Hm().format(rawDate.add(Duration(hours: time_zone)));
+  } else if ( days >= 1 && days < 2) {
+    return "Вчера";
+  } else if ( days >= 2 && days < 7) {
+    return _toRussianWeekday(rawDate.weekday);
+  } else {
+    final date = DateFormat.yMd().format(rawDate).replaceAll(new RegExp('/'), '.');
+    final splittedDate = date.split('.');
+    for (var i = 0; i < splittedDate.length; i++) {
+      if (int.parse(splittedDate[i]) <= 9 ) {
+        splittedDate[i] = "0${splittedDate[i]}";
+      }
+    }
+    return splittedDate.join(".");
+  }
+}
+
+String _toRussianWeekday (int day) {
+  switch(day) {
+    case 0: return "Воскресенье";
+    case 1: return "Понедельник";
+    case 2: return "Вторник";
+    case 3: return "Среда";
+    case 4: return "Четверг";
+    case 5: return "Пятница";
+    case 6: return "Суббота";
+    default: return day.toString();
+
+  }
 }

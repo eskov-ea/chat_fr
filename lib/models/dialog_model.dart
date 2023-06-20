@@ -3,9 +3,10 @@ import 'package:chat/models/contact_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
+import '../services/global.dart';
 import 'message_model.dart';
 
-final DateFormat _dateFormater = DateFormat.yMMMd();
+// final DateFormat _dateFormater = DateFormat.yMMMd();
 
 @immutable
 class DialogData extends Equatable {
@@ -273,9 +274,11 @@ class DialogId {
   }
 }
 
+
+
 String getDateDialogModel(rawDate) {
   // Todo: is that necessary to check it
-  return rawDate != null ? _dateFormater.format(rawDate) : "";
+  return rawDate != null ? dateFormater(rawDate) : "";
 }
 
 String? getAttachmentType(json) {

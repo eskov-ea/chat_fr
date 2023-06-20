@@ -145,7 +145,7 @@ class _CallsPageState extends State<CallsPage> {
             ),
             Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
-                child: Text(getDate(call.date))),
+                child: Text(dateFormater(data.callDate))),
             GestureDetector(
               onTap: () {
                 print("Get call info");
