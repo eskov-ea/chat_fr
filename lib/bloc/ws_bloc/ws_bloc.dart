@@ -109,7 +109,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
           authToken: token, client: socket, channelName: 'private-chatinfo');
       channels.add(channel);
       generalEventSubscription = channel.bind('update').listen((event) {
-        final DialogData newDialog = DialogData.fromJson(event.data["chat"]);
+        final DialogData newDialog = DialogData.fromJson(jsonDecode(event.data)["chat"]);
         print("CHATINFO   ->  $newDialog");
         for (var user in newDialog.usersList) {
           if (user.id == userId) {
