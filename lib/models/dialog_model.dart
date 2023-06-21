@@ -276,7 +276,7 @@ class DialogId {
 
 
 
-String getDateDialogModel(rawDate) {
+String getDateDialogModel(DateTime rawDate) {
   // Todo: is that necessary to check it
   return rawDate != null ? dateFormater(rawDate) : "";
 }

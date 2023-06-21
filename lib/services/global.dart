@@ -27,7 +27,7 @@ import 'messages/messages_repository.dart';
 
 AudioPlayer _player = AudioPlayer();
 const prefix = "7";
-const time_zone = 10;
+final time_zone =  10;
 
 Future<void> playAudio(
     {required AudioPlayer player, required AudioSource source}) async {
@@ -87,13 +87,13 @@ Duration getTZ() {
   return TZ!;
 }
 
-SqfliteDatabase? _db;
-SqfliteDatabase getSqfliteDatabase() {
-  if (_db != null) return _db!;
-  _db = SqfliteDatabase();
-  _db!.initDb();
-  return _db!;
-}
+// SqfliteDatabase? _db;
+// SqfliteDatabase getSqfliteDatabase() {
+//   if (_db != null) return _db!;
+//   _db = SqfliteDatabase();
+//   _db!.initDb();
+//   return _db!;
+// }
 
 String getAudioMessageDuration(int seconds) {
   var minutes = "${(seconds / 60).floor()}";
@@ -212,38 +212,6 @@ MessageData createLocalMessage({
             createdAt: DateTime.now().toString())
       ],
     );
-
-// sendMessageFromGlobal({
-//   required context,
-//   required ParentMessage? parentMessage,
-//   required String messageText,
-//   required int? repliedMessageId,
-//   required int dialogId,
-//   required int userId,
-//   required localMessage,
-// }) async {
-//   try {
-//     BlocProvider.of<ChatsBuilderBloc>(context).add(
-//         ChatsBuilderAddMessageEvent(message: localMessage, dialog: dialogId));
-//     // TODO: if response status code is 200 else ..
-//     final sentMessage = await MessagesRepository().sendMessage(
-//         dialogId: dialogId,
-//         messageText: messageText,
-//         parentMessageId: repliedMessageId);
-//     print("sentMessage response  $sentMessage");
-//     final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
-//     BlocProvider.of<ChatsBuilderBloc>(context).add(
-//         ChatsBuilderUpdateLocalMessageEvent(
-//             message: message,
-//             dialogId: dialogId,
-//             localMessageId: localMessage.messageId));
-//     BlocProvider.of<DialogsViewCubit>(context)
-//         .updateLastDialogMessage(localMessage);
-//   } catch (err) {
-//     throw Exception('Что-то пошло не так');
-//   }
-//   // BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId));
-// }
 
 loadFileAndSaveLocally({required String fileName, required attachmentId}) async {
   final Directory documentDirectory = await getApplicationDocumentsDirectory();
@@ -382,15 +350,16 @@ Widget CustomSizeContainer(Widget child, BuildContext context) {
 String dateFormater(DateTime rawDate) {
   final now = DateTime.now();
   final lastMidnight = DateTime(now.year, now.month,  now.day);
-  final diffTime = rawDate.millisecondsSinceEpoch - lastMidnight.millisecondsSinceEpoch;
+  final diffTime = lastMidnight.millisecondsSinceEpoch - rawDate.millisecondsSinceEpoch;
+  final todayRange = (now.millisecondsSinceEpoch - lastMidnight.millisecondsSinceEpoch) / 1000/60/60/24;
 
   // get days since last midnight
-  final days = diffTime.abs() / 1000 / 60 / 60 / 24;
-  if (days < 1) {
+  final days = diffTime / 1000 / 60 / 60 / 24;
+  if (days <= todayRange) {
     return DateFormat.Hm().format(rawDate.add(Duration(hours: time_zone)));
-  } else if ( days >= 1 && days < 2) {
+  } else if ( days >= todayRange && days < 1) {
     return "Вчера";
-  } else if ( days >= 2 && days < 7) {
+  } else if ( days >= 1 && days < 7) {
     return _toRussianWeekday(rawDate.weekday);
   } else {
     final date = DateFormat.yMd().format(rawDate).replaceAll(new RegExp('/'), '.');

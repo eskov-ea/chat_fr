@@ -4,7 +4,8 @@ import 'package:meta/meta.dart';
 import '../services/global.dart';
 
 final DateFormat _timeFormatter = DateFormat.Hm();
-final DateFormat _dateFormatter = DateFormat.yMMMd();
+// final DateFormat _dateFormatter = DateFormat.yMMMd();
+final DateFormat _dateFormatter = DateFormat.yMd();
 
 @immutable
 class MessageData extends Equatable{
@@ -180,12 +181,15 @@ class MessageAttachmentsData {
     );
 }
 
-String getDate (rawDate) {
-  return _dateFormatter.format(rawDate);
+String getDate (DateTime? rawDate) {
+  if (rawDate == null) return "";
+  final arr = _dateFormatter.format(rawDate).split('/');
+  return [arr[1], getMonthRussianName(int.parse(arr[0])), arr[2]].join(" ");
 }
 
-String getTime (rawDate) {
-  return _timeFormatter.format(rawDate);
+String getTime (DateTime? rawDate) {
+  if (rawDate == null) return "";
+  return _timeFormatter.format(rawDate.add(Duration(hours: time_zone)));
 }
 
 int getMessageStatus (List collection) {

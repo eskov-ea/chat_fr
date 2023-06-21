@@ -9,7 +9,6 @@ import 'call_logs_state.dart';
 class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
   final CallLogService _callLogService = CallLogService();
   final ErrorHandlerBloc errorHandlerBloc;
-  // late final String _asteriskPasswd;
 
   CallLogsBloc({
     required CallLogsBlocState initialState,
@@ -22,12 +21,11 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
           logs.forEach((call) {
             state.logsDictionary[call.id] = true;
           });
-          final _asteriskPasswd = event.passwd;
           final newState = CallsLoadedLogState(callLog: logs, logsDictionary: state.logsDictionary);
           emit(newState);
         } catch (err) {
-          print("Calls log error:  $err");
           final e = err as AppErrorException;
+          print("Calls log error:  ${err.errorLocation}  ${err.message} ${err.type}");
           errorHandlerBloc.add(ErrorHandlerWithErrorEvent(error: err, errorStack: e.message));
           final errorState = CallLogErrorState();
           emit(errorState);

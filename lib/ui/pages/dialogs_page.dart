@@ -268,7 +268,7 @@ class _DialogItem extends StatelessWidget {
                     height: 4,
                   ),
                   Text(
-                    getDateDialogModel(dialogData.lastMessage.time).toUpperCase(),
+                    dialogData.lastMessage.time != null ? getDateDialogModel(dialogData.lastMessage.time!) : "",
                     textAlign: TextAlign.end,
                     style: const TextStyle(
                       fontSize: 13,

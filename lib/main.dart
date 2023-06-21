@@ -113,6 +113,7 @@ class MyApp extends StatelessWidget{
           darkTheme: AppTheme.dark(),
           themeMode: ThemeMode.light,
           title: 'MCFEF',
+          debugShowCheckedModeBanner: false,
           routes: mainNavigation.routes,
           initialRoute: MainNavigationRouteNames.loaderWidget,
           onGenerateRoute: mainNavigation.onGenerateRoute,

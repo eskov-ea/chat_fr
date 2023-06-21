@@ -13,7 +13,6 @@ import '../../services/ws/ws_repository.dart';
 import '../../storage/data_storage.dart';
 
 class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
-  final _webSocketRepository = WebSocketRepository();
   final _secureStorage = DataProvider();
   final WsBlocState initialState;
   final DialogsProvider _dialogsProvider = DialogsProvider();
@@ -170,7 +169,6 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
                 Future.delayed(Duration(seconds: 1)).then((v) {
                   add(WsEventReceiveNewMessage(message: newMessage));
                 });
-                // add(WsEventReceiveNewMessage(message: newMessage));
               } else if (data["message_status"] != null) {
                 final newStatuses =
                     MessageStatuses.fromJson([data["message_status"]]);
@@ -222,7 +220,6 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
             data["message"]["user_id"] != userId) {
           final newMessage = MessageData.fromJson(data["message"]);
           print("NEW MESSAGE    ->  $newMessage");
-          // add(WsEventReceiveNewMessage(message: newMessage));
           Future.microtask(() {
             add(WsEventReceiveNewMessage(message: newMessage));
           });
@@ -243,9 +240,6 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
 
   void onWsEventReconnect(event, emit) {
     print("onWsEventReconnect");
-    // for(var channel in channels) {
-    //   channel?.subscribe();
-    // }
     socket!.reconnect();
   }
 
@@ -310,13 +304,6 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
   onWsEventGetUpdatesOnResume(event, emit) async {
     print("onWsEventGetUpdatesOnResume");
 
-    // emit(Unconnected());
-    // final List<DialogData>? dialogs = await _dialogsProvider.getDialogs();
-    // if (dialogs != null && dialogs.isNotEmpty) {
-    //   for (var dialog in dialogs) {
-    //     add(WsEventNewDialogCreated(socket: socket!, dialog: dialog));
-    //   }
-    // }
     final Map<String, dynamic>? newUpdates =
         await _messagesProvider.getNewUpdatesOnResume();
     print(
