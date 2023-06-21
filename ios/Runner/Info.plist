@@ -31,11 +31,11 @@
 		<string>_dartobservatory._tcp</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Allow this app to use camera&gt;?</string>
+	<string>Доступ к камере необходим для возможности сделать фото</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Allow this app use the microphone?</string>
+	<string>Микрофон необходим для звонков внутри приложения и отправки голосовых сообщений</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Allow this app access to library?</string>
+	<string>Доступ к фотогалерее необходим для возможности отправки и сохранения фото</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
