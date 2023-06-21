@@ -310,6 +310,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
+    print("ChangeAppLifecycleState:  ${state.name}");
     var bloc = BlocProvider.of<WsBloc>(context);
     switch(state){
       case AppLifecycleState.resumed:
