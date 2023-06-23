@@ -9,12 +9,14 @@ class UsersState {
   final bool isSearchMode = false;
   copyWith(){}
   List<UserContact> get users => usersContainer.users;
+  final Map<int, bool> onlineUsersDictionary = {};
 }
 
 class UsersLoadedState extends UsersState {
   final UsersListContainer usersContainer;
   final UsersListContainer searchUsersContainer;
   final String searchQuery;
+  final Map<int, bool> onlineUsersDictionary;
 
   bool get isSearchMode => searchQuery.isNotEmpty;
   List<UserContact> get users =>
@@ -23,12 +25,14 @@ class UsersLoadedState extends UsersState {
   UsersLoadedState.initial()
       : usersContainer = const UsersListContainer.initial(),
         searchUsersContainer = const UsersListContainer.initial(),
+        onlineUsersDictionary = {},
         searchQuery = "";
 
   UsersLoadedState({
     required this.usersContainer,
     required this.searchUsersContainer,
-    required this.searchQuery
+    required this.searchQuery,
+    required this.onlineUsersDictionary
   });
 
   @override
@@ -38,23 +42,30 @@ class UsersLoadedState extends UsersState {
               runtimeType == other.runtimeType &&
               usersContainer == other.usersContainer &&
               searchUsersContainer == other.searchUsersContainer &&
+              onlineUsersDictionary.length == other.onlineUsersDictionary.length &&
+              onlineUsersDictionary.keys == other.onlineUsersDictionary.keys &&
               searchQuery == other.searchQuery;
 
   @override
   int get hashCode =>
       usersContainer.hashCode ^
       searchUsersContainer.hashCode ^
+      onlineUsersDictionary.hashCode ^
+      onlineUsersDictionary.length.hashCode ^
+      onlineUsersDictionary.keys.hashCode ^
       searchQuery.hashCode;
 
   UsersLoadedState copyWith({
     UsersListContainer? usersContainer,
     UsersListContainer? searchUsersContainer,
     String? searchQuery,
+    Map<int, bool>? onlineUsersDictionary,
   }) {
     return UsersLoadedState(
       usersContainer: usersContainer ?? this.usersContainer,
       searchUsersContainer: searchUsersContainer ?? this.searchUsersContainer,
       searchQuery: searchQuery ?? this.searchQuery,
+      onlineUsersDictionary: onlineUsersDictionary ?? this.onlineUsersDictionary
     );
   }
 }

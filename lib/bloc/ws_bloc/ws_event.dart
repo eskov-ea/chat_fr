@@ -59,6 +59,24 @@ class WsEventNewDialogCreated extends WsBlocEvent {
   WsEventNewDialogCreated({required this.dialog, required this.socket});
 }
 
+class WsOnlineUsersInitialEvent extends WsBlocEvent{
+  final List onlineUsers;
+
+  WsOnlineUsersInitialEvent({required this.onlineUsers});
+}
+
+class WsOnlineUsersJoinEvent extends WsBlocEvent{
+  final int userId;
+
+  WsOnlineUsersJoinEvent({required this.userId});
+}
+
+class WsOnlineUsersExitEvent extends WsBlocEvent{
+  final int userId;
+
+  WsOnlineUsersExitEvent({required this.userId});
+}
+
 class WsEventDisconnect extends WsBlocEvent{}
 
 class WsEventCloseConnection extends WsBlocEvent{}

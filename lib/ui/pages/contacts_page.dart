@@ -1,6 +1,7 @@
 import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../services/global.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/user_item.dart';
 import '../widgets/search_widget.dart';
@@ -48,7 +49,10 @@ class ContactsPage extends StatelessWidget {
                                 padding: const EdgeInsets.only(
                                     left: 14, right: 14, top: 0, bottom: 0),
                                 child: Align(
-                                  child: UserItem(user: state.users[index]),
+                                  child: UserItem(
+                                    user: state.users[index],
+                                    onlineStatus: isOnline(state.users[index].id, state.onlineUsersDictionary),
+                                  ),
                                   // Text(state.users[index].username),
                                 ),
                               )

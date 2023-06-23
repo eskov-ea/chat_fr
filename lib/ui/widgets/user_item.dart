@@ -16,10 +16,12 @@ import 'avatar.dart';
 class UserItem extends StatelessWidget {
   const UserItem({
     Key? key,
-    required this.user
+    required this.user,
+    required this.onlineStatus
   }) : super(key: key);
 
   final UserContact user;
+  final bool onlineStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -60,12 +62,22 @@ class UserItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    user.lastname + " " + user.firstname,
-                    style: const TextStyle(fontSize: 16),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    softWrap: false,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        user.lastname + " " + user.firstname,
+                        style: const TextStyle(fontSize: 16),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        softWrap: false,
+                      ),
+                      if (onlineStatus) SizedBox(width: 10,),
+                      if (onlineStatus) Padding(
+                        padding: EdgeInsets.only(bottom: 2),
+                        child: Icon(Icons.circle, color: Colors.green, size: 15,)
+                      )
+                    ],
                   ),
                   Container(
                     width: MediaQuery.of(context).size.width * 0.6,

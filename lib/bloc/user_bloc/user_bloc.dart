@@ -13,24 +13,17 @@ import '../ws_bloc/ws_bloc.dart';
 
 class UsersBloc extends Bloc<UsersEvent, UsersState> {
   final UsersRepository usersRepository;
-  late final StreamSubscription usersSubscription;
-  final WsBloc webSocketBloc;
   final _secureStorage = DataProvider();
   final _logger = Logger.getInstance();
-
   final _methodChannel = const MethodChannel("com.application.chat/write_files_method");
-  final _eventChannel = const EventChannel("event.channel/write_files_service");
 
   UsersBloc({
     required this.usersRepository,
-    required this.webSocketBloc,
   }) :  super(UsersState()) {
-    usersSubscription = webSocketBloc.stream.listen((streamState) {
-
-    });
     on<UsersLoadEvent>(onUsersLoadEvent);
     on<UsersSearchEvent>(onUsersSearchEvent);
     on<UsersDeleteEvent>(onUsersDeleteEvent);
+    on<UsersUpdateOnlineStatusEvent>(onUsersUpdateOnlineStatusEvent);
   }
 
   void onUsersLoadEvent (
@@ -51,12 +44,22 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
         final container = state.searchUsersContainer;
         final filteredUsers = filterUsersBySearchQuery(users, query);
         final newContainer = container.copyWith(users: filteredUsers);
-        emit(UsersLoadedState(usersContainer: state.usersContainer, searchQuery: query, searchUsersContainer: newContainer));
+        emit(UsersLoadedState(
+            usersContainer: state.usersContainer,
+            searchQuery: query,
+            searchUsersContainer: newContainer,
+          onlineUsersDictionary: state.onlineUsersDictionary
+        ));
       } else {
         print('not state.isSearchMode');
         final container = state.usersContainer;
         final newContainer = container.copyWith(users: users);
-        emit(UsersLoadedState(usersContainer: newContainer, searchQuery: '', searchUsersContainer: state.searchUsersContainer));
+        emit(UsersLoadedState(
+            usersContainer: newContainer,
+            searchQuery: '',
+            searchUsersContainer: state.searchUsersContainer,
+            onlineUsersDictionary: state.onlineUsersDictionary
+        ));
       }
     } catch (err) {
       print("ERROR: onUsersLoadEvent ${err}");
@@ -74,11 +77,21 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
         final filteredUsers = filterUsersBySearchQuery(state.users, query);
         final newContainer = container.copyWith(users: filteredUsers);
         print("SEARCHWIGET   ${container.users}");
-        emit(UsersLoadedState(usersContainer: container, searchQuery: query, searchUsersContainer: newContainer));
+        emit(UsersLoadedState(
+            usersContainer: container,
+            searchQuery: query,
+            searchUsersContainer: newContainer,
+            onlineUsersDictionary: state.onlineUsersDictionary
+        ));
       } else {
         final container = state.usersContainer;
         final newContainer = container.copyWith(users: container.users);
-        emit(UsersLoadedState(usersContainer: newContainer, searchQuery: '', searchUsersContainer: state.searchUsersContainer));
+        emit(UsersLoadedState(
+            usersContainer: newContainer,
+            searchQuery: '',
+            searchUsersContainer: state.searchUsersContainer,
+            onlineUsersDictionary: state.onlineUsersDictionary
+        ));
       }
   }
 
@@ -86,6 +99,43 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
       UsersDeleteEvent event, emit
       ) {
    emit(UsersState());
+  }
+
+  void onUsersUpdateOnlineStatusEvent(
+      UsersUpdateOnlineStatusEvent event, emit
+  ) {
+    final st = state as UsersLoadedState;
+    UsersLoadedState newState;
+    if (event.onlineUsersDictionary != null) {
+      newState = st.copyWith(
+          usersContainer: st.usersContainer,
+          searchUsersContainer: st.searchUsersContainer,
+          searchQuery: st.searchQuery,
+          onlineUsersDictionary: event.onlineUsersDictionary
+      );
+      emit(newState);
+    } else if (event.exitedUser != null) {
+      final int id = event.exitedUser!;
+      st.onlineUsersDictionary.remove(id);
+      newState = st.copyWith(
+          usersContainer: st.usersContainer,
+          searchUsersContainer: st.searchUsersContainer,
+          searchQuery: st.searchQuery,
+          onlineUsersDictionary: st.onlineUsersDictionary
+      );
+      emit(newState);
+    } else if (event.joinedUser != null) {
+      final int id = event.joinedUser!;
+      st.onlineUsersDictionary[id] = true;
+      newState = st.copyWith(
+          usersContainer: st.usersContainer,
+          searchUsersContainer: st.searchUsersContainer,
+          searchQuery: st.searchQuery,
+          onlineUsersDictionary: st.onlineUsersDictionary
+      );
+      print("onUsersUpdateOnlineStatusEvent     state is   ${newState} ${newState}");
+      emit(newState);
+    }
   }
 
 

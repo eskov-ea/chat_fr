@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:chat/services/global.dart';
 import 'package:chat/ui/widgets/search_widget.dart';
 import 'package:flutter/material.dart';
 import '../widgets/user_item.dart';
@@ -11,12 +14,14 @@ class NewMessagePage extends StatefulWidget {
 
   final UsersViewCubit bloc;
 
+
   @override
   State<NewMessagePage> createState() => _NewMessagePageState();
 }
 
 class _NewMessagePageState extends State<NewMessagePage> {
 
+  late final StreamSubscription userViewCubitStateSubscription;
   bool selectedMode = false;
   List selected = [];
   bool isSecret = false;
@@ -38,10 +43,26 @@ class _NewMessagePageState extends State<NewMessagePage> {
     });
   }
 
+  @override
+  void initState() {
+    userViewCubitStateSubscription = widget.bloc.stream.listen((state) {
+      if (state is UsersViewCubitLoadedState) {
+        setState(() {});
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    userViewCubitStateSubscription.cancel();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    final _bloc = widget.bloc;
+    final UsersViewCubit _bloc = widget.bloc;
     return SafeArea(
         child: Padding(
           padding: const EdgeInsets.only(top: 20),
@@ -215,7 +236,7 @@ class _NewMessagePageState extends State<NewMessagePage> {
         ));
   }
 
-  Widget _UsersList(bloc) {
+  Widget _UsersList(UsersViewCubit bloc) {
     if (bloc.state is UsersViewCubitLoadedState) {
       return ListView.builder(
           itemCount: bloc.usersBloc.state.users.length,
@@ -235,7 +256,10 @@ class _NewMessagePageState extends State<NewMessagePage> {
                           _setSelected(bloc.usersBloc.state.users[index].id);
                         },
                       ),
-                    Expanded(child: UserItem(user: bloc.usersBloc.state.users[index])),
+                    Expanded(child: UserItem(
+                      user: bloc.usersBloc.state.users[index],
+                      onlineStatus: isOnline(bloc.usersBloc.state.users[index].id, bloc.state.onlineUsersDictionary) ,)
+                    ),
 
                   ],
                 ),

@@ -149,7 +149,7 @@ class CallInfoPage extends StatelessWidget {
 }
 
 String getTime(DateTime callTime) {
-  callTime = callTime.add(Duration(hours: time_zone));
+  callTime = callTime.add(getTZ());
   if (callTime.hour < 10 && callTime.minute < 10) return "0${callTime.hour}:0${callTime.minute}";
   if (callTime.hour < 10) return "0${callTime.hour}:${callTime.minute}";
   if (callTime.minute < 10) return "${callTime.hour}:0${callTime.minute}";

@@ -21,7 +21,9 @@ import '../ws_bloc/ws_state.dart';
 class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   final DialogsProvider dialogsProvider;
   late final StreamSubscription newMessageSubscription;
+  //TODO: remove WSBloc from this Bloc up to DialogsViewCubit
   final WsBloc webSocketBloc;
+  //TODO: remove WSBloc from this Bloc up to DialogsViewCubit
   final ErrorHandlerBloc errorHandlerBloc;
 
   DialogsBloc({

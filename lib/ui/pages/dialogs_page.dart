@@ -1,15 +1,17 @@
 import 'dart:async';
-
 import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
 import 'package:chat/helpers.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/theme.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit_state.dart';
 import 'package:chat/ui/widgets/widgets.dart';
+import 'package:chat/view_models/user/users_view_cubit.dart';
+import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../models/dialog_model.dart';
 import '../../../utils.dart';
+import '../../models/contact_model.dart';
 import '../../models/message_model.dart';
 import '../../services/global.dart';
 import '../../services/helpers/navigation_helpers.dart';
@@ -27,22 +29,22 @@ class MessagesPage extends StatefulWidget {
 
 class _MessagesPageState extends State<MessagesPage> {
 
-  List<String> onlineMembers = [];
+  Map<int, bool> onlineMembers = {};
   late final StreamSubscription presenceOnlineInfoChannelSubscription;
   int? userId;
+  int  counter = 0;
 
   @override
   void initState() {
     _readUserId();
-    // presenceOnlineInfoChannelSubscription = BlocProvider.of<WsBloc>(context).
-    // _readOnlineMembers();
+    presenceOnlineInfoChannelSubscription = BlocProvider.of<UsersViewCubit>(context).stream.listen((state) {
+      setState(() {
+        onlineMembers = state.onlineUsersDictionary;
+        counter++;
+      });
+      print("onlineMembers    ${onlineMembers}");
+    });
     super.initState();
-  }
-
-
-  void _readOnlineMembers() {
-    final WSBlocChannels = BlocProvider.of<WsBloc>(context).channels;
-    print("WSBlocChannels:  ${WSBlocChannels}  ${WSBlocChannels.length}");
   }
 
   void _readUserId() async {
@@ -54,6 +56,16 @@ class _MessagesPageState extends State<MessagesPage> {
 
   void checkRequiredChats() {
     final dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs;
+  }
+
+  bool isMemberOnline(int id) {
+    return onlineMembers[id] != null ? true : false;
+  }
+
+  @override
+  void dispose() {
+    presenceOnlineInfoChannelSubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -91,7 +103,6 @@ class _MessagesPageState extends State<MessagesPage> {
                       delegate: SliverChildBuilderDelegate(
                             (context, index) =>
                             !_isDialogActive(state.dialogs[index], userId!) ||
-                            // state.dialogs[index].chatType.typeId == 4 && !(state.dialogs[index].messageCount > 0) ||
                             state.dialogs[index].chatType.typeId == 3 && !(state.dialogs[index].messageCount > 0)
                             ? SizedBox.shrink()
                             : Container(
@@ -100,6 +111,8 @@ class _MessagesPageState extends State<MessagesPage> {
                                 child: Align(
                                   child: _DialogItem(
                                     userId: userId,
+                                    checkOnline: isMemberOnline,
+                                    onlineMembers: onlineMembers,
                                     dialogData: DialogData(
                                         userData: state.dialogs[index].userData,
                                         dialogId: state.dialogs[index].dialogId,
@@ -133,14 +146,19 @@ class _MessagesPageState extends State<MessagesPage> {
 
 
 class _DialogItem extends StatelessWidget {
-  const _DialogItem({
+   _DialogItem({
     Key? key,
     required this.dialogData,
     required this.userId,
+    required this.checkOnline,
+    required this.onlineMembers
   }) : super(key: key);
 
   final DialogData dialogData;
   final int? userId;
+  final Function checkOnline;
+  final Map<int, bool> onlineMembers;
+
   String getChatItemName(DialogData data) {
     if (data.chatType.p2p == 1) {
       for (var i = 0; i < data.usersList.length; i++)  {
@@ -153,8 +171,9 @@ class _DialogItem extends StatelessWidget {
     }
     return "Dialog";
   }
-  List getPartnersData( data) {
-    var partners = [];
+
+  List<UserContact> getPartnersData(List<UserContact> data) {
+    final List<UserContact> partners = [];
     for (var i = 0; i < data.length; i++)  {
       if (data[i].id != userId) {
         partners.add(data[i]);
@@ -164,11 +183,22 @@ class _DialogItem extends StatelessWidget {
     return partners;
   }
 
+  WidgetSpan isOnlineWidget (int id) {
+    if (checkOnline(id)) {
+      return WidgetSpan(
+        child: Icon(Icons.circle, color: Colors.green, size: 15,),
+      );
+    } else {
+      return WidgetSpan(child: SizedBox.shrink());
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
 
     final String partnerName = getChatItemName(dialogData);
-    final List partners = getPartnersData(dialogData.usersList);
+    final List<UserContact> partners = getPartnersData(dialogData.usersList);
 
     return InkWell(
       onTap: () {
@@ -200,7 +230,7 @@ class _DialogItem extends StatelessWidget {
               padding: const EdgeInsets.only(right: 12.0),
               child: Center(
                 child: partners.isNotEmpty && partners.first.image != null
-                    ? Avatar.medium(url: partners.first.image )
+                    ? Avatar.medium(url: partners.first.image! )
                     : CircleAvatar(
                   radius: 28,
                   backgroundColor: Colors.grey,
@@ -216,21 +246,32 @@ class _DialogItem extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      partnerName,
+                    child: RichText(
+                      text: TextSpan(
+                        text: partnerName,
+                        style: const TextStyle(
+                            fontSize: 18,
+                            letterSpacing: 0.1,
+                            wordSpacing: 1.5,
+                            fontWeight: FontWeight.w500,
+                            decoration: TextDecoration.none,
+                            color: LightColors.secondaryText
+                        ),
+                        children: [
+                          WidgetSpan(child: SizedBox(width: 5,),),
+                          if (dialogData.chatType.p2p == 1 && onlineMembers[partners.first.id] != null)
+                            WidgetSpan(
+                              child: Icon(Icons.circle, color: Colors.green, size: 15,),
+                            )
+                        ]
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 17,
-                        letterSpacing: 0.1,
-                        wordSpacing: 1.5,
-                        fontWeight: FontWeight.w600,
-                        decoration: TextDecoration.none
-                      ),
+
                     ),
                   ),
                   SizedBox(

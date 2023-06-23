@@ -48,6 +48,9 @@ class WsStateNewDialogCreated extends WsBlocState {
   const WsStateNewDialogCreated({required this.dialog});
 }
 
+/**
+ * User Exit/Join dialog related states */
+
 class WsStateNewUserJoinDialog extends WsBlocState {
   final ChatUser user;
   final int dialogId;
@@ -66,4 +69,26 @@ class WsStateNewUserExitDialog extends WsBlocState {
     required this.user,
     required this.dialogId
   });
+}
+
+
+/**
+ * Online users related states */
+
+class WsStateOnlineUsersInitialState extends WsBlocState {
+  final List onlineUsers;
+
+  WsStateOnlineUsersInitialState({required this.onlineUsers});
+}
+
+class WsStateOnlineUsersExitState extends WsBlocState {
+  final int userId;
+
+  WsStateOnlineUsersExitState({required this.userId});
+}
+
+class WsStateOnlineUsersJoinState extends WsBlocState {
+  final int userId;
+
+  WsStateOnlineUsersJoinState({required this.userId});
 }

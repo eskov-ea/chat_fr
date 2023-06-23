@@ -75,8 +75,9 @@ class MyApp extends StatelessWidget{
         ),
         BlocProvider(
             create: (_) => UsersViewCubit(
+              wsBloc: websocketBloc,
               usersBloc: UsersBloc(
-                  usersRepository: UsersRepository(), webSocketBloc: websocketBloc)
+                  usersRepository: UsersRepository())
                 ..add(UsersLoadEvent()),)
         ),
         BlocProvider(

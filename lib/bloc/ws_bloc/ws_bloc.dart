@@ -60,6 +60,12 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
         onWsUserJoinChatEvent(event, emit);
       } else if (event is WsUserExitChatEvent) {
         onWsUserExitChatEvent(event, emit);
+      } else if (event is WsOnlineUsersInitialEvent) {
+        onWsOnlineUsersInitialEvent(event, emit);
+      } else if (event is WsOnlineUsersExitEvent) {
+        onWsOnlineUsersExitEvent(event, emit);
+      } else if (event is WsOnlineUsersJoinEvent) {
+        onWsOnlineUsersJoinEvent(event, emit);
       }
     });
   }
@@ -135,19 +141,25 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
         authToken: token
       );
       presenceChannel.subscribeIfNotUnsubscribed();
-      presenceChannel.trigger(eventName: 'join', data: {'userId' : userId});
+      // presenceChannel.trigger(eventName: 'join', data: {'userId' : userId});
       presenceChannel.whenMemberAdded().listen((event) {
-        print('presenceChannel | Member added, rootObject is ${event.rootObject}');
-        print('presenceChannel | Member added, userId is ${event.userId}');
+        if (event.rootObject["event"] == "pusher:member_added") {
+          print('presenceChannel | Member added, rootObject is ${jsonDecode(event.rootObject["data"])["user_id"].runtimeType}');
+          add(WsOnlineUsersJoinEvent(userId: jsonDecode(event.rootObject["data"])["user_id"]));
+        }
       });
       presenceChannel.whenMemberRemoved().listen((event) {
-        print('presenceChannel | Member added, rootObject is ${event.rootObject}');
-        print('presenceChannel | Member added, userId is ${event.userId}');
+        if (event.rootObject["event"] == "pusher:member_removed") {
+        print('presenceChannel | Member removed, rootObject is ${jsonDecode(event.rootObject["data"])["user_id"].runtimeType}');
+        final int id = int.parse(jsonDecode(event.rootObject["data"])["user_id"]);
+        add(WsOnlineUsersExitEvent(userId: id));
+        }
       });
       presenceChannelSubs = presenceChannel.bindToAll().listen((event) {
-        print("presenceChannel event.data:  ${event.data}");
-        print("presenceChannel event.userId:  ${event.userId}");
-        print("presenceChannel event.rootObject:  ${event.rootObject}");
+        if (event.rootObject["event"] == "pusher:subscription_succeeded") {
+          print("presenceChannel event.rootObject:  ${jsonDecode(event.rootObject["data"])["presence"]["ids"]}");
+          add(WsOnlineUsersInitialEvent(onlineUsers: jsonDecode(event.rootObject["data"])["presence"]["ids"]));
+        }
 
       });
 
@@ -341,6 +353,18 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
       add(WsEventUpdateStatus(statuses: newStatuses));
     }
   }
+}
+
+void onWsOnlineUsersInitialEvent(WsOnlineUsersInitialEvent event, Emitter<WsBlocState> emit) {
+  emit(WsStateOnlineUsersInitialState(onlineUsers: event.onlineUsers));
+}
+
+void onWsOnlineUsersExitEvent (WsOnlineUsersExitEvent event, Emitter<WsBlocState> emit) {
+  emit(WsStateOnlineUsersExitState(userId: event.userId));
+}
+
+void onWsOnlineUsersJoinEvent (WsOnlineUsersJoinEvent event, Emitter<WsBlocState> emit) {
+  emit(WsStateOnlineUsersJoinState(userId: event.userId));
 }
 
 clientSubscribeToChannel(
