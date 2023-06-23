@@ -27,6 +27,7 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
 
   void _onState(UsersState state) {
     if (state is UsersLoadedState){
+      print("UsersLoadedState   ${state.onlineUsersDictionary}");
       final users = state.users;
       final Map<String, UserContact> usersDictionary = {};
       users.forEach((user) {

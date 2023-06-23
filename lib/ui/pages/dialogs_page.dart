@@ -259,7 +259,7 @@ class _DialogItem extends StatelessWidget {
                             wordSpacing: 1.5,
                             fontWeight: FontWeight.w500,
                             decoration: TextDecoration.none,
-                            color: LightColors.secondaryText
+                            color: AppColors.textDark
                         ),
                         children: [
                           WidgetSpan(child: SizedBox(width: 5,),),

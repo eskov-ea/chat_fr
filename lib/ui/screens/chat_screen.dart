@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:chat/bloc/calls_bloc/calls_bloc.dart';
 import 'package:chat/helpers.dart';
@@ -73,10 +74,20 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
 
   bool isSipServiceConnected = false;
+  bool isOnline = false;
+  late final StreamSubscription usersViewCubitStateSubscription;
 
   @override
   void initState() {
     isSipServiceConnected = BlocProvider.of<CallsBloc>(context).state is ConnectedCallServiceState;
+    usersViewCubitStateSubscription = BlocProvider.of<UsersViewCubit>(context).stream.listen((state) {
+      setState(() {
+        isOnline = state.onlineUsersDictionary[widget.partnerId] != null ? true : false;
+      });
+      setState(() {
+        isOnline = BlocProvider.of<UsersViewCubit>(context).state.onlineUsersDictionary[widget.partnerId] != null;
+      });
+    });
     super.initState();
   }
 
@@ -150,10 +161,33 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  Widget getDialogName(DialogData? dialog, String username) {
+    if (widget.dialogData?.chatType.p2p == 1 || widget.dialogData == null) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            username,
+            style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.w700)
+          ),
+          if(isOnline) SizedBox(width: 10,),
+          if(isOnline) Padding(
+            padding: EdgeInsets.only(top: 5),
+            child: Icon(Icons.circle, color: Colors.green, size: 15),
+          )
+        ],
+      );
+    }
+    return Text(
+      dialog!.name,
+      style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.w700)
+    );
+  }
 
   @override
   void dispose() {
     focusNode.dispose();
+    usersViewCubitStateSubscription.cancel();
     super.dispose();
   }
 
@@ -193,12 +227,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 openGroupChatInfoPage(context: context, usersCubit: widget.usersCubit, dialogData: widget.dialogData, userId: null, dialogCubit: widget.dialogCubit, username: widget.username, partnerId: widget.partnerId, );
               }
             },
-            child: Text(
-              widget.dialogData?.chatType.p2p == 1 || widget.dialogData == null
-                ? widget.username
-                : widget.dialogData!.name,
-              style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.w700),
-            ),
+            child: getDialogName(widget.dialogData, widget.username),
           ),
           actions: [
             if (isSelectedMode) GestureDetector(
