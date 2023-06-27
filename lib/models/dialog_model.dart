@@ -284,3 +284,21 @@ String getDateDialogModel(DateTime rawDate) {
 String? getAttachmentType(json) {
   print(json);
 }
+
+class ClientUserEvent {
+  final int fromUser;
+  final int toUser;
+  final String event;
+
+  ClientUserEvent({
+    required this.fromUser,
+    required this.toUser,
+    required this.event
+  });
+
+  static ClientUserEvent fromJson(json) => ClientUserEvent(
+    fromUser: json["fromUser"],
+    toUser: json["toUser"],
+    event: json["event"]
+  );
+}

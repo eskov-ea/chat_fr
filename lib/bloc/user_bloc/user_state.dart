@@ -1,5 +1,6 @@
 import 'package:chat/bloc/user_bloc/users_list_container.dart';
 import '../../models/contact_model.dart';
+import '../../models/dialog_model.dart';
 import '../../models/user_profile_model.dart';
 
 class UsersState {
@@ -10,6 +11,7 @@ class UsersState {
   copyWith(){}
   List<UserContact> get users => usersContainer.users;
   final Map<int, bool> onlineUsersDictionary = {};
+  final Map<int, ClientUserEvent> clientEventsDictionary = {};
 }
 
 class UsersLoadedState extends UsersState {
@@ -17,6 +19,7 @@ class UsersLoadedState extends UsersState {
   final UsersListContainer searchUsersContainer;
   final String searchQuery;
   final Map<int, bool> onlineUsersDictionary;
+  final Map<int, ClientUserEvent> clientEventsDictionary;
 
   bool get isSearchMode => searchQuery.isNotEmpty;
   List<UserContact> get users =>
@@ -26,13 +29,15 @@ class UsersLoadedState extends UsersState {
       : usersContainer = const UsersListContainer.initial(),
         searchUsersContainer = const UsersListContainer.initial(),
         onlineUsersDictionary = {},
+        clientEventsDictionary = {},
         searchQuery = "";
 
   UsersLoadedState({
     required this.usersContainer,
     required this.searchUsersContainer,
     required this.searchQuery,
-    required this.onlineUsersDictionary
+    required this.onlineUsersDictionary,
+    required this.clientEventsDictionary
   });
 
   @override
@@ -44,6 +49,8 @@ class UsersLoadedState extends UsersState {
               searchUsersContainer == other.searchUsersContainer &&
               onlineUsersDictionary.length == other.onlineUsersDictionary.length &&
               onlineUsersDictionary.keys == other.onlineUsersDictionary.keys &&
+              clientEventsDictionary.keys == other.clientEventsDictionary.keys &&
+              clientEventsDictionary.length == other.clientEventsDictionary.length &&
               searchQuery == other.searchQuery;
 
   @override
@@ -52,6 +59,8 @@ class UsersLoadedState extends UsersState {
       searchUsersContainer.hashCode ^
       onlineUsersDictionary.hashCode ^
       onlineUsersDictionary.length.hashCode ^
+      clientEventsDictionary.length.hashCode ^
+      clientEventsDictionary.keys.hashCode ^
       onlineUsersDictionary.keys.hashCode ^
       searchQuery.hashCode;
 
@@ -60,12 +69,14 @@ class UsersLoadedState extends UsersState {
     UsersListContainer? searchUsersContainer,
     String? searchQuery,
     Map<int, bool>? onlineUsersDictionary,
+    Map<int, ClientUserEvent>? clientEvent
   }) {
     return UsersLoadedState(
       usersContainer: usersContainer ?? this.usersContainer,
       searchUsersContainer: searchUsersContainer ?? this.searchUsersContainer,
       searchQuery: searchQuery ?? this.searchQuery,
-      onlineUsersDictionary: onlineUsersDictionary ?? this.onlineUsersDictionary
+      onlineUsersDictionary: onlineUsersDictionary ?? this.onlineUsersDictionary,
+      clientEventsDictionary: clientEvent ?? this.clientEventsDictionary
     );
   }
 }

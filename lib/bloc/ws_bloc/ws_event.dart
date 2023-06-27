@@ -77,6 +77,16 @@ class WsOnlineUsersExitEvent extends WsBlocEvent{
   WsOnlineUsersExitEvent({required this.userId});
 }
 
+class WsOnlineUserTypingEvent extends WsBlocEvent{
+  final ClientUserEvent clientEvent;
+  final int dialogId;
+
+  WsOnlineUserTypingEvent({
+    required this.clientEvent,
+    required this.dialogId
+  });
+}
+
 class WsEventDisconnect extends WsBlocEvent{}
 
 class WsEventCloseConnection extends WsBlocEvent{}

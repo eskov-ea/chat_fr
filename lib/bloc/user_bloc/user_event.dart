@@ -1,6 +1,8 @@
 import 'package:chat/models/contact_model.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../models/dialog_model.dart';
+
 abstract class UsersEvent extends Equatable{
   @override
   List<Object> get props => [];
@@ -14,11 +16,15 @@ class UsersUpdateOnlineStatusEvent extends UsersEvent{
   final Map<int, bool>? onlineUsersDictionary;
   final int? joinedUser;
   final int? exitedUser;
+  final ClientUserEvent? clientEvent;
+  final int? dialogId;
 
   UsersUpdateOnlineStatusEvent({
     required this.onlineUsersDictionary,
     required this.joinedUser,
     required this.exitedUser,
+    required this.clientEvent,
+    required this.dialogId
   });
 }
 

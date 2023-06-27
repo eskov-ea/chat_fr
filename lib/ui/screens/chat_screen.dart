@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:chat/bloc/calls_bloc/calls_bloc.dart';
+import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
 import 'package:chat/helpers.dart';
 import 'package:chat/models/chat_builder_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/theme.dart';
 import 'package:chat/ui/widgets/widgets.dart';
+import 'package:dart_pusher_channels/dart_pusher_channels.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -75,21 +77,53 @@ class _ChatScreenState extends State<ChatScreen> {
 
   bool isSipServiceConnected = false;
   bool isOnline = false;
+  bool isTyping = false;
   late final StreamSubscription usersViewCubitStateSubscription;
 
   @override
   void initState() {
     isSipServiceConnected = BlocProvider.of<CallsBloc>(context).state is ConnectedCallServiceState;
+    setState(() {
+      isOnline = BlocProvider.of<UsersViewCubit>(context).state.onlineUsersDictionary[widget.partnerId] != null;
+    });
     usersViewCubitStateSubscription = BlocProvider.of<UsersViewCubit>(context).stream.listen((state) {
+      print("usersViewCubitStateSubscription   ${state.clientEvent.length}");
       setState(() {
         isOnline = state.onlineUsersDictionary[widget.partnerId] != null ? true : false;
+        isTyping = state.clientEvent[widget.dialogData?.dialogId] != null && state.clientEvent[widget.dialogData?.dialogId]?.event == "typing";
       });
-      setState(() {
-        isOnline = BlocProvider.of<UsersViewCubit>(context).state.onlineUsersDictionary[widget.partnerId] != null;
-      });
+      print("CLIENT_EVENT   ${state.clientEvent[widget.dialogData?.dialogId]?.fromUser} ${state.clientEvent[widget.dialogData?.dialogId]?.toUser}");
+      print("CLIENT_EVENT compare ${state.clientEvent[widget.dialogData?.dialogId] != null && state.clientEvent[widget.dialogData?.dialogId]?.event == "typing"}");
     });
-    super.initState();
+    focusNode.addListener(() {
+      if(focusNode.hasFocus) {
+        print("_sendTypingEvent send");
+        _sendTypingEvent();
+      } else {
+        print("_sendTypingEvent send finish");
+        _sendFinishTypingEvent();
+      }
+    });
+   super.initState();
   }
+  void _sendTypingEvent() async {
+    while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
+      print("_sendTypingEvent waiting");
+      await Future.delayed(const Duration(seconds: 3));
+    }
+    BlocProvider.of<WsBloc>(context).presenceChannel!.trigger(eventName: "client-user-event",
+        data: {"dialogId" : widget.dialogData?.dialogId, "event" : "typing", "fromUser" : widget.userId, "toUser": widget.partnerId});
+  }
+
+  void _sendFinishTypingEvent() async {
+    while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
+      print("_sendTypingEvent waiting");
+      await Future.delayed(const Duration(seconds: 3));
+    }
+    BlocProvider.of<WsBloc>(context).presenceChannel!.trigger(eventName: "client-user-event",
+        data: {"dialogId" : widget.dialogData?.dialogId, "event" : "finish_typing", "fromUser" : widget.userId, "toUser": widget.partnerId});
+  }
+
 
 
   final focusNode = FocusNode();
@@ -163,17 +197,23 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget getDialogName(DialogData? dialog, String username) {
     if (widget.dialogData?.chatType.p2p == 1 || widget.dialogData == null) {
-      return Row(
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             username,
             style: const TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.w700)
           ),
-          if(isOnline) SizedBox(width: 10,),
-          if(isOnline) Padding(
-            padding: EdgeInsets.only(top: 5),
-            child: Icon(Icons.circle, color: Colors.green, size: 15),
+          if(isOnline) Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.circle, color: Colors.green, size: 12),
+              SizedBox(width: 10,),
+              Text(
+                isTyping ? "Набирает сообщение..." : "Online",
+                style: TextStyle(color: Colors.black, fontSize: 14)
+              )
+            ],
           )
         ],
       );
@@ -250,7 +290,11 @@ class _ChatScreenState extends State<ChatScreen> {
             if (!isSelectedMode && !kIsWeb && ( widget.dialogData == null || widget.dialogData!.chatType.p2p == 1)) Padding(
               padding: const EdgeInsets.only(right: 20),
               child: IconButton(
-                icon: const Icon(CupertinoIcons.phone, color: AppColors.secondary, size: 30,),
+                icon: Icon(
+                  CupertinoIcons.phone,
+                  color: isSipServiceConnected ? AppColors.secondary : AppColors.textFaded,
+                  size: 30
+                ),
                 onPressed: () {
                   if (!isSipServiceConnected) {
                     customToastMessage(context, "Не удалось подключиться к Sip-серверу, попробуйте еще раз");

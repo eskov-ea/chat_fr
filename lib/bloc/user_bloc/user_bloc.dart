@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:chat/bloc/user_bloc/user_event.dart';
 import 'package:chat/bloc/user_bloc/user_state.dart';
 import 'package:chat/bloc/user_bloc/users_list_container.dart';
+import 'package:chat/models/dialog_model.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -48,7 +49,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
             usersContainer: state.usersContainer,
             searchQuery: query,
             searchUsersContainer: newContainer,
-          onlineUsersDictionary: state.onlineUsersDictionary
+            onlineUsersDictionary: state.onlineUsersDictionary,
+            clientEventsDictionary: state.clientEventsDictionary
         ));
       } else {
         print('not state.isSearchMode');
@@ -58,7 +60,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
             usersContainer: newContainer,
             searchQuery: '',
             searchUsersContainer: state.searchUsersContainer,
-            onlineUsersDictionary: state.onlineUsersDictionary
+            onlineUsersDictionary: state.onlineUsersDictionary,
+            clientEventsDictionary: state.clientEventsDictionary
         ));
       }
     } catch (err) {
@@ -81,7 +84,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
             usersContainer: container,
             searchQuery: query,
             searchUsersContainer: newContainer,
-            onlineUsersDictionary: state.onlineUsersDictionary
+            onlineUsersDictionary: state.onlineUsersDictionary,
+            clientEventsDictionary: state.clientEventsDictionary
         ));
       } else {
         final container = state.usersContainer;
@@ -90,7 +94,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
             usersContainer: newContainer,
             searchQuery: '',
             searchUsersContainer: state.searchUsersContainer,
-            onlineUsersDictionary: state.onlineUsersDictionary
+            onlineUsersDictionary: state.onlineUsersDictionary,
+            clientEventsDictionary: state.clientEventsDictionary
         ));
       }
   }
@@ -111,7 +116,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
           usersContainer: st.usersContainer,
           searchUsersContainer: st.searchUsersContainer,
           searchQuery: st.searchQuery,
-          onlineUsersDictionary: event.onlineUsersDictionary
+          onlineUsersDictionary: event.onlineUsersDictionary,
+          clientEvent: st.clientEventsDictionary
       );
       emit(newState);
     } else if (event.exitedUser != null) {
@@ -121,7 +127,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
           usersContainer: st.usersContainer,
           searchUsersContainer: st.searchUsersContainer,
           searchQuery: st.searchQuery,
-          onlineUsersDictionary: st.onlineUsersDictionary
+          onlineUsersDictionary: st.onlineUsersDictionary,
+          clientEvent: st.clientEventsDictionary
       );
       emit(newState);
     } else if (event.joinedUser != null) {
@@ -131,9 +138,26 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
           usersContainer: st.usersContainer,
           searchUsersContainer: st.searchUsersContainer,
           searchQuery: st.searchQuery,
-          onlineUsersDictionary: st.onlineUsersDictionary
+          onlineUsersDictionary: st.onlineUsersDictionary,
+          clientEvent: st.clientEventsDictionary
       );
-      print("onUsersUpdateOnlineStatusEvent     state is   ${newState} ${newState}");
+      emit(newState);
+    } else if (event.clientEvent != null && event.dialogId != null ) {
+      Map<int, ClientUserEvent> newClientEventDictionary = st.clientEventsDictionary;
+      print("onUsersUpdateOnlineStatusEvent     state is   ${newClientEventDictionary.length} ${newClientEventDictionary[193]?.event}  ${event.clientEvent?.event}");
+      if (event.clientEvent?.event == "typing") {
+        newClientEventDictionary[event.dialogId!] = event.clientEvent!;
+      }
+      if (event.clientEvent?.event == "finish_typing") {
+        newClientEventDictionary.remove(event.dialogId!);
+      }
+      newState = st.copyWith(
+          usersContainer: st.usersContainer,
+          searchUsersContainer: st.searchUsersContainer,
+          searchQuery: st.searchQuery,
+          onlineUsersDictionary: st.onlineUsersDictionary,
+          clientEvent: newClientEventDictionary
+      );
       emit(newState);
     }
   }

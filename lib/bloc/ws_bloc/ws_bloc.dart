@@ -24,7 +24,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
   PusherChannelsClient? socket;
   String? token;
   int? userId;
-  late PresenceChannel presenceChannel;
+  PresenceChannel? presenceChannel;
   StreamSubscription<ChannelReadEvent>? presenceChannelSubs;
 
   static const options = PusherChannelsOptions.fromHost(
@@ -66,6 +66,8 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
         onWsOnlineUsersExitEvent(event, emit);
       } else if (event is WsOnlineUsersJoinEvent) {
         onWsOnlineUsersJoinEvent(event, emit);
+      } else if (event is WsOnlineUserTypingEvent) {
+        onWsOnlineUserTypingEvent(event, emit);
       }
     });
   }
@@ -140,28 +142,9 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
         channelName: 'presence-onlineinfo',
         authToken: token
       );
-      presenceChannel.subscribeIfNotUnsubscribed();
-      // presenceChannel.trigger(eventName: 'join', data: {'userId' : userId});
-      presenceChannel.whenMemberAdded().listen((event) {
-        if (event.rootObject["event"] == "pusher:member_added") {
-          print('presenceChannel | Member added, rootObject is ${jsonDecode(event.rootObject["data"])["user_id"].runtimeType}');
-          add(WsOnlineUsersJoinEvent(userId: jsonDecode(event.rootObject["data"])["user_id"]));
-        }
-      });
-      presenceChannel.whenMemberRemoved().listen((event) {
-        if (event.rootObject["event"] == "pusher:member_removed") {
-        print('presenceChannel | Member removed, rootObject is ${jsonDecode(event.rootObject["data"])["user_id"].runtimeType}');
-        final int id = int.parse(jsonDecode(event.rootObject["data"])["user_id"]);
-        add(WsOnlineUsersExitEvent(userId: id));
-        }
-      });
-      presenceChannelSubs = presenceChannel.bindToAll().listen((event) {
-        if (event.rootObject["event"] == "pusher:subscription_succeeded") {
-          print("presenceChannel event.rootObject:  ${jsonDecode(event.rootObject["data"])["presence"]["ids"]}");
-          add(WsOnlineUsersInitialEvent(onlineUsers: jsonDecode(event.rootObject["data"])["presence"]["ids"]));
-        }
+      presenceChannel!.subscribeIfNotUnsubscribed();
 
-      });
+      socket?.eventStream.listen(_onSocketEvent);
 
 
       if (dialogs != null) {
@@ -202,6 +185,26 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
     });
     socket!.connect();
     emit(Connected(socket: socket!));
+  }
+
+  void _onSocketEvent(PusherChannelsReadEvent event) {
+    print("pusher:   ${event.rootObject}");
+    if (event.rootObject["event"] == "pusher_internal:subscription_succeeded" && event.rootObject["data"] != null) {
+      add(WsOnlineUsersInitialEvent(onlineUsers: jsonDecode(event.rootObject["data"])["presence"]["ids"]));
+    } else if (event.rootObject["event"] == "pusher_internal:member_removed") {
+      print('presenceChannel | Member removed, rootObject is ${jsonDecode(event.rootObject["data"])["user_id"].runtimeType}');
+      final int id = int.parse(jsonDecode(event.rootObject["data"])["user_id"]);
+      add(WsOnlineUsersExitEvent(userId: id));
+    } else if (event.rootObject["event"] == "pusher_internal:member_added") {
+      print('presenceChannel | Member added, rootObject is ${jsonDecode(event.rootObject["data"])["user_id"].runtimeType}');
+      add(WsOnlineUsersJoinEvent(userId: jsonDecode(event.rootObject["data"])["user_id"]));
+    } else if (event.rootObject["event"] == "client-user-event") {
+      print("client-user-event  ${event.rootObject}  ${event.rootObject["data"]["event"]}  ${event.rootObject["data"]["fromUser"].runtimeType}");
+      add(WsOnlineUserTypingEvent(
+        clientEvent: ClientUserEvent.fromJson(event.rootObject["data"]),
+        dialogId: event.rootObject["data"]["dialogId"]
+      ));
+    }
   }
 
   void onNewMessageReceived(event, emit) {
@@ -365,6 +368,14 @@ void onWsOnlineUsersExitEvent (WsOnlineUsersExitEvent event, Emitter<WsBlocState
 
 void onWsOnlineUsersJoinEvent (WsOnlineUsersJoinEvent event, Emitter<WsBlocState> emit) {
   emit(WsStateOnlineUsersJoinState(userId: event.userId));
+}
+
+void onWsOnlineUserTypingEvent(WsOnlineUserTypingEvent event, Emitter<WsBlocState> emit) {
+  print("onWsOnlineUserTypingEvent   ${event.dialogId}  ${event.clientEvent.event}");
+  emit(WsOnlineUserTypingState(
+    clientEvent: event.clientEvent,
+    dialogId: event.dialogId
+  ));
 }
 
 clientSubscribeToChannel(

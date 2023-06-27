@@ -6,6 +6,7 @@ import '../../../../bloc/user_bloc/user_state.dart';
 import '../../bloc/ws_bloc/ws_bloc.dart';
 import '../../bloc/ws_bloc/ws_state.dart';
 import '../../models/contact_model.dart';
+import '../../models/dialog_model.dart';
 import 'users_view_cubit_state.dart';
 
 class UsersViewCubit extends Cubit<UsersViewCubitState> {
@@ -27,7 +28,7 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
 
   void _onState(UsersState state) {
     if (state is UsersLoadedState){
-      print("UsersLoadedState   ${state.onlineUsersDictionary}");
+      print("UsersLoadedState   ${state.clientEventsDictionary[193]}   ${state.clientEventsDictionary[193]?.fromUser}");
       final users = state.users;
       final Map<String, UserContact> usersDictionary = {};
       users.forEach((user) {
@@ -38,6 +39,7 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
         searchQuery: '',
         usersDictionary: usersDictionary,
         onlineUsersDictionary: state.onlineUsersDictionary,
+        clientEvent: state.clientEventsDictionary
       ));
     } else if (state is UsersErrorState) {
       emit(UsersViewCubitErrorState());
@@ -45,6 +47,7 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
   }
 
   void _onWsStateChange(WsBlocState state) {
+    print("WsBlocState  ${state}");
     if (state is WsStateOnlineUsersInitialState) {
       final Map<int, bool> onlineUsersDictionary = {};
       state.onlineUsers.forEach((id) {
@@ -53,19 +56,34 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
       usersBloc.add(UsersUpdateOnlineStatusEvent(
         onlineUsersDictionary: onlineUsersDictionary,
         joinedUser: null,
-        exitedUser: null
+        exitedUser: null,
+        clientEvent: null,
+        dialogId: null
       ));
     } else if (state is WsStateOnlineUsersExitState) {
       usersBloc.add(UsersUpdateOnlineStatusEvent(
         onlineUsersDictionary: null,
         joinedUser: null,
-        exitedUser: state.userId
+        exitedUser: state.userId,
+        clientEvent: null,
+        dialogId: null
       ));
     } else if (state is WsStateOnlineUsersJoinState) {
       usersBloc.add(UsersUpdateOnlineStatusEvent(
         onlineUsersDictionary: null,
         joinedUser: state.userId,
-        exitedUser: null
+        exitedUser: null,
+        clientEvent: null,
+        dialogId: null
+      ));
+    } else if (state is WsOnlineUserTypingState) {
+      print("WsBlocState  ${state.clientEvent.event}");
+      usersBloc.add(UsersUpdateOnlineStatusEvent(
+        onlineUsersDictionary: null,
+        joinedUser: null,
+        exitedUser: null,
+        clientEvent: state.clientEvent,
+        dialogId: state.dialogId
       ));
     }
   }

@@ -92,3 +92,28 @@ class WsStateOnlineUsersJoinState extends WsBlocState {
 
   WsStateOnlineUsersJoinState({required this.userId});
 }
+
+class WsOnlineUserTypingState extends WsBlocState{
+  final ClientUserEvent clientEvent;
+  final int dialogId;
+
+  WsOnlineUserTypingState({
+    required this.clientEvent,
+    required this.dialogId
+  });
+
+  @override
+  bool operator ==(Object other) =>
+    identical(this, other) ||
+      other is WsOnlineUserTypingState &&
+        runtimeType == other.runtimeType &&
+        clientEvent.event == other.clientEvent.event &&
+        dialogId == other.dialogId &&
+        clientEvent.fromUser == other.clientEvent.fromUser &&
+        clientEvent.toUser == other.clientEvent.toUser;
+
+  @override
+  int get hashCode =>
+      clientEvent.hashCode ^ clientEvent.toUser.hashCode ^ clientEvent.fromUser.hashCode ^
+        clientEvent.event.hashCode ^ dialogId.hashCode;
+}
