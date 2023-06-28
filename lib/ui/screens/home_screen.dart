@@ -70,7 +70,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   SqfliteDatabase? _db;
   bool isUpdateAvailable = true;
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
-  final String prefix = "7";
 
 
   Future<bool> isCallRunning () async {
@@ -208,6 +207,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  void initialLoadData() async {
+    BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLoadingEvent());
+    BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.add(DialogsLoadEvent());
+    BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(InitializeSocketEvent());
+    BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersLoadEvent());
+  }
+
   void getUserCallLog(UserProfileAsteriskSettings settings) {
     BlocProvider.of<CallLogsBloc>(context).add(LoadCallLogsEvent(passwd: settings.asteriskUserPassword!));
   }
@@ -219,7 +225,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
   @override
   void initState() {
-    shouldDownloadData();
+    initialLoadData();
     showId();
     WidgetsBinding.instance?.addObserver(this);
     userProfileDataSubscription =  BlocProvider.of<ProfileBloc>(context).stream.listen(_onBlocProfileStateChanged);

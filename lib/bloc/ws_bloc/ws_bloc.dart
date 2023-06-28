@@ -284,7 +284,6 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
   }
 
   void onWsEventDisconnect(event, emit) async {
-    print("onWsEventDisconnect");
     emit(Unconnected());
     await generalEventSubscription?.cancel();
     for (var eventSubscription in eventSubscriptions) {
@@ -371,7 +370,6 @@ void onWsOnlineUsersJoinEvent (WsOnlineUsersJoinEvent event, Emitter<WsBlocState
 }
 
 void onWsOnlineUserTypingEvent(WsOnlineUserTypingEvent event, Emitter<WsBlocState> emit) {
-  print("onWsOnlineUserTypingEvent   ${event.dialogId}  ${event.clientEvent.event}");
   emit(WsOnlineUserTypingState(
     clientEvent: event.clientEvent,
     dialogId: event.dialogId

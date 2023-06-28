@@ -79,28 +79,34 @@ class _ChatScreenState extends State<ChatScreen> {
   bool isOnline = false;
   bool isTyping = false;
   late final StreamSubscription usersViewCubitStateSubscription;
+  late final StreamSubscription sipStateSubscription;
 
   @override
   void initState() {
-    isSipServiceConnected = BlocProvider.of<CallsBloc>(context).state is ConnectedCallServiceState;
+
     setState(() {
+      isSipServiceConnected = !(BlocProvider.of<CallsBloc>(context).state is UnconnectedCallServiceState);
       isOnline = BlocProvider.of<UsersViewCubit>(context).state.onlineUsersDictionary[widget.partnerId] != null;
     });
+    sipStateSubscription = BlocProvider.of<CallsBloc>(context).stream.listen((state) {
+      if (state is UnconnectedCallServiceState) {
+        setState(() {
+          isSipServiceConnected = false;
+        });
+      } else {
+        isSipServiceConnected = true;
+      }
+    });
     usersViewCubitStateSubscription = BlocProvider.of<UsersViewCubit>(context).stream.listen((state) {
-      print("usersViewCubitStateSubscription   ${state.clientEvent.length}");
       setState(() {
         isOnline = state.onlineUsersDictionary[widget.partnerId] != null ? true : false;
         isTyping = state.clientEvent[widget.dialogData?.dialogId] != null && state.clientEvent[widget.dialogData?.dialogId]?.event == "typing";
       });
-      print("CLIENT_EVENT   ${state.clientEvent[widget.dialogData?.dialogId]?.fromUser} ${state.clientEvent[widget.dialogData?.dialogId]?.toUser}");
-      print("CLIENT_EVENT compare ${state.clientEvent[widget.dialogData?.dialogId] != null && state.clientEvent[widget.dialogData?.dialogId]?.event == "typing"}");
     });
     focusNode.addListener(() {
       if(focusNode.hasFocus) {
-        print("_sendTypingEvent send");
         _sendTypingEvent();
       } else {
-        print("_sendTypingEvent send finish");
         _sendFinishTypingEvent();
       }
     });
@@ -108,7 +114,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
   void _sendTypingEvent() async {
     while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
-      print("_sendTypingEvent waiting");
       await Future.delayed(const Duration(seconds: 3));
     }
     BlocProvider.of<WsBloc>(context).presenceChannel!.trigger(eventName: "client-user-event",
@@ -117,7 +122,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _sendFinishTypingEvent() async {
     while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
-      print("_sendTypingEvent waiting");
       await Future.delayed(const Duration(seconds: 3));
     }
     BlocProvider.of<WsBloc>(context).presenceChannel!.trigger(eventName: "client-user-event",
@@ -228,6 +232,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     focusNode.dispose();
     usersViewCubitStateSubscription.cancel();
+    sipStateSubscription.cancel();
     super.dispose();
   }
 

@@ -26,7 +26,7 @@ import 'dart:convert';
 // import 'package:universal_html/html.dart' as html;
 
   AudioPlayer _player = AudioPlayer();
-  const prefix = "7";
+  const String prefix = "7";
   Duration? TZ;
 
   Future<void> playAudio(

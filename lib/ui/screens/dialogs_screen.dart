@@ -201,7 +201,8 @@ class _DialogItem extends StatelessWidget {
     final List<UserContact> partners = getPartnersData(dialogData.usersList);
 
     return InkWell(
-      onTap: () {
+      onTap: () async {
+       await Future.delayed(Duration(milliseconds: 100));
         openChatScreen(
             context: context,
             userId: userId,

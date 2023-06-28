@@ -41,21 +41,33 @@ class MainNavigation {
   Route<Object> onGenerateRoute(RouteSettings settings) {
     switch (settings.name) {
       case MainNavigationRouteNames.chatPage:
-        const String name = "/home_screen/chat_page";
+        const String name = MainNavigationRouteNames.chatPage;
         final arguments = settings.arguments as ChatPageArguments;
-        return MaterialPageRoute(
+        return PageRouteBuilder(
           settings: const RouteSettings(name: name),
-          builder: (BuildContext context) => _screenFactory.makeChatScreen(arguments)
+          pageBuilder: (BuildContext context, _, __) => _screenFactory.makeChatScreen(arguments),
+          transitionsBuilder: (context, Animation<double> animation,
+              Animation<double> secondaryAnimation, Widget child) {
+            final tween = Tween(begin: const Offset(1.0, 0.0), end: const Offset(0.0, 0.0)).chain(CurveTween(curve: Curves.ease));
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+           );
+          },
+          transitionDuration: Duration(milliseconds: 800),
         );
       case MainNavigationRouteNames.imageScreen:
         final arguments = settings.arguments as ImageScreenArguments;
         const String name = MainNavigationRouteNames.imageViewPage;
         return MaterialPageRoute(
-            builder: (BuildContext context) => _screenFactory.makeImageScreen(arguments)
+          settings: const RouteSettings(name: name),
+          builder: (BuildContext context) => _screenFactory.makeImageScreen(arguments)
         );
       case MainNavigationRouteNames.userProfileInfoPage:
         final arguments = settings.arguments as UserProfileArguments;
+        const String name = MainNavigationRouteNames.userProfileInfoPage;
         return MaterialPageRoute(
+            settings: const RouteSettings(name: name),
             builder: (BuildContext context) => _screenFactory.makeUserProfileInfoPage(arguments)
         );
       case MainNavigationRouteNames.groupChatInfoPage:
@@ -67,14 +79,14 @@ class MainNavigation {
         );
       case MainNavigationRouteNames.runningCallScreen:
         final arguments = settings.arguments as CallScreenArguments;
-        const String name = "/home_screen/running_call_screen";
+        const String name = MainNavigationRouteNames.runningCallScreen;
         return MaterialPageRoute(
           settings: const RouteSettings(name: name),
           builder: (BuildContext context) => _screenFactory.makeRunningCallScreen(arguments)
         );
       case MainNavigationRouteNames.incomingCallScreen:
         final arguments = settings.arguments as CallScreenArguments;
-        const String name = "/home_screen/incoming_call_screen";
+        const String name = MainNavigationRouteNames.incomingCallScreen;
         return MaterialPageRoute(
             settings: const RouteSettings(name: name),
             builder: (BuildContext context) => _screenFactory.makeIncomingCallScreen(arguments)
@@ -121,7 +133,7 @@ class MainNavigation {
             builder: (BuildContext context) => _screenFactory.makeResetPasswordScreen()
         );
       default:
-        const widget = Text('Navigation error!!!');
+        const widget = Center(child: Text('Ошибка навигации между страницами приложения', style: TextStyle(color: Colors.black87, fontSize: 16),));
         return MaterialPageRoute(builder: (_) => widget);
     }
   }

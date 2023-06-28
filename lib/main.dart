@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget{
               wsBloc: websocketBloc,
               usersBloc: UsersBloc(
                   usersRepository: UsersRepository())
-                ..add(UsersLoadEvent()),)
+            )
         ),
         BlocProvider(
             create: (context) => DialogsViewCubit(
@@ -87,7 +87,7 @@ class MyApp extends StatelessWidget{
                     errorHandlerBloc: errorHandlerBloc,
                     dialogsProvider: DialogsProvider(),
                     initialState: const DialogsState.initial()
-                )..add(DialogsLoadEvent()),
+                ),
                 initialState: DialogsLoadingViewCubitState(
                 ))),
         BlocProvider(
@@ -97,7 +97,7 @@ class MyApp extends StatelessWidget{
           ),
         ),
         BlocProvider(
-          create: (_) => ProfileBloc()..add(ProfileBlocLoadingEvent()),
+          create: (_) => ProfileBloc(),
         ),
         BlocProvider(
           create: (_) => CallsBloc(),
