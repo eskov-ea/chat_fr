@@ -9,7 +9,7 @@ class UserContact {
   final String position;
   final String phone;
   final String email;
-  final String? image = null;
+  final String? avatar;
 
   UserContact({
     required this.id,
@@ -21,6 +21,7 @@ class UserContact {
     required this.phone,
     required this.dept,
     required this.email,
+    required this.avatar
   });
 
   static UserContact fromJson(json) => UserContact(
@@ -33,6 +34,7 @@ class UserContact {
     phone: json['staff']['phone'] ?? "",
     dept: json['staff']['dept'] ?? "",
     email: json['email'] ?? "",
+    avatar: json['staff']['avatar']
   );
 
 }

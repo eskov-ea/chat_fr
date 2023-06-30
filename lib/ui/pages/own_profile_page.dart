@@ -3,10 +3,9 @@ import 'package:chat/bloc/chats_builder_bloc/chats_builder_event.dart';
 import 'package:chat/bloc/profile_bloc/profile_bloc.dart';
 import 'package:chat/bloc/profile_bloc/profile_events.dart';
 import 'package:chat/bloc/profile_bloc/profile_state.dart';
-import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
 import 'package:chat/services/global.dart';
+import 'package:chat/storage/data_storage.dart';
 import 'package:chat/theme.dart';
-import 'package:dart_pusher_channels/dart_pusher_channels.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,11 +13,13 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/user_bloc/user_event.dart';
 import '../../bloc/ws_bloc/ws_event.dart';
+import '../../models/user_profile_model.dart';
 import '../../services/auth/auth_repo.dart';
 import '../../view_models/dialogs_page/dialogs_view_cubit.dart';
 import '../../view_models/user/users_view_cubit.dart';
 import '../../view_models/websocket/websocket_view_cubit.dart';
 import '../navigation/main_navigation.dart';
+import '../widgets/avatar_widget.dart';
 
 
 class ProfilePage extends StatelessWidget {
@@ -29,6 +30,7 @@ class ProfilePage extends StatelessWidget {
     required this.isUpdateAvailable,
     Key? key
   }) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
@@ -46,18 +48,7 @@ class ProfilePage extends StatelessWidget {
                           ListView(
                             children: [
                               const SizedBox(height: 20,),
-                              CircleAvatar(
-                                radius: 70,
-                                backgroundColor: Colors.grey,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4), // Border radius
-                                  child: ClipOval(
-                                      child: state.user?.image != null
-                                          ? Image.network(state.user!.image!)
-                                          : Image.asset('assets/images/no_avatar.png')
-                                  ),
-                                ),
-                              ),
+                              AvatarWidget(userId: state.user?.id, size: 70,),
                               const SizedBox(height: 20,),
                               Text(state.user!.lastname + " " + state.user!.firstname + " " + state.user!.middlename,
                                   textAlign: TextAlign.center,

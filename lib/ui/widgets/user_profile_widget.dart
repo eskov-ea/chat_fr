@@ -1,3 +1,4 @@
+import 'package:chat/ui/widgets/avatar_widget.dart';
 import 'package:flutter/material.dart';
 import '../../models/contact_model.dart';
 
@@ -17,18 +18,7 @@ class UserProfileWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 20,),
-            CircleAvatar(
-              radius: 70,
-              backgroundColor: Colors.grey,
-              child: Padding(
-                padding: const EdgeInsets.all(4), // Border radius
-                child: ClipOval(
-                    child: user.image != null
-                        ? Image.network(user.image!)
-                        : Image.asset('assets/images/no_avatar.png')
-                ),
-              ),
-            ),
+            AvatarWidget(userId: user.id, size: 70,),
             const SizedBox(height: 20,),
             Text(user.lastname + " " + user.firstname + " " + user.middlename,
                 textAlign: TextAlign.center,

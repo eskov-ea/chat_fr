@@ -6,8 +6,6 @@ import 'package:chat/helpers.dart';
 import 'package:chat/models/chat_builder_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/theme.dart';
-import 'package:chat/ui/widgets/widgets.dart';
-import 'package:dart_pusher_channels/dart_pusher_channels.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -529,87 +527,6 @@ class _MessageListState extends State<_MessageList> {
     );
   }
 }
-
-class _DateLable extends StatelessWidget {
-  const _DateLable({
-    Key? key,
-    required this.lable,
-  }) : super(key: key);
-
-  final String lable;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32.0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 12),
-            child: Text(
-              lable,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textFaded,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AppBarTitle extends StatelessWidget {
-  const _AppBarTitle({
-    Key? key,
-    required this.messageData,
-  }) : super(key: key);
-
-  final MessageData messageData;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Avatar.small(
-          url: "messageData.profilePicture",
-        ),
-        const SizedBox(
-          width: 16,
-        ),
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "messageData.senderData.senderName",
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 14),
-              ),
-              const SizedBox(height: 2),
-              const Text(
-                'Online now',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
-              ),
-            ],
-          ),
-        )
-      ],
-    );
-  }
-}
-
 
 class _ReplyMessageBar extends StatelessWidget {
   const _ReplyMessageBar({

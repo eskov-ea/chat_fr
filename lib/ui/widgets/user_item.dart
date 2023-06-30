@@ -1,17 +1,10 @@
-import 'package:chat/bloc/dialogs_bloc/dialogs_bloc.dart';
-import 'package:chat/bloc/dialogs_bloc/dialogs_state.dart';
-import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/contact_model.dart';
-import '../../models/dialog_model.dart';
-import '../../models/user_profile_model.dart';
-import '../../services/dialogs/dialogs_api_provider.dart';
 import '../../services/global.dart';
 import '../../services/helpers/navigation_helpers.dart';
 import '../../storage/data_storage.dart';
-import '../screens/chat_screen.dart';
-import 'avatar.dart';
+import 'avatar_widget.dart';
 
 class UserItem extends StatelessWidget {
   const UserItem({
@@ -43,20 +36,7 @@ class UserItem extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: user.image != null
-                  ? Avatar.small(url: user.image!)
-                  : CircleAvatar(
-                radius: 21,
-                backgroundColor: Colors.grey,
-                child: Padding(
-                  padding: const EdgeInsets.all(1), // Border radius
-                  child: ClipOval(
-                      child: Image.asset('assets/images/no_avatar.png')
-                  ),
-                ),
-              ),
-            ),
+            AvatarWidget(userId: user.id),
             Padding(
               padding: const EdgeInsets.only(left: 12.0),
               child: Column(
@@ -107,6 +87,5 @@ class UserItem extends StatelessWidget {
       ),
     );
   }
-
 
 }

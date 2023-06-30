@@ -1,9 +1,7 @@
+import 'package:chat/ui/widgets/avatar_widget.dart';
 import 'package:flutter/material.dart';
-
 import '../../models/contact_model.dart';
-import '../../models/user_profile_model.dart';
 import '../../services/global.dart';
-import 'avatar.dart';
 
 class CallUserItem extends StatelessWidget {
   const CallUserItem({
@@ -24,20 +22,7 @@ class CallUserItem extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: user.image != null
-                  ? Avatar.small(url: user.image!)
-                  : CircleAvatar(
-                radius: 21,
-                backgroundColor: Colors.grey,
-                child: Padding(
-                  padding: const EdgeInsets.all(1), // Border radius
-                  child: ClipOval(
-                      child: Image.asset('assets/images/no_avatar.png')
-                  ),
-                ),
-              ),
-            ),
+            AvatarWidget(userId: user.id, size: 21),
             Padding(
               padding: const EdgeInsets.only(left: 12.0),
               child: Column(

@@ -12,7 +12,7 @@ class UserProfileData extends Equatable{
   final String position;
   final String phone;
   final String email;
-  final String? image = null;
+  final String? avatar;
   final UserProfileAsteriskSettings? userProfileSettings;
   final AppSettings? appSettings;
   final ChatSettings? chatSettings;
@@ -26,6 +26,7 @@ class UserProfileData extends Equatable{
     required this.position,
     required this.phone,
     required this.dept,
+    required this.avatar,
     required this.email,
     required this.userProfileSettings,
     required this.appSettings,
@@ -42,6 +43,7 @@ class UserProfileData extends Equatable{
           phone: json['user']['staff']['phone'] ?? "",
           dept: json['user']['staff']['dept'] ?? "",
           email: json['user']['email'] ?? "",
+          avatar: json['user']['staff']["avatar"],
           userProfileSettings: UserProfileAsteriskSettings.fromJson(json['settings']),
           appSettings: AppSettings.fromJson(json['settings']),
           chatSettings: ChatSettings.fromJson(json['settings'])
@@ -56,12 +58,13 @@ class UserProfileData extends Equatable{
     "company": company,
     "position": position,
     "phone": phone,
+    "avatar": avatar,
     "dept": dept,
     "email": email
   };
 
   @override
-  List<Object?> get props => [id, firstname, lastname, middlename, company, position, phone, dept, email, image, appSettings, userProfileSettings];
+  List<Object?> get props => [id, firstname, lastname, middlename, company, position, phone, dept, email, avatar, appSettings, userProfileSettings];
 
 }
 

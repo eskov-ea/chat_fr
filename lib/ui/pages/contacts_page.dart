@@ -45,14 +45,14 @@ class ContactsPage extends StatelessWidget {
                             separatorBuilder: (context, index) => const Divider(),
                             itemBuilder: (context, index) {
                               return state.users.isNotEmpty
-                                  ? Container(
-                                padding: const EdgeInsets.only(
+                                ? Container(
+                                  padding: const EdgeInsets.only(
                                     left: 14, right: 14, top: 0, bottom: 0),
-                                child: Align(
-                                  child: UserItem(
-                                    user: state.users[index],
-                                    onlineStatus: isOnline(state.users[index].id, state.onlineUsersDictionary),
-                                  ),
+                                  child: Align(
+                                    child: UserItem(
+                                      user: state.users[index],
+                                      onlineStatus: isOnline(state.users[index].id, state.onlineUsersDictionary),
+                                    ),
                                   // Text(state.users[index].username),
                                 ),
                               )

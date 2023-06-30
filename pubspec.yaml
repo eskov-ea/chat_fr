@@ -9,7 +9,6 @@ environment:
   sdk: ">=2.16.1"
 
 dependencies:
-  cached_network_image: 3.1.0
   google_fonts: 2.1.0
   jiffy: 4.1.0
   equatable: 2.0.3

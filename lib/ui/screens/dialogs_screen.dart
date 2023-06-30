@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
 import 'package:chat/helpers.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/theme.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit_state.dart';
-import 'package:chat/ui/widgets/widgets.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
-import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../models/dialog_model.dart';
@@ -16,6 +13,7 @@ import '../../models/message_model.dart';
 import '../../services/global.dart';
 import '../../services/helpers/navigation_helpers.dart';
 import '../widgets/app_bar.dart';
+import '../widgets/avatar_widget.dart';
 import '../widgets/slidable_widget.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 
@@ -33,6 +31,7 @@ class _MessagesPageState extends State<MessagesPage> {
   late final StreamSubscription presenceOnlineInfoChannelSubscription;
   int? userId;
   int  counter = 0;
+
 
   @override
   void initState() {
@@ -180,6 +179,7 @@ class _DialogItem extends StatelessWidget {
       }
     }
     if (partners.isEmpty) partners.add(data[0]);
+
     return partners;
   }
 
@@ -230,18 +230,9 @@ class _DialogItem extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 12.0),
               child: Center(
-                child: partners.isNotEmpty && partners.first.image != null
-                    ? Avatar.medium(url: partners.first.image! )
-                    : CircleAvatar(
-                  radius: 28,
-                  backgroundColor: Colors.grey,
-                  child: Padding(
-                    padding: const EdgeInsets.all(4), // Border radius
-                    child: ClipOval(
-                        child: Image.asset('assets/images/no_avatar.png')
-                    ),
-                  ),
-                ),
+                child: dialogData.chatType.p2p == 1
+                    ? AvatarWidget(userId: partners.first.id)
+                    : AvatarWidget(userId: null)
               )
             ),
             Expanded(
@@ -396,5 +387,8 @@ bool _isDialogActive(DialogData dialog, int userId) {
 
   return isUserActive;
 }
+
+
+
 
 

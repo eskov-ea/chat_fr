@@ -3,6 +3,7 @@ import 'dart:convert';
   import 'dart:math';
   import 'package:chat/bloc/dialogs_bloc/dialogs_bloc.dart';
   import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
+import 'package:chat/services/user_profile/user_profile_api_provider.dart';
   import 'package:chat/storage/sqflite_database.dart';
   import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
   import 'package:flutter/foundation.dart';
@@ -232,6 +233,26 @@ import 'dart:convert';
     }
   }
 
+  Future<File?> loadAndSaveLocallyUserAvatar({required int? userId}) async {
+    if (userId == null) return null;
+    final Directory documentDirectory = await getApplicationDocumentsDirectory();
+    final String path = documentDirectory.path;
+    final File file = File('$path/avatar.$userId.jpg');
+
+    if (await file.exists()) {
+      print("Image status: read from disk");
+      return file;
+    } else {
+      final UserProfileProvider userProfileProvider = UserProfileProvider();
+      final String? data = await userProfileProvider.loadUserAvatar(userId!);
+      if (data == null) return null;
+      final bytes = base64Decode(data);
+      await file.writeAsBytes(bytes);
+      print("Image status: fetch from the Internet");
+      return file;
+    }
+  }
+
   Future<File?> isLocalFileExist({required String fileName}) async {
     final Directory documentDirectory = await getApplicationDocumentsDirectory();
     final String path = documentDirectory.path;
@@ -356,6 +377,7 @@ import 'dart:convert';
 
   // get days since last midnight
   final days = diffTime / 1000 / 60 / 60 / 24;
+  print("dateFormater:   days: $days  range: $todayDayRange   lastMid: $lastMidnight   rawDate:  $rawDate");
   if (days <= todayDayRange) {
     return DateFormat.Hm().format(rawDate.add(getTZ()));
   } else if ( days >= todayDayRange && days < 1) {
