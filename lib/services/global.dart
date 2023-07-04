@@ -1,10 +1,7 @@
 import 'dart:convert';
   import 'dart:io';
   import 'dart:math';
-  import 'package:chat/bloc/dialogs_bloc/dialogs_bloc.dart';
-  import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
 import 'package:chat/services/user_profile/user_profile_api_provider.dart';
-  import 'package:chat/storage/sqflite_database.dart';
   import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
   import 'package:flutter/foundation.dart';
   import 'package:flutter/material.dart';
@@ -15,16 +12,12 @@ import 'package:chat/services/user_profile/user_profile_api_provider.dart';
   import 'package:path_provider/path_provider.dart';
   import '../bloc/chats_builder_bloc/chats_builder_bloc.dart';
   import '../bloc/chats_builder_bloc/chats_builder_event.dart';
-  import '../bloc/ws_bloc/ws_bloc.dart';
-  import '../bloc/ws_bloc/ws_event.dart';
   import '../models/dialog_model.dart';
   import '../models/message_model.dart';
   import '../ui/navigation/main_navigation.dart';
   import 'package:chat/view_models/auth/auth_view_cubit.dart';
   import 'package:chat/models/message_model.dart' as parseTime;
-  import '../view_models/chats_builder_view/chat_view_cubit.dart';
   import 'messages/messages_repository.dart';
-// import 'package:universal_html/html.dart' as html;
 
   AudioPlayer _player = AudioPlayer();
   const String prefix = "7";
@@ -387,6 +380,9 @@ import 'package:chat/services/user_profile/user_profile_api_provider.dart';
   } else {
     final date = DateFormat.yMd().format(rawDate).replaceAll(new RegExp('/'), '.');
     final splittedDate = date.split('.');
+    final tmp = splittedDate[1];
+    splittedDate[1] = splittedDate[0];
+    splittedDate[0] = tmp;
     for (var i = 0; i < splittedDate.length; i++) {
       if (int.parse(splittedDate[i]) <= 9 ) {
         splittedDate[i] = "0${splittedDate[i]}";

@@ -45,7 +45,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         accountParams.remotePushNotificationAllowed = true
 
         val nat = core.createNatPolicy()
-        nat.stunServer = "aster.mcfef.com:3478"
+        nat.stunServer = "aster.mcfef.com:7078"
         nat.enableStun(true)
         nat.enableTurn(true)
         nat.enableIce(true)
@@ -120,7 +120,6 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                 Log.w("SIP RegistrationState status", "false")
                 val args = makePlatformEventPayload("REGISTRATION_SUCCESS", null, null)
                 MainActivity.callServiceEventSink?.success(args)
-                Log.w("Account setup 4", core.defaultAccount?.params?.identityAddress?.displayName.toString())
             }
         }
 

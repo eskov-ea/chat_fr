@@ -245,6 +245,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             callerName = "${state.callerName}";
           }
           if (Platform.isIOS) return;
+          // if (ModalRoute.of(context)?.settings.name != "")
           Navigator.of(context).pushNamed(
               MainNavigationRouteNames.incomingCallScreen,
               arguments: CallScreenArguments(
@@ -255,6 +256,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           );
         } else if (state is OutgoingCallServiceState) {
           _isPushSent = false;
+          print("Route name:  ${ModalRoute.of(context)?.settings.name}");
           try {
             final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => "$prefix${el.id}" == state.callerName);
             callerName = "${callerUser.firstname} ${callerUser.lastname}";
@@ -264,9 +266,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Navigator.of(context).pushNamed(
               MainNavigationRouteNames.outgoingCallScreen,
               arguments: CallScreenArguments(
-                callerName: callerName ?? state.callerName,
-                // callsBloc: BlocProvider.of<CallsBloc>(context),
-                // users: BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users
+                callerName: callerName ?? state.callerName
               )
           );
         } else if(state is ConnectedCallState) {
