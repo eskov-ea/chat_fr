@@ -38,3 +38,6 @@ class EndedCallServiceEvent extends CallsEvent {
   });
 }
 
+class EndCallWithNoLogServiceEvent extends CallsEvent {}
+
+

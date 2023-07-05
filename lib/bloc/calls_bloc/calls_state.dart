@@ -81,3 +81,5 @@ class ErrorCallServiceState extends CallState{
 }
 
 class ConnectedCallState extends CallState{}
+
+class EndCallWithNoLogServiceState extends CallState{}

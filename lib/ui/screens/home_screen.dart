@@ -238,6 +238,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         if (state is UnconnectedCallServiceState) {
           customToastMessage(context, "Произошла ошибка при подключении к SIP-серверу");
         } else if (state is IncomingCallState) {
+          if(ModalRoute.of(context)?.settings.name == MainNavigationRouteNames.incomingCallScreen) return;
           try {
             final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => "$prefix${el.id}" == state.callerName);
             callerName = "${callerUser.firstname} ${callerUser.lastname}";
@@ -245,7 +246,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             callerName = "${state.callerName}";
           }
           if (Platform.isIOS) return;
-          // if (ModalRoute.of(context)?.settings.name != "")
           Navigator.of(context).pushNamed(
               MainNavigationRouteNames.incomingCallScreen,
               arguments: CallScreenArguments(
@@ -255,6 +255,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               )
           );
         } else if (state is OutgoingCallServiceState) {
+          print("NAVIGATOR outg   ${ModalRoute.of(context)?.settings.name}");
+          if(ModalRoute.of(context)?.settings.name == MainNavigationRouteNames.outgoingCallScreen) return;
           _isPushSent = false;
           print("Route name:  ${ModalRoute.of(context)?.settings.name}");
           try {
@@ -308,6 +310,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             print("PUSH CALUSERID   ${state.callerName}");
             _sendMessage(context: context, userId: int.parse(userId!), dialogId: dialogId);
           }
+        } else if (state is EndCallWithNoLogServiceState) {
+          Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
         }
       });
     }

@@ -1,10 +1,9 @@
 import 'dart:async';
-
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
-import 'package:chat/bloc/call_logs_bloc/call_logs_event.dart';
 import 'package:chat/models/call_model.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/storage/data_storage.dart';
+import 'package:chat/theme.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +11,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/call_logs_bloc/call_logs_state.dart';
 import '../../services/global.dart';
 import '../../view_models/user/users_view_cubit.dart';
-import '../../view_models/user/users_view_cubit_state.dart';
 import '../widgets/app_bar.dart';
+
 
 class CallsPage extends StatefulWidget {
   const CallsPage({Key? key, helper}) : super(key: key);
@@ -99,7 +98,85 @@ class _CallsPageState extends State<CallsPage> {
       }
       return GestureDetector(
         onTap: () {
-          callNumber(context, data!.callerNumber);
+          showDialog(
+              context: context,
+              builder: (BuildContext context) => Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    height: 100,
+                    decoration: BoxDecoration(
+                        color: LightColors.background,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(8.0),
+                          topRight: Radius.circular(8.0)
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        "Позвонить ${data?.callerName}?",
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.6,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: LightColors.background,
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(8.0),
+                        bottomRight: Radius.circular(8.0)
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: (){
+                            callNumber(context, data!.callerNumber);
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Color(0x80B6B6B6),
+                              border: Border(
+                                top: BorderSide(color: Color(0xbedcdcdc)),
+                                right: BorderSide(color: Color(0xbfdcdcdc)),
+                              )
+                            ),
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            child: Text("Да",
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: (){
+                            Navigator.pop(context);
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            height: 50,
+                            decoration: BoxDecoration(
+                                border: Border(
+                                  top: BorderSide(color: Color(0x80B6B6B6)),
+                                  right: BorderSide(color: Color(0xbfdcdcdc)),
+                                )
+                            ),
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            child: Text("Нет",
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              ));
         },
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),

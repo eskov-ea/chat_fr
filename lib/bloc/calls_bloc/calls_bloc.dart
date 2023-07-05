@@ -27,7 +27,11 @@ class CallsBloc
       }  else if (callEvent.event == "CONNECTED") {
         add(ConnectedCallEvent());
       } else if (callEvent.event == "ENDED") {
-        print("CALL_ENDED event:    ${callEvent.callData}");
+        print("CALL_ENDED event:    ${callEvent.callData} ${callEvent.callData!["uniqueid"]} ${callEvent.callData!["call_id"]}");
+        if (callEvent.callData!["call_id"] == null && callEvent.callData!["uniqueid"] == null) {
+          add(EndCallWithNoLogServiceEvent());
+          return;
+        }
         if(callEvent.callData != null && callEvent.callData!["sip_from"] != null && callEvent.callData!["call_id"] != null) {
           final callData = CallModel.fromJson(callEvent.callData);
           add(EndedCallServiceEvent(callData: callData));
@@ -61,6 +65,8 @@ class CallsBloc
           emit(ConnectedCallState());
         } else if (event is ErrorCallEvent) {
           emit(ErrorCallServiceState(callerName: event.callerId));
+        } else if (event is EndCallWithNoLogServiceEvent) {
+          emit(EndCallWithNoLogServiceState());
         }
       });
     }

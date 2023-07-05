@@ -28,11 +28,11 @@ class CallModel {
   );
 
   static CallModel fromJsonOnEndedCall(json) => CallModel(
-    date: getDateFromUnix(json["calldate"]),
-    fromCaller: json["src"],
-    toCaller: json["dst"],
+    date: getDateFromUnix(json["calldate"] ?? json["date"]),
+    fromCaller: json["src"] ?? json["sip_from"],
+    toCaller: json["dst"] ?? json["sip_to"],
     duration: json["duration"] ?? "00:00:00",
-    callStatus: json["disposition"],
+    callStatus: json["disposition"] ?? json["reason"],
     id: json["uniqueid"],
   );
 
@@ -43,6 +43,7 @@ String gerCallReason(String reason) {
 }
 
 String getDateFromUnix(json) {
+  print("getDateFromUnix  $json");
   try {
     final seconds = int.parse(json);
     final date =  DateTime.fromMillisecondsSinceEpoch(seconds * 1000).toString();
