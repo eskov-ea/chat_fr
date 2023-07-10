@@ -45,7 +45,12 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         accountParams.remotePushNotificationAllowed = true
 
         val nat = core.createNatPolicy()
+//        nat.stunServer = "aster.mcfef.com:3478"
         nat.stunServer = "aster.mcfef.com:7078"
+        nat.enableTcpTurnTransport(true)
+        nat.stunServerUsername = "740"
+
+
         nat.enableStun(true)
         nat.enableTurn(true)
         nat.enableIce(true)

@@ -233,7 +233,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     updateUserProfileData();
     getOs();
     if (!kIsWeb) {
-      // _db = getSqfliteDatabase();
       callServiceBlocSubscription = BlocProvider.of<CallsBloc>(context).stream.listen((state) async {
         if (state is UnconnectedCallServiceState) {
           customToastMessage(context, "Произошла ошибка при подключении к SIP-серверу");
@@ -249,9 +248,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Navigator.of(context).pushNamed(
               MainNavigationRouteNames.incomingCallScreen,
               arguments: CallScreenArguments(
-                callerName: callerName ?? state.callerName,
-                // callsBloc: BlocProvider.of<CallsBloc>(context),
-                // users: BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users
+                callerName: callerName ?? state.callerName
               )
           );
         } else if (state is OutgoingCallServiceState) {
@@ -304,7 +301,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           if (_isPushSent == false) {
             _isPushSent = true;
             dialogId ??= await createDialog(context, state.callerName);
-            // print("SENDING_PUSH   ${dialogId}");
             _pushNotificationService.sendMissCallPush(
                 userId: state.callerName, userName: myUserName);
             print("PUSH CALUSERID   ${state.callerName}");
@@ -401,27 +397,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
 }
 
-class _OptionsIcon extends StatelessWidget {
-  const _OptionsIcon({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-
-    var _bloc = BlocProvider.of<UsersViewCubit>(context);
-    return IconBackground(
-      icon: Icons.launch,
-      onTap: () {
-        showModalBottomSheet(
-          isScrollControlled: true,
-          context: context,
-          builder: (context) => NewMessagePage(bloc: _bloc),
-        );
-      },
-    );
-  }
-
-}
-
+/**
+ * Two functions when the called user haven't respond
+ * on the call. We send a message with information that there is an missed call
+ * and the second if there is no dialog between users - we create dialog and send message
+ */
 //TODO: refactor to one global function
 _sendMessage({required context, required userId, required dialogId}) async {
   try {
