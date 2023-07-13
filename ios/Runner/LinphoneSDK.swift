@@ -204,7 +204,8 @@ class LinphoneSDK : ObservableObject
         }
 
     
-    func login(domain: String, password: String, username: String) {
+    func login(domain: String, password: String, username: String,
+               stunDomain: String, stunPort: String) {
             
             do {
                 
@@ -224,7 +225,9 @@ class LinphoneSDK : ObservableObject
                 let account = try mCore.createAccount(params: accountParams)
                 
                 let nat = try? mCore.createNatPolicy()
-                nat?.stunServer = "aster.mcfef.com:3478"
+                nat?.stunServer = "\(stunDomain):\(stunPort)"
+                nat?.tcpTurnTransportEnabled = true
+                nat?.stunServerUsername = username
                 nat?.stunEnabled = true
                 nat?.turnEnabled = true
                 nat?.iceEnabled = true

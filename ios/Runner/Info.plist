@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Cashalot</string>
+	<string>MCFEF</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,15 +15,15 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>mcfef</string>
+	<string>MCFEF</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.3</string>
+	<string>1.0.5</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.3</string>
+	<string>1.0.5</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSBonjourServices</key>
@@ -31,7 +31,7 @@
 		<string>_dartobservatory._tcp</string>
 	</array>
 	<key>NSUserNotificationsUsageDescription</key>
-    <string>Уведомления могут содержать напоминания, звуки и наклейки значков. Их конфигурирование возможно в Настройках.</string>
+	<string>Уведомления могут содержать напоминания, звуки и наклейки значков. Их конфигурирование возможно в Настройках.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Доступ к камере необходим для возможности сделать фото</string>
 	<key>NSMicrophoneUsageDescription</key>

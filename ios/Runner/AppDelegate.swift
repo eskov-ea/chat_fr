@@ -70,27 +70,6 @@ import PushKit
                 }
             }
             if call.method == "SAVE_SIP_CONTACTS" {
-                print("SAVE_SIP_CONTACTS")
-                let args = call.arguments as? Dictionary<String, Any>
-                let type = args!["type"] as? String
-                let data = args!["data"] as? Dictionary<String, String>
-                let sm = StorageManager()
-                if (data != nil) {
-//                    let sm = StorageManager()
-                    sm.saveDataToDocuments(data!, jsonFilename: sm.filename)
-                } else {
-                    print("Data error:  \(args)  \(type)")
-                }
-                print("Read file:  start")
-                do {
-                    let result = sm.readDataFromDocuments(jsonFilename: sm.filename)
-                    let contact = result?.contacts["760"]
-                    print("Read file:  \(contact)")
-                } catch {
-                    print("Read file error:  \(error)")
-                }
-            }
-            if call.method == "SAVE_SIP_CONTACTS" {
                 let args = call.arguments as? Dictionary<String, Any>
                 let type = args!["type"] as? String
                 let data = args!["data"] as? Dictionary<String, String>
@@ -112,9 +91,12 @@ import PushKit
                 let domain = args!["domain"] as? String
                 let password = args!["password"] as? String
                 let username = args!["username"] as? String
+                let stunDomain = args!["stun_domain"] as? String
+                let stunPort = args!["stun_port"] as? String
                 print("loginData \(domain) \(username) \(password)")
-                if (domain != nil && password != nil && username != nil) {
-                    self!.linphoneSDK.login(domain: domain!, password: password!, username: username!)
+                if (domain != nil && password != nil && username != nil
+                    && stunDomain != nil && stunPort != nil) {
+                    self!.linphoneSDK.login(domain: domain!, password: password!, username: username!, stunDomain: stunDomain!, stunPort: stunPort!)
                 } else {
                     print("No data to login into SIP account")
                 }
