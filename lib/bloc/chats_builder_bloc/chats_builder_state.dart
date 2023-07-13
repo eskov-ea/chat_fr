@@ -35,9 +35,9 @@ class ChatsBuilderState {
     updatedMessagesDictionary
   }) {
     return ChatsBuilderState(
-      chats: updatedChats ?? chats,
-      counter: updatedCounter ?? counter,
-      messagesDictionary: updatedMessagesDictionary ?? messagesDictionary,
+      chats: updatedChats ?? this.chats,
+      counter: updatedCounter ?? this.counter,
+      messagesDictionary: updatedMessagesDictionary ?? this.messagesDictionary,
     );
   }
 }

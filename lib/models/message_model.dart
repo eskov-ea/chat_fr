@@ -43,7 +43,7 @@ class MessageData extends Equatable{
     dialogId: json["chat_id"],
     message: json["message"],
     messageDate: getDate(DateTime.tryParse(json["created_at"])?.add(getTZ())),
-    messageTime: getTime(DateTime.tryParse(json["created_at"])),
+    messageTime: getTime(DateTime.tryParse(json["created_at"])?.add(getTZ())),
     status: MessageStatuses.fromJson(json["statuses"]),
     rawDate: DateTime.tryParse(json["created_at"])!,
     file: json["file"] != null
@@ -189,7 +189,7 @@ String getDate (DateTime? rawDate) {
 
 String getTime (DateTime? rawDate) {
   if (rawDate == null) return "";
-  return _timeFormatter.format(rawDate.add(getTZ()));
+  return _timeFormatter.format(rawDate);
 }
 
 int getMessageStatus (List collection) {

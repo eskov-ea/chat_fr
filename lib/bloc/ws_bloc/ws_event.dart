@@ -14,6 +14,17 @@ class WsEventUpdateStatus extends WsBlocEvent{
   final List<MessageStatuses> statuses;
 
   WsEventUpdateStatus({required this.statuses});
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is WsEventUpdateStatus &&
+              runtimeType == other.runtimeType &&
+              statuses.last.id == other.statuses.last.id;
+
+  @override
+  int get hashCode =>
+      statuses.hashCode ^ statuses.last.id.hashCode ;
 }
 
 

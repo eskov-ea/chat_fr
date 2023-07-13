@@ -32,13 +32,15 @@ class CallsBloc
           add(EndCallWithNoLogServiceEvent());
           return;
         }
-        if(callEvent.callData != null && callEvent.callData!["sip_from"] != null && callEvent.callData!["call_id"] != null) {
-          final callData = CallModel.fromJson(callEvent.callData);
-          add(EndedCallServiceEvent(callData: callData));
-        } else {
           final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
           add(EndedCallServiceEvent(callData: callData));
-        }
+        // if(callEvent.callData != null && callEvent.callData!["sip_from"] != null && callEvent.callData!["call_id"] != null) {
+        //   final callData = CallModel.fromJson(callEvent.callData);
+        //   add(EndedCallServiceEvent(callData: callData));
+        // } else {
+        //   final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
+        //   add(EndedCallServiceEvent(callData: callData));
+        // }
       } else if (callEvent.event == "INCOMING") {
         add(IncomingCallEvent(callerId: callEvent.callerId!));
       } else if (callEvent.event == "OUTGOING") {

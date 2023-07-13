@@ -83,7 +83,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       await sipChannel.invokeMethod('SIP_LOGIN', {
         "username": "$prefix$userId",
         "password": settings.asteriskUserPassword,
-        "domain": settings.asteriskHost
+        "domain": settings.asteriskHost,
+        "stun_domain": settings.stunHost,
+        "stun_port": settings.stunPort
       });
     } catch (err) {
       print("sipRegistration error  $err");
@@ -234,6 +236,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     getOs();
     if (!kIsWeb) {
       callServiceBlocSubscription = BlocProvider.of<CallsBloc>(context).stream.listen((state) async {
+        print("CALL_SERVICE_STATE   $state");
         if (state is UnconnectedCallServiceState) {
           customToastMessage(context, "Произошла ошибка при подключении к SIP-серверу");
         } else if (state is IncomingCallState) {

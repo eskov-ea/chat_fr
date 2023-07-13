@@ -167,7 +167,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
               } else if (data["message_status"] != null) {
                 final newStatuses =
                     MessageStatuses.fromJson([data["message_status"]]);
-                print("UPDATE STATUSES    -> ${newStatuses.last}");
+                print("UPDATE STATUSES    -> ${newStatuses.last.statusId}");
                 add(WsEventUpdateStatus(statuses: newStatuses));
               } else if (data["join"] != null) {
                 print("EVENTJOIN  ${data["join"]}");

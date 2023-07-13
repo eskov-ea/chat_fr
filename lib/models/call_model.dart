@@ -1,3 +1,5 @@
+import '../services/global.dart';
+
 const time_zone = 10;
 
 class CallModel {
@@ -19,7 +21,7 @@ class CallModel {
   });
 
   static CallModel fromJson(json) => CallModel(
-      date: getDateFromUnix(json["date"]),
+      date: getDate(json["date"]),
       fromCaller: json["sip_from"],
       toCaller: json["sip_to"],
       duration: json["duration"] ?? "00:00:00",
@@ -33,7 +35,7 @@ class CallModel {
     toCaller: json["dst"] ?? json["sip_to"],
     duration: json["duration"] ?? "00:00:00",
     callStatus: json["disposition"] ?? json["reason"],
-    id: json["uniqueid"],
+    id: json["uniqueid"] ?? json["call_id"]
   );
 
 }
@@ -43,13 +45,30 @@ String gerCallReason(String reason) {
 }
 
 String getDateFromUnix(json) {
-  print("getDateFromUnix  $json");
+  print("getDateFromUnix js $json");
   try {
     final seconds = int.parse(json);
-    final date =  DateTime.fromMillisecondsSinceEpoch(seconds * 1000).toString();
-    return date;
+    final date =  DateTime.fromMillisecondsSinceEpoch(seconds * 1000).subtract(getTZ());
+    print("getDateFromUnix  $date");
+    return date.toString();
   } catch (_) {
-    final date = DateTime.parse(json);
+    final date = DateTime.parse(json).subtract(getTZ());
+    print("getDateFromUnix $date");
     return date.toString();
   }
+}
+
+//
+// String getDateFromUnix(json) {
+//   final seconds = int.parse(json);
+//   final date =  DateTime.fromMillisecondsSinceEpoch(seconds).toString();
+//   // print("getDateFromUnix   ${date}");
+//   return date;
+// }
+//
+// String getDate(json) {
+String getDate(json) {
+  final date = DateTime.parse(json);
+  print("getDateFromUnix  $json   ${date}");
+  return date.toString();
 }

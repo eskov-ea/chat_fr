@@ -26,7 +26,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         print("ChatsBuilderAddMessageEvent");
         add(ChatsBuilderAddMessageEvent(message: streamState.message, dialog: streamState.message.dialogId));
       } else if (streamState is WsStateUpdateStatus){
-        print("WsStateUpdateStatus   ${streamState.statuses}");
+        print("WsStateUpdateStatus ololo   ${streamState.statuses.last.statusId}");
         add(ChatsBuilderReceivedUpdatedMessageStatusesEvent(statuses: streamState.statuses));
       } else if (streamState is WsStateNewDialogCreated) {
 
@@ -35,6 +35,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     print("newMessageSubscription $newMessageSubscription");
 
     on<ChatsBuilderEvent>((event, emit) async {
+      print("ChatsBuilderEvent   $event");
       if(event is ChatsBuilderLoadMessagesEvent) {
         await onChatsBuilderLoadMessagesEvent(event, emit);
       } else if(event is ChatsBuilderCreateEvent) {
@@ -138,6 +139,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       ChatsBuilderReceivedUpdatedMessageStatusesEvent event, Emitter<ChatsBuilderState> emit
       ){
     print("onChatsBuilderReceivedUpdatedMessageStatusesEvent");
+    //TODO: implement chat dictionary not list
     final chats = state.chats;
     for (final MessageStatuses status in event.statuses) {
       for (var chat in chats) {
@@ -150,7 +152,9 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         }
       }
     }
-    emit(state.copyWith(updatedChats: state.chats, updatedCounter: state.counter++));
+    final newState = state.copyWith(updatedChats: state.chats, updatedCounter: state.counter+1);
+    print("onChatsBuilderReceivedUpdatedMessageStatusesEvent    ${state.counter}   ${newState.counter}  ${state.chats.length}  ${newState.chats.length}");
+    emit(newState);
   }
 
   onChatsBuilderUpdateLocalMessageEvent(

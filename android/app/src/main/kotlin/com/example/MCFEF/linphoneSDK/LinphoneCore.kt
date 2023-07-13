@@ -27,7 +27,8 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         "actionColor" to "#4CAF50"
     )
 
-    fun login(username: String, password: String, domain: String) {
+    fun login(username: String, password: String, domain: String, stunDomain: String, stunPort: String) {
+        Log.i("SIP_REG", "Register in SIP with [ $username, $password, $domain ]")
 
         writeSipAccountToStorage(username, password, domain)
 
@@ -46,9 +47,9 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
         val nat = core.createNatPolicy()
 //        nat.stunServer = "aster.mcfef.com:3478"
-        nat.stunServer = "aster.mcfef.com:7078"
+        nat.stunServer = "$stunDomain:$stunPort"
         nat.enableTcpTurnTransport(true)
-        nat.stunServerUsername = "740"
+        nat.stunServerUsername = username
 
 
         nat.enableStun(true)
@@ -106,9 +107,11 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         val username = sharedPreference.getString("username", null)
         val password = sharedPreference.getString("password", null)
         val domain = sharedPreference.getString("domain", null)
+        val stunDomain = sharedPreference.getString("stun_domain", null)
+        val stunPort = sharedPreference.getString("stun_port", null)
 
-        if (username != null && password != null && domain != null) {
-            login(username, password, domain)
+        if (username != null && password != null && domain != null && stunDomain != null && stunPort != null) {
+            login(username, password, domain, stunDomain, stunPort)
         } else {
             Toast.makeText(context, "Входящий вызов получен, но не может быть обработан. Запустите MCFEF вручную", Toast.LENGTH_LONG).show()
         }

@@ -373,6 +373,7 @@ import 'package:chat/services/user_profile/user_profile_api_provider.dart';
   print("dateFormater:   days: $days  range: $todayDayRange   lastMid: $lastMidnight   rawDate:  $rawDate");
   if (days <= todayDayRange) {
     return DateFormat.Hm().format(rawDate.add(getTZ()));
+    // return DateFormat.Hm().format(rawDate.add(getTZ()));
   } else if ( days >= todayDayRange && days < 1) {
     return "Вчера";
   } else if ( days >= 1 && days < todayWeekRange) {

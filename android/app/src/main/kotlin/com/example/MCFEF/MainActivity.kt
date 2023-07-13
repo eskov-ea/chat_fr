@@ -101,15 +101,18 @@ class MainActivity: FlutterActivity() {
 //      Start listen to SIP activities
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_SIP ).setMethodCallHandler {
             call, result ->
+            Log.i("SIP_METHOD_CHANNEL", "${call.method}")
             if (call.method.equals("SIP_LOGIN")) {
                 val username = call.argument<String?>("username")
                 val password = call.argument<String?>("password")
                 val domain = call.argument<String?>("domain")
+                val stunDomain = call.argument<String?>("stun_domain")
+                val stunPort = call.argument<String?>("stun_port")
 
                 Log.w("SIP method channel:", "$username, $password, $domain")
 
-                if (username != null && password != null && domain != null) {
-                    linphoneCore.login(username, password, domain)
+                if (username != null && password != null && domain != null && stunDomain != null && stunPort != null) {
+                    linphoneCore.login(username, password, domain, stunDomain, stunPort)
                 }
             } else if (call.method.equals("OUTGOING_CALL")) {
                 val number = call.argument<String?>("number")

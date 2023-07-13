@@ -54,22 +54,22 @@ class _CallsPageState extends State<CallsPage> {
     }
   }
 
-  String getDate(String callDate) {
-    final now = DateTime.now();
-    final callTime = DateTime.parse(callDate);
-    final timeDiff = now.difference(callTime).inDays;
-    switch(timeDiff) {
-      case 0:
-        if (callTime.hour < 10 && callTime.minute < 10) return "0${callTime.hour}:0${callTime.minute}";
-        if (callTime.hour < 10) return "0${callTime.hour}:${callTime.minute}";
-        if (callTime.minute < 10) return "${callTime.hour}:0${callTime.minute}";
-        return "${callTime.hour}:${callTime.minute}";
-      case 1:
-        return "Вчера";
-      default:
-        return "${callTime.day}.${callTime.month}.${callTime.year}";
-    }
-  }
+  // String getDate(String callDate) {
+  //   final now = DateTime.now();
+  //   final callTime = DateTime.parse(callDate);
+  //   final timeDiff = now.difference(callTime).inDays;
+  //   switch(timeDiff) {
+  //     case 0:
+  //       if (callTime.hour < 10 && callTime.minute < 10) return "0${callTime.hour}:0${callTime.minute}";
+  //       if (callTime.hour < 10) return "0${callTime.hour}:${callTime.minute}";
+  //       if (callTime.minute < 10) return "${callTime.hour}:0${callTime.minute}";
+  //       return "${callTime.hour}:${callTime.minute}";
+  //     case 1:
+  //       return "Вчера";
+  //     default:
+  //       return "${callTime.day}.${callTime.month}.${callTime.year}";
+  //   }
+  // }
 
   Widget getCallInfo(Map<String, UserContact>  users, CallModel call, int index) {
     try {
@@ -98,85 +98,10 @@ class _CallsPageState extends State<CallsPage> {
       }
       return GestureDetector(
         onTap: () {
-          showDialog(
-              context: context,
-              builder: (BuildContext context) => Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.6,
-                    height: 100,
-                    decoration: BoxDecoration(
-                        color: LightColors.background,
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(8.0),
-                          topRight: Radius.circular(8.0)
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        "Позвонить ${data?.callerName}?",
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.6,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: LightColors.background,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(8.0),
-                        bottomRight: Radius.circular(8.0)
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        GestureDetector(
-                          onTap: (){
-                            callNumber(context, data!.callerNumber);
-                            Navigator.pop(context);
-                          },
-                          child: Container(
-                            alignment: Alignment.center,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: Color(0x80B6B6B6),
-                              border: Border(
-                                top: BorderSide(color: Color(0xbedcdcdc)),
-                                right: BorderSide(color: Color(0xbfdcdcdc)),
-                              )
-                            ),
-                            width: MediaQuery.of(context).size.width * 0.3,
-                            child: Text("Да",
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: (){
-                            Navigator.pop(context);
-                          },
-                          child: Container(
-                            alignment: Alignment.center,
-                            height: 50,
-                            decoration: BoxDecoration(
-                                border: Border(
-                                  top: BorderSide(color: Color(0x80B6B6B6)),
-                                  right: BorderSide(color: Color(0xbfdcdcdc)),
-                                )
-                            ),
-                            width: MediaQuery.of(context).size.width * 0.3,
-                            child: Text("Нет",
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ));
+          print("Get call info");
+          Navigator.of(context).pushNamed(
+              MainNavigationRouteNames.callInfoPage,
+              arguments: data);
         },
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -220,21 +145,9 @@ class _CallsPageState extends State<CallsPage> {
                 ],
               ),
             ),
-            Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Text(dateFormater(data.callDate))),
-            GestureDetector(
-              onTap: () {
-                print("Get call info");
-                Navigator.of(context).pushNamed(
-                    MainNavigationRouteNames.callInfoPage,
-                    arguments: data);
-              },
-              child: Icon(
-                Icons.info_outline,
-                color: Colors.blueAccent,
-              ),
-            )
           ]),
         ),
       );
