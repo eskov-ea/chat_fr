@@ -323,7 +323,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     var bloc = BlocProvider.of<WsBloc>(context);
     switch(state){
       case AppLifecycleState.resumed:
-      // bloc.add(WsEventReconnect());
+      bloc.add(WsEventReconnect());
         if (bloc.state is Connected) {
           print('HOMESCREEN CONNECTED SOCKET STATE');
         } else if (bloc.state is Unconnected) {

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/global.dart';
+import '../navigation/main_navigation.dart';
 
 class RunningCallScreen extends StatefulWidget {
   final String callerName;
@@ -233,6 +234,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
                 onTap: () {
                   print("NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
                   declineCall();
+                  Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
                 },
                 child: Column(
                   // A button

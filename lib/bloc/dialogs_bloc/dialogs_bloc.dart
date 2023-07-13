@@ -107,7 +107,6 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       if (dialogs.isNotEmpty) sortDialogsByLastMessage(dialogs);
       final newState = state.copyWith(dialogs: dialogs);
       emit(newState);
-      webSocketBloc.add(InitializeSocketEvent());
     } catch(err) {
       final e = err as AppErrorException;
       errorHandlerBloc.add(ErrorHandlerWithErrorEvent(error: err, errorStack: e.message));

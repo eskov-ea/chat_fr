@@ -9,6 +9,7 @@ class CoreContext (val context: Context) {
     companion object {
         var core: Core? = null
         val PREFERENCE_FILENAME = "FLEXISIP_LOGIN_ACCOUNT"
+        var isLoggedIn: Boolean = false
     }
 
     private fun createCore() {

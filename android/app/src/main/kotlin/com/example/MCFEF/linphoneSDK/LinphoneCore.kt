@@ -128,6 +128,8 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                 Log.w("SIP RegistrationState status", "false")
                 val args = makePlatformEventPayload("REGISTRATION_SUCCESS", null, null)
                 MainActivity.callServiceEventSink?.success(args)
+                CoreContext.core = core
+                CoreContext.isLoggedIn = true
             }
         }
 

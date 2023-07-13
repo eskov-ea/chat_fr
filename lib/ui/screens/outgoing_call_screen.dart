@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../services/global.dart';
+import '../navigation/main_navigation.dart';
 
 class OutgoingCallScreen extends StatefulWidget {
   const OutgoingCallScreen({
@@ -92,6 +93,7 @@ class _OutgoingCallScreenState extends State<OutgoingCallScreen> {
                     print(
                         "NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
                     declineCall();
+                    Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
                   },
                   child: Column(
                     // A button

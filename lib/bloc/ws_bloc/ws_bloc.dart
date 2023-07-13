@@ -51,7 +51,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
       } else if (event is WsEventReconnect) {
         onWsEventReconnect(event, emit);
       } else if (event is WsEventDisconnect) {
-        onWsEventDisconnect(event, emit);
+        onWsEventReconnect(event, emit);
       } else if (event is WsEventCloseConnection) {
         onWsEventCloseConnection(event, emit);
       } else if (event is WsEventGetUpdatesOnResume) {
@@ -96,14 +96,14 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
           seconds: 1,
         ),
         defaultActivityDuration: const Duration(
-          seconds: 15,
+          seconds: 5,
         ),
         activityDurationOverride: const Duration(
-          seconds: 15,
+          seconds: 5,
         ),
         waitForPongDuration: const Duration(
           seconds: 5,
-        )
+        ),
     );
 
     socket!.onConnectionEstablished.listen((event) async {
@@ -184,6 +184,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
       }
     });
     socket!.connect();
+
     emit(Connected(socket: socket!));
   }
 
@@ -253,10 +254,6 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
     emit(Unconnected());
   }
 
-  void onWsEventReconnect(event, emit) {
-    print("onWsEventReconnect");
-    socket!.reconnect();
-  }
 
   void onWsEventCloseConnection(event, emit) async {
     print("onWsEventCloseConnection");
@@ -272,6 +269,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
         print(err);
       }
     }
+    presenceChannel?.unsubscribe();
     generalEventSubscription = null;
     eventSubscriptions = [];
     socket?.dispose();
@@ -283,7 +281,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
     }
   }
 
-  void onWsEventDisconnect(event, emit) async {
+  void onWsEventReconnect(event, emit) async {
     emit(Unconnected());
     await generalEventSubscription?.cancel();
     for (var eventSubscription in eventSubscriptions) {
@@ -296,6 +294,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
         print(err);
       }
     }
+    presenceChannel?.unsubscribe();
     generalEventSubscription = null;
     eventSubscriptions = [];
     socket?.dispose();

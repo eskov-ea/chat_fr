@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/global.dart';
+import '../navigation/main_navigation.dart';
 
 class IncomingCallScreen extends StatelessWidget {
 
@@ -88,6 +89,7 @@ class IncomingCallScreen extends StatelessWidget {
                     print(
                         "NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
                     declineCall();
+                    Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
                   },
                   child: Column(
                     // A button
