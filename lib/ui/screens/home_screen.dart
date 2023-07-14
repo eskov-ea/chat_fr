@@ -323,13 +323,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     var bloc = BlocProvider.of<WsBloc>(context);
     switch(state){
       case AppLifecycleState.resumed:
-      bloc.add(WsEventReconnect());
-        if (bloc.state is Connected) {
-          print('HOMESCREEN CONNECTED SOCKET STATE');
-        } else if (bloc.state is Unconnected) {
-          print('HOMESCREEN DISCONNECTED SOCKET STATE');
-          bloc.add(InitializeSocketEvent());
-        }
+        bloc.add(WsEventReconnect());
         final passwd = BlocProvider.of<ProfileBloc>(context).state.user?.userProfileSettings?.asteriskUserPassword;
         if (passwd == null) return;
         BlocProvider.of<CallLogsBloc>(context).add(UpdateCallLogsEvent(passwd: passwd));
