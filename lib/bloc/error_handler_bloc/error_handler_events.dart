@@ -12,3 +12,12 @@ class ErrorHandlerWithErrorEvent extends ErrorHandlerEvent {
   });
 }
 
+class ErrorHandlerAccessDeniedEvent extends ErrorHandlerEvent{
+  final Object error;
+  final Object? errorStack;
+
+  ErrorHandlerAccessDeniedEvent({
+    required this.error,
+    required this.errorStack
+  });
+}

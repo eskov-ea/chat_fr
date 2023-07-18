@@ -55,16 +55,17 @@ class MyApp extends StatelessWidget{
   Widget build(BuildContext context) {
     final websocketBloc =  WsBloc(initialState: Unconnected());
     final errorHandlerBloc =  ErrorHandlerBloc();
+    final authBloc = AuthBloc(authRepo: AuthRepository());
     return MultiBlocProvider(
       providers: [
         BlocProvider(
             create: (context) => websocketBloc
         ),
         BlocProvider(
-            create: (_) => AuthViewCubit(authBloc: AuthBloc(authRepo: AuthRepository()), initialState: AuthViewCubitFormFillInProgressState())
+            create: (_) => AuthViewCubit(authBloc: authBloc, initialState: AuthViewCubitFormFillInProgressState())
         ),
         BlocProvider(
-            create: (_) => LoaderViewCubit(authBloc: AuthBloc(authRepo: AuthRepository()), initialState: LoaderViewCubitState.unknown)
+            create: (_) => LoaderViewCubit(authBloc: authBloc, initialState: LoaderViewCubitState.unknown)
         ),
         BlocProvider(
             lazy: false,
@@ -84,7 +85,6 @@ class MyApp extends StatelessWidget{
             create: (context) => DialogsViewCubit(
                 dialogsBloc: DialogsBloc(
                     webSocketBloc: websocketBloc,
-                    errorHandlerBloc: errorHandlerBloc,
                     dialogsProvider: DialogsProvider(),
                     initialState: const DialogsState.initial()
                 ),

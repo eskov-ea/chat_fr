@@ -27,17 +27,17 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         "actionColor" to "#4CAF50"
     )
 
-    fun login(username: String, password: String, domain: String, stunDomain: String, stunPort: String) {
+    fun login(username: String, password: String, domain: String, stunDomain: String, stunPort: String, host: String) {
         Log.i("SIP_REG", "Register in SIP with [ $username, $password, $domain ]")
 
-        writeSipAccountToStorage(username, password, domain)
+        writeSipAccountToStorage(username, password, domain, host)
 
         val transportType = TransportType.Tcp
         val authInfo = Factory.instance().createAuthInfo(username, null, password, null, null, domain, null)
         val accountParams = core.createAccountParams()
         val identity = Factory.instance().createAddress("sip:$username@$domain")
         accountParams.identityAddress = identity
-        val address = Factory.instance().createAddress("sip:$domain")
+        val address = Factory.instance().createAddress("sip:$host")
 
         address?.transport = transportType
         accountParams.serverAddress = address
@@ -93,12 +93,13 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
     }
 
-    private fun writeSipAccountToStorage(username: String, password: String, domain: String) {
+    private fun writeSipAccountToStorage(username: String, password: String, domain: String, host: String) {
         val sharedPreference =  context.getSharedPreferences(CoreContext.PREFERENCE_FILENAME,Context.MODE_PRIVATE)
         val editor = sharedPreference.edit()
         editor.putString("username",username)
         editor.putString("password",password)
         editor.putString("domain",domain)
+        editor.putString("host",host)
         editor.apply()
     }
 
@@ -109,9 +110,10 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         val domain = sharedPreference.getString("domain", null)
         val stunDomain = sharedPreference.getString("stun_domain", null)
         val stunPort = sharedPreference.getString("stun_port", null)
+        val host = sharedPreference.getString("host", null)
 
-        if (username != null && password != null && domain != null && stunDomain != null && stunPort != null) {
-            login(username, password, domain, stunDomain, stunPort)
+        if (username != null && password != null && domain != null && stunDomain != null && stunPort != null && host != null) {
+            login(username, password, domain, stunDomain, stunPort, host)
         } else {
             Toast.makeText(context, "Входящий вызов получен, но не может быть обработан. Запустите MCFEF вручную", Toast.LENGTH_LONG).show()
         }

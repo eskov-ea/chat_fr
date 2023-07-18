@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String? os;
   SqfliteDatabase? _db;
   bool isUpdateAvailable = true;
-  late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
+  // late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
 
 
   Future<bool> isCallRunning () async {
@@ -79,13 +79,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future<void> sipRegistration(UserProfileAsteriskSettings settings) async {
     try {
       final String? userId = await _dataProvider.getUserId();
-      print("Trying to register to SIP with    $prefix$userId@${settings.asteriskHost} and password ${settings.asteriskUserPassword}");
+      print("Trying to register to SIP with    $prefix$userId@${settings.asteriskHost} and password ${settings.asteriskUserPassword} and domain  ${settings.userDomain}");
       await sipChannel.invokeMethod('SIP_LOGIN', {
         "username": "$prefix$userId",
         "password": settings.asteriskUserPassword,
-        "domain": settings.asteriskHost,
+        "domain": settings.userDomain,
         "stun_domain": settings.stunHost,
-        "stun_port": settings.stunPort
+        "stun_port": settings.stunPort,
+        "host": settings.asteriskHost
       });
     } catch (err) {
       print("sipRegistration error  $err");
@@ -93,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _subscribeToErrorsBlocStream() {
-    _errorHandlerBlocSubscription = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.errorHandlerBloc.stream.listen(_onErrorState);
+    // _errorHandlerBlocSubscription = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.errorHandlerBloc.stream.listen(_onErrorState);
   }
 
   void _onErrorState(ErrorHandlerState state){
@@ -283,6 +284,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           print("CALL_ENDED  ${state.callData.id}");
           BlocProvider.of<CallLogsBloc>(context).add(AddCallToLogEvent(call: state.callData));
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
+        } else if(state is EndCallWithNoLogServiceState) {
+          print("NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
+          print("CALL_ENDED  ");
+          Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
         } else if(state is ErrorCallServiceState) {
           final List<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs;
           int? dialogId;
@@ -345,7 +350,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void dispose() {
     callServiceBlocSubscription.cancel();
     if ( _db != null) _db!.closeDb();
-    _errorHandlerBlocSubscription.cancel();
+    // _errorHandlerBlocSubscription.cancel();
     super.dispose();
   }
 

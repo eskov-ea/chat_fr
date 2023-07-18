@@ -66,7 +66,7 @@ class UserItem extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 12),
                       maxLines: 1,
-                      softWrap: false,
+                      softWrap: true,
                     ),
                   ),
                   Container(

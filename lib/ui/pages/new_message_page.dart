@@ -65,7 +65,7 @@ class _NewMessagePageState extends State<NewMessagePage> {
     final UsersViewCubit _bloc = widget.bloc;
     return SafeArea(
         child: Padding(
-          padding: const EdgeInsets.only(top: 20),
+          padding: const EdgeInsets.only(top: 40),
           child: Scaffold(
             appBar: AppBar(
               automaticallyImplyLeading: false,
@@ -243,31 +243,33 @@ class _NewMessagePageState extends State<NewMessagePage> {
           itemBuilder: (context, index) {
             return bloc.usersBloc.state.users.isNotEmpty
                 ? Container(
-              padding: const EdgeInsets.only(
-                  left: 14, right: 14, top: 10, bottom: 10),
-              child: Align(
-                child: Row(
-                  children: [
-                    if (selectedMode)
-                      Checkbox(
-                        activeColor: Colors.blue,
-                        value: selected.contains(bloc.usersBloc.state.users[index].id),
-                        onChanged: (_) {
-                          _setSelected(bloc.usersBloc.state.users[index].id);
-                        },
-                      ),
-                    Expanded(child: UserItem(
-                      user: bloc.usersBloc.state.users[index],
-                      onlineStatus: isOnline(bloc.usersBloc.state.users[index].id, bloc.state.onlineUsersDictionary) ,)
-                    ),
+                    padding: const EdgeInsets.only(
+                    left: 0, right: 0, top: 10, bottom: 10),
+                    child: Row(
+                      children: [
+                        if (selectedMode)
+                          Container(
+                            padding: EdgeInsets.only(left: 10),
+                            width: 40,
+                            child: Checkbox(
+                              activeColor: Colors.blue,
+                              value: selected.contains(bloc.usersBloc.state.users[index].id),
+                              onChanged: (_) {
+                                _setSelected(bloc.usersBloc.state.users[index].id);
+                              },
+                            ),
+                          ),
+                        Expanded(child: UserItem(
+                          user: bloc.usersBloc.state.users[index],
+                          onlineStatus: isOnline(bloc.usersBloc.state.users[index].id, bloc.state.onlineUsersDictionary) ,)
+                        ),
 
-                  ],
-                ),
-              ),
-            )
+                      ],
+                    ),
+                )
                 : const Center(
-              child: Text('Нет участников'),
-            );
+                    child: Text('Нет участников'),
+                  );
           });
     } else {
       return const Text('Участники не найдены');

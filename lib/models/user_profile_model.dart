@@ -69,32 +69,35 @@ class UserProfileData extends Equatable{
 }
 
 class UserProfileAsteriskSettings extends Equatable{
-  final String? asteriskHost;
+  final String userDomain;
   final String asteriskPort;
   final String stunHost;
   final String stunPort;
   final String asteriskUserLogin;
   final String? asteriskUserPassword;
+  final String asteriskHost;
 
   const UserProfileAsteriskSettings({
-    required this.asteriskHost,
+    required this.userDomain,
     required this.asteriskPort,
     required this.stunHost,
     required this.stunPort,
     required this.asteriskUserLogin,
-    required this.asteriskUserPassword
+    required this.asteriskUserPassword,
+    required this.asteriskHost
   });
 
   static UserProfileAsteriskSettings? fromJson(json) {
     return json == null
         ? null
         : UserProfileAsteriskSettings(
-          asteriskHost: json["asterisk"]["asterisk_host"],
+          userDomain: json["asterisk"]["asterisk_domain"],
           asteriskPort: json["asterisk"]["asterisk_port"],
           stunHost: json["asterisk"]["stun_host"],
           stunPort: json["asterisk"]["stun_port"],
           asteriskUserLogin: json["asterisk"]["asterisk_user_login"].toString(),
-          asteriskUserPassword: json["asterisk"]["asterisk_user_password"]
+          asteriskUserPassword: json["asterisk"]["asterisk_user_password"],
+          asteriskHost: json["asterisk"]["asterisk_host"]
         );
   }
 

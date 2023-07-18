@@ -28,13 +28,14 @@ class CallLogService {
         List<CallModel> callLog =
         collection.map((call) => CallModel.fromJson(call)).toList();
         return callLog;
-      } else if(response.statusCode == 403) {
+      } else if(response.statusCode == 401) {
         throw AppErrorException(AppErrorExceptionType.access, null, "Call logs service, loading call logs");
       } else {
         throw AppErrorException(AppErrorExceptionType.getData, null, "Call logs service, loading call logs");
       }
     } catch (err) {
       Logger.getInstance().sendErrorTrace(message: "CallLogService.getCallLogs", err: err.toString());
+      rethrow;
       throw AppErrorException(AppErrorExceptionType.other, err.toString(), "Call logs service, loading call logs");
     }
   }

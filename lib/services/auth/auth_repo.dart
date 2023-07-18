@@ -79,7 +79,7 @@ class AuthRepository {
 
   Future<bool> checkAuthStatus(String? token) async {
     final response = await http.get(
-      Uri.parse('https://erp.mcfef.com/api/chat/chats'),
+      Uri.parse('https://erp.mcfef.com/api/profile'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $token',

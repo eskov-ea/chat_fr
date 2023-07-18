@@ -27,16 +27,18 @@ class DialogsProvider {
         List<DialogData> dialogs =
             collection.map((dialog) => DialogData.fromJson(dialog)).toList();
         return dialogs;
-      } else if (response.statusCode == 403) {
-        throw AppErrorException(AppErrorExceptionType.access, null, "DialogsProvider, loading dialogs");
+      } else if (response.statusCode == 401) {
+        print("Get dialogs print   ${response.statusCode}  ${response.body}");
+        throw AppErrorException(AppErrorExceptionType.access, null, "DialogsProvider, loading dialogs no auth");
+
       } else {
-        throw AppErrorException(AppErrorExceptionType.getData, null, "DialogsProvider, loading dialogs");
+        return throw AppErrorException(AppErrorExceptionType.getData, null, "DialogsProvider, loading dialogs");
       }
     } on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, loading dialogs");
     } catch(err) {
       _logger.sendErrorTrace(message: "DialogsProvider.getDialogs", err: err.toString());
-      throw AppErrorException(AppErrorExceptionType.other, err.toString(), "DialogsProvider, loading dialogs");
+      rethrow;
     }
   }
 

@@ -13,6 +13,7 @@ import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/message_model.dart';
 import '../../services/dialogs/dialogs_api_provider.dart';
+import '../../services/logger/logger_service.dart';
 import '../ws_bloc/ws_bloc.dart';
 import '../ws_bloc/ws_event.dart';
 import '../ws_bloc/ws_state.dart';
@@ -24,12 +25,11 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   //TODO: remove WSBloc from this Bloc up to DialogsViewCubit
   final WsBloc webSocketBloc;
   //TODO: remove WSBloc from this Bloc up to DialogsViewCubit
-  final ErrorHandlerBloc errorHandlerBloc;
+  final Logger _logger = Logger.getInstance();
 
   DialogsBloc({
     required DialogsState initialState,
     required this.webSocketBloc,
-    required this.errorHandlerBloc,
     required this.dialogsProvider}) : super(initialState) {
         newMessageSubscription = webSocketBloc.stream.listen((streamState) {
           print("DialogsEvent   ${streamState}");
@@ -109,7 +109,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       emit(newState);
     } catch(err) {
       final e = err as AppErrorException;
-      errorHandlerBloc.add(ErrorHandlerWithErrorEvent(error: err, errorStack: e.message));
+      _logger.sendErrorTrace(message: "DialogsProvider.getDialogs", err: "${err.type},  ${err.message}");
       final errorState = state.copyWith(dialogs: [], searchQuery: "", isErrorHappened: true);
       emit(errorState);
     }

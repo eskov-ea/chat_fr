@@ -59,7 +59,7 @@ class AuthBloc
         final bool auth = await authRepo.checkAuthStatus(token);
         if (!auth) await _dataProvider.deleteToken();
         final newState =
-        auth == true ? const Authenticated() : Unauthenticated();
+        token != null ? const Authenticated() : Unauthenticated();
         emit(newState);
       } catch (err) {
         print("Platform error: $err");

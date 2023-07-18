@@ -108,11 +108,12 @@ class MainActivity: FlutterActivity() {
                 val domain = call.argument<String?>("domain")
                 val stunDomain = call.argument<String?>("stun_domain")
                 val stunPort = call.argument<String?>("stun_port")
+                val host = call.argument<String?>("host")
 
                 Log.w("SIP method channel:", "$username, $password, $domain")
 
-                if (username != null && password != null && domain != null && stunDomain != null && stunPort != null) {
-                    linphoneCore.login(username, password, domain, stunDomain, stunPort)
+                if (username != null && password != null && domain != null && stunDomain != null && stunPort != null && host != null) {
+                    linphoneCore.login(username, password, domain, stunDomain, stunPort, host)
                 }
             } else if (call.method.equals("OUTGOING_CALL")) {
                 val number = call.argument<String?>("number")

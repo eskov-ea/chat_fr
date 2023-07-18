@@ -14,6 +14,7 @@ import '../../services/global.dart';
 import '../../services/helpers/navigation_helpers.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/avatar_widget.dart';
+import '../widgets/shimmer.dart';
 import '../widgets/slidable_widget.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 
@@ -136,7 +137,7 @@ class _MessagesPageState extends State<MessagesPage> {
           }
           else {
             _readUserId();
-            return const Center(child: CircularProgressIndicator(),);
+            return const Shimmer(child: ShimmerLoading(child: DialogsSkeletonWidget()));
           }
         }),
     );
@@ -298,7 +299,7 @@ class _DialogItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   const SizedBox(
-                    height: 4,
+                    height: 11,
                   ),
                   Text(
                     dialogData.lastMessage.time != null ? getDateDialogModel(dialogData.lastMessage.time!) : "",
@@ -345,6 +346,76 @@ class _DialogItem extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class DialogsSkeletonWidget extends StatelessWidget {
+  const DialogsSkeletonWidget({Key? key}): super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(top: 5),
+      child: ListView.builder(
+        itemCount: 7,
+        itemBuilder: (context, itemCount) =>
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: 100,
+              color: Color(0xDFDFDF),
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                          color: Colors.grey,
+                          shape: BoxShape.circle
+                      ),
+                    ),
+                    SizedBox(width: 20,),
+                    Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              height: 30,
+                              width: MediaQuery.of(context).size.width * 0.5,
+                              decoration: BoxDecoration(
+                                  color: Colors.grey,
+                                  borderRadius: BorderRadius.all(Radius.circular(5))
+                              ),
+                            ),
+                            SizedBox(height: 10,),
+                            Container(
+                              height: 16,
+                              width: MediaQuery.of(context).size.width * 0.5,
+                              decoration: BoxDecoration(
+                                  color: Colors.grey,
+                                  borderRadius: BorderRadius.all(Radius.circular(5))
+                              ),
+                            )
+                          ],
+                        )
+                    ),
+                    Container(
+                      alignment: Alignment.topRight,
+                      height: 20,
+                      width: 60,
+                      decoration: BoxDecoration(
+                          color: Colors.grey,
+                          borderRadius: BorderRadius.all(Radius.circular(5))
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
       ),
     );
   }
