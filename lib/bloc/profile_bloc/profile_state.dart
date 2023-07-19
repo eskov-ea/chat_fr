@@ -41,3 +41,5 @@ class UserProfileLoadedState extends UserProfileState{
 class UserProfileLoggedOutState extends UserProfileState {
   final UserProfileData? user = null;
 }
+
+class UserProfileErrorState extends UserProfileState {}

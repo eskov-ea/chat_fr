@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../bloc/auth_bloc/auth_bloc.dart';
@@ -52,20 +53,24 @@ class AuthViewCubit extends Cubit<AuthViewCubitState> {
   }
 
   String _mapErrorToMessage(Object error) {
-    if (error is! ApiClientException) {
+    if (error is !AppErrorException) {
       return 'Неизвестная ошибка, поторите попытку';
     }
     switch (error.type) {
-      case ApiClientExceptionType.network:
+      case AppErrorExceptionType.network:
         return 'Сервер не доступен. Проверте подключение к интернету';
-      case ApiClientExceptionType.auth:
+      case AppErrorExceptionType.auth:
         return 'Неправильный логин или пароль!';
-      case ApiClientExceptionType.access:
+      case AppErrorExceptionType.access:
         return 'Недостаточно прав доступа!';
-      case ApiClientExceptionType.sessionExpired:
-        return 'Суссия устарела, обновите КЕШ';
-      case ApiClientExceptionType.other:
+      case AppErrorExceptionType.sessionExpired:
+        return 'Сессия устарела, обновите КЕШ';
+      case AppErrorExceptionType.other:
         return 'Произошла ошибка. Попробуйте еще раз';
+      case AppErrorExceptionType.parsing:
+        return 'Произошла ошибка при обработке данных. Если повторится - свяжитесь с разработчиком';
+      case AppErrorExceptionType.getData:
+        return 'Произошла ошибка при получении данных с сервера. Попробуйте еще раз';
     }
   }
 

@@ -1,12 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:chat/services/global.dart';
 import 'package:chat/services/logger/logger_service.dart';
-import 'package:chat/storage/data_storage.dart';
-
+import '../../bloc/error_handler_bloc/error_types.dart';
 import '../../models/contact_model.dart';
 import 'package:http/http.dart' as http;
-import '../../models/user_profile_model.dart';
-import '../exeptions/api_client_exceptions.dart';
 
 
 class UsersProvider {
@@ -20,13 +18,24 @@ class UsersProvider {
           'Authorization': 'Bearer $token'
         },
       );
-      List<dynamic> collection = jsonDecode(response.body)["data"];
-      List<UserContact> users = collection.map((user) => UserContact.fromJson(user)).toList();
-      return users;
+      if (response.statusCode == 200) {
+        List<dynamic> collection = jsonDecode(response.body)["data"];
+        List<UserContact> users = collection.map((user) => UserContact.fromJson(user)).toList();
+        return users;
+      } else if (response.statusCode == 401) {
+        throw AppErrorException(AppErrorExceptionType.auth, null,
+            "DialogsProvider, creating dialogs");
+      } else {
+        throw AppErrorException(AppErrorExceptionType.getData, null,
+            "DialogsProvider, creating dialogs");
+      }
+    }  on SocketException{
+      throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, creating dialogs");
+    } on AppErrorException{
+      rethrow;
     } catch (err) {
-      print("ERROR: $err");
       Logger.getInstance().sendErrorTrace(message: "UsersProvider.getUsers", err: err.toString());
-      throw ApiClientException(ApiClientExceptionType.other, err.toString());
+      throw AppErrorException(AppErrorExceptionType.other, err.toString(), "DialogsProvider, creating dialogs");
     }
   }
 

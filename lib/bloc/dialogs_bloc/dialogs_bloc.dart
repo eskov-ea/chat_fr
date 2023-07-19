@@ -26,10 +26,12 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   final WsBloc webSocketBloc;
   //TODO: remove WSBloc from this Bloc up to DialogsViewCubit
   final Logger _logger = Logger.getInstance();
+  final ErrorHandlerBloc errorHandlerBloc;
 
   DialogsBloc({
     required DialogsState initialState,
     required this.webSocketBloc,
+    required this.errorHandlerBloc,
     required this.dialogsProvider}) : super(initialState) {
         newMessageSubscription = webSocketBloc.stream.listen((streamState) {
           print("DialogsEvent   ${streamState}");
@@ -108,10 +110,14 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       final newState = state.copyWith(dialogs: dialogs);
       emit(newState);
     } catch(err) {
-      final e = err as AppErrorException;
-      _logger.sendErrorTrace(message: "DialogsProvider.getDialogs", err: "${err.type},  ${err.message}");
-      final errorState = state.copyWith(dialogs: [], searchQuery: "", isErrorHappened: true);
-      emit(errorState);
+      err as AppErrorException;
+      if (err.type == AppErrorExceptionType.auth) {
+        errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
+      } else {
+        _logger.sendErrorTrace(message: "DialogsProvider.getDialogs", err: "${err.type},  ${err.message}");
+        final errorState = state.copyWith(dialogs: [], searchQuery: "", isErrorHappened: true);
+        emit(errorState);
+      }
     }
   }
 
@@ -193,8 +199,6 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       Emitter<DialogsState> emit
       ){
     print("onDeleteDialogsEvent  ${state.dialogs?.length}");
-    final newState = state.copyWith(dialogs: []);
-    // emit(newState);
     add(DialogsLoadEvent());
   }
 

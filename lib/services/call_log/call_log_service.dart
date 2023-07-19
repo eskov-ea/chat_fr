@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:chat/models/call_model.dart';
 import 'package:chat/services/global.dart';
 
@@ -33,9 +34,12 @@ class CallLogService {
       } else {
         throw AppErrorException(AppErrorExceptionType.getData, null, "Call logs service, loading call logs");
       }
+    }  on SocketException{
+      throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, creating dialogs");
+    } on AppErrorException{
+      rethrow;
     } catch (err) {
       Logger.getInstance().sendErrorTrace(message: "CallLogService.getCallLogs", err: err.toString());
-      rethrow;
       throw AppErrorException(AppErrorExceptionType.other, err.toString(), "Call logs service, loading call logs");
     }
   }

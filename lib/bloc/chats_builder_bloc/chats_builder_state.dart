@@ -1,4 +1,5 @@
 import '../../models/chat_builder_model.dart';
+import '../error_handler_bloc/error_types.dart';
 
 
 class ChatsBuilderState {
@@ -6,12 +7,16 @@ class ChatsBuilderState {
    //TODO: create normal equals rules for state
    int counter;
    Map<String, bool> messagesDictionary;
+   AppErrorException? error;
+   bool isError;
 
    ChatsBuilderState.initial()
-      : chats =  <ChatsData>[], counter = 0, messagesDictionary = {};
+      : chats =  <ChatsData>[], counter = 0, messagesDictionary = {},
+         error = null, isError = false;
 
   ChatsBuilderState({
-    required this.chats, required this.counter, required this.messagesDictionary
+    required this.chats, required this.counter, required this.messagesDictionary,
+    required this.error, required this.isError
   });
 
 
@@ -22,29 +27,37 @@ class ChatsBuilderState {
               runtimeType == other.runtimeType &&
               chats == other.chats &&
               chats.length == other.chats.length &&
+              error == other.error &&
               counter == other.counter;
   @override
   int get hashCode =>
-      chats.hashCode ^ chats.length ^ counter.hashCode;
+      chats.hashCode ^ chats.length ^ counter.hashCode ^error.hashCode;
 
 
 
   ChatsBuilderState copyWith({
     List<ChatsData>? updatedChats,
     updatedCounter,
-    updatedMessagesDictionary
+    updatedMessagesDictionary,
+    AppErrorException? error,
+    bool? isError
   }) {
     return ChatsBuilderState(
       chats: updatedChats ?? this.chats,
       counter: updatedCounter ?? this.counter,
       messagesDictionary: updatedMessagesDictionary ?? this.messagesDictionary,
+      error: error ?? this.error,
+      isError: isError ?? this.isError
     );
   }
 }
 
 class ChatsBuilderInProgressState extends ChatsBuilderState{
   ChatsBuilderInProgressState({required List<ChatsData> chats,
-    required int counter, required Map<String, bool> messagesDictionary}) :
-        super(chats: chats, counter: counter, messagesDictionary: messagesDictionary);
+    required int counter, required Map<String, bool> messagesDictionary,
+    required AppErrorException? error, required bool isError}) :
+        super(chats: chats, counter: counter, messagesDictionary: messagesDictionary,
+          error: error, isError: isError
+      );
 
 }

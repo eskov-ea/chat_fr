@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/services/exeptions/api_client_exceptions.dart';
 import 'package:chat/models/auth_user_model.dart';
@@ -41,19 +42,17 @@ class AuthRepository {
         final userId = profile.id;
         await _secureStorage.setUserId(userId);
         return authToken;
-      } else if (response.statusCode == 403) {
-        throw ApiClientException(ApiClientExceptionType.access, "403: do not have permission");
       } else {
-        throw ApiClientException(ApiClientExceptionType.auth, "not authorized");
+        throw AppErrorException(AppErrorExceptionType.auth, null, "not authorized");
       }
     } on SocketException {
-        throw ApiClientException(ApiClientExceptionType.network, "connection problems");
-    } on ApiClientException {
+      throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, creating dialogs");
+    } on AppErrorExceptionType {
         rethrow;
     } catch (err) {
         print("auth err  -->  $err");
         _logger.sendErrorTrace(message: "AuthRepository.login", err: err.toString());
-        throw ApiClientException(ApiClientExceptionType.other, err.toString());
+        throw AppErrorException(AppErrorExceptionType.other, "AuthRepository",  err.toString());
     }
   }
 
@@ -70,8 +69,6 @@ class AuthRepository {
       await _secureStorage.deleteUserId();
       await _secureStorage.deleteToken();
       await _secureStorage.deleteDeviceID();
-      final token2 = await _secureStorage.getToken();
-      // TODO: function to delete deviceId for notifications from db
     } catch (err) {
       _logger.sendErrorTrace(message: "AuthRepository.logout", err: err.toString());
     }

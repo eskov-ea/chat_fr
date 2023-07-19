@@ -41,6 +41,7 @@ import '../navigation/main_navigation.dart';
 import '../pages/new_message_page.dart';
 import '../widgets/icon_buttons.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
+import '../widgets/session_expires_widget.dart';
 import 'running_call_screen.dart';
 
 
@@ -69,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String? os;
   SqfliteDatabase? _db;
   bool isUpdateAvailable = true;
-  // late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
+  late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
 
 
   Future<bool> isCallRunning () async {
@@ -94,14 +95,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _subscribeToErrorsBlocStream() {
-    // _errorHandlerBlocSubscription = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.errorHandlerBloc.stream.listen(_onErrorState);
+    _errorHandlerBlocSubscription = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.errorHandlerBloc.stream.listen(_onErrorState);
   }
 
   void _onErrorState(ErrorHandlerState state){
+    print("ErrorHandlerState log ${state}");
     if (state is ErrorHandlerWithErrorState) {
-      final String message = _mapErrorToMessage(state.error);
-      final error = state.error as AppErrorException;
-      customToastMessage(context, "Error message: $message, error was: ${error.message}, location: ${error.errorLocation}");
+      if (state.error.type == AppErrorExceptionType.auth) {
+        SessionExpiredModalWidget(context);
+      } else {
+        final String message = _mapErrorToMessage(state.error);
+        customToastMessage(context, "Error message: $message");
+      }
     }
   }
   String _mapErrorToMessage(Object error) {
@@ -349,8 +354,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     callServiceBlocSubscription.cancel();
+    userProfileDataSubscription.cancel();
     if ( _db != null) _db!.closeDb();
-    // _errorHandlerBlocSubscription.cancel();
+    _errorHandlerBlocSubscription.cancel();
     super.dispose();
   }
 

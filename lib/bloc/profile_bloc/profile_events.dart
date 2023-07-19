@@ -1,10 +1,12 @@
-abstract class ABlocEvent {}
+abstract class ProfileBlocEvent {}
 
-class ProfileBlocInitialEvent extends ABlocEvent {}
+class ProfileBlocInitialEvent extends ProfileBlocEvent {}
 
-class ProfileBlocLoadingEvent extends ABlocEvent {}
+class ProfileBlocLoadingEvent extends ProfileBlocEvent {}
 
-class ProfileBlocLoadedEvent extends ABlocEvent {}
+class ProfileBlocErrorEvent extends ProfileBlocEvent {}
 
-class ProfileBlocLogoutEvent extends ABlocEvent {}
+class ProfileBlocLoadedEvent extends ProfileBlocEvent {}
+
+class ProfileBlocLogoutEvent extends ProfileBlocEvent {}
 

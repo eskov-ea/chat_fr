@@ -70,22 +70,26 @@ class MyApp extends StatelessWidget{
         BlocProvider(
             lazy: false,
             create: (context) => ChatsBuilderBloc(
-                messagesProvider: MessagesProvider(),
-                webSocketBloc: websocketBloc)
-              ..add(ChatsBuilderCreateEvent())
+              errorHandlerBloc: errorHandlerBloc,
+              messagesProvider: MessagesProvider(),
+              webSocketBloc: websocketBloc
+            )..add(ChatsBuilderCreateEvent())
         ),
         BlocProvider(
-            create: (_) => UsersViewCubit(
-              wsBloc: websocketBloc,
-              usersBloc: UsersBloc(
-                  usersRepository: UsersRepository())
+          create: (_) => UsersViewCubit(
+            wsBloc: websocketBloc,
+            usersBloc: UsersBloc(
+              errorHandlerBloc: errorHandlerBloc,
+              usersRepository: UsersRepository()
             )
+          )
         ),
         BlocProvider(
             create: (context) => DialogsViewCubit(
                 dialogsBloc: DialogsBloc(
                     webSocketBloc: websocketBloc,
                     dialogsProvider: DialogsProvider(),
+                    errorHandlerBloc: errorHandlerBloc,
                     initialState: const DialogsState.initial()
                 ),
                 initialState: DialogsLoadingViewCubitState(
@@ -97,7 +101,9 @@ class MyApp extends StatelessWidget{
           ),
         ),
         BlocProvider(
-          create: (_) => ProfileBloc(),
+          create: (_) => ProfileBloc(
+            errorHandlerBloc: errorHandlerBloc,
+          ),
         ),
         BlocProvider(
           create: (_) => CallsBloc(),
@@ -105,7 +111,12 @@ class MyApp extends StatelessWidget{
         ),
         BlocProvider(
           create: (_) => CallLogsBloc(initialState: CallLogInitialState(),
-            errorHandlerBloc: errorHandlerBloc),
+            errorHandlerBloc: errorHandlerBloc,
+          ),
+          lazy: false,
+        ),
+        BlocProvider(
+          create: (_) => errorHandlerBloc,
           lazy: false,
         ),
       ],

@@ -83,7 +83,8 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
     token = await _secureStorage.getToken();
     final rawUserId = await _secureStorage.getUserId();
     userId = int.parse(rawUserId!);
-    final List<DialogData>? dialogs = await _dialogsProvider.getDialogs();
+    try {
+      final List<DialogData>? dialogs = await _dialogsProvider.getDialogs();
 
     socket = PusherChannelsClient.websocket(
         options: options,
@@ -186,6 +187,9 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
     socket!.connect();
 
     emit(Connected(socket: socket!));
+    } catch (_) {
+      emit(Unconnected());
+    }
   }
 
   void _onSocketEvent(PusherChannelsReadEvent event) {

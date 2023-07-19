@@ -39,7 +39,6 @@ class AuthBloc
         Emitter<AuthState> emit,
         ) async {
       try {
-        final String? token = await _dataProvider.getToken();
         await authRepo.logout();
         emit(Unauthenticated());
       } catch (err) {
@@ -56,8 +55,8 @@ class AuthBloc
       try {
         final String? token = await _dataProvider.getToken();
         print("AuthCheckStatusEvent  $token");
-        final bool auth = await authRepo.checkAuthStatus(token);
-        if (!auth) await _dataProvider.deleteToken();
+        // final bool auth = await authRepo.checkAuthStatus(token);
+        // if (!auth) await _dataProvider.deleteToken();
         final newState =
         token != null ? const Authenticated() : Unauthenticated();
         emit(newState);

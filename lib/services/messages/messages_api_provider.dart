@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
+import '../../bloc/error_handler_bloc/error_types.dart';
 import '../../models/dialog_model.dart';
 import '../../models/message_model.dart';
 import 'package:http/http.dart' as http;
@@ -33,14 +34,19 @@ class MessagesProvider {
         List<MessageData> messages = collection.map((message) => MessageData.fromJson(message)).toList();
         return messages;
       } else if (response.statusCode == 401) {
-        // TODO: implement logout
-        return <MessageData>[];
+        throw AppErrorException(AppErrorExceptionType.auth, null,
+            "MessagesProvider.getMessages");
       } else {
-        return <MessageData>[];
+        throw AppErrorException(AppErrorExceptionType.getData, null,
+            "MessagesProvider.getMessages");
       }
+    } on SocketException{
+      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.getMessages");
+    } on AppErrorException{
+      rethrow;
     } catch (err) {
       _logger.sendErrorTrace(message: "MessagesProvider.getMessages", err: err.toString());
-      return <MessageData>[];
+      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.getMessages");
     }
   }
 
@@ -56,18 +62,21 @@ class MessagesProvider {
       );
       if (response.statusCode == 200) {
         Map<String, dynamic> collection = jsonDecode(response.body)["data"];
-        // print("update collection     -.   $collection");
         return collection;
       } else if (response.statusCode == 401) {
-        // TODO: implement logout
-        throw Exception("Необходимо авторизоваться");
+        throw AppErrorException(AppErrorExceptionType.auth, null,
+            "MessagesProvider.getNewUpdatesOnResume");
       } else {
-        throw Exception("Произошла ошибка при отправке сообщения, повторите еще раз");
+        throw AppErrorException(AppErrorExceptionType.getData, null,
+            "MessagesProvider.getNewUpdatesOnResume");
       }
+    } on SocketException{
+      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.getNewUpdatesOnResume");
+    } on AppErrorException {
+      rethrow;
     } catch (err) {
-      print(err);
       _logger.sendErrorTrace(message: "MessagesProvider.getNewUpdatesOnResume", err: err.toString());
-      throw Exception("Произошла ошибка при отправке сообщения, повторите еще раз");
+      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.getNewUpdatesOnResume");
     }
   }
 
@@ -92,10 +101,22 @@ class MessagesProvider {
           },
           body: postData
       );
-      return response.body;
+      if (response.statusCode == 200) {
+        return response.body;
+      } else if (response.statusCode == 401) {
+        throw AppErrorException(AppErrorExceptionType.auth, null,
+            "MessagesProvider.sendMessage");
+      } else {
+        throw AppErrorException(AppErrorExceptionType.getData, null,
+            "MessagesProvider.sendMessage");
+      }
+    } on SocketException{
+      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.sendMessage");
+    } on AppErrorException {
+      rethrow;
     } catch (err) {
-      _logger.sendErrorTrace(message: "MessagesProvider.getNewUpdatesOnResume", err: err.toString());
-      return null;
+      _logger.sendErrorTrace(message: "MessagesProvider.sendMessage", err: err.toString());
+      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.sendMessage");
     }
   }
 
@@ -129,7 +150,6 @@ class MessagesProvider {
       final postData = jsonEncode(<String, Object>{
         'data': data
       });
-      print("DELETING MESSAGE data  $postData");
       final response = await http.post(
           Uri.parse('https://erp.mcfef.com/api/chat/message/setstatuses'),
           headers: <String, String>{
@@ -141,33 +161,54 @@ class MessagesProvider {
       print(response.body);
       if (response.statusCode == 200){
         return true;
+      } else if (response.statusCode == 401) {
+        throw AppErrorException(AppErrorExceptionType.auth, null,
+            "MessagesProvider.deleteMessage");
       } else {
-        return false;
+        throw AppErrorException(AppErrorExceptionType.getData, null,
+            "MessagesProvider.deleteMessage");
       }
+    } on SocketException{
+      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.sendMessage");
+    } on AppErrorException {
+      rethrow;
     } catch(err) {
       _logger.sendErrorTrace(message: "MessagesProvider.deleteMessage", err: err.toString());
-      return false;
+      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.deleteMessage");
     }
   }
 
   Future<int?> createDialogAndSendMessage ({required userId, required partnerId, required message}) async {
-    final response = await http.post(
-      Uri.parse('https://web-notifications.ru/api/dialogs'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'userId': userId,
-        'partnerId': partnerId,
-        'text': message
-      }),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('https://web-notifications.ru/api/dialogs'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'userId': userId,
+          'partnerId': partnerId,
+          'text': message
+        }),
+      );
 
-    if (response.statusCode == 200){
-      DialogId dialog = DialogId.fromJson(jsonDecode(response.body));
-      return dialog.dialogId;
-    } else {
-      return null;
+      if (response.statusCode == 200) {
+        DialogId dialog = DialogId.fromJson(jsonDecode(response.body));
+        return dialog.dialogId;
+      } else if (response.statusCode == 401) {
+        throw AppErrorException(AppErrorExceptionType.auth, null,
+            "MessagesProvider.createDialogAndSendMessage");
+      } else {
+        throw AppErrorException(AppErrorExceptionType.getData, null,
+            "MessagesProvider.createDialogAndSendMessage");
+      }
+    } on SocketException{
+      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.createDialogAndSendMessage");
+    } on AppErrorException {
+      rethrow;
+    } catch (err) {
+      _logger.sendErrorTrace(message: "MessagesProvider.createDialogAndSendMessage", err: err.toString());
+      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.createDialogAndSendMessage");
     }
   }
 
@@ -181,15 +222,22 @@ class MessagesProvider {
           'Authorization': 'Bearer $token'
         },
       );
-      print("decoded file   ${response.body}");
       if (response.statusCode == 200) {
         return MessageAttachmentsData.fromJson(jsonDecode(response.body)["data"]);
+      } else if (response.statusCode == 401) {
+        throw AppErrorException(AppErrorExceptionType.auth, null,
+            "MessagesProvider.loadAttachmentData");
       } else {
-        return null;
+        throw AppErrorException(AppErrorExceptionType.getData, null,
+            "MessagesProvider.loadAttachmentData");
       }
+    } on SocketException{
+      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.loadAttachmentData");
+    } on AppErrorException {
+      rethrow;
     } catch (err) {
       _logger.sendErrorTrace(message: "MessagesProvider.loadAttachmentData", err: err.toString());
-      return null;
+      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.loadAttachmentData");
     }
   }
 
@@ -225,12 +273,22 @@ class MessagesProvider {
             'Authorization': 'Bearer $token'
           },
           body: postData);
-      print("AUDIORESPONSE    ${response.body}");
-      return response.body;
+      if (response.statusCode == 200) {
+        return response.body;
+      } else if (response.statusCode == 401) {
+        throw AppErrorException(AppErrorExceptionType.auth, null,
+            "MessagesProvider.sendAudioMessage");
+      } else {
+        throw AppErrorException(AppErrorExceptionType.getData, null,
+            "MessagesProvider.sendAudioMessage");
+      }
+    } on SocketException{
+      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.sendAudioMessage");
+    } on AppErrorException {
+      rethrow;
     } catch (err) {
-      print("sendAudioMessage $err");
       _logger.sendErrorTrace(message: "MessagesProvider.sendAudioMessage", err: err.toString());
-      throw Exception('Error sending audio message');
+      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.sendAudioMessage");
     }
   }
 
@@ -269,12 +327,22 @@ class MessagesProvider {
             'Authorization': 'Bearer $token'
           },
           body: postData);
-      print(response.body);
-      return response.body;
+      if (response.statusCode == 200) {
+        return response.body;
+      } else if (response.statusCode == 401) {
+        throw AppErrorException(AppErrorExceptionType.auth, null,
+            "MessagesProvider.sendMessageWithFileBase64");
+      } else {
+        throw AppErrorException(AppErrorExceptionType.getData, null,
+            "MessagesProvider.sendMessageWithFileBase64");
+      }
+    } on SocketException{
+      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.sendMessageWithFileBase64");
+    } on AppErrorException {
+      rethrow;
     } catch (err) {
-      print("sendMessageWithFileBase64 $err");
       _logger.sendErrorTrace(message: "MessagesProvider.sendMessageWithFileBase64", err: err.toString());
-      throw Exception('Error sending file base64 message');
+      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.sendMessageWithFileBase64");
     }
   }
 

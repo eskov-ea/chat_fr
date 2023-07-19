@@ -24,6 +24,11 @@ class CallsPage extends StatefulWidget {
 
 class _CallsPageState extends State<CallsPage> {
 
+  late final StreamSubscription _usersSubscription;
+  String? userId;
+  Map<String, UserContact> users = {};
+  late final StreamSubscription _errorSubscription;
+  bool isError = false;
 
   @override
   void initState() {
@@ -41,17 +46,19 @@ class _CallsPageState extends State<CallsPage> {
     super.initState();
   }
 
-  late final StreamSubscription _usersSubscription;
-  String? userId;
-  Map<String, UserContact> users = {};
-  late final StreamSubscription _errorSubscription;
-  bool isError = false;
   void _onState(state) {
     if (state is CallLogErrorState) {
       setState(() {
         isError = true;
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _errorSubscription.cancel();
+    _usersSubscription.cancel();
+    super.dispose();
   }
 
   // String getDate(String callDate) {

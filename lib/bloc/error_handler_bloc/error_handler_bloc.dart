@@ -10,7 +10,7 @@ class ErrorHandlerBloc extends Bloc<ErrorHandlerEvent, ErrorHandlerState> {
   ErrorHandlerBloc(): super( ErrorHandlerInitialState()){
     on<ErrorHandlerEvent>((event, emit) async {
       if (event is ErrorHandlerWithErrorEvent) {
-        await onErrorEventEvent(event, emit);
+        onErrorEventEvent(event, emit);
       } else if (event is ErrorHandlerAccessDeniedEvent) {
         onErrorHandlerAccessDeniedEvent(event, emit);
       }
@@ -22,7 +22,6 @@ class ErrorHandlerBloc extends Bloc<ErrorHandlerEvent, ErrorHandlerState> {
   }
 
   void onErrorHandlerAccessDeniedEvent(ErrorHandlerAccessDeniedEvent event, emit) {
-    // authBloc.add(LogoutEvent());
     emit(ErrorHandlerWithErrorState(error: event.error));
   }
 

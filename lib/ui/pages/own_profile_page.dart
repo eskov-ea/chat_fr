@@ -4,7 +4,6 @@ import 'package:chat/bloc/profile_bloc/profile_bloc.dart';
 import 'package:chat/bloc/profile_bloc/profile_events.dart';
 import 'package:chat/bloc/profile_bloc/profile_state.dart';
 import 'package:chat/services/global.dart';
-import 'package:chat/storage/data_storage.dart';
 import 'package:chat/theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +12,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/user_bloc/user_event.dart';
 import '../../bloc/ws_bloc/ws_event.dart';
-import '../../models/user_profile_model.dart';
 import '../../services/auth/auth_repo.dart';
 import '../../view_models/dialogs_page/dialogs_view_cubit.dart';
 import '../../view_models/user/users_view_cubit.dart';
@@ -34,14 +32,30 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ProfileBloc, UserProfileState>(
-      builder: (BuildContext context, state) {
-        if (state is UserProfileLoadedState){
-          return Scaffold(
-            body: SafeArea(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: Column(
+    return Scaffold(
+      body: SafeArea(
+        child: Container(
+          child: BlocBuilder<ProfileBloc, UserProfileState>(
+            builder: (BuildContext context, state) {
+              if (state is UserProfileErrorState) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text("Произошла ошибка при загрузке данных. Попробуйте перезагрузить приложение",
+                        style: TextStyle(fontSize: 18, color: Colors.black87,),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 20,)
+                    ],
+                  ),
+                );
+              }
+              if (state is UserProfileLoadedState){
+                return SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  child: Column(
                     children: [
                       Expanded(
                         child: CustomSizeContainer(
@@ -123,19 +137,20 @@ class ProfilePage extends StatelessWidget {
                       ),
                       SizedBox(height: 5,),
                     ]
-                ),
-              ),
-            )
-          );
-        } else {
-          return Column(children: [
-            const Expanded(
-                child: Center(
-                  child: CircularProgressIndicator(),
-                )),
-          ]);
-        }
-      },
+                  ),
+                );
+              } else {
+                return Column(children: [
+                  const Expanded(
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      )),
+                ]);
+              }
+            },
+          ),
+        ),
+      ),
     );
   }
 }

@@ -9,7 +9,7 @@ class ErrorHandlerInitialState extends ErrorHandlerState {
 }
 
 class ErrorHandlerWithErrorState extends ErrorHandlerState{
-  final Object error;
+  final AppErrorException error;
 
   ErrorHandlerWithErrorState({
     required this.error

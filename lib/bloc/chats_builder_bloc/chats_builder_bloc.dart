@@ -4,21 +4,25 @@ import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/chat_builder_model.dart';
 import '../../models/message_model.dart';
+import '../error_handler_bloc/error_handler_bloc.dart';
+import '../error_handler_bloc/error_handler_events.dart';
+import '../error_handler_bloc/error_types.dart';
 import '../ws_bloc/ws_bloc.dart';
 import '../ws_bloc/ws_state.dart';
 import 'chats_builder_event.dart';
 import 'chats_builder_state.dart';
-
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
 
 class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
   final MessagesProvider messagesProvider;
   final WsBloc webSocketBloc;
+  final ErrorHandlerBloc errorHandlerBloc;
   late final StreamSubscription newMessageSubscription;
 
   ChatsBuilderBloc({
     required this.webSocketBloc,
+    required this.errorHandlerBloc,
     required this.messagesProvider}) : super( ChatsBuilderState.initial()){
     newMessageSubscription = webSocketBloc.stream.listen((streamState) {
       print("streamState   ${streamState}");
@@ -76,28 +80,51 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     // TODO: refactor this part if necessary
     // emit(ChatsBuilderInProgressState(chats: state.chats, counter: state.counter));
     final userId = await DataProvider().getUserId();
-    List<MessageData> messages = await messagesProvider.getMessages(userId, event.dialogId, event.pageNumber);
-    var chatExist = false;
-    final Map<String, bool> newMessagesDictionary = state.messagesDictionary;
-    for (var chat in state.chats) {
-      if (chat.chatId == event.dialogId) {
-        for (var message in messages) {
-          if (newMessagesDictionary["${message.messageId}"] != true) {
-            newMessagesDictionary["${message.messageId}"] = true;
-            chat.messages.add(message);
+    try {
+      List<MessageData> messages = await messagesProvider.getMessages(
+          userId, event.dialogId, event.pageNumber);
+      var chatExist = false;
+      final Map<String, bool> newMessagesDictionary = state.messagesDictionary;
+      for (var chat in state.chats) {
+        if (chat.chatId == event.dialogId) {
+          for (var message in messages) {
+            if (newMessagesDictionary["${message.messageId}"] != true) {
+              newMessagesDictionary["${message.messageId}"] = true;
+              chat.messages.add(message);
+            }
           }
+          chatExist = true;
         }
-        chatExist = true;
+      }
+      if (chatExist == false) {
+        for (var message in messages) {
+          newMessagesDictionary["${message.messageId}"] = true;
+        }
+        state.chats.add(ChatsData.makeChatsData(event.dialogId, messages));
+      }
+      // final newState = state.copyWith(updatedChats: state.chats, updatedCounter: state.counter++);
+      emit(ChatsBuilderState(
+        counter: state.counter+1,
+        chats: state.chats,
+        messagesDictionary: newMessagesDictionary,
+        error: null,
+        isError: false
+      ));
+    } catch (err) {
+      final e = err as AppErrorException;
+      if (e.type == AppErrorExceptionType.auth) {
+        errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: e));
+      } else {
+        final errorState = state.copyWith(
+          updatedChats: state.chats,
+          updatedCounter: state.counter,
+          updatedMessagesDictionary: state.messagesDictionary,
+          error: e,
+          isError: true
+        );
+        emit(errorState);
       }
     }
-    if (chatExist == false) {
-      for (var message in messages) {
-        newMessagesDictionary["${message.messageId}"] = true;
-      }
-      state.chats.add(ChatsData.makeChatsData(event.dialogId, messages));
-    }
-    // final newState = state.copyWith(updatedChats: state.chats, updatedCounter: state.counter++);
-    emit(ChatsBuilderState(counter: state.counter++, chats: state.chats, messagesDictionary: newMessagesDictionary));
   }
 
   Future<void> onChatsBuilderAddMessageEvent (
@@ -115,7 +142,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         }
       }
       emit(state.copyWith(
-          updatedChats: state.chats, updatedCounter: state.counter++));
+          updatedChats: state.chats, updatedCounter: state.counter+1));
       final userId = await DataProvider().getUserId();
       if (event.message.senderId.toString() != userId) {
         FlutterRingtonePlayer.play(
@@ -170,7 +197,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       }
     }
     emit(state.copyWith(updatedChats: state.chats,
-        updatedCounter: state.counter++));
+        updatedCounter: state.counter+1));
   }
 
   Future<void> onChatsBuilderUpdateLocalMessageWithErrorEvent (
@@ -190,7 +217,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       }
     }
     emit(state.copyWith(
-        updatedChats: chats, updatedCounter: state.counter++));
+        updatedChats: chats, updatedCounter: state.counter+1));
   }
 
   @override
@@ -223,7 +250,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     final newState = [...state.chats];
     final ChatsData chat = newState.firstWhere((el) => el.chatId == event.dialogId);
     chat.messages.removeWhere((message) => message.messageId == event.messageId);
-    emit(state.copyWith(updatedChats: newState, updatedCounter: state.counter++, updatedMessagesDictionary: state.messagesDictionary));
+    emit(state.copyWith(updatedChats: newState, updatedCounter: state.counter+1, updatedMessagesDictionary: state.messagesDictionary));
   }
 
   void onChatsBuilderDeleteMessagesEvent(
@@ -245,7 +272,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       messagesToDelete.forEach((m) {
         dialog.messages.remove(m);
       });
-      emit(state.copyWith(updatedChats: newState, updatedCounter: state.counter++, updatedMessagesDictionary: state.messagesDictionary));
+      emit(state.copyWith(updatedChats: newState, updatedCounter: state.counter+1, updatedMessagesDictionary: state.messagesDictionary));
     }
   }
 }

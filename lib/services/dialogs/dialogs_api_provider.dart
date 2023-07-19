@@ -29,16 +29,17 @@ class DialogsProvider {
         return dialogs;
       } else if (response.statusCode == 401) {
         print("Get dialogs print   ${response.statusCode}  ${response.body}");
-        throw AppErrorException(AppErrorExceptionType.access, null, "DialogsProvider, loading dialogs no auth");
-
+        throw AppErrorException(AppErrorExceptionType.auth, null, "DialogsProvider, loading dialogs no auth");
       } else {
         return throw AppErrorException(AppErrorExceptionType.getData, null, "DialogsProvider, loading dialogs");
       }
     } on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, loading dialogs");
+    } on AppErrorException{
+      rethrow;
     } catch(err) {
       _logger.sendErrorTrace(message: "DialogsProvider.getDialogs", err: err.toString());
-      rethrow;
+      return throw AppErrorException(AppErrorExceptionType.other, null, "DialogsProvider, loading dialogs");
     }
   }
 
@@ -60,10 +61,14 @@ class DialogsProvider {
         return dialogs;
       } else if (response.statusCode == 403) {
         throw AppErrorException(AppErrorExceptionType.access, null, "DialogsProvider, loading dialogs");
+      }  else if (response.statusCode == 401) {
+        throw AppErrorException(AppErrorExceptionType.auth, null, "DialogsProvider, loading dialogs");
       } else {
         throw AppErrorException(AppErrorExceptionType.getData, null, "DialogsProvider, loading dialogs");
       }
-    } on SocketException{
+    } on AppErrorException{
+      rethrow;
+    }  on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, loading dialogs");
     } catch(err) {
       _logger.sendErrorTrace(message: "DialogsProvider.getPublicDialogs", err: err.toString());
@@ -100,10 +105,14 @@ class DialogsProvider {
         return dialog;
       } else if (response.statusCode == 403) {
         throw AppErrorException(AppErrorExceptionType.access, null, "DialogsProvider, creating dialogs");
+      }  else if (response.statusCode == 401) {
+        throw AppErrorException(AppErrorExceptionType.auth, null, "DialogsProvider, creating dialogs");
       } else {
         throw AppErrorException(AppErrorExceptionType.getData, null, "DialogsProvider, creating dialogs");
       }
-    } on SocketException{
+    } on AppErrorException{
+      rethrow;
+    }  on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, creating dialogs");
     } catch(err) {
       _logger.sendErrorTrace(message: "DialogsProvider.createDialog", err: err.toString());
@@ -123,8 +132,18 @@ class DialogsProvider {
         },
       );
       print("JOINDIALOG SERVICE  ${response.body}");
-      return ChatUser.fromJson(jsonDecode(response.body)["data"]);
-    } on SocketException{
+      if (response.statusCode == 200) {
+        return ChatUser.fromJson(jsonDecode(response.body)["data"]);
+      } else if (response.statusCode == 403) {
+        throw AppErrorException(AppErrorExceptionType.access, null, "DialogsProvider, creating dialogs");
+      }  else if (response.statusCode == 401) {
+        throw AppErrorException(AppErrorExceptionType.auth, null, "DialogsProvider, creating dialogs");
+      } else {
+        throw AppErrorException(AppErrorExceptionType.getData, null, "DialogsProvider, creating dialogs");
+      }
+    } on AppErrorException{
+      rethrow;
+    }  on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, joining user to dialog $dialogId");
     } catch(err) {
       _logger.sendErrorTrace(message: "DialogsProvider.joinDialog", err: err.toString());
@@ -144,7 +163,12 @@ class DialogsProvider {
         },
       );
       print("EXITDIALOG  ${response.body}");
-    } on SocketException{
+      if (response.statusCode == 401) {
+        throw AppErrorException(AppErrorExceptionType.auth, null, "DialogsProvider, creating dialogs");
+      }
+    } on AppErrorException{
+      rethrow;
+    }  on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, exiting user to dialog $dialogId");
     } catch(err) {
       _logger.sendErrorTrace(message: "DialogsProvider.exitDialog", err: err.toString());
