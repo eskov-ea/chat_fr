@@ -62,7 +62,6 @@ class CallsBloc
           add(ConnectingCallServiceEvent());
         } else if (event is OutgoingCallEvent) {
           emit(OutgoingCallServiceState(callerName: event.callerId));
-          await sipChannel.invokeMethod("OUTGOING_CALL", {"number": "sip:${event.callerId}@aster.mcfef.com"});
         } else if (event is ConnectedCallEvent) {
           emit(ConnectedCallState());
         } else if (event is ErrorCallEvent) {

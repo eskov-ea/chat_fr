@@ -17,7 +17,7 @@ class CallLogService {
     try {
       final String? userId = await _secureStorage.getUserId();
       final postData = jsonEncode({
-        "id": "$prefix$userId",
+        "id": "${SipConfig.getPrefix()}$userId",
         "password": passwd
       });
 

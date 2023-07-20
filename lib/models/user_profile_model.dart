@@ -75,6 +75,7 @@ class UserProfileAsteriskSettings extends Equatable{
   final String stunPort;
   final String asteriskUserLogin;
   final String? asteriskUserPassword;
+  final String? sipPrefix;
   final String asteriskHost;
 
   const UserProfileAsteriskSettings({
@@ -84,6 +85,7 @@ class UserProfileAsteriskSettings extends Equatable{
     required this.stunPort,
     required this.asteriskUserLogin,
     required this.asteriskUserPassword,
+    required this.sipPrefix,
     required this.asteriskHost
   });
 
@@ -97,6 +99,7 @@ class UserProfileAsteriskSettings extends Equatable{
           stunPort: json["asterisk"]["stun_port"],
           asteriskUserLogin: json["asterisk"]["asterisk_user_login"].toString(),
           asteriskUserPassword: json["asterisk"]["asterisk_user_password"],
+          sipPrefix: json["asterisk"]["asterisk_prefix"],
           asteriskHost: json["asterisk"]["asterisk_host"]
         );
   }

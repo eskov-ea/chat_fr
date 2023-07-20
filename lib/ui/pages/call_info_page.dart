@@ -108,9 +108,9 @@ class CallInfoPage extends StatelessWidget {
                   SizedBox(width: 20,),
                   GestureDetector(
                     onTap: (){
-                      final dialogData= findDialog(context, 40, int.parse(callData.callerNumber));
+                      final dialogData= findDialog(context, callData.userId, int.parse(callData.callerNumber));
                       final ChatPageArguments chatArgs = ChatPageArguments(
-                        userId: 40,
+                        userId: callData.userId,
                         partnerId: int.parse(callData.callerNumber),
                         dialogData: dialogData,
                         username: callData.callerName,

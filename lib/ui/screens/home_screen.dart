@@ -78,11 +78,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> sipRegistration(UserProfileAsteriskSettings settings) async {
+    SipConfig.sipDomain = settings.userDomain;
+    SipConfig.sipPrefix = settings.sipPrefix;
     try {
       final String? userId = await _dataProvider.getUserId();
-      print("Trying to register to SIP with    $prefix$userId@${settings.asteriskHost} and password ${settings.asteriskUserPassword} and domain  ${settings.userDomain}");
+      print("Trying to register to SIP with    ${SipConfig.getPrefix()}$userId@${settings.asteriskHost} and password ${settings.asteriskUserPassword} and domain  ${settings.userDomain}");
       await sipChannel.invokeMethod('SIP_LOGIN', {
-        "username": "$prefix$userId",
+        "username": "${SipConfig.getPrefix()}$userId",
         "password": settings.asteriskUserPassword,
         "domain": settings.userDomain,
         "stun_domain": settings.stunHost,
@@ -248,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         } else if (state is IncomingCallState) {
           if(ModalRoute.of(context)?.settings.name == MainNavigationRouteNames.incomingCallScreen) return;
           try {
-            final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => "$prefix${el.id}" == state.callerName);
+            final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => "${SipConfig.getPrefix()}${el.id}" == state.callerName);
             callerName = "${callerUser.firstname} ${callerUser.lastname}";
           } catch (err) {
             callerName = "${state.callerName}";
@@ -266,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           _isPushSent = false;
           print("Route name:  ${ModalRoute.of(context)?.settings.name}");
           try {
-            final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => "$prefix${el.id}" == state.callerName);
+            final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => "${SipConfig.getPrefix()}${el.id}" == state.callerName);
             callerName = "${callerUser.firstname} ${callerUser.lastname}";
           } catch (err) {
             print("OutgoingCallServiceState Error:   $err");

@@ -42,7 +42,7 @@ class UsersProvider {
   Map<String, String> setSipContacts(List<UserContact> users) {
     final Map<String, String> map = {};
     users.forEach((user) {
-      map["$prefix${user.id}"] = "${user.lastname} ${user.firstname}";
+      map["${SipConfig.getPrefix()}${user.id}"] = "${user.lastname} ${user.firstname}";
     });
     return map;
   }

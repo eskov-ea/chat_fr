@@ -20,8 +20,19 @@ import 'package:chat/services/user_profile/user_profile_api_provider.dart';
   import 'messages/messages_repository.dart';
 
   AudioPlayer _player = AudioPlayer();
-  const String prefix = "7";
   Duration? TZ;
+
+  class SipConfig {
+    static String? sipDomain = null;
+    static String? sipPrefix = null;
+
+    static final String defaultSipPrefix = "7";
+    static final String defaultSipDomain = "sip.mcfef.com";
+
+
+    static String getDomain() =>  sipDomain ?? defaultSipDomain;
+    static String getPrefix() =>  sipPrefix ?? defaultSipPrefix;
+  }
 
   Future<void> playAudio(
       {required AudioPlayer player, required AudioSource source}) async {
@@ -46,7 +57,7 @@ import 'package:chat/services/user_profile/user_profile_api_provider.dart';
   Future<void> callNumber(BuildContext context, String userId) async {
     print("OUTGOING CALL NUMBER");
     await sipChannel.invokeMethod(
-        "OUTGOING_CALL", {"number": "sip:${prefix}${userId}@aster.mcfef.com"});
+        "OUTGOING_CALL", {"number": "sip:${SipConfig.getPrefix()}${userId}@${SipConfig.getDomain()}"});
   }
 
   Future<void> declineCall() async {
