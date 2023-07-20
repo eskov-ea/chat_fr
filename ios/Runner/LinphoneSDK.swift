@@ -205,7 +205,7 @@ class LinphoneSDK : ObservableObject
 
     
     func login(domain: String, password: String, username: String,
-               stunDomain: String, stunPort: String) {
+               stunDomain: String, stunPort: String, host: String) {
             
             do {
                 
@@ -216,7 +216,7 @@ class LinphoneSDK : ObservableObject
                 let accountParams = try mCore.createAccountParams()
                 let identity = try Factory.Instance.createAddress(addr: String("sip:" + username + "@" + domain))
                 try! accountParams.setIdentityaddress(newValue: identity)
-                let address = try Factory.Instance.createAddress(addr: String("sip:" + domain))
+                let address = try Factory.Instance.createAddress(addr: String("sip:" + host))
                 try address.setTransport(newValue: transport)
                 try accountParams.setServeraddress(newValue: address)
                 accountParams.registerEnabled = true

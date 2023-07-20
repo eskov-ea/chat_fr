@@ -93,10 +93,11 @@ import PushKit
                 let username = args!["username"] as? String
                 let stunDomain = args!["stun_domain"] as? String
                 let stunPort = args!["stun_port"] as? String
+                let host = args!["host"] as? String
                 print("loginData \(domain) \(username) \(password)")
                 if (domain != nil && password != nil && username != nil
-                    && stunDomain != nil && stunPort != nil) {
-                    self!.linphoneSDK.login(domain: domain!, password: password!, username: username!, stunDomain: stunDomain!, stunPort: stunPort!)
+                    && stunDomain != nil && stunPort != nil && host != nil) {
+                    self!.linphoneSDK.login(domain: domain!, password: password!, username: username!, stunDomain: stunDomain!, stunPort: stunPort!, host: host!)
                 } else {
                     print("No data to login into SIP account")
                 }
