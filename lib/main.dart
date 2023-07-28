@@ -5,8 +5,11 @@ import 'package:chat/bloc/call_logs_bloc/call_logs_state.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
 import 'package:chat/services/dialogs/dialogs_api_provider.dart';
+import 'package:chat/services/dialogs/dialogs_repository.dart';
 import 'package:chat/services/messages/messages_api_provider.dart';
+import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/services/users/users_repository.dart';
+import 'package:chat/storage/data_storage.dart';
 import 'package:chat/theme.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
 import 'package:chat/view_models/auth/auth_view_cubit.dart';
@@ -22,13 +25,9 @@ import 'bloc/calls_bloc/calls_bloc.dart';
 import 'bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import 'bloc/chats_builder_bloc/chats_builder_event.dart';
 import 'bloc/dialogs_bloc/dialogs_bloc.dart';
-import 'bloc/dialogs_bloc/dialogs_event.dart';
 import 'bloc/dialogs_bloc/dialogs_state.dart';
 import 'bloc/profile_bloc/profile_bloc.dart';
-import 'bloc/profile_bloc/profile_events.dart';
 import 'bloc/user_bloc/user_bloc.dart';
-import 'bloc/user_bloc/user_event.dart';
-import 'bloc/ws_bloc/ws_event.dart';
 import 'bloc/ws_bloc/ws_state.dart';
 import 'services/auth/auth_repo.dart';
 
@@ -53,7 +52,11 @@ class MyApp extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    final websocketBloc =  WsBloc(initialState: Unconnected());
+    final websocketBloc =  WsBloc(
+      initialState: Unconnected(),
+      dialogsRepository: DialogRepository(),
+      secureStorage: DataProvider()
+    );
     final errorHandlerBloc =  ErrorHandlerBloc();
     final authBloc = AuthBloc(authRepo: AuthRepository());
     return MultiBlocProvider(
@@ -71,7 +74,7 @@ class MyApp extends StatelessWidget{
             lazy: false,
             create: (context) => ChatsBuilderBloc(
               errorHandlerBloc: errorHandlerBloc,
-              messagesProvider: MessagesProvider(),
+              messagesProvider: MessagesRepository(),
               webSocketBloc: websocketBloc
             )..add(ChatsBuilderCreateEvent())
         ),
@@ -88,7 +91,7 @@ class MyApp extends StatelessWidget{
             create: (context) => DialogsViewCubit(
                 dialogsBloc: DialogsBloc(
                     webSocketBloc: websocketBloc,
-                    dialogsProvider: DialogsProvider(),
+                    dialogRepository: DialogRepository(),
                     errorHandlerBloc: errorHandlerBloc,
                     initialState: const DialogsState.initial()
                 ),

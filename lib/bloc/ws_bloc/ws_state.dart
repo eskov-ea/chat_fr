@@ -1,36 +1,62 @@
-import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
-import 'package:dart_pusher_channels/dart_pusher_channels.dart';
-import 'package:equatable/equatable.dart';
 import '../../models/message_model.dart';
 
 
-abstract class WsBlocState extends Equatable {
+abstract class WsBlocState {
   const WsBlocState();
 
-  @override
-  List<Object> get props => [];
 }
 
-class Unconnected extends WsBlocState{}
+class Unconnected extends WsBlocState{
 
-class ConnectingState extends WsBlocState{}
+  @override
+  bool operator ==(Object other) =>
+      other is Unconnected &&
+          runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+}
+
+class ConnectingState extends WsBlocState{
+
+  @override
+  bool operator ==(Object other) =>
+      other is ConnectingState &&
+          runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+}
 
 class Connected extends WsBlocState{
-  final PusherChannelsClient socket;
 
-  const Connected({required this.socket});
+  const Connected();
+  @override
+  bool operator ==(Object other) =>
+      other is Connected &&
+          runtimeType == other.runtimeType;
 
   @override
-  List<PusherChannelsClient> get props => [socket];
+  int get hashCode => runtimeType.hashCode;
 }
+
 class WsStateReceiveNewMessage extends WsBlocState {
   final MessageData message;
 
    const WsStateReceiveNewMessage({required this.message});
 
   @override
-  List<MessageData> get props => [message];
+  bool operator ==(Object other) =>
+      other is WsStateReceiveNewMessage &&
+          runtimeType == other.runtimeType &&
+          message.messageId == other.message.messageId &&
+          message.status.last.statusId == other.message.status.last.statusId;
+
+  @override
+  int get hashCode =>
+      message.messageId.hashCode ^
+      message.status.last.statusId;
 }
 
 class WsStateUpdateStatus extends WsBlocState {
@@ -38,8 +64,7 @@ class WsStateUpdateStatus extends WsBlocState {
 
   const WsStateUpdateStatus({required this.statuses});
 
-  @override
-  List<Object> get props => [statuses];
+
 }
 
 class WsStateNewDialogCreated extends WsBlocState {
@@ -59,6 +84,19 @@ class WsStateNewUserJoinDialog extends WsBlocState {
     required this.user,
     required this.dialogId
   });
+
+  @override
+  bool operator ==(Object other) =>
+      other is WsStateNewUserJoinDialog &&
+          runtimeType == other.runtimeType &&
+          user.userId == other.user.userId &&
+          dialogId == other.dialogId;
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^
+      user.userId.hashCode ^
+      dialogId.hashCode;
 }
 
 class WsStateNewUserExitDialog extends WsBlocState {
@@ -69,6 +107,19 @@ class WsStateNewUserExitDialog extends WsBlocState {
     required this.user,
     required this.dialogId
   });
+
+  @override
+  bool operator ==(Object other) =>
+      other is WsStateNewUserJoinDialog &&
+          runtimeType == other.runtimeType &&
+          user.userId == other.user.userId &&
+          dialogId == other.dialogId;
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^
+      user.userId.hashCode ^
+      dialogId.hashCode;
 }
 
 
@@ -85,12 +136,34 @@ class WsStateOnlineUsersExitState extends WsBlocState {
   final int userId;
 
   WsStateOnlineUsersExitState({required this.userId});
+
+  @override
+  bool operator ==(Object other) =>
+      other is WsStateOnlineUsersJoinState &&
+          runtimeType == other.runtimeType &&
+          userId == other.userId;
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^
+      userId.hashCode;
 }
 
 class WsStateOnlineUsersJoinState extends WsBlocState {
   final int userId;
 
   WsStateOnlineUsersJoinState({required this.userId});
+
+  @override
+  bool operator ==(Object other) =>
+      other is WsStateOnlineUsersJoinState &&
+          runtimeType == other.runtimeType &&
+          userId == other.userId;
+
+  @override
+  int get hashCode =>
+      runtimeType.hashCode ^
+      userId.hashCode;
 }
 
 class WsOnlineUserTypingState extends WsBlocState{

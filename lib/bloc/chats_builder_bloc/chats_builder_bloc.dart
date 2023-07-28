@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:chat/services/messages/messages_api_provider.dart';
+import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/chat_builder_model.dart';
@@ -15,7 +16,7 @@ import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
 
 class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
-  final MessagesProvider messagesProvider;
+  final MessagesRepository messagesProvider;
   final WsBloc webSocketBloc;
   final ErrorHandlerBloc errorHandlerBloc;
   late final StreamSubscription newMessageSubscription;

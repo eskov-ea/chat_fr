@@ -139,7 +139,7 @@ import 'package:chat/services/user_profile/user_profile_api_provider.dart';
       //TODO: implement local message beind added first
       // TODO: if response status code is 200 else ..
       print("SEND IMAGE");
-      final sentMessage = await MessagesRepository().sendMessageWithFile(
+      final sentMessage = await MessagesRepository().sendMessageWithFileBase64(
           dialogId: dialogId,
           messageText: messageText,
           file: file,

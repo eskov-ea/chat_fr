@@ -75,6 +75,7 @@ class MessagesProvider {
     } on AppErrorException {
       rethrow;
     } catch (err) {
+      print("MessagesProvider err   $err");
       _logger.sendErrorTrace(message: "MessagesProvider.getNewUpdatesOnResume", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.getNewUpdatesOnResume");
     }

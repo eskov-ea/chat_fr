@@ -1,25 +1,15 @@
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:equatable/equatable.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import '../services/global.dart';
 import 'message_model.dart';
 
-// final DateFormat _dateFormater = DateFormat.yMMMd();
 
-@immutable
-class DialogData extends Equatable {
-  DialogData(
-      {required this.dialogId,
-      required this.chatType,
-      required this.userData,
-      required this.usersList,
-      required this.name,
-      required this.description,
-      required this.lastMessage,
-      required this.messageCount,
-      required this.chatUsers});
+
+class DialogData {
+
   final int dialogId;
   final DialogType chatType;
   final UserContact userData;
@@ -29,7 +19,19 @@ class DialogData extends Equatable {
   final String name;
   final String? description;
   final int messageCount;
-  final List<ChatUser>? chatUsers;
+  final List<ChatUser> chatUsers;
+
+  DialogData({
+    required this.dialogId,
+    required this.chatType,
+    required this.userData,
+    required this.usersList,
+    required this.name,
+    required this.description,
+    required this.lastMessage,
+    required this.messageCount,
+    required this.chatUsers
+  });
 
   static DialogData fromJson(json) {
     try {
@@ -50,13 +52,23 @@ class DialogData extends Equatable {
                   .toList()
               : null);
     } catch (err) {
+      print(err);
       throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "DialogData model, fromJson method");
     }
   }
 
   @override
-  List<Object?> get props =>
-      [dialogId, chatType, userData, usersList, lastMessage];
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is DialogData &&
+            runtimeType == other.runtimeType &&
+            listEquals(chatUsers, other.chatUsers) &&
+            chatUsers.length == other.chatUsers.length &&
+            other.dialogId == dialogId;
+  }
+  @override
+  int get hashCode => runtimeType.hashCode ^ chatUsers.length.hashCode ^ chatUsers.hashCode ^ dialogId.hashCode;
+
 }
 
 class DialogType {
@@ -101,7 +113,6 @@ class LastMessageData {
   int senderId;
   DateTime? time;
   List<MessageStatuses> statuses;
-  // final int statuses;
 
   LastMessageData(
       {required this.messageId,
@@ -127,6 +138,27 @@ class LastMessageData {
             statuses: MessageStatuses.fromJson(json["statuses"]),
           );
   }
+
+  static LastMessageData from(LastMessageData parent) => LastMessageData(
+      messageId: parent.messageId,
+      message: parent.message,
+      senderId: parent.senderId,
+      time: parent.time,
+      statuses: [...parent.statuses]
+  );
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is LastMessageData &&
+            runtimeType == other.runtimeType &&
+            messageId == other.messageId &&
+            statuses.length == other.statuses.length &&
+            statuses.last.statusId == other.statuses.last.statusId ;
+  }
+  @override
+  int get hashCode => runtimeType.hashCode ^ messageId.hashCode ^ statuses.length.hashCode ^ statuses.last.statusId.hashCode;
+
 }
 
 class DialogPartnerData {
@@ -235,17 +267,20 @@ class SenderMessageData {
 }
 
 class ChatUser {
-  ChatUser(
-      {required this.chatId,
-      required this.userId,
-      required this.chatUserRole,
-      required this.active,
-      required this.user});
   final int chatId;
   final int userId;
   final int chatUserRole;
   final bool active;
   final UserContact user;
+
+  ChatUser({
+    required this.chatId,
+    required this.userId,
+    required this.chatUserRole,
+    required this.active,
+    required this.user
+  });
+
 
   static ChatUser fromJson(json) {
     try {
@@ -259,6 +294,17 @@ class ChatUser {
       throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "ChatUser model");
     }
   }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is ChatUser &&
+            runtimeType == other.runtimeType &&
+            other.active == active &&
+            other.userId == userId;
+  }
+  int get hashCode => runtimeType.hashCode ^ userId.hashCode ^ active.hashCode;
+
 }
 
 class DialogId {

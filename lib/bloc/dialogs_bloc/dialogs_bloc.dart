@@ -13,6 +13,7 @@ import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/message_model.dart';
 import '../../services/dialogs/dialogs_api_provider.dart';
+import '../../services/dialogs/dialogs_repository.dart';
 import '../../services/logger/logger_service.dart';
 import '../ws_bloc/ws_bloc.dart';
 import '../ws_bloc/ws_event.dart';
@@ -20,7 +21,7 @@ import '../ws_bloc/ws_state.dart';
 
 
 class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
-  final DialogsProvider dialogsProvider;
+  final IDialogRepository dialogRepository;
   late final StreamSubscription newMessageSubscription;
   //TODO: remove WSBloc from this Bloc up to DialogsViewCubit
   final WsBloc webSocketBloc;
@@ -32,7 +33,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     required DialogsState initialState,
     required this.webSocketBloc,
     required this.errorHandlerBloc,
-    required this.dialogsProvider}) : super(initialState) {
+    required this.dialogRepository}) : super(initialState) {
         newMessageSubscription = webSocketBloc.stream.listen((streamState) {
           print("DialogsEvent   ${streamState}");
           if (streamState is WsStateReceiveNewMessage){
@@ -61,13 +62,15 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
             final newState = state.copyWith(dialogs: newDialogs);
             emit(newState);
           } else if (streamState is WsStateUpdateStatus){
-            final dialogs = state.dialogs;
-            final List<DialogData> newDialogs = [...dialogs!];
+            final copyState = state.from();
+            print("WsStateUpdateStatus   ${state.dialogs?.last.lastMessage.statuses.length}");
+            final List<DialogData> newDialogs = [...copyState.dialogs ?? <DialogData>[]];
 
-            for (var chat in newDialogs) {
-              if (chat.dialogId == streamState.statuses.last.dialogId) {
-                print("SHITMACUS   ${chat.lastMessage.statuses.length}");
-                chat.lastMessage.statuses.addAll(streamState.statuses);
+            for (var dialog in newDialogs) {
+              if (dialog.dialogId == streamState.statuses.last.dialogId) {
+                print("SHITMACUS   ${dialog.lastMessage.statuses.length}");
+                dialog.lastMessage.statuses.addAll(streamState.statuses);
+            print("WsStateUpdateStatus   ${dialog.lastMessage.statuses.length}");
               }
             }
             final newState = state.copyWith(dialogs: newDialogs);
@@ -82,7 +85,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
           }
         });
     on<DialogsEvent>((event, emit) async {
-      print("DialogsEvent   ${event}");
+      print("DialogsEvent   ${event}  ${state.dialogs}");
       if (event is DialogsLoadEvent) {
         await onDialogsLoadEvent(event, emit);
       } else if (event is ReceiveNewDialogEvent) {
@@ -105,11 +108,13 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       DialogsLoadEvent event, Emitter<DialogsState> emit
       ) async {
     try {
-      List<DialogData> dialogs = await dialogsProvider.getDialogs();
+      List<DialogData> dialogs = await dialogRepository.getDialogs();
       if (dialogs.isNotEmpty) sortDialogsByLastMessage(dialogs);
+      print("Dialogs  $dialogs");
       final newState = state.copyWith(dialogs: dialogs);
       emit(newState);
     } catch(err) {
+      print(err);
       err as AppErrorException;
       if (err.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
@@ -132,36 +137,37 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     }
     final newDialogs = [ ...state.dialogs!, event.dialog];
     final newState = state.copyWith(dialogs: newDialogs);
+    print(newState.dialogs?.length);
     emit(newState);
   }
 
   void onDialogUserJoinChatEvent(DialogUserJoinChatEvent event, emit) {
-    print("DialogUserJoinChatEvent");
     try {
-      // dialogsProvider.joinDialog(event.user.userId, event.dialogId);
-
-      final newDialogs = [ ...state.dialogs!];
+      final copyState = state.from();
+      final newDialogs = [ ...copyState.dialogs!];
       for (var dialog in newDialogs) {
         if(dialog.dialogId == event.dialogId) {
           dialog.usersList.add(event.user.user);
-          dialog.chatUsers?.add(event.user);
-          break;
+          dialog.chatUsers.add(event.user);
+          final newState = state.copyWith(dialogs: newDialogs);
+          emit(newState);
+          return;
         }
       }
-      final newState = state.copyWith(dialogs: newDialogs);
-      emit(newState);
     } catch (err) {
       print(err);
     }
   }
 
+
   void onDialogUserExitChatEvent(DialogUserExitChatEvent event, emit) {
-    final newDialogs = [ ...state.dialogs!];
+    final copyState = state.from();
+    final newDialogs = [ ...copyState.dialogs!];
     for (var dialog in newDialogs) {
       if(dialog.dialogId == event.dialogId) {
-        for (var user in dialog.chatUsers!) {
+        for (var user in dialog.chatUsers) {
           if (user.user.id == event.user.user.id) {
-            dialog.chatUsers!.remove(user);
+            dialog.chatUsers.remove(user);
             break;
           }
         }
@@ -176,17 +182,22 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       UpdateDialogLastMessageEvent event,
       Emitter<DialogsState> emit
       ) {
-    final newDialogs = [ ...state.dialogs!];
+    final copyState = state.from();
+    print("onUpdateDialogLastMessageEvent  ${state.dialogs?.first.lastMessage == copyState.dialogs?.first.lastMessage}");
+    print("onUpdateDialogLastMessageEvent  ${state.dialogs?.first.lastMessage.messageId}");
+    final newDialogs = [ ...copyState.dialogs!];
     for (var dialog in newDialogs) {
       if (dialog.dialogId == event.message.dialogId) {
+        print("onUpdateDialogLastMessageEvent  ${dialog.lastMessage.messageId}");
         dialog.lastMessage.message = event.message.message;
         dialog.lastMessage.messageId = event.message.messageId;
         dialog.lastMessage.senderId = event.message.senderId;
         dialog.lastMessage.time = event.message.rawDate;
         dialog.lastMessage.statuses = event.message.status;
 
-        newDialogs.remove(dialog);
-        newDialogs.insert(0, dialog);
+        // newDialogs.remove(dialog);
+        // newDialogs.insert(0, dialog);
+        print("onUpdateDialogLastMessageEvent  ${newDialogs.first.lastMessage.messageId}");
 
       }
     }
@@ -207,7 +218,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       Emitter<DialogsState> emit
       ){
     print("onDeleteDialogsEvent  ${state.dialogs?.length}");
-    final newState = state.copyWith(dialogs: []);
+    final newState = state.copyWith(dialogs: [], isErrorHappened:  false, searchQuery: "");
     emit(newState);
   }
 

@@ -23,10 +23,12 @@ class DialogsViewCubit extends Cubit<DialogsViewCubitState> {
   }
 
   void _onState(DialogsState state) {
+    print("onCubitState   $state  ${state.dialogs?.length}   ${state.dialogs?.first.chatUsers?.length}");
     final dialogs = state.dialogs;
     final isError = state.isErrorHappened;
     if (dialogs != null) {
       final newState = DialogsLoadedViewCubitState(dialogs: dialogs, searchQuery: "", isError: isError);
+      print("We emit state");
       emit(newState);
     }
   }

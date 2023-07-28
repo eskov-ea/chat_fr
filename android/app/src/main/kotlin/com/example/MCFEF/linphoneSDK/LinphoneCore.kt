@@ -30,20 +30,24 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
     fun login(username: String, password: String, domain: String, stunDomain: String, stunPort: String, host: String) {
         Log.i("SIP_REG", "Register in SIP with [ $username, $password, $domain ]")
 
-        writeSipAccountToStorage(username, password, domain, host)
+        writeSipAccountToStorage(username, password, domain, stunDomain, stunPort, host)
 
         val transportType = TransportType.Tcp
         val authInfo = Factory.instance().createAuthInfo(username, null, password, null, null, domain, null)
         val accountParams = core.createAccountParams()
         val identity = Factory.instance().createAddress("sip:$username@$domain")
         accountParams.identityAddress = identity
-        val address = Factory.instance().createAddress("sip:$host")
+
+        val address = Factory.instance().createAddress("sip:$domain")
+
 
         address?.transport = transportType
         accountParams.serverAddress = address
         accountParams.registerEnabled = true
         accountParams.pushNotificationAllowed = true
         accountParams.remotePushNotificationAllowed = true
+
+        Log.e("ADDRESS_HOST", "account domain: [${accountParams.domain}]   /    server address: [${accountParams.serverAddress?.domain}]")
 
         val nat = core.createNatPolicy()
 //        nat.stunServer = "aster.mcfef.com:3478"
@@ -93,13 +97,15 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
     }
 
-    private fun writeSipAccountToStorage(username: String, password: String, domain: String, host: String) {
+    private fun writeSipAccountToStorage(username: String, password: String, domain: String, stunDomain: String, stunPort: String,  host: String) {
         val sharedPreference =  context.getSharedPreferences(CoreContext.PREFERENCE_FILENAME,Context.MODE_PRIVATE)
         val editor = sharedPreference.edit()
         editor.putString("username",username)
         editor.putString("password",password)
         editor.putString("domain",domain)
         editor.putString("host",host)
+        editor.putString("stun_domain",stunDomain)
+        editor.putString("stun_port",stunPort)
         editor.apply()
     }
 

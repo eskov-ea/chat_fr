@@ -124,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       case AppErrorExceptionType.access:
         return 'Недостаточно прав доступа для получения данных, свяжитесь с администратором!';
       case AppErrorExceptionType.sessionExpired:
-        return 'Суссия устарела, обновите КЕШ';
+        return 'Сессия устарела, обновите КЕШ';
       case AppErrorExceptionType.other:
         return 'Произошла ошибка. Попробуйте еще раз';
       case AppErrorExceptionType.parsing:

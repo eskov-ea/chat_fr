@@ -37,7 +37,7 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
   List<ChatUser> stateUsers = [];
   //TODO: higt this functionality up to bloc
   final DialogsProvider _dialogsProvider = DialogsProvider();
-  // StreamSubscription? _dialogStateSubscription;
+  StreamSubscription? _dialogStateSubscription;
   bool isDeleteUserMode = false;
   bool isAdmin = false;
   String? userId;
@@ -45,16 +45,16 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
   @override
   void initState() {
     print("DIALOGSBLOC    ${BlocProvider.of<DialogsViewCubit>(context)}");
-    getStateUsers(null);
-    // _dialogStateSubscription = widget.dialogsViewCubit.dialogsBloc.stream.listen((event) {
-    //   getStateUsers(event);
-    // });
+    getInitialUsers();
+    _dialogStateSubscription = widget.dialogsViewCubit.dialogsBloc.stream.listen((state) {
+      getUpdatedUserList(state.dialogs);
+    });
     super.initState();
   }
 
   @override
   void dispose() {
-    // _dialogStateSubscription?.cancel();
+    _dialogStateSubscription?.cancel();
     super.dispose();
   }
 
@@ -66,11 +66,10 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
     }
   }
 
-  getStateUsers(event) async {
-    final userId = await DataProvider().getUserId();
-    print("getStateUsers INIT  $event");
+  getInitialUsers() async {
+    userId = await DataProvider().getUserId();
     stateUsers = [];
-    for (var user in widget.dialogData.chatUsers!) {
+    for (var user in widget.dialogData.chatUsers) {
       if (user.active) {
         stateUsers.add(user);
       }
@@ -79,6 +78,24 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
       }
     }
     setState(() {});
+  }
+  void getUpdatedUserList(List<DialogData>? dialogs) {
+    if(dialogs == null) return;
+    for( var dialog in dialogs) {
+      if (dialog.dialogId == widget.dialogData.dialogId) {
+        stateUsers = [];
+        for (var user in dialog.chatUsers) {
+          if (user.active) {
+            stateUsers.add(user);
+          }
+          if (user.userId.toString() == userId && user.chatUserRole == 1) {
+            isAdmin = true;
+          }
+        }
+        setState(() {});
+        return;
+      }
+    }
   }
 
   deleteUserFromChat(ChatUser user) {

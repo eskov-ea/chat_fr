@@ -151,7 +151,7 @@ class DialogsProvider {
     }
   }
 
-  Future exitDialog(userId, dialogId) async {
+  Future<void> exitDialog(userId, dialogId) async {
     final String? token = await _secureStorage.getToken();
 
     try {

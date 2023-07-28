@@ -8,14 +8,13 @@ import 'package:dart_pusher_channels/dart_pusher_channels.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/dialog_model.dart';
 import '../../models/message_model.dart';
-import '../../services/dialogs/dialogs_api_provider.dart';
-import '../../services/ws/ws_repository.dart';
+import '../../services/dialogs/dialogs_repository.dart';
 import '../../storage/data_storage.dart';
 
 class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
-  final _secureStorage = DataProvider();
+  final DataProvider secureStorage;
   final WsBlocState initialState;
-  final DialogsProvider _dialogsProvider = DialogsProvider();
+  final DialogRepository dialogsRepository;
   final MessagesProvider _messagesProvider = MessagesProvider();
   List<StreamSubscription> eventSubscriptions = [];
   List<Channel?> channels = [];
@@ -36,7 +35,11 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
     port: 6001,
   );
 
-  WsBloc({required this.initialState}) : super(initialState) {
+  WsBloc({
+    required this.initialState,
+    required this.dialogsRepository,
+    required this.secureStorage
+  }) : super(initialState) {
     on<WsBlocEvent>((event, emit) async {
       if (event is InitializeSocketEvent) {
         await onInitializeSocketEvent(event, emit);
@@ -74,17 +77,17 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
 
   onConnectingSocketEvent(event, emit) async {
     // TODO: check if it would be optimize listen to Dialogs Bloc to get dialogs
-    emit(Connected(socket: event.socket));
+    emit(Connected());
   }
 
   onInitializeSocketEvent(event, emit) async {
     emit(ConnectingState());
     print("socket onInitializeSocketEvent");
-    token = await _secureStorage.getToken();
-    final rawUserId = await _secureStorage.getUserId();
+    token = await secureStorage.getToken();
+    final rawUserId = await secureStorage.getUserId();
     userId = int.parse(rawUserId!);
     try {
-      final List<DialogData>? dialogs = await _dialogsProvider.getDialogs();
+      final List<DialogData>? dialogs = await dialogsRepository.getDialogs();
 
     socket = PusherChannelsClient.websocket(
         options: options,
@@ -107,7 +110,9 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
         ),
     );
 
+
     socket!.onConnectionEstablished.listen((event) async {
+      print("socket onInitializeSocketEvent connection established");
       for (var subscription in eventSubscriptions) {
         await subscription.cancel();
       }
@@ -121,7 +126,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
         print("CHATINFO   ->  $newDialog");
         for (var user in newDialog.usersList) {
           if (user.id == userId) {
-            add(WsEventNewDialogCreated(dialog: newDialog, socket: socket!));
+            add(WsEventNewDialogCreated(dialog: newDialog));
             return;
           }
         }
@@ -184,9 +189,8 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
         }
       }
     });
-    socket!.connect();
-
-    emit(Connected(socket: socket!));
+      socket!.connect();
+      emit(Connected());
     } catch (_) {
       emit(Unconnected());
     }
@@ -261,7 +265,6 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
 
   void onWsEventCloseConnection(event, emit) async {
     print("onWsEventCloseConnection");
-    emit(Unconnected());
     await generalEventSubscription?.cancel();
     for (var eventSubscription in eventSubscriptions) {
       await eventSubscription.cancel();
@@ -279,10 +282,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
     socket?.dispose();
     socket = null;
     print("onWsEventGetUpdatesOnResume start");
-    while (await hasNetwork() != true) {
-      print("CHECK FOR INTERNET CONNECTIVITY");
-      await Future.delayed(const Duration(seconds: 3));
-    }
+    emit(Unconnected());
   }
 
   void onWsEventReconnect(event, emit) async {
@@ -338,7 +338,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
       print("UPDATED_INFO DIALOGS    $newDialogs");
       for (var dialog in newDialogs) {
         //TODO: remove socket from event parameter
-        add(WsEventNewDialogCreated(dialog: dialog, socket: socket!));
+        add(WsEventNewDialogCreated(dialog: dialog));
       }
     }
     if (messagesCollection!.isNotEmpty) {
@@ -360,6 +360,10 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
   }
 }
 
+void onWsOnlineUsersJoinEvent (WsOnlineUsersJoinEvent event, Emitter<WsBlocState> emit) {
+  emit(WsStateOnlineUsersJoinState(userId: event.userId));
+}
+
 void onWsOnlineUsersInitialEvent(WsOnlineUsersInitialEvent event, Emitter<WsBlocState> emit) {
   emit(WsStateOnlineUsersInitialState(onlineUsers: event.onlineUsers));
 }
@@ -368,11 +372,8 @@ void onWsOnlineUsersExitEvent (WsOnlineUsersExitEvent event, Emitter<WsBlocState
   emit(WsStateOnlineUsersExitState(userId: event.userId));
 }
 
-void onWsOnlineUsersJoinEvent (WsOnlineUsersJoinEvent event, Emitter<WsBlocState> emit) {
-  emit(WsStateOnlineUsersJoinState(userId: event.userId));
-}
-
 void onWsOnlineUserTypingEvent(WsOnlineUserTypingEvent event, Emitter<WsBlocState> emit) {
+  print("onWsOnlineUserTypingEvent");
   emit(WsOnlineUserTypingState(
     clientEvent: event.clientEvent,
     dialogId: event.dialogId

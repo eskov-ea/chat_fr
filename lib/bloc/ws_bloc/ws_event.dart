@@ -63,9 +63,8 @@ class WsEventReceiveNewMessage extends WsBlocEvent{
 
 class WsEventNewDialogCreated extends WsBlocEvent {
   final DialogData dialog;
-  final PusherChannelsClient socket;
 
-  WsEventNewDialogCreated({required this.dialog, required this.socket});
+  WsEventNewDialogCreated({required this.dialog});
 }
 
 class WsOnlineUsersInitialEvent extends WsBlocEvent{
