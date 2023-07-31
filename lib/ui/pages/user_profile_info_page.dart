@@ -62,69 +62,69 @@ class UserProfileInfoPage extends StatelessWidget {
             UserProfileWidget(
               user: user,
             ),
-            const SizedBox(height: 30,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: const BoxDecoration(
-                    color: AppColors.backgroundLight,
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                  ),
-                  width: MediaQuery.of(context).size.width * 0.25,
-                  child: Column(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          callNumber(context, partnerId.toString());
-                        },
-                        icon: Icon(Icons.phone, color: AppColors.secondary,),
-                      ),
-                      Text("Аудио", style: TextStyle(color: AppColors.secondary),)
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: const BoxDecoration(
-                    color: AppColors.backgroundLight,
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                  ),
-                  width: MediaQuery.of(context).size.width * 0.25,
-                  child: Column(
-                    children: [
-                      IconButton(
-                        onPressed: (){
-                          customToastMessage(context, "Возможность видеозвонка еще не готова..");
-                        },
-                        icon: Icon(Icons.videocam_rounded, color: AppColors.secondary,)
-                      ),
-                      Text("Видео", style: TextStyle(color: AppColors.secondary),)
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: const BoxDecoration(
-                    color: AppColors.backgroundLight,
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                  ),
-                  width: MediaQuery.of(context).size.width * 0.25,
-                  child: Column(
-                    children: [
-                      IconButton(
-                        onPressed: (){
-                          customToastMessage(context, "Режим поиска пока не готов..");
-                        },
-                        icon: Icon(Icons.search, color: AppColors.secondary,)
-                      ),
-                      Text("Поиск", style: TextStyle(color: AppColors.secondary),)
-                    ],
-                  ),
-                )
-              ],
-            ),
+            // const SizedBox(height: 30,),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceAround,
+            //   children: [
+            //     Container(
+            //       padding: const EdgeInsets.all(10),
+            //       decoration: const BoxDecoration(
+            //         color: AppColors.backgroundLight,
+            //         borderRadius: BorderRadius.all(Radius.circular(12)),
+            //       ),
+            //       width: MediaQuery.of(context).size.width * 0.25,
+            //       child: Column(
+            //         children: [
+            //           IconButton(
+            //             onPressed: () {
+            //               callNumber(context, partnerId.toString());
+            //             },
+            //             icon: Icon(Icons.phone, color: AppColors.secondary,),
+            //           ),
+            //           Text("Аудио", style: TextStyle(color: AppColors.secondary),)
+            //         ],
+            //       ),
+            //     ),
+            //     Container(
+            //       padding: const EdgeInsets.all(10),
+            //       decoration: const BoxDecoration(
+            //         color: AppColors.backgroundLight,
+            //         borderRadius: BorderRadius.all(Radius.circular(12)),
+            //       ),
+            //       width: MediaQuery.of(context).size.width * 0.25,
+            //       child: Column(
+            //         children: [
+            //           IconButton(
+            //             onPressed: (){
+            //               customToastMessage(context, "Возможность видеозвонка еще не готова..");
+            //             },
+            //             icon: Icon(Icons.videocam_rounded, color: AppColors.secondary,)
+            //           ),
+            //           Text("Видео", style: TextStyle(color: AppColors.secondary),)
+            //         ],
+            //       ),
+            //     ),
+            //     Container(
+            //       padding: const EdgeInsets.all(10),
+            //       decoration: const BoxDecoration(
+            //         color: AppColors.backgroundLight,
+            //         borderRadius: BorderRadius.all(Radius.circular(12)),
+            //       ),
+            //       width: MediaQuery.of(context).size.width * 0.25,
+            //       child: Column(
+            //         children: [
+            //           IconButton(
+            //             onPressed: (){
+            //               customToastMessage(context, "Режим поиска пока не готов..");
+            //             },
+            //             icon: Icon(Icons.search, color: AppColors.secondary,)
+            //           ),
+            //           Text("Поиск", style: TextStyle(color: AppColors.secondary),)
+            //         ],
+            //       ),
+            //     )
+            //   ],
+            // ),
             const SizedBox(height: 30,),
           ],
         )

@@ -5,10 +5,28 @@ abstract class CallState  {
 
 }
 
-class UnconnectedCallServiceState extends CallState{}
+class UnconnectedCallServiceState extends CallState{
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is UnconnectedCallServiceState &&
+              runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+}
 
 class ConnectedCallServiceState extends CallState{
 
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is ConnectedCallServiceState &&
+              runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
 }
 
 class EndedCallServiceState extends CallState{
@@ -80,6 +98,26 @@ class ErrorCallServiceState extends CallState{
   int get hashCode => callerName.hashCode;
 }
 
-class ConnectedCallState extends CallState{}
+class ConnectedCallState extends CallState{
 
-class EndCallWithNoLogServiceState extends CallState{}
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is ConnectedCallState &&
+              runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+}
+
+class EndCallWithNoLogServiceState extends CallState{
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is EndCallWithNoLogServiceState &&
+              runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+}

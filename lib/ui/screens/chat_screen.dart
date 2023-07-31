@@ -73,7 +73,6 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
 
-  bool isSipServiceConnected = false;
   bool isOnline = false;
   bool isTyping = false;
   late final StreamSubscription usersViewCubitStateSubscription;
@@ -83,17 +82,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void initState() {
 
     setState(() {
-      isSipServiceConnected = !(BlocProvider.of<CallsBloc>(context).state is UnconnectedCallServiceState);
       isOnline = BlocProvider.of<UsersViewCubit>(context).state.onlineUsersDictionary[widget.partnerId] != null;
-    });
-    sipStateSubscription = BlocProvider.of<CallsBloc>(context).stream.listen((state) {
-      if (state is UnconnectedCallServiceState) {
-        setState(() {
-          isSipServiceConnected = false;
-        });
-      } else {
-        isSipServiceConnected = true;
-      }
     });
     usersViewCubitStateSubscription = BlocProvider.of<UsersViewCubit>(context).stream.listen((state) {
       setState(() {
@@ -286,24 +275,16 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
             ),
-            // if (widget.dialogData == null || widget.dialogData?.chatType.p2p == 1 && !kIsWeb) IconButton(
-            //   icon: const Icon(CupertinoIcons.video_camera, color: AppColors.secondary, size: 38,),
-            //   onPressed: () {},
-            // ),
             if (!isSelectedMode && !kIsWeb && ( widget.dialogData == null || widget.dialogData!.chatType.p2p == 1)) Padding(
               padding: const EdgeInsets.only(right: 20),
               child: IconButton(
                 icon: Icon(
                   CupertinoIcons.phone,
-                  color: isSipServiceConnected ? AppColors.secondary : AppColors.textFaded,
+                  color: AppColors.secondary ,
                   size: 30
                 ),
                 onPressed: () {
-                  if (!isSipServiceConnected) {
-                    customToastMessage(context, "Не удалось подключиться к Sip-серверу, попробуйте еще раз");
-                  } else {
-                    callNumber(context ,widget.partnerId.toString());
-                  }
+                  callNumber(context ,widget.partnerId.toString());
                 },
               ),
             ),

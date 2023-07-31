@@ -27,7 +27,6 @@ import '../../bloc/profile_bloc/profile_state.dart';
 import '../../bloc/user_bloc/user_event.dart';
 import '../../bloc/ws_bloc/ws_bloc.dart';
 import '../../bloc/ws_bloc/ws_event.dart';
-import '../../bloc/ws_bloc/ws_state.dart';
 import '../../factories/screen_factory.dart';
 import '../../models/message_model.dart';
 import '../../services/dialogs/dialogs_api_provider.dart';
@@ -38,8 +37,6 @@ import '../../storage/sqflite_database.dart';
 import '../../theme.dart';
 import '../../view_models/websocket/websocket_view_cubit.dart';
 import '../navigation/main_navigation.dart';
-import '../pages/new_message_page.dart';
-import '../widgets/icon_buttons.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import '../widgets/session_expires_widget.dart';
 import 'running_call_screen.dart';
@@ -163,7 +160,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       try {
         bool isJoined = false;
         final String? userId = await _dataProvider.getUserId();
-        // final dialogVC = BlocProvider.of<DialogsViewCubit>(context);
         final publicDialogs = await DialogsProvider().getPublicDialogs();
         if (publicDialogs.isNotEmpty) {
           for (var requiredChat in settings.autoJoinChats){
@@ -228,15 +224,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     BlocProvider.of<CallLogsBloc>(context).add(LoadCallLogsEvent(passwd: settings.asteriskUserPassword!));
   }
 
-  Future<void> showId () async {
-    // final id = await _dataProvider.getDeviceID();
-    final id = await MethodChannel("com.application.chat/method").invokeMethod('getDeviceToken');
-    print('token:  $id');
-  }
+
   @override
   void initState() {
     initialLoadData();
-    showId();
     WidgetsBinding.instance?.addObserver(this);
     userProfileDataSubscription =  BlocProvider.of<ProfileBloc>(context).stream.listen(_onBlocProfileStateChanged);
     _subscribeToErrorsBlocStream();
