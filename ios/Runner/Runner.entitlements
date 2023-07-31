@@ -6,7 +6,7 @@
 	<string>development</string>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.com.application.chat.notification</string>
+		<string>group.com.application.mcfef.chat.notification</string>
 	</array>
 </dict>
 </plist>

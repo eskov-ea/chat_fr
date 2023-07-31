@@ -9,7 +9,7 @@ import UserNotifications
 import linphonesw
 
 
-let APP_GROUP_ID = "group.com.application.chat.notification"
+let APP_GROUP_ID = "group.com.application.mcfef.chat.notification"
 //var LINPHONE_DUMMY_SUBJECT = "dummy subject"
 
 struct MsgData: Codable {

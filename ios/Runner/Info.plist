@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>MCFEF</string>
+	<string>MCFEF Int.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,29 +15,29 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>MCFEF</string>
+	<string>MCFEF Int.</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.5</string>
+	<string>1.0.1</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.5</string>
+	<string>1.0.1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_dartobservatory._tcp</string>
 	</array>
-	<key>NSUserNotificationsUsageDescription</key>
-	<string>Уведомления могут содержать напоминания, звуки и наклейки значков. Их конфигурирование возможно в Настройках.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Доступ к камере необходим для возможности сделать фото</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Микрофон будет использован для звонков внутри приложения и отправки голосовых сообщений</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Доступ к галерее необходим при отправке медиафайлов другим пользователям и возмозможности сохренения медиафайлов, полученных от других пользователей</string>
+	<key>NSUserNotificationsUsageDescription</key>
+	<string>Уведомления могут содержать напоминания, звуки и наклейки значков. Их конфигурирование возможно в Настройках.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

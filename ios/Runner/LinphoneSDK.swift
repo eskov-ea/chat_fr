@@ -53,7 +53,7 @@ class LinphoneSDK : ObservableObject
         let factory = Factory.Instance
         let configDir = factory.getConfigDir(context: nil)
         
-        try? mCore = Factory.Instance.createCore(configPath: "\(configDir)/MyConfig", factoryConfigPath: "", systemContext: nil)
+        try? mCore = Factory.Instance.createCore(configPath: "\(configDir)/linphonerc", factoryConfigPath: "", systemContext: nil)
         mProviderDelegate = CallKitProviderDelegate(context: self)
         // enabling push notifications management in the core
         mCore.callkitEnabled = true
@@ -216,7 +216,7 @@ class LinphoneSDK : ObservableObject
                 let accountParams = try mCore.createAccountParams()
                 let identity = try Factory.Instance.createAddress(addr: String("sip:" + username + "@" + domain))
                 try! accountParams.setIdentityaddress(newValue: identity)
-                let address = try Factory.Instance.createAddress(addr: String("sip:" + host))
+                let address = try Factory.Instance.createAddress(addr: String("sip:" + domain))
                 try address.setTransport(newValue: transport)
                 try accountParams.setServeraddress(newValue: address)
                 accountParams.registerEnabled = true
