@@ -10,10 +10,8 @@ class Logger {
   static Logger getInstance() {
     if (logger == null) {
       logger = Logger();
-      print("Logger: logger returned from new instance");
       return logger!;
     } else {
-      print("Logger: logger had been created early");
       return logger!;
     }
   }

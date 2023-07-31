@@ -197,7 +197,6 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
   }
 
   void _onSocketEvent(PusherChannelsReadEvent event) {
-    print("pusher:   ${event.rootObject}");
     if (event.rootObject["event"] == "pusher_internal:subscription_succeeded" && event.rootObject["data"] != null) {
       add(WsOnlineUsersInitialEvent(onlineUsers: jsonDecode(event.rootObject["data"])["presence"]["ids"]));
     } else if (event.rootObject["event"] == "pusher_internal:member_removed") {

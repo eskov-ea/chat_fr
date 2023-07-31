@@ -21,7 +21,7 @@ class DialogsLoadedViewCubitState extends DialogsViewCubitState {
           other is DialogsLoadedViewCubitState &&
               runtimeType == other.runtimeType &&
               //TODO: implement deep equality functionality to compare lists of collections
-              compareDialogDataLists2(dialogs, other.dialogs) &&
+              compareDialogDataLists(dialogs, other.dialogs) &&
               searchQuery == other.searchQuery &&
               isError == other.isError;
 

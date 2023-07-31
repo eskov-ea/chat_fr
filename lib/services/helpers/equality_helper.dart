@@ -19,6 +19,6 @@ bool compareDialogDataLists (List<DialogData>? list1, List<DialogData>? list2) {
 
 bool compareDialogDataLists2 (List<DialogData>? list1, List<DialogData>? list2) {
   final b = compareDialogDataLists(list1, list2);
-  print("compareDialogDataLists    $b    /  last mess: list1 - ${list1?.firstWhere((e) => e.dialogId == 193).lastMessage.statuses.length}    ///  list2 - ${list2?.firstWhere((e) => e.dialogId == 193).lastMessage.statuses.length}");
+  // print("compareDialogDataLists    $b    /  last mess: list1 - ${list1?.firstWhere((e) => e.dialogId == 193).lastMessage.statuses.length}    ///  list2 - ${list2?.firstWhere((e) => e.dialogId == 193).lastMessage.statuses.length}");
   return b;
 }

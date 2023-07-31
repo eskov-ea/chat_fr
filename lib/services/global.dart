@@ -381,7 +381,6 @@ import 'package:chat/services/user_profile/user_profile_api_provider.dart';
 
   // get days since last midnight
   final days = diffTime / 1000 / 60 / 60 / 24;
-  print("dateFormater:   days: $days  range: $todayDayRange   lastMid: $lastMidnight   rawDate:  $rawDate");
   if (days <= todayDayRange) {
     return DateFormat.Hm().format(rawDate.add(getTZ()));
     // return DateFormat.Hm().format(rawDate.add(getTZ()));

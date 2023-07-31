@@ -40,7 +40,6 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
             final dialogs = state.dialogs;
             final List<DialogData> newDialogs = [...dialogs!];
             for (var dialog in newDialogs) {
-              print("LastMessageData ${dialog.lastMessage}, ");
               if(dialog.dialogId == streamState.message.dialogId) {
                 if (dialog.lastMessage != null) {
                   dialog.lastMessage.message = streamState.message.message;
@@ -54,7 +53,6 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
 
                 } else {
                   final jsonMessage = makeJsonMessage(streamState.message);
-                  print("LastMessageData ${jsonMessage}, ");
                   dialog.lastMessage = LastMessageData.fromJson(jsonMessage);
                 }
               }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:chat/services/messages/messages_api_provider.dart';
 import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
