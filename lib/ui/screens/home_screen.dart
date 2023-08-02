@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return await sipChannel.invokeMethod('CHECK_FOR_RUNNING_CALL');
   }
 
-  Future<void> sipRegistration(UserProfileAsteriskSettings settings) async {
+  Future<void> sipRegistration(UserProfileAsteriskSettings settings, String? displayName) async {
     SipConfig.sipDomain = settings.userDomain;
     SipConfig.sipPrefix = settings.sipPrefix;
     try {
@@ -82,6 +82,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       print("Trying to register to SIP with    ${SipConfig.getPrefix()}$userId@${settings.asteriskHost} and password ${settings.asteriskUserPassword} and domain  ${settings.userDomain}");
       await sipChannel.invokeMethod('SIP_LOGIN', {
         "username": "${SipConfig.getPrefix()}$userId",
+        "display_name": displayName,
         "password": settings.asteriskUserPassword,
         "domain": settings.userDomain,
         "stun_domain": settings.stunHost,
@@ -190,7 +191,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         if (state.user != null && state.user?.userProfileSettings != null
             && state.user!.userProfileSettings!.asteriskUserPassword != null
             && state.user!.userProfileSettings!.asteriskHost != null) {
-          sipRegistration(state.user!.userProfileSettings!);
+          sipRegistration(state.user!.userProfileSettings!, myUserName);
         }
         getUserCallLog(state.user!.userProfileSettings!);
       } else {

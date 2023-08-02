@@ -21,6 +21,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import com.example.MCFEF.linphoneSDK.CoreContext
 import com.example.MCFEF.linphoneSDK.LinphoneCore
+import com.example.MCFEF.StorageManager
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.common.base.Charsets
 import com.google.firebase.messaging.FirebaseMessaging
@@ -91,10 +92,13 @@ class MainActivity: FlutterActivity() {
                 }
             }
             if (call.method == "SAVE_SIP_CONTACTS") {
-//                var data: String? = call.argument<String?>("data")
-//                var sm = StorageManager(context)
-//                data =
-//                sm.writeData(data!.toByteArray())
+//                var data= call.argument<String?>("data")
+//                if (data != null) {
+//                    var sm = StorageManager(context)
+//                    var bytes: ByteArray = data.toByteArray()
+////                    sm.writeData(bytes)
+//                    sm.writeData(data)
+//                }
             }
         }
 
@@ -104,16 +108,17 @@ class MainActivity: FlutterActivity() {
             Log.i("SIP_METHOD_CHANNEL", "${call.method}")
             if (call.method.equals("SIP_LOGIN")) {
                 val username = call.argument<String?>("username")
+                val displayName = call.argument<String?>("display_name")
                 val password = call.argument<String?>("password")
                 val domain = call.argument<String?>("domain")
                 val stunDomain = call.argument<String?>("stun_domain")
                 val stunPort = call.argument<String?>("stun_port")
                 val host = call.argument<String?>("host")
 
-                Log.w("SIP method channel:", "$username, $password, $domain")
+                Log.w("SIP method channel:", "$username, $password, $domain,  $displayName")
 
                 if (username != null && password != null && domain != null && stunDomain != null && stunPort != null && host != null) {
-                    linphoneCore.login(username, password, domain, stunDomain, stunPort, host)
+                    linphoneCore.login(username, password, domain, stunDomain, stunPort, host, displayName)
                 }
             } else if (call.method.equals("OUTGOING_CALL")) {
                 val number = call.argument<String?>("number")

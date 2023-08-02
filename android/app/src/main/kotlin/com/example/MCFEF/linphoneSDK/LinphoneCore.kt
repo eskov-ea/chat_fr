@@ -13,6 +13,7 @@ import com.example.MCFEF.makePlatformEventPayload
 import com.google.firebase.messaging.FirebaseMessaging
 import io.flutter.Log
 import org.linphone.core.*
+import com.example.MCFEF.StorageManager
 
 class LinphoneCore constructor(var core: Core, var context: Context) {
 
@@ -26,22 +27,29 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         "backgroundUrl" to "https://i.pravatar.cc/500",
         "actionColor" to "#4CAF50"
     )
+    val sm = StorageManager(context)
+    var contacts: String? = null
 
-    fun login(username: String, password: String, domain: String, stunDomain: String, stunPort: String, host: String) {
+    init {
+        contacts = sm.readData()
+    }
+
+    fun login(username: String, password: String, domain: String, stunDomain: String, stunPort: String, host: String, displayName: String?) {
         Log.i("SIP_REG", "Register in SIP with [ $username, $password, $domain ]")
 
-        writeSipAccountToStorage(username, password, domain, stunDomain, stunPort, host)
+        writeSipAccountToStorage(username, password, domain, stunDomain, stunPort, host, displayName)
 
         val transportType = TransportType.Tcp
         val authInfo = Factory.instance().createAuthInfo(username, null, password, null, null, domain, null)
         val accountParams = core.createAccountParams()
         val identity = Factory.instance().createAddress("sip:$username@$domain")
+        identity?.displayName = displayName
         accountParams.identityAddress = identity
 
         val address = Factory.instance().createAddress("sip:$domain")
 
-
         address?.transport = transportType
+
         accountParams.serverAddress = address
         accountParams.registerEnabled = true
         accountParams.pushNotificationAllowed = true
@@ -89,18 +97,13 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
         core.start()
 
-
-        if (!core.isPushNotificationAvailable) {
-//            Toast.makeText(context, "Something is wrong with the push setup!", Toast.LENGTH_LONG).show()
-            Log.w("PUSH", "${core.isVerifyServerCertificates}")
-        }
-
     }
 
-    private fun writeSipAccountToStorage(username: String, password: String, domain: String, stunDomain: String, stunPort: String,  host: String) {
+    private fun writeSipAccountToStorage(username: String, password: String, domain: String, stunDomain: String, stunPort: String,  host: String, displayName: String?) {
         val sharedPreference =  context.getSharedPreferences(CoreContext.PREFERENCE_FILENAME,Context.MODE_PRIVATE)
         val editor = sharedPreference.edit()
         editor.putString("username",username)
+        editor.putString("display_name", displayName)
         editor.putString("password",password)
         editor.putString("domain",domain)
         editor.putString("host",host)
@@ -112,6 +115,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
     fun readSipAccountFromStorageAndLogin() {
         val sharedPreference =  context.getSharedPreferences(CoreContext.PREFERENCE_FILENAME,Context.MODE_PRIVATE)
         val username = sharedPreference.getString("username", null)
+        val displayName = sharedPreference.getString("display_name", null)
         val password = sharedPreference.getString("password", null)
         val domain = sharedPreference.getString("domain", null)
         val stunDomain = sharedPreference.getString("stun_domain", null)
@@ -119,10 +123,21 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         val host = sharedPreference.getString("host", null)
 
         if (username != null && password != null && domain != null && stunDomain != null && stunPort != null && host != null) {
-            login(username, password, domain, stunDomain, stunPort, host)
+            login(username, password, domain, stunDomain, stunPort, host, displayName)
         } else {
             Toast.makeText(context, "Входящий вызов получен, но не может быть обработан. Запустите MCFEF вручную", Toast.LENGTH_LONG).show()
         }
+    }
+
+    fun getCallerFromContacts(id: String): String {
+        if (contacts == null) return id
+        val mapped = contacts!!.substring(1, contacts!!.length -1).trim()
+        val map: Map<String, String> = mapped.split(",").associate {
+            val (left, right) = it.split(":")
+            left.trim() to right.trim()
+        }
+        Log.i("SIP_CONTACTS", map[id].toString())
+        return map[id] ?: id
     }
 
     private val coreListener = object: CoreListenerStub() {
@@ -152,9 +167,10 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
             when (state) {
                 Call.State.IncomingReceived -> {
                     val caller = if(call.remoteAddress.displayName != null) {
-                        call.remoteAddress.displayName!!
+                        getCallerFromContacts(call.remoteAddress.username.toString())
+//                        call.remoteAddress.displayName!!
                     } else {
-                        call.remoteAddress.username.toString()
+                        getCallerFromContacts(call.remoteAddress.username.toString())
                     }
                     Log.w("ACTIVE_CALL", "IncomingReceived   $caller, ${call.remoteAddress.domain}, ${call.remoteAddress.scheme}, ${call.remoteAddress.displayName}, ${call.remoteAddress.transport}")
                     val args: Map<String, Any?> = mapOf(

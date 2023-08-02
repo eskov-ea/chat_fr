@@ -40,7 +40,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
       List<UserContact> users = await usersRepository.getAllUsers(token);
       final usersMap = usersRepository.getSipContacts(users);
       _methodChannel.invokeMethod("SAVE_SIP_CONTACTS", {
-        "data" : usersMap
+        "data" : usersMap.toString()
       });
       users.sort((a, b) => a.lastname.compareTo(b.lastname));
       print("STATE:   $state  ${state.searchQuery}");
