@@ -84,7 +84,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         "domain": settings.userDomain,
         "stun_domain": settings.stunHost,
         "stun_port": settings.stunPort,
-        "host": settings.asteriskHost
+        "host": settings.asteriskHost,
+        "cert": settings.asteriskCert
       });
     } catch (err) {
       print("sipRegistration error  $err");

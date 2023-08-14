@@ -34,17 +34,16 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         contacts = sm.readData()
     }
 
-    fun login(username: String, password: String, domain: String, stunDomain: String, stunPort: String, host: String, displayName: String?) {
+    fun login(username: String, password: String, domain: String, stunDomain: String, stunPort: String, host: String, displayName: String?, cert: String) {
         Log.i("SIP_REG", "Register in SIP with [ $username, $password, $domain ]")
 
-        writeSipAccountToStorage(username, password, domain, stunDomain, stunPort, host, displayName)
+        writeSipAccountToStorage(username, password, domain, stunDomain, stunPort, host, displayName, cert)
 
         val transportType = TransportType.Tls
         val authInfo = Factory.instance().createAuthInfo(username, null, password, null, null, domain, null)
 
-        authInfo.tlsCert = this::class.java.classLoader.getResource("assets/certs/aster.mcfef.com.txt").readText()
-//        authInfo.tlsCertPath = "assets/certs/aster.mcfef.com.txt"
-        Log.i("TLS_CERTIFICATE", authInfo.tlsCert.toString())
+        authInfo.tlsCert = cert
+//        authInfo.tlsCert = this::class.java.classLoader.getResource("assets/certs/aster.mcfef.com.txt").readText()
 
         val accountParams = core.createAccountParams()
         val identity = Factory.instance().createAddress("sip:$username@$domain")
@@ -104,7 +103,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
     }
 
-    private fun writeSipAccountToStorage(username: String, password: String, domain: String, stunDomain: String, stunPort: String,  host: String, displayName: String?) {
+    private fun writeSipAccountToStorage(username: String, password: String, domain: String, stunDomain: String, stunPort: String,  host: String, displayName: String?, cert: String) {
         val sharedPreference =  context.getSharedPreferences(CoreContext.PREFERENCE_FILENAME,Context.MODE_PRIVATE)
         val editor = sharedPreference.edit()
         editor.putString("username",username)
@@ -114,6 +113,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         editor.putString("host",host)
         editor.putString("stun_domain",stunDomain)
         editor.putString("stun_port",stunPort)
+        editor.putString("cert",cert)
         editor.apply()
     }
 
@@ -126,9 +126,10 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         val stunDomain = sharedPreference.getString("stun_domain", null)
         val stunPort = sharedPreference.getString("stun_port", null)
         val host = sharedPreference.getString("host", null)
+        val cert = sharedPreference.getString("cert", null)
 
-        if (username != null && password != null && domain != null && stunDomain != null && stunPort != null && host != null) {
-            login(username, password, domain, stunDomain, stunPort, host, displayName)
+        if (username != null && password != null && domain != null && stunDomain != null && stunPort != null && host != null && cert != null) {
+            login(username, password, domain, stunDomain, stunPort, host, displayName, cert)
         } else {
             Toast.makeText(context, "Входящий вызов получен, но не может быть обработан. Запустите MCFEF вручную", Toast.LENGTH_LONG).show()
         }
