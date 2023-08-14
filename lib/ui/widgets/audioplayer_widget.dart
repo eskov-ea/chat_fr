@@ -167,33 +167,37 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   Widget audioWidget() {
     return Container(
-      child: _playerIsInited && _dataIsLoaded
-          ? Row(
-            mainAxisAlignment: widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              _controlButtons(),
-              SizedBox(
-                width: 150,
-                child: Slider(
-                  value: position.inSeconds.toDouble(),
-                  min: 0,
-                  max: duration.inSeconds.toDouble(),
-                  onChanged: setSubscriptionDuration,
-                  // divisions: 100
-                ),
-              ),
-              // _slider(_mSubscriptionDuration, setSubscriptionDuration),
-              // _timing(snapshot.data),
-              Text(
-                getAudioMessageDuration(duration.inSeconds),
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              )
-            ],
-          )
-          : Center(
-              child: CircularProgressIndicator()
+      child: Row(
+        mainAxisAlignment: widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          _playerIsInited && _dataIsLoaded
+            ? _controlButtons()
+            : SizedBox(
+                width: 15,
+                height: 15,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                )
+            ),
+          SizedBox(
+            width: 150,
+            child: Slider(
+              value: position.inSeconds.toDouble(),
+              min: 0,
+              max: duration.inSeconds.toDouble(),
+              onChanged: setSubscriptionDuration,
+              // divisions: 100
+            ),
           ),
+          // _slider(_mSubscriptionDuration, setSubscriptionDuration),
+          // _timing(snapshot.data),
+          Text(
+            getAudioMessageDuration(duration.inSeconds),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          )
+        ],
+      )
     );
   }
 

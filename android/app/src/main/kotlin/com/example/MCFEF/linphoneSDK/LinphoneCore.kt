@@ -39,8 +39,13 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
         writeSipAccountToStorage(username, password, domain, stunDomain, stunPort, host, displayName)
 
-        val transportType = TransportType.Tcp
+        val transportType = TransportType.Tls
         val authInfo = Factory.instance().createAuthInfo(username, null, password, null, null, domain, null)
+
+        authInfo.tlsCert = this::class.java.classLoader.getResource("assets/certs/aster.mcfef.com.txt").readText()
+//        authInfo.tlsCertPath = "assets/certs/aster.mcfef.com.txt"
+        Log.i("TLS_CERTIFICATE", authInfo.tlsCert.toString())
+
         val accountParams = core.createAccountParams()
         val identity = Factory.instance().createAddress("sip:$username@$domain")
         identity?.displayName = displayName
@@ -286,7 +291,14 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
                 }
                 Call.State.Error -> {
+                    val caller = if(call.remoteAddress.displayName != null) {
+                        call.remoteAddress.displayName!!
+                    } else {
+                        call.remoteAddress.username.toString()
+                    }
+                    val args = makePlatformEventPayload("ERROR", call.remoteAddress.username, null)
 
+                    MainActivity.callServiceEventSink?.success(args)
                 }
                 Call.State.PausedByRemote -> {
 

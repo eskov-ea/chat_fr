@@ -15,6 +15,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../services/global.dart';
+import '../../services/helpers/message_sender_helper.dart';
 import '../../services/messages/messages_repository.dart';
 import '../../theme.dart';
 import '../../view_models/dialogs_page/dialogs_view_cubit.dart';
@@ -93,6 +94,7 @@ class _MessageWidgetState extends State<MessageWidget>  with SingleTickerProvide
       localFileAttachment = await isLocalFileExist(fileName: widget.file!.name);
       if (localFileAttachment != null) setState(() {});
       print("Check if file exists -->  $localFileAttachment");
+      print("Check if file exists  w filename-->  ${widget.file!.name}");
     }
   }
 
@@ -513,7 +515,11 @@ class _MessageTile extends StatelessWidget {
                             height: 30,
                           ),
                           GestureDetector(
-                            onTap: (){ _resendErroredMessage(messageId, dialogId, context, message, parentMessage, repliedMsgId); },
+                            onTap: (){
+                              resendErroredMessage(
+                                messageId: messageId, dialogId: dialogId, context: context, userId: userId,
+                                messageText: message, parentMessage: parentMessage, repliedMessageId: repliedMsgId);
+                              },
                             child: Container(
                               child: Text("Отправить снова",
                                 style: TextStyle(fontSize: 18),
@@ -548,50 +554,6 @@ class _MessageTile extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _resendErroredMessage(int messageId, int dialogId, BuildContext context,
-      String messageText, ParentMessage? parentMessage,
-      int? repliedMessageId) async {
-    print("_resendErroredMessage  -->  $messageId,  text  -->  $messageText");
-    final localMessage = createLocalMessage(
-      dialogId: dialogId,
-      messageText: messageText,
-      parentMessage: parentMessage,
-      replyedMessageId: repliedMessageId,
-      userId: userId
-    );
-    BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderDeleteLocalMessageEvent(dialogId: dialogId, messageId: messageId));
-    Navigator.of(context).pop();
-    try {
-      BlocProvider.of<ChatsBuilderBloc>(context).add(
-          ChatsBuilderAddMessageEvent(message: localMessage, dialog: dialogId));
-      // TODO: if response status code is 200 else ..
-      final sentMessage = await MessagesRepository().sendMessage(
-          dialogId: dialogId,
-          messageText: messageText,
-          parentMessageId: repliedMessageId);
-      print("sentMessage response  $sentMessage");
-      if (sentMessage == null) {
-        customToastMessage(context, "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");
-        return;
-      }
-      final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
-      BlocProvider.of<ChatsBuilderBloc>(context).add(
-          ChatsBuilderUpdateLocalMessageEvent(
-              message: message,
-              dialogId: dialogId,
-              localMessageId: localMessage.messageId));
-      BlocProvider.of<DialogsViewCubit>(context)
-          .updateLastDialogMessage(localMessage);
-      print("RESULT IS  $sentMessage ${BlocProvider.of<ChatsBuilderBloc>(context)}");
-    } catch (err) {
-      print("ERRRRRRRRROR  $err ");
-      // customToastMessage(context, "Ошибка: Произошла ошибка при отправке сообщения, попробуйте еще раз");
-      BlocProvider.of<ChatsBuilderBloc>(context).add(
-          ChatsBuilderUpdateMessageWithErrorEvent(message: localMessage, dialog: dialogId)
-      );
-    }
   }
 
   void _deleteErroredMessage(int messageId, int dialogId, BuildContext context) {

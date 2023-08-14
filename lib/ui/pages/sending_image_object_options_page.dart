@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:image/image.dart' as IMG;
+import 'package:path_provider/path_provider.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../models/message_model.dart';
@@ -23,7 +24,7 @@ Widget SendingObjectOptionsPage({
   required userId,
   required dialogId,
   required createDialogFn,
-  required parentMessageId
+  required ParentMessage? parentMessage
 }) {
 
   final _messageController = messageController;
@@ -33,6 +34,11 @@ Widget SendingObjectOptionsPage({
     if (dialogId == null) await createDialogFn;
     final XFile? result = await _picker.pickImage(source: ImageSource.gallery);
     if (result != null && !kIsWeb) {
+      final Directory documentDirectory = await getApplicationDocumentsDirectory();
+      final String path = documentDirectory.path;
+      final String tmpFileName = result.path.split('/').last;
+      final File file = File("$path/$tmpFileName");
+      file.writeAsBytesSync(await result.readAsBytes());
       Navigator.of(context).push(
           MaterialPageRoute(builder: (context) =>
               SendingImagePreview(
@@ -40,9 +46,9 @@ Widget SendingObjectOptionsPage({
                 username: username,
                 userId: userId,
                 dialogId: dialogId,
-                file: File(result.path),
+                file: file,
                 createDialogFn: createDialogFn,
-                parentMessageId: parentMessageId
+                parentMessage: parentMessage
               )
           )
       );
@@ -75,7 +81,7 @@ Widget SendingObjectOptionsPage({
           print("original bytes size  -->  ${bytes.lengthInBytes}");
 
           String base64 = base64Encode(bytes);
-          final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.name.split('.').last, parentMessageId: parentMessageId, bytes: bytes);
+          final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.name.split('.').last, parentMessageId: parentMessage?.parentMessageId, bytes: bytes);
           print(response);
           // final message = MessageData.fromJson(jsonDecode(response)["data"]);
           // BlocProvider.of<ChatsBuilderBloc>(context).add(
@@ -96,6 +102,11 @@ Widget SendingObjectOptionsPage({
     if (dialogId == null) await createDialogFn;
     final XFile? result = await _picker.pickImage(source: ImageSource.camera);
     if (result != null && !kIsWeb) {
+      final Directory documentDirectory = await getApplicationDocumentsDirectory();
+      final String path = documentDirectory.path;
+      final String tmpFileName = result.path.split('/').last;
+      final File file = File("$path/$tmpFileName");
+      file.writeAsBytesSync(await result.readAsBytes());
       Navigator.of(context).push(
           MaterialPageRoute(builder: (context) =>
               SendingImagePreview(
@@ -103,9 +114,9 @@ Widget SendingObjectOptionsPage({
                 username: username,
                 userId: userId,
                 dialogId: dialogId,
-                file: File(result.path),
+                file: file,
                 createDialogFn: createDialogFn,
-                parentMessageId: parentMessageId
+                parentMessage: parentMessage
               )
           )
       );
@@ -114,19 +125,25 @@ Widget SendingObjectOptionsPage({
 
   void _pickFileAndSend() async {
     final FilePickerResult? result = await FilePicker.platform.pickFiles();
-    if (result != null && !kIsWeb) {
+    if (result != null && result.paths.first != null && !kIsWeb) {
+      final docFile = File(result.paths.first!);
+      final Directory documentDirectory = await getApplicationDocumentsDirectory();
+      final String path = documentDirectory.path;
+      final String tmpFileName = result.paths.first!.split('/').last;
+      final File file = File("$path/$tmpFileName");
+      file.writeAsBytesSync(await docFile.readAsBytes());
       //TODO: refactor this repeated code
       Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) =>
-              SendingFilePreview(
-                controller: _messageController,
-                username: username,
-                userId: userId,
-                dialogId: dialogId,
-                file: File(result.files.single.path!),
-                parentMessageId: parentMessageId
-              )
+        MaterialPageRoute(builder: (context) =>
+          SendingFilePreview(
+            controller: _messageController,
+            username: username,
+            userId: userId,
+            dialogId: dialogId,
+            file: File(result.files.single.path!),
+            parentMessage: parentMessage
           )
+        )
       );
     }
     if (result != null && kIsWeb) {
@@ -151,7 +168,7 @@ Widget SendingObjectOptionsPage({
       try {
         final bytes = result.files.first.bytes;
         String base64 = base64Encode(bytes!);
-        final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.files.first.name.split('.').last, parentMessageId:parentMessageId, bytes: null);
+        final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.files.first.name.split('.').last, parentMessageId: parentMessage?.parentMessageId, bytes: null);
         print(response);
         final message = MessageData.fromJson(jsonDecode(response)["data"]);
         print("message -->  $message");

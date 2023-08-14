@@ -1,23 +1,20 @@
 import 'dart:convert';
-  import 'dart:io';
-  import 'dart:math';
+import 'dart:io';
 import 'package:chat/services/user_profile/user_profile_api_provider.dart';
-  import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
-  import 'package:flutter/foundation.dart';
-  import 'package:flutter/material.dart';
-  import 'package:flutter/services.dart';
-  import 'package:flutter_bloc/flutter_bloc.dart';
-  import 'package:intl/intl.dart';
-  import 'package:just_audio/just_audio.dart';
-  import 'package:path_provider/path_provider.dart';
-  import '../bloc/chats_builder_bloc/chats_builder_bloc.dart';
-  import '../bloc/chats_builder_bloc/chats_builder_event.dart';
-  import '../models/dialog_model.dart';
-  import '../models/message_model.dart';
-  import '../ui/navigation/main_navigation.dart';
-  import 'package:chat/view_models/auth/auth_view_cubit.dart';
-  import 'package:chat/models/message_model.dart' as parseTime;
-  import 'messages/messages_repository.dart';
+import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:path_provider/path_provider.dart';
+import '../bloc/chats_builder_bloc/chats_builder_bloc.dart';
+import '../bloc/chats_builder_bloc/chats_builder_event.dart';
+import '../models/dialog_model.dart';
+import '../ui/navigation/main_navigation.dart';
+import 'package:chat/view_models/auth/auth_view_cubit.dart';
+import 'messages/messages_repository.dart';
 
   AudioPlayer _player = AudioPlayer();
   Duration? TZ;
@@ -107,61 +104,6 @@ import 'package:chat/services/user_profile/user_profile_api_provider.dart';
     return minutes + " : " + secondsS;
   }
 
-  sendMessageWithPayload(
-      {required BuildContext context,
-        required String? messageText,
-        required String filetype,
-        required int? dialogId,
-        required File file,
-        required parentMessageId}) async {
-    if (dialogId == null) {
-      customToastMessage(context, "Отправьте сначала текстовое сообщение для создания диалога");
-    }
-    showModalBottomSheet(
-        isDismissible: false,
-        isScrollControlled: true,
-        backgroundColor: Colors.black54,
-        context: context,
-        builder: (BuildContext context) => Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            CircularProgressIndicator(),
-            SizedBox(
-              height: 30,
-            ),
-            Text(
-              "Отправка",
-              style: TextStyle(color: Colors.white, fontSize: 24),
-            )
-          ],
-        ));
-    try {
-      //TODO: implement local message beind added first
-      // TODO: if response status code is 200 else ..
-      print("SEND IMAGE");
-      final sentMessage = await MessagesRepository().sendMessageWithFileBase64(
-          dialogId: dialogId,
-          messageText: messageText,
-          file: file,
-          filetype: filetype,
-          parentMessageId: parentMessageId);
-      print('sentMessage   $sentMessage');
-      final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
-      // BlocProvider.of<ChatsBuilderBloc>(context)
-      //     .add(ChatsBuilderAddMessageEvent(message: message, dialog: dialogId!));
-      BlocProvider.of<ChatsBuilderBloc>(context)
-          .add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
-      // TODO: Can be refactored to named route
-      Navigator.pop(context);
-      Navigator.pop(context);
-      Navigator.pop(context);
-    } catch (err) {
-      customToastMessage(context, "Не удалось отправить сообщение. Попробуйте еще раз");
-      Navigator.pop(context);
-
-    }
-  }
-
   loadingInProgressModalWidget(BuildContext context, String message) {
     showModalBottomSheet(
         isDismissible: false,
@@ -171,7 +113,11 @@ import 'package:chat/services/user_profile/user_profile_api_provider.dart';
         builder: (BuildContext context) => Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(),
+            SizedBox(
+              width: 30,
+              height: 30,
+              child: const CircularProgressIndicator()
+            ),
             const SizedBox(
               height: 30,
             ),
@@ -187,41 +133,11 @@ import 'package:chat/services/user_profile/user_profile_api_provider.dart';
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  MessageData createLocalMessage({
-    required replyedMessageId,
-    required parentMessage,
-    required userId,
-    required dialogId,
-    required messageText,
-  }) =>
-      MessageData(
-        messageId: Random().nextInt(100000),
-        parentMessageId: replyedMessageId,
-        parentMessage: parentMessage,
-        senderId: userId,
-        dialogId: dialogId,
-        message: messageText,
-        messageDate: parseTime.getDate(DateTime.now()),
-        messageTime: parseTime.getTime(DateTime.now()),
-        rawDate: DateTime.now(),
-        file: null,
-        isError: false,
-        status: [
-          MessageStatuses(
-              id: 0,
-              userId: userId,
-              statusId: 0,
-              messageId: 0,
-              dialogId: dialogId!,
-              createdAt: DateTime.now().toString())
-        ],
-      );
-
   loadFileAndSaveLocally({required String fileName, required attachmentId}) async {
     final Directory documentDirectory = await getApplicationDocumentsDirectory();
     final String path = documentDirectory.path;
     final File file = File('$path/$fileName');
-
+    print("Documents directory is    $path");
     if (await file.exists()) {
       print("file exists");
       return file;
@@ -261,7 +177,7 @@ import 'package:chat/services/user_profile/user_profile_api_provider.dart';
     final Directory documentDirectory = await getApplicationDocumentsDirectory();
     final String path = documentDirectory.path;
     final File file = File('$path/$fileName');
-
+    print("isLocalFileExist   $path    //   $fileName");
     if (await file.exists()) {
       return file;
     }

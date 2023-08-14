@@ -1,13 +1,12 @@
-import 'dart:convert';
 import 'dart:io';
+import 'package:chat/models/message_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
-import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
-import '../../models/message_model.dart';
-import '../../services/global.dart';
-import '../../services/messages/messages_repository.dart';
+import '../../services/helpers/message_sender_helper.dart';
+import '../navigation/main_navigation.dart';
+
 
 class SendingImagePreview extends StatelessWidget {
   const SendingImagePreview({
@@ -17,7 +16,7 @@ class SendingImagePreview extends StatelessWidget {
     required this.file,
     required this.controller,
     required this.createDialogFn,
-    required this.parentMessageId,
+    required this.parentMessage,
     Key? key,
   }) : super(key: key);
 
@@ -27,7 +26,7 @@ class SendingImagePreview extends StatelessWidget {
   final File file;
   final createDialogFn;
   final TextEditingController controller;
-  final int? parentMessageId;
+  final ParentMessage? parentMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -93,19 +92,36 @@ class SendingImagePreview extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () async {
+                showModalBottomSheet(
+                  isDismissible: false,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.black54,
+                  context: context,
+                  builder: (BuildContext context) => Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      CircularProgressIndicator(),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Text(
+                        "Отправка",
+                        style: TextStyle(color: Colors.white, fontSize: 24),
+                      )
+                    ],
+                ));
                 final messageText = controller.text;
-                final String filetype = file.path.split('.').last;
                 controller.clear();
                 if(dialogId == null) await createDialogFn();
-                sendMessageWithPayload(
-                  file: file,
-                  //TODO: first check if dialog exists
-                  dialogId: dialogId,
-                  filetype: filetype,
-                  messageText: messageText,
-                  context: context,
-                  parentMessageId: parentMessageId
+                sendMessageUnix(
+                    bloc: BlocProvider.of<ChatsBuilderBloc>(context),
+                    messageText: messageText,
+                    file: file,
+                    dialogId: dialogId!,
+                    userId: userId,
+                    parentMessage: parentMessage
                 );
+                Navigator.popUntil(context, (route) => route.settings.name == MainNavigationRouteNames.chatPage);
               },
               style: ElevatedButton.styleFrom(
                 shape: const CircleBorder(),

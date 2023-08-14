@@ -63,6 +63,7 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
     setState(() {
       isDownloading = true;
     });
+
     final rawFile = await loadFileAndSaveLocally(
         attachmentId: widget.file?.attachmentId, fileName: widget.file!.name);
     if (rawFile != null) {

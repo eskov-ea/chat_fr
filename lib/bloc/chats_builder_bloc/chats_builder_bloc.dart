@@ -15,15 +15,17 @@ import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
 
 class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
-  final MessagesRepository messagesProvider;
+  final MessagesRepository messagesRepository;
   final WsBloc webSocketBloc;
   final ErrorHandlerBloc errorHandlerBloc;
+  final DataProvider dataProvider;
   late final StreamSubscription newMessageSubscription;
 
   ChatsBuilderBloc({
     required this.webSocketBloc,
+    required this.dataProvider,
     required this.errorHandlerBloc,
-    required this.messagesProvider}) : super( ChatsBuilderState.initial()){
+    required this.messagesRepository}) : super( ChatsBuilderState.initial()){
     newMessageSubscription = webSocketBloc.stream.listen((streamState) {
       print("streamState   ${streamState}");
       if (streamState is WsStateReceiveNewMessage){
@@ -79,9 +81,9 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     print("onChatsBuilderLoadMessagesEvent");
     // TODO: refactor this part if necessary
     // emit(ChatsBuilderInProgressState(chats: state.chats, counter: state.counter));
-    final userId = await DataProvider().getUserId();
+    final userId = await dataProvider.getUserId();
     try {
-      List<MessageData> messages = await messagesProvider.getMessages(
+      List<MessageData> messages = await messagesRepository.getMessages(
           userId, event.dialogId, event.pageNumber);
       var chatExist = false;
       final Map<String, bool> newMessagesDictionary = state.messagesDictionary;
@@ -132,7 +134,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       ) async {
     print("TRY TO ADD MESSAGE");
     if (state.messagesDictionary["${event.message.messageId}"] != null) {
-      print("Message already in the list");
+      print("Message already in the list   ${event.message.messageId}");
       return;
     } else {
       for (var chat in state.chats) {
@@ -159,7 +161,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       ChatsBuilderUpdateStatusMessagesEvent event, Emitter<ChatsBuilderState> emit
       ) async {
     print("UPDATE CHAT MESSAGES STATUSES");
-    messagesProvider.updateMessageStatuses(dialogId: event.dialogId);
+    messagesRepository.updateMessageStatuses(dialogId: event.dialogId);
   }
 
   void onChatsBuilderReceivedUpdatedMessageStatusesEvent(
@@ -192,6 +194,9 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         print("ChatsBuilderUpdateLocalMessageEvent");
         final message = chat.messages.firstWhere((element) => element.messageId == event.localMessageId);
         message.messageId = event.message.messageId;
+        if (event.message.file != null) {
+          message.file!.attachmentId = event.message.file!.attachmentId;
+        }
         message.status.addAll(event.message.status);
         state.messagesDictionary["${event.message.messageId}"] = true;
       }

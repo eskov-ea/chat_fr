@@ -155,7 +155,7 @@ class ParentMessage {
 }
 
 class MessageAttachmentsData {
-  const MessageAttachmentsData({
+  MessageAttachmentsData({
     required this.attachmentId,
     required this.chatMessageId,
     required this.name,
@@ -163,7 +163,7 @@ class MessageAttachmentsData {
     required this.preview,
     required this.content
   });
-  final int attachmentId;
+  int attachmentId;
   final int chatMessageId;
   final String name;
   final String filetype;

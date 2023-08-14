@@ -335,7 +335,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     if (replyMessage != null) _ReplyMessageBar(replyMessage: replyMessage!, cancelReplyMessage: cancelReplyMessage, senderName: senderReplyName!,),
                     ActionBar(userId: widget.userId, partnerId: widget.partnerId, dialogId: widget.dialogData?.dialogId,
                       setDialogData: setDialogData, rootWidget: widget, username: widget.username,
-                      focusNode: focusNode, setRecording: setRecording, isRecording: isRecording, replyedMessageId: replyedMessageId, dialogData: widget.dialogData,
+                      focusNode: focusNode, setRecording: setRecording, isRecording: isRecording, dialogData: widget.dialogData,
                       dialogCubit: widget.dialogCubit, cancelReplyMessage: cancelReplyMessage, parentMessage: replyedParentMsg, isSelectedMode: isSelectedMode,
                       selected: selected, deleteMessages: deleteMessages
                     ),

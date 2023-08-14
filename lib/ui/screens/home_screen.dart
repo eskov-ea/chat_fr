@@ -18,8 +18,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../../bloc/calls_bloc/calls_bloc.dart';
 import '../../bloc/calls_bloc/calls_state.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
-import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
-import '../../bloc/chats_builder_bloc/chats_builder_state.dart';
 import '../../bloc/error_handler_bloc/error_types.dart';
 import '../../bloc/profile_bloc/profile_bloc.dart';
 import '../../bloc/profile_bloc/profile_events.dart';
@@ -28,10 +26,9 @@ import '../../bloc/user_bloc/user_event.dart';
 import '../../bloc/ws_bloc/ws_bloc.dart';
 import '../../bloc/ws_bloc/ws_event.dart';
 import '../../factories/screen_factory.dart';
-import '../../models/message_model.dart';
 import '../../services/dialogs/dialogs_api_provider.dart';
 import '../../services/global.dart';
-import '../../services/messages/messages_repository.dart';
+import '../../services/helpers/message_sender_helper.dart';
 import '../../services/push_notifications/push_notification_service.dart';
 import '../../storage/sqflite_database.dart';
 import '../../theme.dart';
@@ -283,22 +280,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           print("CALL_ENDED  ${state.callData.id}");
           BlocProvider.of<CallLogsBloc>(context).add(AddCallToLogEvent(call: state.callData));
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
-        } else if(state is EndCallWithNoLogServiceState) {
-          print("NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
-          print("CALL_ENDED  ");
-          Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
         } else if(state is ErrorCallServiceState) {
+          Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
           final List<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs;
           int? dialogId;
+          String caller = '';
           final String? userId = await _dataProvider.getUserId();
           if (dialogs != null && dialogs.isNotEmpty) {
+            caller = state.callerName.substring(1, state.callerName.length);
             for (var dialog in dialogs) {
               if (dialog.chatType.typeId == 1) {
                 for (var user in dialog.usersList) {
-                  if (user.id.toString() == state.callerName) {
+                  if (user.id.toString() == caller) {
                     dialogId = dialog.dialogId;
-                    print("FIND DIALOG  -->  ${dialog.usersList} , ${dialog.dialogId}");
-                    // break;
+                    break;
                   }
                 }
               }
@@ -307,11 +302,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
           if (_isPushSent == false) {
             _isPushSent = true;
-            dialogId ??= await createDialog(context, state.callerName);
+            final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);
+            dialogId ??= await createDialog(chatsBuilderBloc: chatsBuilderBloc, partnerId: int.parse(state.callerName));
             _pushNotificationService.sendMissCallPush(
-                userId: state.callerName, userName: myUserName);
-            print("PUSH CALUSERID   ${state.callerName}");
-            _sendMessage(context: context, userId: int.parse(userId!), dialogId: dialogId);
+                userId: caller, userName: myUserName);
+            sendMessageUnix(
+              userId: int.parse(userId!),
+              dialogId: dialogId!,
+              bloc: chatsBuilderBloc,
+              messageText: "Пропущенный звонок",
+              file: null,
+              parentMessage: null,
+            );
           }
         } else if (state is EndCallWithNoLogServiceState) {
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
@@ -401,51 +403,51 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
 /**
  * Two functions when the called user haven't respond
- * on the call. We send a message with information that there is an missed call
+ * to the call. We send a message with information that there is an missed call
  * and the second if there is no dialog between users - we create dialog and send message
  */
 //TODO: refactor to one global function
-_sendMessage({required context, required userId, required dialogId}) async {
-  try {
-    final messageText = "Пропущенный звонок";
-    final localMessage = createLocalMessage(replyedMessageId: null, parentMessage: null, userId: userId, dialogId: dialogId, messageText: messageText);
-    print("localMessage  $localMessage");
-    BlocProvider.of<ChatsBuilderBloc>(context).add(
-        ChatsBuilderAddMessageEvent(message: localMessage, dialog: dialogId!)
-    );
-    // TODO: if response status code is 200 else ..
-    final sentMessage = await MessagesRepository().sendMessage(dialogId: dialogId!, messageText: messageText, parentMessageId: null);
-    print("sentMessage  $sentMessage");
-    if (sentMessage == null) {
-      customToastMessage(context, "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");
-      return;
-    }
-    final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
-    BlocProvider.of<ChatsBuilderBloc>(context).add(
-        ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: dialogId!, localMessageId: localMessage.messageId)
-    );
-    BlocProvider.of<DialogsViewCubit>(context).updateLastDialogMessage(localMessage);
-  } catch (err) {
-    print("_sendMessage error $err");
-  }
-  BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
-}
-
-createDialog(context, partnerId) async {
-    final newDialog = await DialogsProvider().createDialog(chatType: 1, users: [partnerId], chatName: "p2p", chatDescription: null, isPublic: false);
-    print("SENDING_PUSH   ${newDialog?.dialogId}");
-    if (newDialog != null) {
-      final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);
-      final initLength = chatsBuilderBloc.state.chats.length;
-      whenFinishAddingDialog(Stream<ChatsBuilderState> source) async {
-        chatsBuilderBloc.add(ChatsBuilderLoadMessagesEvent(dialogId: newDialog.dialogId));
-        await for (var value in source) {
-          if (value.chats.length > initLength) {
-            return;
-          }
-        }
-      }
-      await whenFinishAddingDialog(chatsBuilderBloc.stream);
-      return newDialog.dialogId;
-    }
-}
+// _sendMessage({required context, required userId, required dialogId}) async {
+//   try {
+//     final messageText = "Пропущенный звонок";
+//     final localMessage = createLocalMessage(replyedMessageId: null, parentMessage: null, userId: userId, dialogId: dialogId, messageText: messageText);
+//     print("localMessage  $localMessage");
+//     BlocProvider.of<ChatsBuilderBloc>(context).add(
+//         ChatsBuilderAddMessageEvent(message: localMessage, dialog: dialogId!)
+//     );
+//     // TODO: if response status code is 200 else ..
+//     final sentMessage = await MessagesRepository().sendMessage(dialogId: dialogId!, messageText: messageText, parentMessageId: null);
+//     print("sentMessage  $sentMessage");
+//     if (sentMessage == null) {
+//       customToastMessage(context, "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");
+//       return;
+//     }
+//     final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
+//     BlocProvider.of<ChatsBuilderBloc>(context).add(
+//         ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: dialogId!, localMessageId: localMessage.messageId)
+//     );
+//     BlocProvider.of<DialogsViewCubit>(context).updateLastDialogMessage(localMessage);
+//   } catch (err) {
+//     print("_sendMessage error $err");
+//   }
+//   BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
+// }
+//
+// createDialog(context, partnerId) async {
+//     final newDialog = await DialogsProvider().createDialog(chatType: 1, users: [partnerId], chatName: "p2p", chatDescription: null, isPublic: false);
+//     print("SENDING_PUSH   ${newDialog?.dialogId}");
+//     if (newDialog != null) {
+//       final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);
+//       final initLength = chatsBuilderBloc.state.chats.length;
+//       whenFinishAddingDialog(Stream<ChatsBuilderState> source) async {
+//         chatsBuilderBloc.add(ChatsBuilderLoadMessagesEvent(dialogId: newDialog.dialogId));
+//         await for (var value in source) {
+//           if (value.chats.length > initLength) {
+//             return;
+//           }
+//         }
+//       }
+//       await whenFinishAddingDialog(chatsBuilderBloc.stream);
+//       return newDialog.dialogId;
+//     }
+// }

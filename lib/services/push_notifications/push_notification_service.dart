@@ -28,14 +28,14 @@ class PushNotificationService {
           },
           body: postData
       );
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 302) {
         return;
       } else if (response.statusCode == 401) {
         throw AppErrorException(AppErrorExceptionType.auth, null,
-            "MessagesProvider.loadAttachmentData");
+            "PushNotificationService.sendMissCallPush");
       } else {
         throw AppErrorException(AppErrorExceptionType.getData, null,
-            "MessagesProvider.loadAttachmentData");
+            "PushNotificationService.MessagesProvider");
       }
     } on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.loadAttachmentData");

@@ -1,9 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:chat/bloc/chats_builder_bloc/chats_builder_state.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/services/global.dart';
+import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,13 +15,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
-import '../../bloc/error_handler_bloc/error_types.dart';
 import '../../models/dialog_model.dart';
 import '../../services/dialogs/dialogs_api_provider.dart';
-import '../../services/messages/messages_api_provider.dart';
+import '../../services/helpers/message_sender_helper.dart';
 import '../../services/messages/messages_repository.dart';
 import '../../theme.dart';
-import '../../view_models/chats_builder_view/chat_view_cubit.dart';
 import '../pages/sending_image_object_options_page.dart';
 import 'glowing_action_button.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -40,7 +39,6 @@ class ActionBar extends StatefulWidget {
   final Function cancelReplyMessage;
   final Widget rootWidget;
   final FocusNode focusNode;
-  final int? replyedMessageId;
   final Function setRecording;
   final bool isRecording;
   final DialogData? dialogData;
@@ -54,7 +52,6 @@ class ActionBar extends StatefulWidget {
     required this.userId,
     required this.dialogId,
     required this.partnerId,
-    required this.replyedMessageId,
     required this.setDialogData,
     required this.cancelReplyMessage,
     required this.rootWidget,
@@ -80,15 +77,14 @@ class ActionBarState extends State<ActionBar> {
   final TextEditingController _messageController = TextEditingController();
   bool sendButton = false;
   bool isSendButtonDisabled = false;
-  // final _audioRecorder = Record();
   Codec _codec = Codec.aacMP4;
   String _mPath = 'voice.mp4';
   bool _mRecorderIsInited = false;
-  double _mSubscriptionDuration = 0;
   StreamSubscription? _recorderSubscription;
   int recordingDuration = 0;
   double dbLevel = 0;
   final FlutterSoundRecorder _mRecorder = FlutterSoundRecorder();
+  final Logger _logger = Logger.getInstance();
 
   @override
   void initState() {
@@ -103,10 +99,7 @@ class ActionBarState extends State<ActionBar> {
   void dispose() {
     stopRecorder(_mRecorder);
     cancelRecorderSubscriptions();
-
-    // Be careful : you must `close` the audio session when you have finished with it.
     _mRecorder.closeRecorder();
-
     super.dispose();
   }
   void cancelRecorderSubscriptions() {
@@ -117,15 +110,13 @@ class ActionBarState extends State<ActionBar> {
   }
   Future<void> openTheRecorder() async {
     // if (!kIsWeb) {
-      // var status = await Permission.microphone.request();
-      // var status = true;
-      // if (status != true) {
-        // throw RecordingPermissionException('Microphone permission not granted');
-      // }
+    //   var status = await Permission.microphone.request();
+    //   if (status != true) {
+    //     throw RecordingPermissionException('Microphone permission not granted');
+    //   }
     // }
     final path = await getTemporaryDirectory();
     _mPath = path.path + '/' + _mPath;
-    print("_mPath   -->  $_mPath");
     await _mRecorder.openRecorder();
     if (!await _mRecorder.isEncoderSupported(_codec) && kIsWeb) {
       // _codec = Codec.opusWebM;
@@ -157,7 +148,7 @@ class ActionBarState extends State<ActionBar> {
     _mRecorderIsInited = true;
   }
   Future<void> init() async {
-    print("INIR RECORDER");
+    print("INIT RECORDER");
     await openTheRecorder();
     _mRecorder.setSubscriptionDuration(const Duration(milliseconds: 100));
     _recorderSubscription = _mRecorder.onProgress!.listen((e) {
@@ -184,6 +175,8 @@ class ActionBarState extends State<ActionBar> {
       setState(() {});
     } catch (err) {
       print("ERROR recording audio startRecorder  -->  $err ");
+      customToastMessage(context, "Произошла ошибка при записи голосового сообщения");
+      _logger.sendErrorTrace(message: "func record: Произошла ошибка при записи голосового сообщения", err: err.toString());
     }
   }
 
@@ -195,6 +188,8 @@ class ActionBarState extends State<ActionBar> {
       record(recorder);
     } catch (err) {
       print("ERROR recording an audio message  $err");
+      customToastMessage(context, "Произошла ошибка при записи голосового сообщения");
+      _logger.sendErrorTrace(message: "func start: Произошла ошибка при записи голосового сообщения", err: err.toString());
     }
   }
 
@@ -296,19 +291,30 @@ class ActionBarState extends State<ActionBar> {
                   child: GestureDetector(
                     onLongPressStart: (details){
                       print('START LONG PRESS');
-                      // TODO: implement recording voice messages functionality
                       widget.setRecording(true);
                       if (sendButton == false) _start(_mRecorder);
                     },
                     onLongPressEnd: (details) async {
                       print('END LONG PRESS');
-                      final recordedAudio = await _stop(_mRecorder);
-                      widget.setRecording(false);
-                      final File file = File(_mPath!);
-                      final String filetype = file.path.split('.').last;
-                      print("recordedAudio  --> $recordedAudio");
-                      _sendAudioMessage(file.path, widget.userId, widget.dialogId, filetype );
-                      },
+                      try {
+                        final recordedAudioPath = await _stop(_mRecorder);
+                        print("Record message path:   $recordedAudioPath");
+                        widget.setRecording(false);
+                        final File record = File(recordedAudioPath!);
+                        final Directory documentDirectory = await getApplicationDocumentsDirectory();
+                        final String path = documentDirectory.path;
+                        final String filetype = _mPath.split('.').last;
+                        final int r = Random().nextInt(100000);
+                        final String uniq = DateTime.now().microsecondsSinceEpoch.toString();
+                        final String filename = "voice_m_$r$uniq.$filetype";
+                        final File file = File("$path/$filename");
+                        file.writeAsBytesSync(await record.readAsBytes());
+                        _sendAudioMessage(file, widget.userId, widget.dialogId);
+                      } catch (err) {
+                        print("Record message error:   $err");
+                        customToastMessage(context, "Произошла ошибка при записи голосового сообщения");
+                      }
+                    },
                     child: GlowingActionButton(
                       color: isSendButtonDisabled ? Colors.grey : widget.isRecording ? Colors.red : AppColors.accent ,
                       icon: !kIsWeb
@@ -365,7 +371,7 @@ class ActionBarState extends State<ActionBar> {
         username: widget.username,
         userId: widget.userId,
         createDialogFn: createDialogFn,
-        parentMessageId: widget.replyedMessageId
+        parentMessage: widget.parentMessage
       ),
     );
   }
@@ -378,62 +384,84 @@ class ActionBarState extends State<ActionBar> {
   }
 
   _sendMessage(context, ParentMessage? parentMessage) async {
-    final messageText = _messageController.text;
-    final localMessage = createLocalMessage(replyedMessageId: widget.replyedMessageId,
-        dialogId: widget.dialogId!, messageText: messageText, parentMessage: widget.parentMessage, userId: widget.userId);
-    print("localMessage  ${localMessage}");
-    try {
-      _messageController.clear();
-      BlocProvider.of<ChatsBuilderBloc>(context).add(
-          ChatsBuilderAddMessageEvent(message: localMessage, dialog: widget.dialogId!)
-      );
-      // TODO: if response status code is 200 else ..
-      final sentMessage = await MessagesRepository().sendMessage(dialogId: widget.dialogId!, messageText: messageText, parentMessageId: widget.replyedMessageId);
-      print("sentMessage response  $sentMessage");
-      if (sentMessage == null) {
-        customToastMessage(context, "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");
-        return;
-      }
-      final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
-      BlocProvider.of<ChatsBuilderBloc>(context).add(
-          ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: widget.dialogId!, localMessageId: localMessage.messageId)
-      );
-      widget.dialogCubit.updateLastDialogMessage(localMessage);
-    } catch (err) {
-      print(err);
-      customToastMessage(context, "Ошибка: Произошла ошибка при отправке сообщения, попробуйте еще раз");
-      BlocProvider.of<ChatsBuilderBloc>(context).add(
-          ChatsBuilderUpdateMessageWithErrorEvent(message: localMessage, dialog: widget.dialogId!)
-      );
-    }
-    BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogId!));
-    setState(() {
-      isSendButtonDisabled = false;
-    });
+    sendMessageUnix(
+        bloc: BlocProvider.of<ChatsBuilderBloc>(context),
+        messageText: _messageController.text,
+        dialogId: widget.dialogId!,
+        userId: widget.userId,
+        parentMessage: parentMessage,
+        file: null
+    );
+    _messageController.clear();
   }
-  void _sendAudioMessage (String filePath, userId, dialogId, String filetype) async {
-    if (dialogId == null) {
-      await createDialogAndSendMessage(context, widget.rootWidget);
-      dialogId = widget.dialogId;
-    }
-    try {
-      final sentMessage = await MessagesProvider().sendAudioMessage(
-          filePath: filePath,
-          userId: userId,
-          dialogId: dialogId,
-          filetype: filetype,
-          parentMessageId: widget.replyedMessageId);
-      final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
-      print("SENTMESSAGE  -->  ${message.file}");
-      // BlocProvider.of<ChatsBuilderBloc>(context).add(
-      //     ChatsBuilderAddMessageEvent(message: message, dialog: widget.dialogId!)
-      // );
-    } catch (err) {
-      //TODO: add local message with error to save the data
-      customToastMessage(context, "Ошибка: Произошла ошибка при отправке сообщения, попробуйте еще раз");
-    }
+  // _sendMessage(context, ParentMessage? parentMessage) async {
+  //   final messageText = _messageController.text;
+  //   final localMessage = createLocalMessage(replyedMessageId: widget.replyedMessageId,
+  //       dialogId: widget.dialogId!, messageText: messageText, parentMessage: widget.parentMessage, userId: widget.userId);
+  //   print("localMessage  ${localMessage}");
+  //   try {
+  //     _messageController.clear();
+  //     BlocProvider.of<ChatsBuilderBloc>(context).add(
+  //         ChatsBuilderAddMessageEvent(message: localMessage, dialog: widget.dialogId!)
+  //     );
+  //     // TODO: if response status code is 200 else ..
+  //     final sentMessage = await MessagesRepository().sendMessage(dialogId: widget.dialogId!, messageText: messageText, parentMessageId: widget.replyedMessageId, filetype: null, filePath: null, );
+  //     print("sentMessage response  $sentMessage");
+  //     if (sentMessage == null) {
+  //       customToastMessage(context, "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");
+  //       return;
+  //     }
+  //     final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
+  //     BlocProvider.of<ChatsBuilderBloc>(context).add(
+  //         ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: widget.dialogId!, localMessageId: localMessage.messageId)
+  //     );
+  //     widget.dialogCubit.updateLastDialogMessage(localMessage);
+  //   } catch (err) {
+  //     print(err);
+  //     customToastMessage(context, "Ошибка: Произошла ошибка при отправке сообщения, попробуйте еще раз");
+  //     BlocProvider.of<ChatsBuilderBloc>(context).add(
+  //         ChatsBuilderUpdateMessageWithErrorEvent(message: localMessage, dialog: widget.dialogId!)
+  //     );
+  //   }
+  //   BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogId!));
+  //   setState(() {
+  //     isSendButtonDisabled = false;
+  //   });
+  // }
 
+  _sendAudioMessage(File file, userId, dialogId) {
+    sendMessageUnix(
+        bloc: BlocProvider.of<ChatsBuilderBloc>(context),
+        messageText: _messageController.text,
+        file: file,
+        dialogId: widget.dialogId!,
+        userId: widget.userId,
+        parentMessage: widget.parentMessage
+    );
   }
+
+  // void _sendAudioMessage (String filePath, userId, dialogId, String filetype) async {
+  //   if (dialogId == null) {
+  //     await createDialogAndSendMessage(context, widget.rootWidget);
+  //     dialogId = widget.dialogId;
+  //   }
+  //   try {
+  //     final sentMessage = await MessagesProvider().sendAudioMessage(
+  //         filePath: filePath,
+  //         dialogId: dialogId,
+  //         filetype: filetype,
+  //         parentMessageId: widget.replyedMessageId);
+  //     final message = MessageData.fromJson(jsonDecode(sentMessage!)["data"]);
+  //     print("SENTMESSAGE  -->  ${message.file}");
+  //     // BlocProvider.of<ChatsBuilderBloc>(context).add(
+  //     //     ChatsBuilderAddMessageEvent(message: message, dialog: widget.dialogId!)
+  //     // );
+  //   } catch (err) {
+  //     //TODO: add local message with error to save the data
+  //     customToastMessage(context, "Ошибка: Произошла ошибка при отправке сообщения, попробуйте еще раз");
+  //   }
+  // }
+
   createDialogAndSendMessage(context, rootWidget) async {
     print("CREATE DIALOG");
     //TODO: optimize two sending message and create dialog-sending message methods  ---- first need to create dialog and then send message
@@ -459,7 +487,6 @@ class ActionBarState extends State<ActionBar> {
       if (newDialog!= null) {
         widget.setDialogData(widget.rootWidget, newDialog);
       }
-      // _sendMessage(context);
     } catch(err) {
       print("createDialogAndSendMessage error  $err");
     }

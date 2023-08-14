@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'models/message_model.dart';
 
 abstract class Helpers {

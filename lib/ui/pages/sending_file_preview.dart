@@ -7,7 +7,9 @@ import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../models/message_model.dart';
 import '../../services/global.dart';
+import '../../services/helpers/message_sender_helper.dart';
 import '../../services/messages/messages_repository.dart';
+import '../navigation/main_navigation.dart';
 
 class SendingFilePreview extends StatefulWidget {
   const SendingFilePreview({
@@ -16,7 +18,7 @@ class SendingFilePreview extends StatefulWidget {
     required this.dialogId,
     required this.file,
     required this.controller,
-    required this.parentMessageId,
+    required this.parentMessage,
     Key? key
   }) : super(key: key);
 
@@ -25,7 +27,7 @@ class SendingFilePreview extends StatefulWidget {
   final int? dialogId;
   final File file;
   final TextEditingController controller;
-  final int? parentMessageId;
+  final ParentMessage? parentMessage;
 
   @override
   State<SendingFilePreview> createState() => _SendingFilePreviewState();
@@ -147,18 +149,36 @@ class _SendingFilePreviewState extends State<SendingFilePreview> {
             ),
             ElevatedButton(
               onPressed: () {
+                showModalBottomSheet(
+                  isDismissible: false,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.black54,
+                  context: context,
+                  builder: (BuildContext context) => Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      CircularProgressIndicator(),
+                      SizedBox(
+                        height: 30,
+                      ),
+                      Text(
+                        "Отправка",
+                        style: TextStyle(color: Colors.white, fontSize: 24),
+                      )
+                    ],
+                ));
                 final messageText = widget.controller.text;
                 final String filetype = widget.file.path.split('.').last;
                 widget.controller.clear();
-                sendMessageWithPayload(
-                  file: widget.file,
-                  //TODO: first check if dialog exists
-                  dialogId: widget.dialogId!,
-                  filetype: filetype,
-                  messageText: messageText,
-                  context: context,
-                  parentMessageId: widget.parentMessageId
+                sendMessageUnix(
+                    bloc: BlocProvider.of<ChatsBuilderBloc>(context),
+                    messageText: messageText,
+                    file: widget.file,
+                    dialogId: widget.dialogId!,
+                    userId: widget.userId,
+                    parentMessage: widget.parentMessage
                 );
+                Navigator.popUntil(context, (route) => route.settings.name == MainNavigationRouteNames.chatPage);
               },
               style: ElevatedButton.styleFrom(
                 shape: const CircleBorder(),

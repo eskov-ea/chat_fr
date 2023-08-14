@@ -45,30 +45,17 @@ String gerCallReason(String reason) {
 }
 
 String getDateFromUnix(json) {
-  print("getDateFromUnix js $json");
   try {
     final seconds = int.parse(json);
     final date =  DateTime.fromMillisecondsSinceEpoch(seconds * 1000).subtract(getTZ());
-    print("getDateFromUnix  $date");
     return date.toString();
   } catch (_) {
     final date = DateTime.parse(json).subtract(getTZ());
-    print("getDateFromUnix $date");
     return date.toString();
   }
 }
 
-//
-// String getDateFromUnix(json) {
-//   final seconds = int.parse(json);
-//   final date =  DateTime.fromMillisecondsSinceEpoch(seconds).toString();
-//   // print("getDateFromUnix   ${date}");
-//   return date;
-// }
-//
-// String getDate(json) {
 String getDate(json) {
   final date = DateTime.parse(json);
-  print("getDateFromUnix  $json   ${date}");
   return date.toString();
 }

@@ -74,8 +74,9 @@ class MyApp extends StatelessWidget{
             lazy: false,
             create: (context) => ChatsBuilderBloc(
               errorHandlerBloc: errorHandlerBloc,
-              messagesProvider: MessagesRepository(),
-              webSocketBloc: websocketBloc
+              messagesRepository: MessagesRepository(),
+              webSocketBloc: websocketBloc,
+              dataProvider: DataProvider()
             )..add(ChatsBuilderCreateEvent())
         ),
         BlocProvider(

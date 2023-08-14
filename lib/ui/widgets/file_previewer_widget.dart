@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:chat/services/messages/messages_repository.dart';
+import 'package:chat/theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -93,7 +94,7 @@ class _FilePreviewerWidgetState extends State<FilePreviewerWidget> {
               children: [
                 const Icon( Icons.arrow_circle_up),
                 const SizedBox(width: 20,),
-                Text(widget.fileName)
+                Text(widget.fileName, style: TextStyle(color: AppColors.textFaded),)
               ],
             ),
           ),

@@ -81,7 +81,7 @@ class MessagesProvider {
     }
   }
 
-  Future<String?> sendMessage({
+  Future<String> sendTextMessage({
     required dialogId,
     required messageText,
     required parentMessageId
@@ -179,7 +179,7 @@ class MessagesProvider {
     }
   }
 
-  Future<int?> createDialogAndSendMessage ({required userId, required partnerId, required message}) async {
+  Future<int?> createDialog ({required userId, required partnerId, required message}) async {
     try {
       final response = await http.post(
         Uri.parse('https://web-notifications.ru/api/dialogs'),
@@ -242,28 +242,25 @@ class MessagesProvider {
     }
   }
 
-  Future sendAudioMessage({
-    required filePath,
-    required userId,
-    required dialogId,
-    required filetype,
-    required parentMessageId
+  Future<String> sendAudioMessage({
+    required String? filename,
+    required int dialogId,
+    required String? messageText,
+    required String? filetype,
+    required int? parentMessageId,
+    required String? content
   }) async {
     print('SENDING MESSAGE WITh AUDIO FILE');
     try {
       final String? token = await _secureStorage.getToken();
-      final bytes = File(filePath).readAsBytesSync();
-      String base64file = base64Encode(bytes);
-      final uniq = DateTime.now().microsecondsSinceEpoch.toString();
-      print(base64file);
       final postData = jsonEncode(<String, Object>{
         'data': {
           'message': '',
           'parent_id': parentMessageId,
           'file': {
-            'name': '$uniq.$filetype',
+            'name': '$filename.$filetype',
             'preview': base64icon,
-            'content': base64file
+            'content': content
           }
         }
       });
@@ -294,29 +291,27 @@ class MessagesProvider {
   }
 
   Future<String> sendMessageWithFileBase64({
-    required filePath,
-    required dialogId,
-    required messageText,
-    required filetype,
-    required parentMessageId
+    required String? filename,
+    required int dialogId,
+    required String? messageText,
+    required String? filetype,
+    required int? parentMessageId,
+    required Uint8List? bytes,
+    required String? content
   }) async {
     print('SENDING MESSAGE WITh FILE');
     try {
       final String? token = await _secureStorage.getToken();
-      final bytes = File(filePath.path).readAsBytesSync();
-      final uniq = DateTime.now().microsecondsSinceEpoch.toString();
-      String base64Image = base64Encode(bytes);
-      final preview = resizeImage(bytes);
-      print("base64file   $base64Image");
+      final preview = resizeImage(bytes!);
 
       final postData = jsonEncode(<String, Object>{
         'data': {
           'message': '$messageText',
           'parent_id': parentMessageId,
           'file': {
-            'name': '$uniq.$filetype',
+            'name': '$filename.$filetype',
             'preview': preview ?? base64icon,
-            'content': base64Image
+            'content': content
           }
         }
       });
@@ -351,7 +346,7 @@ class MessagesProvider {
     required String base64,
     required int dialogId,
     required String filetype,
-    required int parentMessageId,
+    required int? parentMessageId,
     required Uint8List? bytes
   }) async {
     print('SENDING MESSAGE WITh FILE WEB');
