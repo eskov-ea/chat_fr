@@ -30,12 +30,10 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       print("streamState   ${streamState}");
       if (streamState is WsStateReceiveNewMessage){
         print("ChatsBuilderAddMessageEvent");
-        add(ChatsBuilderAddMessageEvent(message: streamState.message, dialog: streamState.message.dialogId));
+        add(ChatsBuilderAddMessageEvent(message: streamState.message, dialogId: streamState.message.dialogId));
       } else if (streamState is WsStateUpdateStatus){
-        print("WsStateUpdateStatus ololo   ${streamState.statuses.last.statusId}");
+        print("WsStateUpdateStatus ololo   ${streamState.statuses}");
         add(ChatsBuilderReceivedUpdatedMessageStatusesEvent(statuses: streamState.statuses));
-      } else if (streamState is WsStateNewDialogCreated) {
-
       }
     });
     print("newMessageSubscription $newMessageSubscription");
@@ -44,8 +42,6 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       print("ChatsBuilderEvent   $event");
       if(event is ChatsBuilderLoadMessagesEvent) {
         await onChatsBuilderLoadMessagesEvent(event, emit);
-      } else if(event is ChatsBuilderCreateEvent) {
-        await onChatsBuilderCreateEvent(event, emit);
       } else if (event is ChatsBuilderAddMessageEvent) {
         onChatsBuilderAddMessageEvent(event, emit);
       } else if (event is ChatsBuilderUpdateStatusMessagesEvent) {
@@ -69,12 +65,6 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
   }
 
 
-  Future<void> onChatsBuilderCreateEvent(
-    ChatsBuilderCreateEvent event, Emitter<ChatsBuilderState> emit
-      ) async {
-    print("onChatsBuilderCreateEvent");
-  }
-
   Future<void> onChatsBuilderLoadMessagesEvent (
       ChatsBuilderLoadMessagesEvent event, Emitter<ChatsBuilderState> emit
       ) async {
@@ -85,6 +75,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     try {
       List<MessageData> messages = await messagesRepository.getMessages(
           userId, event.dialogId, event.pageNumber);
+      print("Loaded messages:   pg:  ${event.pageNumber}   $messages");
       var chatExist = false;
       final Map<String, bool> newMessagesDictionary = state.messagesDictionary;
       for (var chat in state.chats) {
@@ -106,7 +97,6 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       }
       // final newState = state.copyWith(updatedChats: state.chats, updatedCounter: state.counter++);
       emit(ChatsBuilderState(
-        counter: state.counter+1,
         chats: state.chats,
         messagesDictionary: newMessagesDictionary,
         error: null,
@@ -119,7 +109,6 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       } else {
         final errorState = state.copyWith(
           updatedChats: state.chats,
-          updatedCounter: state.counter,
           updatedMessagesDictionary: state.messagesDictionary,
           error: e,
           isError: true
@@ -137,15 +126,17 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       print("Message already in the list   ${event.message.messageId}");
       return;
     } else {
+      final newDictionary = state.messagesDictionary;
       for (var chat in state.chats) {
-        if (chat.chatId == event.dialog) {
+        if (chat.chatId == event.dialogId) {
           print("ADD MESSAGE  ${event.message}");
           chat.messages.insert(0, event.message);
+          newDictionary["${event.message.messageId}"] = true;
         }
       }
       emit(state.copyWith(
-          updatedChats: state.chats, updatedCounter: state.counter+1));
-      final userId = await DataProvider().getUserId();
+          updatedChats: state.chats));
+      final userId = await dataProvider.getUserId();
       if (event.message.senderId.toString() != userId) {
         FlutterRingtonePlayer.play(
           android: AndroidSounds.notification,
@@ -167,42 +158,45 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
   void onChatsBuilderReceivedUpdatedMessageStatusesEvent(
       ChatsBuilderReceivedUpdatedMessageStatusesEvent event, Emitter<ChatsBuilderState> emit
       ){
-    print("onChatsBuilderReceivedUpdatedMessageStatusesEvent");
     //TODO: implement chat dictionary not list
-    final chats = state.chats;
+    final chats = state.from();
     for (final MessageStatuses status in event.statuses) {
       for (var chat in chats) {
         if (chat.chatId == status.dialogId) {
           for (var message in chat.messages) {
-            if (message.messageId == status.messageId) {
+            if (message.messageId == status.messageId &&
+            !message.status.contains(status)) {
               message.status.add(status);
             }
           }
         }
       }
     }
-    final newState = state.copyWith(updatedChats: state.chats, updatedCounter: state.counter+1);
-    print("onChatsBuilderReceivedUpdatedMessageStatusesEvent    ${state.counter}   ${newState.counter}  ${state.chats.length}  ${newState.chats.length}");
+    final newState = state.copyWith(updatedChats: chats);
     emit(newState);
   }
 
   onChatsBuilderUpdateLocalMessageEvent(
       ChatsBuilderUpdateLocalMessageEvent event, Emitter<ChatsBuilderState> emit
       ){
-    for (var chat in state.chats) {
+    final messagesDictionary = state.messagesDictionary;
+    final chats = state.from();
+    for (var chat in chats) {
       if (chat.chatId == event.dialogId) {
-        print("ChatsBuilderUpdateLocalMessageEvent");
+        print("ChatsBuilderUpdateLocalMessageEvent  ${event.message}   ${chat.messages.first.status}");
         final message = chat.messages.firstWhere((element) => element.messageId == event.localMessageId);
         message.messageId = event.message.messageId;
         if (event.message.file != null) {
           message.file!.attachmentId = event.message.file!.attachmentId;
         }
         message.status.addAll(event.message.status);
-        state.messagesDictionary["${event.message.messageId}"] = true;
+        messagesDictionary.remove("${event.localMessageId}");
+        messagesDictionary["${event.message.messageId}"] = true;
       }
     }
-    emit(state.copyWith(updatedChats: state.chats,
-        updatedCounter: state.counter+1));
+    print("ChatsBuilderUpdateLocalMessageEvent    ${state.chats.first.messages.first.status}");
+    print("ChatsBuilderUpdateLocalMessageEvent    ${chats.first.messages.first.status}");
+    emit(state.copyWith(updatedChats: chats, updatedMessagesDictionary: messagesDictionary));
   }
 
   Future<void> onChatsBuilderUpdateLocalMessageWithErrorEvent (
@@ -222,7 +216,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       }
     }
     emit(state.copyWith(
-        updatedChats: chats, updatedCounter: state.counter+1));
+        updatedChats: chats));
   }
 
   @override
@@ -255,7 +249,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     final newState = [...state.chats];
     final ChatsData chat = newState.firstWhere((el) => el.chatId == event.dialogId);
     chat.messages.removeWhere((message) => message.messageId == event.messageId);
-    emit(state.copyWith(updatedChats: newState, updatedCounter: state.counter+1, updatedMessagesDictionary: state.messagesDictionary));
+    emit(state.copyWith(updatedChats: newState, updatedMessagesDictionary: state.messagesDictionary));
   }
 
   void onChatsBuilderDeleteMessagesEvent(
@@ -277,7 +271,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       messagesToDelete.forEach((m) {
         dialog.messages.remove(m);
       });
-      emit(state.copyWith(updatedChats: newState, updatedCounter: state.counter+1, updatedMessagesDictionary: state.messagesDictionary));
+      emit(state.copyWith(updatedChats: newState, updatedMessagesDictionary: state.messagesDictionary));
     }
   }
 }

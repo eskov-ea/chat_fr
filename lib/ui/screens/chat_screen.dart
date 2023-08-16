@@ -76,7 +76,6 @@ class _ChatScreenState extends State<ChatScreen> {
   bool isOnline = false;
   bool isTyping = false;
   late final StreamSubscription usersViewCubitStateSubscription;
-  late final StreamSubscription sipStateSubscription;
 
   @override
   void initState() {
@@ -219,7 +218,6 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     focusNode.dispose();
     usersViewCubitStateSubscription.cancel();
-    sipStateSubscription.cancel();
     super.dispose();
   }
 

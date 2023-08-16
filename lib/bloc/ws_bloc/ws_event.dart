@@ -67,6 +67,13 @@ class WsEventNewDialogCreated extends WsBlocEvent {
   WsEventNewDialogCreated({required this.dialog});
 }
 
+class WsEventDialogDeleted extends WsBlocEvent {
+  final DialogData dialog;
+  final String channelName;
+
+  WsEventDialogDeleted({required this.dialog, required this.channelName});
+}
+
 class WsOnlineUsersInitialEvent extends WsBlocEvent{
   final List onlineUsers;
 

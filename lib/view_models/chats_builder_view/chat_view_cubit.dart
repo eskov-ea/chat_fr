@@ -18,10 +18,10 @@ class ChatBuilderScreenViewCubit extends Cubit<ChatScreenViewCubitState> {
   }
 
   void _onState(ChatsBuilderState state) {
-    if (state is ChatsBuilderInProgressState) {
-      emit(ChatScreenViewCubitInProgressState());
-      return;
-    }
+    // if (state is ChatsBuilderInProgressState) {
+    //   emit(ChatScreenViewCubitInProgressState());
+    //   return;
+    // }
     emit(ChatScreenViewCubitSuccessState(chats: state.chats));
   }
 

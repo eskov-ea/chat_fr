@@ -5,8 +5,6 @@ import 'package:chat/models/message_model.dart';
 abstract class ChatsBuilderEvent{}
 
 
-class ChatsBuilderCreateEvent extends ChatsBuilderEvent {}
-
 class ChatsBuilderUpdateStatusMessagesEvent extends ChatsBuilderEvent {
   final int dialogId;
 
@@ -55,11 +53,11 @@ class ChatsBuilderDeleteMessagesEvent extends ChatsBuilderEvent {
 
 class ChatsBuilderAddMessageEvent extends ChatsBuilderEvent {
   final MessageData message;
-  final int dialog;
+  final int dialogId;
 
   ChatsBuilderAddMessageEvent({
     required this.message,
-    required this.dialog,
+    required this.dialogId,
   });
 }
 

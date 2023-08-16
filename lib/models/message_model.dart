@@ -65,11 +65,10 @@ class MessageData extends Equatable{
   };
 
   @override
-  List<Object?> get props => [messageId, senderId, message, messageDate,
-    messageTime, status, rawDate];
+  List<Object?> get props => [messageId, senderId, status];
 }
 
-class MessageStatuses {
+class MessageStatuses extends Equatable {
   const MessageStatuses({
     required this.id,
     required this.userId,
@@ -99,6 +98,10 @@ class MessageStatuses {
     }
     return msgStatusesList;
   }
+
+  @override
+  List<Object?> get props => [id, statusId];
+
 }
 
 

@@ -154,7 +154,7 @@ class LastMessageData {
             runtimeType == other.runtimeType &&
             messageId == other.messageId &&
             statuses.length == other.statuses.length &&
-            statuses.last.statusId == other.statuses.last.statusId ;
+            statuses.last.statusId == other.statuses.last.statusId;
   }
   @override
   int get hashCode => runtimeType.hashCode ^ messageId.hashCode ^ statuses.length.hashCode ^ statuses.last.statusId.hashCode;

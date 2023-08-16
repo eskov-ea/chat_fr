@@ -41,7 +41,7 @@ sendMessageUnix({
   try {
 // 2. Add local message to tray
     bloc.add(
-      ChatsBuilderAddMessageEvent(message: localMessage, dialog: dialogId));
+      ChatsBuilderAddMessageEvent(message: localMessage, dialogId: dialogId));
 // 3. Send message
       final response = await MessagesRepository().sendMessage(
         dialogId: dialogId,
@@ -190,7 +190,7 @@ void resendErroredMessage({
   Navigator.of(context).pop();
   try {
     BlocProvider.of<ChatsBuilderBloc>(context).add(
-        ChatsBuilderAddMessageEvent(message: localMessage, dialog: dialogId));
+        ChatsBuilderAddMessageEvent(message: localMessage, dialogId: dialogId));
     // TODO: if response status code is 200 else ..
     final sentMessage = await MessagesRepository().sendMessage(
         dialogId: dialogId,

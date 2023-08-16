@@ -1,7 +1,9 @@
+import 'package:equatable/equatable.dart';
+
 import 'message_model.dart';
 
 
-class ChatsData {
+class ChatsData extends Equatable{
   final int chatId;
   final List<MessageData> messages;
 
@@ -31,4 +33,7 @@ class ChatsData {
     }
     return this;
   }
+
+  @override
+  List<Object?> get props => [chatId, messages];
 }

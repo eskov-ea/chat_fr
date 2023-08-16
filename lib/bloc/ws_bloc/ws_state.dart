@@ -73,6 +73,13 @@ class WsStateNewDialogCreated extends WsBlocState {
   const WsStateNewDialogCreated({required this.dialog});
 }
 
+class WsStateDialogDeleted extends WsBlocState {
+  final DialogData dialog;
+  final String channelName;
+
+  const WsStateDialogDeleted({required this.dialog, required this.channelName});
+}
+
 /**
  * User Exit/Join dialog related states */
 
