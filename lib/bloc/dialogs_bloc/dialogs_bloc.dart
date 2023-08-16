@@ -1,22 +1,15 @@
 import 'dart:async';
-import 'dart:convert';
-
 import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_state.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_events.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
-import 'package:chat/bloc/user_bloc/user_event.dart';
-import 'package:chat/bloc/user_bloc/user_state.dart';
 import 'package:chat/models/dialog_model.dart';
-import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/message_model.dart';
-import '../../services/dialogs/dialogs_api_provider.dart';
 import '../../services/dialogs/dialogs_repository.dart';
 import '../../services/logger/logger_service.dart';
 import '../ws_bloc/ws_bloc.dart';
-import '../ws_bloc/ws_event.dart';
 import '../ws_bloc/ws_state.dart';
 
 
@@ -37,8 +30,8 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         newMessageSubscription = webSocketBloc.stream.listen((streamState) {
           print("DialogsEvent   ${streamState}");
           if (streamState is WsStateReceiveNewMessage){
-            final dialogs = state.dialogs;
-            final List<DialogData> newDialogs = [...dialogs!];
+            final copyState = state.from();
+            final List<DialogData> newDialogs = [ ...copyState.dialogs!];
             for (var dialog in newDialogs) {
               if(dialog.dialogId == streamState.message.dialogId) {
                 if (dialog.lastMessage != null) {
@@ -74,12 +67,13 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
             final newState = state.copyWith(dialogs: newDialogs);
             emit(newState);
           } else if (streamState is WsStateNewDialogCreated) {
-
             add(ReceiveNewDialogEvent(dialog: streamState.dialog));
           } else if (streamState is WsStateNewUserJoinDialog) {
             add(DialogUserJoinChatEvent(user: streamState.user, dialogId: streamState.dialogId));
           } else if (streamState is WsStateNewUserExitDialog) {
             add(DialogUserExitChatEvent(user: streamState.user, dialogId: streamState.dialogId));
+          } else if (streamState is WsStateDialogDeleted) {
+            add(DialogDeletedChatEvent(dialog: streamState.dialog));
           }
         });
     on<DialogsEvent>((event, emit) async {
@@ -98,6 +92,8 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         onRefreshDialogsEvent(event, emit);
       } else if (event is DeleteAllDialogsEvent) {
         onDeleteAllDialogsEvent(event, emit);
+      } else if (event is DialogDeletedChatEvent) {
+        onDialogDeletedChatEvent(event, emit);
       }
     });
   }
@@ -127,9 +123,10 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   void onReceiveNewDialogEvent(
       ReceiveNewDialogEvent event,
       Emitter<DialogsState> emit
-      ) {
+  ) {
     for (var dialog in state.dialogs!) {
       if (dialog.dialogId == event.dialog.dialogId) {
+        print("Such dialog already presented");
         return;
       }
     }
@@ -218,6 +215,16 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     print("onDeleteDialogsEvent  ${state.dialogs?.length}");
     final newState = state.copyWith(dialogs: [], isErrorHappened:  false, searchQuery: "");
     emit(newState);
+  }
+
+  void onDialogDeletedChatEvent(
+      DialogDeletedChatEvent event,
+      Emitter<DialogsState> emit
+      ){
+    final copyState = state.from();
+    final newDialogs = [ ...copyState.dialogs!];
+    newDialogs.removeWhere((dialog) => dialog.dialogId == event.dialog.dialogId);
+    emit(state.copyWith(dialogs: newDialogs));
   }
 
 

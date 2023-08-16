@@ -14,7 +14,7 @@ class ChatScreenViewCubitSuccessState extends ChatScreenViewCubitState{
       identical(this, other) ||
           other is ChatScreenViewCubitSuccessState &&
               runtimeType == other.runtimeType &&
-              chats == other.chats ;
+              chats == other.chats;
 
   @override
   int get hashCode => chats.hashCode;

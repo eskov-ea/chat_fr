@@ -22,6 +22,12 @@ class ReceiveNewDialogEvent extends DialogsEvent{
   ReceiveNewDialogEvent({required this.dialog});
 }
 
+class DialogDeletedChatEvent extends DialogsEvent{
+  final DialogData dialog;
+
+  DialogDeletedChatEvent({required this.dialog});
+}
+
 class UpdateDialogLastMessageEvent extends DialogsEvent{
   final MessageData message;
 

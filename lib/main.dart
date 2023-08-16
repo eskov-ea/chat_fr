@@ -77,7 +77,7 @@ class MyApp extends StatelessWidget{
               messagesRepository: MessagesRepository(),
               webSocketBloc: websocketBloc,
               dataProvider: DataProvider()
-            )..add(ChatsBuilderCreateEvent())
+            )
         ),
         BlocProvider(
           create: (_) => UsersViewCubit(

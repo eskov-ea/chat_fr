@@ -17,7 +17,9 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
   final DialogRepository dialogsRepository;
   final MessagesProvider _messagesProvider = MessagesProvider();
   List<StreamSubscription> eventSubscriptions = [];
-  List<Channel?> channels = [];
+  // List<Channel?> channels = [];
+  Map<String, Channel> channels = {};
+  // Map<String, StreamSubscription> eventSubscriptions = {};
   StreamSubscription? generalEventSubscription;
   SynchronousStreamController? socketConnectionEventSubscription;
   PusherChannelsClient? socket;
@@ -71,6 +73,8 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
         onWsOnlineUsersJoinEvent(event, emit);
       } else if (event is WsOnlineUserTypingEvent) {
         onWsOnlineUserTypingEvent(event, emit);
+      } else if (event is WsEventDialogDeleted) {
+        onWsEventDialogDeleted(event, emit);
       }
     });
   }
@@ -120,7 +124,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
 
       final Channel channel = clientSubscribeToChannel(
           authToken: token, client: socket, channelName: 'private-chatinfo');
-      channels.add(channel);
+      channels[channel.name] = channel;
       generalEventSubscription = channel.bind('update').listen((event) {
         final DialogData newDialog = DialogData.fromJson(jsonDecode(event.data)["chat"]);
         print("CHATINFO   ->  $newDialog");
@@ -137,9 +141,24 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
           authToken: token,
           client: socket,
           channelName: 'private-userinfo.$rawUserId');
-      channels.add(userInfoChannel);
-      generalEventSubscription = channel.bind('update').listen((event) {
-        print("USERINFOCHANNEL   $event");
+      channels[userInfoChannel.name] = userInfoChannel;
+      generalEventSubscription = userInfoChannel.bind('update').listen((event) {
+        print("USERINFOCHANNEL  ${event.channelName}   ${jsonDecode(event.data)}");
+        final data = jsonDecode(event.data);
+        if (data["chat_join"] != null) {
+          final DialogData newDialog = DialogData.fromJson(data["chat_join"]);
+          for (var user in newDialog.usersList) {
+            if (user.id == userId) {
+              add(WsEventNewDialogCreated(dialog: newDialog));
+              return;
+            }
+          }
+        } else if(data["chat_exit"] != null) {
+          final DialogData newDialog = DialogData.fromJson(data["chat_exit"]);
+          print("UNSUBSCRIBE CHAT   -->   private-chat.${newDialog.dialogId}");
+          add(WsEventDialogDeleted(dialog: newDialog, channelName: "private-chat.${newDialog.dialogId}"));
+          return;
+        }
       });
       userInfoChannel.subscribeIfNotUnsubscribed();
 
@@ -159,14 +178,14 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
               authToken: token,
               client: socket,
               channelName: 'private-chat.${dialog.dialogId}');
-          channels.add(dialogChannel);
+          channels[dialogChannel.name] = dialogChannel;
           StreamSubscription dialogEventSubscription =
             dialogChannel.bind('update').listen((event) {
               print("DialogChannel event:  $event");
               final data = jsonDecode(event.data);
               if (data["message"] != null) {
                 final newMessage = MessageData.fromJson(data["message"]);
-                print("NEW MESSAGE    ->  $newMessage");
+                print("NEW MESSAGE   ${event.channelName}    ->  $newMessage");
                 Future.delayed(Duration(seconds: 1)).then((v) {
                   add(WsEventReceiveNewMessage(message: newMessage));
                 });
@@ -257,6 +276,14 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
     emit(WsStateNewDialogCreated(dialog: event.dialog));
   }
 
+  void onWsEventDialogDeleted(WsEventDialogDeleted event, emit) async {
+    print("onWsEventDialogDeleted");
+    channels[event.channelName]?.unsubscribe();
+    print("UNSUBSCRIBE CHAT   ${channels[event.channelName]?.state}");
+    channels.remove(event.channelName);
+    emit(WsStateDialogDeleted(dialog: event.dialog, channelName: event.channelName));
+  }
+
   void onWsEventDisconnected(event, emit) {
     emit(Unconnected());
   }
@@ -268,13 +295,13 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
     for (var eventSubscription in eventSubscriptions) {
       await eventSubscription.cancel();
     }
-    for (var channel in channels) {
+    channels.forEach((key, value) {
       try {
-        channel?.unsubscribe();
+        channels[key]?.unsubscribe();
       } catch (err) {
         print(err);
       }
-    }
+    });
     presenceChannel?.unsubscribe();
     generalEventSubscription = null;
     eventSubscriptions = [];
@@ -290,13 +317,13 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
     for (var eventSubscription in eventSubscriptions) {
       await eventSubscription.cancel();
     }
-    for (var channel in channels) {
+    channels.forEach((key, value) {
       try {
-        channel?.unsubscribe();
+        channels[key]?.unsubscribe();
       } catch (err) {
         print(err);
       }
-    }
+    });
     presenceChannel?.unsubscribe();
     generalEventSubscription = null;
     eventSubscriptions = [];
