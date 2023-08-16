@@ -205,14 +205,15 @@ class LinphoneSDK : ObservableObject
 
     
     func login(domain: String, password: String, username: String,
-               stunDomain: String, stunPort: String, host: String) {
+               stunDomain: String, stunPort: String, host: String, cert: String) {
             
             do {
                 
                 var transport : TransportType
-                transport = TransportType.Tcp
+                transport = TransportType.Tls
                 
                 let authInfo = try Factory.Instance.createAuthInfo(username: username, userid: "", passwd: password, ha1: "", realm: "", domain: domain)
+                authInfo.tlsCert = cert
                 let accountParams = try mCore.createAccountParams()
                 let identity = try Factory.Instance.createAddress(addr: String("sip:" + username + "@" + domain))
                 try! accountParams.setIdentityaddress(newValue: identity)

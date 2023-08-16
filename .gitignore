@@ -33,6 +33,9 @@
 /MCFEF
 /ios-2
 
+
+pubspec.lock
+/ios/Podfile.lock
 # Web related
 
 # Symbolication related

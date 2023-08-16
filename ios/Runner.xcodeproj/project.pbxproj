@@ -12,6 +12,7 @@
 		529E5B5328840F6C009AF27B /* CallKitProviderDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529E5B5228840F6C009AF27B /* CallKitProviderDelegate.swift */; };
 		529E5B572884354C009AF27B /* LoginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529E5B562884354C009AF27B /* LoginService.swift */; };
 		52D8C86A2880262700BA405F /* LinphoneSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52D8C8692880262700BA405F /* LinphoneSDK.swift */; };
+		6F3459842A92CF03691CE61C /* Pods_NotificationServiceAppExtention.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05E929CEA44C17A6FA718258 /* Pods_NotificationServiceAppExtention.framework */; };
 		7120EC982A77562B00333457 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7120EC972A77562B00333457 /* NotificationService.swift */; };
 		7120EC9C2A77562B00333457 /* NotificationServiceAppExtention.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7120EC952A77562B00333457 /* NotificationServiceAppExtention.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7120ECA22A77566F00333457 /* LoginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 529E5B562884354C009AF27B /* LoginService.swift */; };
@@ -91,6 +92,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6F3459842A92CF03691CE61C /* Pods_NotificationServiceAppExtention.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
