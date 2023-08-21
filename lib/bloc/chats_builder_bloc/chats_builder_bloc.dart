@@ -73,9 +73,15 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     // emit(ChatsBuilderInProgressState(chats: state.chats, counter: state.counter));
     final userId = await dataProvider.getUserId();
     try {
+      Timer? timer;
+      int time =0;
       List<MessageData> messages = await messagesRepository.getMessages(
           userId, event.dialogId, event.pageNumber);
       print("Loaded messages:   pg:  ${event.pageNumber}   $messages");
+      timer = Timer.periodic(Duration(milliseconds: 100), (timer){
+        time = time + 100;
+        print("Time --> ${time}");
+      });
       var chatExist = false;
       final Map<String, bool> newMessagesDictionary = state.messagesDictionary;
       for (var chat in state.chats) {
@@ -96,6 +102,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         state.chats.add(ChatsData.makeChatsData(event.dialogId, messages));
       }
       // final newState = state.copyWith(updatedChats: state.chats, updatedCounter: state.counter++);
+      timer?.cancel();
       emit(ChatsBuilderState(
         chats: state.chats,
         messagesDictionary: newMessagesDictionary,
@@ -159,7 +166,8 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       ChatsBuilderReceivedUpdatedMessageStatusesEvent event, Emitter<ChatsBuilderState> emit
       ){
     //TODO: implement chat dictionary not list
-    final chats = state.from();
+    // final chats = state.from();
+    final chats = state.chats;
     for (final MessageStatuses status in event.statuses) {
       for (var chat in chats) {
         if (chat.chatId == status.dialogId) {
@@ -180,7 +188,8 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       ChatsBuilderUpdateLocalMessageEvent event, Emitter<ChatsBuilderState> emit
       ){
     final messagesDictionary = state.messagesDictionary;
-    final chats = state.from();
+    // final chats = state.from();
+    final chats = state.chats;
     for (var chat in chats) {
       if (chat.chatId == event.dialogId) {
         print("ChatsBuilderUpdateLocalMessageEvent  ${event.message}   ${chat.messages.first.status}");
@@ -194,8 +203,6 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         messagesDictionary["${event.message.messageId}"] = true;
       }
     }
-    print("ChatsBuilderUpdateLocalMessageEvent    ${state.chats.first.messages.first.status}");
-    print("ChatsBuilderUpdateLocalMessageEvent    ${chats.first.messages.first.status}");
     emit(state.copyWith(updatedChats: chats, updatedMessagesDictionary: messagesDictionary));
   }
 

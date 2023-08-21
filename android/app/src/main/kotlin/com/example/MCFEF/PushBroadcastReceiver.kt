@@ -14,7 +14,6 @@ class PushBroadcastReceiver: BroadcastReceiver() {
 
 
     override fun onReceive(context: Context, intent: Intent) {
-        Toast.makeText(context, "Receive push", Toast.LENGTH_LONG).show()
         if (!CoreContext.isLoggedIn) {
             Log.i("BROADCAST", "We start new service")
             val core = CoreContext(context).getInstance()

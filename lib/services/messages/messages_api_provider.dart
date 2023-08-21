@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -18,6 +19,7 @@ import './icon_base64.dart';
 class MessagesProvider {
   final _secureStorage = DataProvider();
   final _logger = Logger.getInstance();
+
 
   Future <List<MessageData>> getMessages(userId, dialogId, pageNumber) async {
     try {

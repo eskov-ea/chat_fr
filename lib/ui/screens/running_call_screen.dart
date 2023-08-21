@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/global.dart';
+import '../../services/helpers/call_timer.dart';
 import '../navigation/main_navigation.dart';
 
 class RunningCallScreen extends StatefulWidget {
@@ -25,48 +26,21 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   bool isMute = false;
   bool isSpeaker = false;
   bool isConnected = false;
-  Timer? timer;
-  int seconds = 0;
-  int minutes = 0;
-  int hours = 0;
-  String digitSeconds = "00";
-  String digitMinutes = "00";
-  String digitHours = "00";
+  final timer = CallTimer.getInstance();
   String? username;
+  late final StreamSubscription _streamSubscription;
+  String? callDuration;
 
-
-
-  void startTimer() {
-    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      int localSeconds = seconds + 1;
-      int localMinutes = minutes;
-      int localHours = hours;
-
-      if(localSeconds > 59) {
-        if (localMinutes > 59) {
-          localHours++;
-          localMinutes = 0;
-        } else {
-          localMinutes++;
-          localSeconds = 0;
-        }
-      }
-      setState(() {
-        seconds = localSeconds;
-        minutes = localMinutes;
-        hours = localHours;
-        digitSeconds = (seconds >= 10) ? "$seconds" : "0$seconds";
-        digitMinutes = (minutes >= 10) ? "$minutes" : "0$minutes";
-        digitHours = (hours >= 10) ? "$hours" : "0$hours";
-      });
-    });
-  }
 
   @override
   void initState() {
+    _streamSubscription = timer.stream().listen((time) {
+      setState(() {
+        callDuration = time;
+      });
+    });
     super.initState();
-    startTimer();
-    // print("USEEEERS    ${widget.users}");
+// print("USEEEERS    ${widget.users}");
     // username = widget.users.firstWhere((el) => el.id.toString() == widget.callerName).lastname;
     // callServiceBlocSubscription = widget.callsBloc.stream.listen((state) {
     //   if (state is EndedCallServiceState) {
@@ -80,8 +54,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
 
   @override
   void dispose() {
-    timer?.cancel();
-    // callServiceBlocSubscription.cancel();
+    _streamSubscription.cancel();
     super.dispose();
   }
 
@@ -121,7 +94,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
             height: 3,
           ),
           Text(
-            "$digitHours:$digitMinutes:$digitSeconds",
+            callDuration ?? "",
             style: TextStyle(color: Colors.white, fontSize: 18),
           ),
           Expanded(
@@ -232,8 +205,8 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
             children: [
               GestureDetector(
                 onTap: () {
-                  print("NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
                   declineCall();
+                  timer.stop();
                   Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
                 },
                 child: Column(

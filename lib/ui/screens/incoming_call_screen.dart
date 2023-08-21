@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/global.dart';
+import '../../services/helpers/call_timer.dart';
 import '../navigation/main_navigation.dart';
 
 class IncomingCallScreen extends StatelessWidget {
@@ -12,6 +13,7 @@ class IncomingCallScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final timer = CallTimer.getInstance();
     return Scaffold(
         // appBar: ,
         backgroundColor: const Color(0xFF474747),
@@ -56,8 +58,8 @@ class IncomingCallScreen extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () {
-                    print(
-                        "NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
+                    print("NAVIGATOR   inc   ${ModalRoute.of(context)?.settings.name}");
+                    timer.start();
                     acceptCall();
                   },
                   child: Column(
@@ -86,8 +88,7 @@ class IncomingCallScreen extends StatelessWidget {
                 ),
                 GestureDetector(
                   onTap: () {
-                    print(
-                        "NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
+                    print("NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
                     declineCall();
                     Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
                   },

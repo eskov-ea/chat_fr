@@ -383,10 +383,12 @@ class _MessageListState extends State<_MessageList> {
   bool _shouldAutoscroll = true;
   int pageNumber = 1;
   bool isLoading = false;
+  late final StreamSubscription _newMessagesSubscription;
 
   @override
   void dispose() {
     _scrollController.removeListener(() { setupScrollListener; });
+    _newMessagesSubscription.cancel();
     super.dispose();
   }
 
@@ -395,6 +397,7 @@ class _MessageListState extends State<_MessageList> {
     print("init messages list");
     super.initState();
     BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogData.dialogId));
+    _newMessagesSubscription = BlocProvider.of<WsBloc>(context).stream.listen(_onNewMessageReceived);
     setupScrollListener(
       scrollController: _scrollController,
       onAtTop: () {
@@ -421,11 +424,15 @@ class _MessageListState extends State<_MessageList> {
     });
   }
 
-  void onMessagesStateChange(BuildContext context, WsBlocState state) {
+  void _onNewMessageReceived(WsBlocState state) {
     if (state is WsStateReceiveNewMessage) {
-      // if (_shouldAutoscroll == true) _scrollToBottom();
+      if (state.message.dialogId == widget.dialogData.dialogId) {
+        print("UPDATE STATUSES +++");
+        BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogData.dialogId));
+      }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

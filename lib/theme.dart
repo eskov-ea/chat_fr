@@ -16,6 +16,7 @@ abstract class AppColors {
   static const textHighlight = secondary;
   static const cardLight = Color(0xFFF9FAFE);
   static const cardDark = Color(0xFF303334);
+  static const activeCall = Color(0xFF49D549);
 }
 
 abstract class LightColors {

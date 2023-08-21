@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_event.dart';
@@ -30,11 +29,11 @@ import '../../services/dialogs/dialogs_api_provider.dart';
 import '../../services/global.dart';
 import '../../services/helpers/message_sender_helper.dart';
 import '../../services/push_notifications/push_notification_service.dart';
-import '../../storage/sqflite_database.dart';
 import '../../theme.dart';
 import '../../view_models/websocket/websocket_view_cubit.dart';
 import '../navigation/main_navigation.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
+import '../widgets/active_call_widget.dart';
 import '../widgets/session_expires_widget.dart';
 import 'running_call_screen.dart';
 
@@ -62,7 +61,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String? callerName;
   String? myUserName;
   String? os;
-  SqfliteDatabase? _db;
+  bool isActiveCall = false;
+  bool isIncomingCall = false;
   bool isUpdateAvailable = true;
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
 
@@ -108,7 +108,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
   String _mapErrorToMessage(Object error) {
-    print("Error happened");
     if (error is! AppErrorException) {
       return 'Неизвестная ошибка, поторите попытку';
     }
@@ -154,7 +153,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _autoJoinChats(ChatSettings settings) async {
-    print('autojoin');
     if (settings.autoJoinChats.isNotEmpty) {
       try {
         bool isJoined = false;
@@ -162,7 +160,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         final publicDialogs = await DialogsProvider().getPublicDialogs();
         if (publicDialogs.isNotEmpty) {
           for (var requiredChat in settings.autoJoinChats){
-            print('autojoin  ${requiredChat.name}');
             for (var publicDialog in publicDialogs) {
               if (requiredChat.dialogId == publicDialog.dialogId){
                 await DialogsProvider()
@@ -223,6 +220,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     BlocProvider.of<CallLogsBloc>(context).add(LoadCallLogsEvent(passwd: settings.asteriskUserPassword!));
   }
 
+  void _openIncomingCallScreen() {
+    if (Platform.isIOS) return;
+    Navigator.of(context).pushNamed(
+        MainNavigationRouteNames.incomingCallScreen,
+        arguments: CallScreenArguments(
+            callerName: callerName ?? "Не удалось определить номер"
+        )
+    );
+  }
+  void _returnToConnectedCallScreen() {
+    Navigator.of(context).pushNamed(
+        MainNavigationRouteNames.runningCallScreen,
+        arguments: CallScreenArguments(
+          callerName: callerName ?? "Не удалось определить номер",
+        )
+    );
+  }
+
 
   @override
   void initState() {
@@ -245,13 +260,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           } catch (err) {
             callerName = "${state.callerName}";
           }
-          if (Platform.isIOS) return;
-          Navigator.of(context).pushNamed(
-              MainNavigationRouteNames.incomingCallScreen,
-              arguments: CallScreenArguments(
-                callerName: callerName ?? state.callerName
-              )
-          );
+          setState(() {
+            isIncomingCall = true;
+          });
+          _openIncomingCallScreen();
         } else if (state is OutgoingCallServiceState) {
           print("NAVIGATOR outg   ${ModalRoute.of(context)?.settings.name}");
           if(ModalRoute.of(context)?.settings.name == MainNavigationRouteNames.outgoingCallScreen) return;
@@ -263,6 +275,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           } catch (err) {
             print("OutgoingCallServiceState Error:   $err");
           }
+          setState(() {
+            isActiveCall = true;
+          });
           Navigator.of(context).pushNamed(
               MainNavigationRouteNames.outgoingCallScreen,
               arguments: CallScreenArguments(
@@ -270,15 +285,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               )
           );
         } else if(state is ConnectedCallState) {
-          Navigator.of(context).pushNamed(
+          setState(() {
+            isActiveCall = true;
+            isIncomingCall = false;
+          });
+          Navigator.of(context).popAndPushNamed(
               MainNavigationRouteNames.runningCallScreen,
               arguments: CallScreenArguments(
                 callerName: callerName ?? "Не удалось определить номер",
               )
           );
         } else if(state is EndedCallServiceState) {
-          print("NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
-          print("CALL_ENDED  ${state.callData.id}");
+          print("NAVIGATOR end   ${ModalRoute.of(context)?.settings.name}");
+          setState(() {
+            isActiveCall = false;
+            isIncomingCall = false;
+            callerName = null;
+          });
           BlocProvider.of<CallLogsBloc>(context).add(AddCallToLogEvent(call: state.callData));
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
         } else if(state is ErrorCallServiceState) {
@@ -317,6 +340,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             );
           }
         } else if (state is EndCallWithNoLogServiceState) {
+          setState(() {
+            isActiveCall = false;
+            isIncomingCall = false;
+            callerName = null;
+          });
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
         }
       });
@@ -326,7 +354,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
-    print("ChangeAppLifecycleState:  ${state.name}");
     var bloc = BlocProvider.of<WsBloc>(context);
     switch(state){
       case AppLifecycleState.resumed:
@@ -352,103 +379,64 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void dispose() {
     callServiceBlocSubscription.cancel();
     userProfileDataSubscription.cancel();
-    if ( _db != null) _db!.closeDb();
     _errorHandlerBlocSubscription.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _selectedTab,
-        children: [
-          _screenFactory.makeMessagesPage(),
-          _screenFactory.makeCallsPage(),
-          _screenFactory.makeContactsPage(),
-          _screenFactory.makeProfilePage(isUpdateAvailable),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedTab,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: AppColors.backgroundLight,
-        selectedItemColor: AppColors.secondary,
-        unselectedItemColor: null,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.bubble_left_bubble_right_fill),
-            label: 'Сообщения',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.phone_fill),
-            label: 'Звонки',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.person_2_fill),
-            label: 'Участники',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.settings_solid),
-            label: 'Профиль',
-          ),
-        ],
-        onTap: onSelectTab,
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
+          children: [
+            isIncomingCall
+              ? IncomingCallStatusWidget(screenCallback: _openIncomingCallScreen,)
+              : SizedBox.shrink(),
+            isActiveCall
+              ? ActiveCallStatusWidget(screenCallback: _returnToConnectedCallScreen)
+              : SizedBox.shrink(),
+            Expanded(
+              child: IndexedStack(
+                index: _selectedTab,
+                children: [
+                  _screenFactory.makeMessagesPage(),
+                  _screenFactory.makeCallsPage(),
+                  _screenFactory.makeContactsPage(),
+                  _screenFactory.makeProfilePage(isUpdateAvailable),
+                ],
+              ),
+            )
+          ],
+        ),
+
+
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedTab,
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: AppColors.backgroundLight,
+          selectedItemColor: AppColors.secondary,
+          unselectedItemColor: null,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.bubble_left_bubble_right_fill),
+              label: 'Сообщения',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.phone_fill),
+              label: 'Звонки',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.person_2_fill),
+              label: 'Участники',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(CupertinoIcons.settings_solid),
+              label: 'Профиль',
+            ),
+          ],
+          onTap: onSelectTab,
+        ),
       ),
     );
   }
-
-
-
 }
-
-/**
- * Two functions when the called user haven't respond
- * to the call. We send a message with information that there is an missed call
- * and the second if there is no dialog between users - we create dialog and send message
- */
-//TODO: refactor to one global function
-// _sendMessage({required context, required userId, required dialogId}) async {
-//   try {
-//     final messageText = "Пропущенный звонок";
-//     final localMessage = createLocalMessage(replyedMessageId: null, parentMessage: null, userId: userId, dialogId: dialogId, messageText: messageText);
-//     print("localMessage  $localMessage");
-//     BlocProvider.of<ChatsBuilderBloc>(context).add(
-//         ChatsBuilderAddMessageEvent(message: localMessage, dialog: dialogId!)
-//     );
-//     // TODO: if response status code is 200 else ..
-//     final sentMessage = await MessagesRepository().sendMessage(dialogId: dialogId!, messageText: messageText, parentMessageId: null);
-//     print("sentMessage  $sentMessage");
-//     if (sentMessage == null) {
-//       customToastMessage(context, "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");
-//       return;
-//     }
-//     final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
-//     BlocProvider.of<ChatsBuilderBloc>(context).add(
-//         ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: dialogId!, localMessageId: localMessage.messageId)
-//     );
-//     BlocProvider.of<DialogsViewCubit>(context).updateLastDialogMessage(localMessage);
-//   } catch (err) {
-//     print("_sendMessage error $err");
-//   }
-//   BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
-// }
-//
-// createDialog(context, partnerId) async {
-//     final newDialog = await DialogsProvider().createDialog(chatType: 1, users: [partnerId], chatName: "p2p", chatDescription: null, isPublic: false);
-//     print("SENDING_PUSH   ${newDialog?.dialogId}");
-//     if (newDialog != null) {
-//       final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);
-//       final initLength = chatsBuilderBloc.state.chats.length;
-//       whenFinishAddingDialog(Stream<ChatsBuilderState> source) async {
-//         chatsBuilderBloc.add(ChatsBuilderLoadMessagesEvent(dialogId: newDialog.dialogId));
-//         await for (var value in source) {
-//           if (value.chats.length > initLength) {
-//             return;
-//           }
-//         }
-//       }
-//       await whenFinishAddingDialog(chatsBuilderBloc.stream);
-//       return newDialog.dialogId;
-//     }
-// }

@@ -92,6 +92,7 @@ class UserProfileAsteriskSettings extends Equatable{
   });
 
   static UserProfileAsteriskSettings? fromJson(json) {
+    print("UserProfileAsteriskSettings    $json");
     return json == null
         ? null
         : UserProfileAsteriskSettings(
@@ -103,7 +104,7 @@ class UserProfileAsteriskSettings extends Equatable{
           asteriskUserPassword: json["asterisk"]["asterisk_user_password"],
           sipPrefix: json["asterisk"]["asterisk_prefix"],
           asteriskHost: json["asterisk"]["asterisk_host"],
-        asteriskCert: json["asterisk"]["cert"]
+          asteriskCert: json["asterisk"]["asterisk_cert"]
         );
   }
 

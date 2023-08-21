@@ -27,18 +27,18 @@ class UserProfileProvider {
         return profile;
       } else if (response.statusCode == 401) {
         throw AppErrorException(AppErrorExceptionType.auth, null,
-            "DialogsProvider, creating dialogs");
+            "UserProfileProvider, getUserProfile");
       } else {
         throw AppErrorException(AppErrorExceptionType.getData, null,
-            "DialogsProvider, creating dialogs");
+            "UserProfileProvider, getUserProfile");
       }
     }  on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, creating dialogs");
+      throw AppErrorException(AppErrorExceptionType.network, null, "UserProfileProvider, getUserProfile");
     } on AppErrorException{
       rethrow;
     } catch(err) {
-      _logger.sendErrorTrace(message: "DialogsProvider.createDialog", err: err.toString());
-      throw AppErrorException(AppErrorExceptionType.other, err.toString(), "DialogsProvider, creating dialogs");
+      _logger.sendErrorTrace(message: "UserProfileProvider.createDialog", err: err.toString());
+      throw AppErrorException(AppErrorExceptionType.other, err.toString(), "DialogsProvider, getUserProfile");
     }
   }
 

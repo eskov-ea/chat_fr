@@ -40,7 +40,7 @@ class ProfileBloc extends Bloc<ProfileBlocEvent, UserProfileState> {
       if(err.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
-        print("ERROR: onProfileBlocLoadingEvent ${err}");
+        print("ERROR: onProfileBlocLoadingEvent ${err.message}");
         _logger.sendErrorTrace(message: "ProfileBloc.onProfileBlocLoadingEvent", err: err.toString());
         emit(UserProfileErrorState());
       }

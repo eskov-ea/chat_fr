@@ -7,7 +7,7 @@ final DateFormat _timeFormatter = DateFormat.Hm();
 // final DateFormat _dateFormatter = DateFormat.yMMMd();
 final DateFormat _dateFormatter = DateFormat.yMd();
 
-@immutable
+
 class MessageData extends Equatable{
   MessageData({
     required this.messageId,
@@ -65,7 +65,7 @@ class MessageData extends Equatable{
   };
 
   @override
-  List<Object?> get props => [messageId, senderId, status];
+  List<Object?> get props => [messageId, senderId, status, isError];
 }
 
 class MessageStatuses extends Equatable {
@@ -133,7 +133,7 @@ class MessageDialogData {
   );
 }
 
-class ParentMessage {
+class ParentMessage extends Equatable{
   const ParentMessage({
     required this.parentMessageText,
     required this.senderId,
@@ -155,9 +155,12 @@ class ParentMessage {
     parentMessageText: parentMessageText,
     senderId: senderId
   );
+
+  @override
+  List<Object?> get props => [senderId, parentMessageId];
 }
 
-class MessageAttachmentsData {
+class MessageAttachmentsData  extends Equatable{
   MessageAttachmentsData({
     required this.attachmentId,
     required this.chatMessageId,
@@ -182,6 +185,9 @@ class MessageAttachmentsData {
       preview: json["preview"],
       content: json["content"]
     );
+
+  @override
+  List<Object?> get props => [attachmentId];
 }
 
 String getDate (DateTime? rawDate) {

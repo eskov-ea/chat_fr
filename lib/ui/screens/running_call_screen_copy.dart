@@ -243,7 +243,7 @@ class _RunningCallScreenCopyState extends State<RunningCallScreenCopy> {
               children: [
                 if (state is IncomingCallState) GestureDetector(
                   onTap: () {
-                    print("NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
+                    print("NAVIGATOR 2   ${ModalRoute.of(context)?.settings.name}");
                     acceptCall();
                   },
                   child: Column(
@@ -270,7 +270,7 @@ class _RunningCallScreenCopyState extends State<RunningCallScreenCopy> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    print("NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
+                    print("NAVIGATOR 3   ${ModalRoute.of(context)?.settings.name}");
                     // declineCall();
                   },
                   child: Column(
