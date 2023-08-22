@@ -69,8 +69,7 @@ class LinphoneSDK : ObservableObject
                     // We're being called by someone (and app is in background)
                     self.mCall = call
                     self.isCallIncoming = true
-//                    self.incomingCallName = self.getCallerName()
-                    self.incomingCallName = call.remoteAddress?.username ?? "Неизвестен"
+                    self.incomingCallName = self.getCallerName()
                     self.mProviderDelegate.incomingCall()
                 } else if (state == .IncomingReceived) { // When a call is received
                     if (!self.isCallIncoming) {
@@ -158,6 +157,8 @@ class LinphoneSDK : ObservableObject
     }
     
     func getCallerName() -> String {
+        let displayName = try mCall?.remoteAddress?.displayName
+        if(displayName != nil) {return displayName!}
         let callerId: String = mCall?.remoteAddress?.username ?? "Неизвестен"
         do {
             let storedContacts = sm.readDataFromDocuments(jsonFilename: sm.filename)
@@ -210,7 +211,7 @@ class LinphoneSDK : ObservableObject
             do {
                 
                 var transport : TransportType
-                transport = TransportType.Tls
+                transport = TransportType.Tcp
                 
                 let authInfo = try Factory.Instance.createAuthInfo(username: username, userid: "", passwd: password, ha1: "", realm: "", domain: domain)
                 authInfo.tlsCert = cert

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../services/helpers/call_timer.dart';
 import '../../theme.dart';
@@ -42,11 +43,15 @@ class _ActiveCallStatusWidgetState extends State<ActiveCallStatusWidget> {
       onTap: widget.screenCallback,
       child: Container(
         width: MediaQuery.of(context).size.width,
-        height: 50,
+        height: Platform.isIOS ? 80 : 50,
         color: AppColors.activeCall,
-        child: Center(
-          child: Text("Вернуться к звонку - $callDuration",
-            style: TextStyle(color: Colors.white, fontSize: 16),
+        child: Align(
+          alignment: Platform.isIOS ? Alignment.bottomCenter : Alignment.center,
+          child: Padding(
+            padding: Platform.isIOS ? EdgeInsets.only(bottom: 10) : EdgeInsets.zero,
+            child: Text("Вернуться к звонку - $callDuration",
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
           ),
         ),
       ),

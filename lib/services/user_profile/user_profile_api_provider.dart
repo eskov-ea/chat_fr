@@ -37,8 +37,8 @@ class UserProfileProvider {
     } on AppErrorException{
       rethrow;
     } catch(err) {
-      _logger.sendErrorTrace(message: "UserProfileProvider.createDialog", err: err.toString());
-      throw AppErrorException(AppErrorExceptionType.other, err.toString(), "DialogsProvider, getUserProfile");
+      _logger.sendErrorTrace(message: "UserProfileProvider.getUserProfile", err: err.toString());
+      throw AppErrorException(AppErrorExceptionType.other, err.toString(), "UserProfileProvider, getUserProfile");
     }
   }
 

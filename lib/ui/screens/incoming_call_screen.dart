@@ -13,7 +13,6 @@ class IncomingCallScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final timer = CallTimer.getInstance();
     return Scaffold(
         // appBar: ,
         backgroundColor: const Color(0xFF474747),
@@ -59,7 +58,6 @@ class IncomingCallScreen extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     print("NAVIGATOR   inc   ${ModalRoute.of(context)?.settings.name}");
-                    timer.start();
                     acceptCall();
                   },
                   child: Column(

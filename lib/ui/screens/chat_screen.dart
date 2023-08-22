@@ -427,7 +427,6 @@ class _MessageListState extends State<_MessageList> {
   void _onNewMessageReceived(WsBlocState state) {
     if (state is WsStateReceiveNewMessage) {
       if (state.message.dialogId == widget.dialogData.dialogId) {
-        print("UPDATE STATUSES +++");
         BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogData.dialogId));
       }
     }

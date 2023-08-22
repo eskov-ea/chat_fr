@@ -41,14 +41,6 @@ PreferredSizeWidget CustomAppBar(context)  {
           }
         }),
       leadingWidth: 54,
-      // leading: Align(
-      //   alignment: Alignment.centerRight,
-      //   child: IconBackground(
-      //     icon: Icons.search,
-      //     onTap: () async {
-      //     },
-      //   ),
-      // ),
       actions: const [
         Padding(
           padding: EdgeInsets.only(right: 24.0,),

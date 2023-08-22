@@ -7,6 +7,7 @@ import 'package:chat/bloc/error_handler_bloc/error_handler_state.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/user_profile_model.dart';
 import 'package:chat/storage/data_storage.dart';
+import 'package:chat/ui/widgets/app_bar.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -27,6 +28,7 @@ import '../../bloc/ws_bloc/ws_event.dart';
 import '../../factories/screen_factory.dart';
 import '../../services/dialogs/dialogs_api_provider.dart';
 import '../../services/global.dart';
+import '../../services/helpers/call_timer.dart';
 import '../../services/helpers/message_sender_helper.dart';
 import '../../services/push_notifications/push_notification_service.dart';
 import '../../theme.dart';
@@ -65,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool isIncomingCall = false;
   bool isUpdateAvailable = true;
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
+  final timer = CallTimer.getInstance();
 
 
   Future<bool> isCallRunning () async {
@@ -285,11 +288,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               )
           );
         } else if(state is ConnectedCallState) {
+          timer.start();
           setState(() {
             isActiveCall = true;
             isIncomingCall = false;
           });
-          Navigator.of(context).popAndPushNamed(
+          Navigator.of(context).pushNamed(
               MainNavigationRouteNames.runningCallScreen,
               arguments: CallScreenArguments(
                 callerName: callerName ?? "Не удалось определить номер",
@@ -385,57 +389,55 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Column(
-          children: [
-            isIncomingCall
-              ? IncomingCallStatusWidget(screenCallback: _openIncomingCallScreen,)
-              : SizedBox.shrink(),
-            isActiveCall
-              ? ActiveCallStatusWidget(screenCallback: _returnToConnectedCallScreen)
-              : SizedBox.shrink(),
-            Expanded(
-              child: IndexedStack(
-                index: _selectedTab,
-                children: [
-                  _screenFactory.makeMessagesPage(),
-                  _screenFactory.makeCallsPage(),
-                  _screenFactory.makeContactsPage(),
-                  _screenFactory.makeProfilePage(isUpdateAvailable),
-                ],
-              ),
-            )
-          ],
-        ),
+    return Scaffold(
+      body: Column(
+        children: [
+          isIncomingCall && Platform.isAndroid
+            ? IncomingCallStatusWidget(screenCallback: _openIncomingCallScreen,)
+            : SizedBox.shrink(),
+          isActiveCall
+            ? ActiveCallStatusWidget(screenCallback: _returnToConnectedCallScreen)
+            : SizedBox.shrink(),
+          Expanded(
+            child: IndexedStack(
+              index: _selectedTab,
+              children: [
+                _screenFactory.makeMessagesPage(),
+                _screenFactory.makeCallsPage(),
+                _screenFactory.makeContactsPage(),
+                _screenFactory.makeProfilePage(isUpdateAvailable),
+              ],
+            ),
+          )
+        ],
+      ),
 
 
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedTab,
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: AppColors.backgroundLight,
-          selectedItemColor: AppColors.secondary,
-          unselectedItemColor: null,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.bubble_left_bubble_right_fill),
-              label: 'Сообщения',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.phone_fill),
-              label: 'Звонки',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.person_2_fill),
-              label: 'Участники',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(CupertinoIcons.settings_solid),
-              label: 'Профиль',
-            ),
-          ],
-          onTap: onSelectTab,
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedTab,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: AppColors.backgroundLight,
+        selectedItemColor: AppColors.secondary,
+        unselectedItemColor: null,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.bubble_left_bubble_right_fill),
+            label: 'Сообщения',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.phone_fill),
+            label: 'Звонки',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.person_2_fill),
+            label: 'Участники',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(CupertinoIcons.settings_solid),
+            label: 'Профиль',
+          ),
+        ],
+        onTap: onSelectTab,
       ),
     );
   }

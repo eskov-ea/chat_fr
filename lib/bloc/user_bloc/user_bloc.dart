@@ -119,56 +119,60 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   void onUsersUpdateOnlineStatusEvent(
       UsersUpdateOnlineStatusEvent event, emit
   ) {
-    final st = state as UsersLoadedState;
-    UsersLoadedState newState;
-    if (event.onlineUsersDictionary != null) {
-      newState = st.copyWith(
-          usersContainer: st.usersContainer,
-          searchUsersContainer: st.searchUsersContainer,
-          searchQuery: st.searchQuery,
-          onlineUsersDictionary: event.onlineUsersDictionary,
-          clientEvent: st.clientEventsDictionary
-      );
-      emit(newState);
-    } else if (event.exitedUser != null) {
-      final int id = event.exitedUser!;
-      st.onlineUsersDictionary.remove(id);
-      newState = st.copyWith(
-          usersContainer: st.usersContainer,
-          searchUsersContainer: st.searchUsersContainer,
-          searchQuery: st.searchQuery,
-          onlineUsersDictionary: st.onlineUsersDictionary,
-          clientEvent: st.clientEventsDictionary
-      );
-      emit(newState);
-    } else if (event.joinedUser != null) {
-      final int id = event.joinedUser!;
-      st.onlineUsersDictionary[id] = true;
-      newState = st.copyWith(
-          usersContainer: st.usersContainer,
-          searchUsersContainer: st.searchUsersContainer,
-          searchQuery: st.searchQuery,
-          onlineUsersDictionary: st.onlineUsersDictionary,
-          clientEvent: st.clientEventsDictionary
-      );
-      emit(newState);
-    } else if (event.clientEvent != null && event.dialogId != null ) {
-      Map<int, ClientUserEvent> newClientEventDictionary = st.clientEventsDictionary;
-      print("onUsersUpdateOnlineStatusEvent     state is   ${newClientEventDictionary.length} ${newClientEventDictionary[193]?.event}  ${event.clientEvent?.event}");
-      if (event.clientEvent?.event == "typing") {
-        newClientEventDictionary[event.dialogId!] = event.clientEvent!;
+    try {
+      final st = state as UsersLoadedState;
+      UsersLoadedState newState;
+      if (event.onlineUsersDictionary != null) {
+        newState = st.copyWith(
+            usersContainer: st.usersContainer,
+            searchUsersContainer: st.searchUsersContainer,
+            searchQuery: st.searchQuery,
+            onlineUsersDictionary: event.onlineUsersDictionary,
+            clientEvent: st.clientEventsDictionary);
+        emit(newState);
+      } else if (event.exitedUser != null) {
+        final int id = event.exitedUser!;
+        st.onlineUsersDictionary.remove(id);
+        newState = st.copyWith(
+            usersContainer: st.usersContainer,
+            searchUsersContainer: st.searchUsersContainer,
+            searchQuery: st.searchQuery,
+            onlineUsersDictionary: st.onlineUsersDictionary,
+            clientEvent: st.clientEventsDictionary);
+        emit(newState);
+      } else if (event.joinedUser != null) {
+        final int id = event.joinedUser!;
+        st.onlineUsersDictionary[id] = true;
+        newState = st.copyWith(
+            usersContainer: st.usersContainer,
+            searchUsersContainer: st.searchUsersContainer,
+            searchQuery: st.searchQuery,
+            onlineUsersDictionary: st.onlineUsersDictionary,
+            clientEvent: st.clientEventsDictionary);
+        emit(newState);
+      } else if (event.clientEvent != null && event.dialogId != null) {
+        Map<int, ClientUserEvent> newClientEventDictionary =
+            st.clientEventsDictionary;
+        print(
+            "onUsersUpdateOnlineStatusEvent     state is   ${newClientEventDictionary.length} ${newClientEventDictionary[193]?.event}  ${event.clientEvent?.event}");
+        if (event.clientEvent?.event == "typing") {
+          newClientEventDictionary[event.dialogId!] = event.clientEvent!;
+        }
+        if (event.clientEvent?.event == "finish_typing") {
+          newClientEventDictionary.remove(event.dialogId!);
+        }
+        newState = st.copyWith(
+            usersContainer: st.usersContainer,
+            searchUsersContainer: st.searchUsersContainer,
+            searchQuery: st.searchQuery,
+            onlineUsersDictionary: st.onlineUsersDictionary,
+            clientEvent: newClientEventDictionary);
+        emit(newState);
       }
-      if (event.clientEvent?.event == "finish_typing") {
-        newClientEventDictionary.remove(event.dialogId!);
-      }
-      newState = st.copyWith(
-          usersContainer: st.usersContainer,
-          searchUsersContainer: st.searchUsersContainer,
-          searchQuery: st.searchQuery,
-          onlineUsersDictionary: st.onlineUsersDictionary,
-          clientEvent: newClientEventDictionary
-      );
-      emit(newState);
+    } catch (err) {
+      print("ERROR: onUsersLoadEvent ${err}");
+      _logger.sendErrorTrace(message: "UsersBloc.onUsersLoadEvent", err: err.toString());
+      emit(UsersErrorState());
     }
   }
 
