@@ -36,6 +36,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
       UsersLoadEvent event, Emitter<UsersState> emit
       ) async {
     try {
+      print("onUsersLoadEvent ++");
+      throw new AppErrorException(AppErrorExceptionType.other, "test", "");
       final String? token = await _secureStorage.getToken();
       List<UserContact> users = await usersRepository.getAllUsers(token);
       final usersMap = usersRepository.getSipContacts(users);
@@ -43,9 +45,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
         "data" : usersMap.toString()
       });
       users.sort((a, b) => a.lastname.compareTo(b.lastname));
-      print("STATE:   $state  ${state.searchQuery}");
       if (state.isSearchMode) {
-        print('state.isSearchMode');
         final query = state.searchQuery.toLowerCase();
         final container = state.searchUsersContainer;
         final filteredUsers = filterUsersBySearchQuery(users, query);
@@ -58,7 +58,6 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
             clientEventsDictionary: state.clientEventsDictionary
         ));
       } else {
-        print('not state.isSearchMode');
         final container = state.usersContainer;
         final newContainer = container.copyWith(users: users);
         emit(UsersLoadedState(

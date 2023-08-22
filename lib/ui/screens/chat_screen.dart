@@ -394,10 +394,10 @@ class _MessageListState extends State<_MessageList> {
 
   @override
   void initState() {
-    print("init messages list");
     super.initState();
-    BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogData.dialogId));
+    // In development if we hot restart the app the yielded state in stream are not reachable
     _newMessagesSubscription = BlocProvider.of<WsBloc>(context).stream.listen(_onNewMessageReceived);
+    BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogData.dialogId));
     setupScrollListener(
       scrollController: _scrollController,
       onAtTop: () {

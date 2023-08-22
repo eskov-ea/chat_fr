@@ -3,6 +3,7 @@ import '../../models/dialog_model.dart';
 
 
 bool compareDialogDataLists (List<DialogData>? list1, List<DialogData>? list2) {
+  // print("compareDialogDataLists   ${list1?[0].dialogId}  ${list1?[0].lastMessage.statuses.length} ${list2?[0].lastMessage.statuses.length}");
   if (list1 == null) return list2 == null;
   if (list2 == null) return false;
   if (list1.length != list2.length) return false;
@@ -19,6 +20,6 @@ bool compareDialogDataLists (List<DialogData>? list1, List<DialogData>? list2) {
 
 bool compareDialogDataLists2 (List<DialogData>? list1, List<DialogData>? list2) {
   final b = compareDialogDataLists(list1, list2);
-  // print("compareDialogDataLists    $b    /  last mess: list1 - ${list1?.firstWhere((e) => e.dialogId == 193).lastMessage.statuses.length}    ///  list2 - ${list2?.firstWhere((e) => e.dialogId == 193).lastMessage.statuses.length}");
+  print("compareDialogDataLists    $b    /  last mess: list1 - ${list1?.firstWhere((e) => e.dialogId == 193).lastMessage.statuses.length}    ///  list2 - ${list2?.firstWhere((e) => e.dialogId == 193).lastMessage.statuses.length}");
   return b;
 }

@@ -9,7 +9,10 @@ abstract class Helpers {
     if (statuses == null) return 0;
     var status = 0;
     for (var statusObj in statuses) {
-      if (statusObj.userId == userId) status = statusObj.statusId;
+      if (statusObj.userId == userId) {
+        // print("checkIReadMessage - ${statuses.last.dialogId}  ${statusObj.statusId}");
+        status = statusObj.statusId;
+      }
     }
     return status;
   }

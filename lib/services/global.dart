@@ -204,7 +204,7 @@ import 'messages/messages_repository.dart';
     }
   }
 
-  refreshAllData(BuildContext context){
+  void refreshAllData(BuildContext context){
     BlocProvider.of<DialogsViewCubit>(context).refreshAllDialogs();
     BlocProvider.of<ChatsBuilderBloc>(context).add(RefreshChatsBuilderEvent());
     // BlocProvider.of<WsBloc>(context).add(WsEventDisconnect());

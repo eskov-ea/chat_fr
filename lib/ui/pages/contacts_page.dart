@@ -11,9 +11,15 @@ class ContactsPage extends StatelessWidget {
   const ContactsPage({Key? key}) : super(key: key);
 
 
+
+
   @override
   Widget build(BuildContext context) {
+
     final cubit = context.read<UsersViewCubit>();
+    // Future<void> refreshContacts() async {
+    //   BlocProvider.of<UsersViewCubit>(context).usersBloc.add();
+    // }
     return SafeArea(
       child: Scaffold(
         appBar: CustomAppBar(context),
@@ -46,25 +52,25 @@ class ContactsPage extends StatelessWidget {
                             itemBuilder: (context, index) {
                               return state.users.isNotEmpty
                                 ? Container(
-                                  padding: const EdgeInsets.only(
-                                    left: 14, right: 14, top: 0, bottom: 0),
-                                  child: Align(
-                                    child: UserItem(
-                                      user: state.users[index],
-                                      onlineStatus: isOnline(state.users[index].id, state.onlineUsersDictionary),
+                                    padding: const EdgeInsets.only(
+                                      left: 14, right: 14, top: 0, bottom: 0),
+                                    child: Align(
+                                      child: UserItem(
+                                        user: state.users[index],
+                                        onlineStatus: isOnline(state.users[index].id, state.onlineUsersDictionary),
+                                      ),
+                                    // Text(state.users[index].username),
                                     ),
-                                  // Text(state.users[index].username),
-                                ),
-                              )
-                                  : const Center(
-                                child: Text('No contacts yet'),
-                              );
+                                  )
+                                : const Center(
+                                   child: Text('No contacts yet'),
+                                  );
                             })
                     ),
                   ],
                 ),
               );
-            }
+            } else
             return const Center(
               child: Text(
                 'Произошла ошибка при загрузке пользователей, попробуйте еще раз',
@@ -77,3 +83,25 @@ class ContactsPage extends StatelessWidget {
     );
   }
 }
+
+
+
+
+// return RefreshIndicator(
+// onRefresh: () async {
+// print("We refresh here");
+// refreshContacts();
+// },
+// child: Container(
+// color: Colors.greenAccent,
+// height: MediaQuery.of(context).size.height,
+// width: MediaQuery.of(context).size.width,
+// child: const Center(
+// child: Text(
+// 'Произошла ошибка при загрузке пользователей, попробуйте еще раз',
+// style: TextStyle(fontSize: 20.0),
+// textAlign: TextAlign.center,
+// ),
+// ),
+// ),
+// );
