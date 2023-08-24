@@ -203,7 +203,7 @@ void resendErroredMessage({
     );
     print("sentMessage response  $sentMessage");
     if (sentMessage == null) {
-      customToastMessage(context, "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");
+      customToastMessage(context: context, message: "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");
       return;
     }
     final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);

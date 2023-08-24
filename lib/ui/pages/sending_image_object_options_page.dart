@@ -93,7 +93,7 @@ Widget SendingObjectOptionsPage({
         } catch (err) {
           print("ERROR sending image on web  --> $err");
           Navigator.pop(context);
-          customToastMessage(context, "Не удалось отправить сообщение. Попробуйте еще раз");
+          customToastMessage(context: context, message: "Не удалось отправить сообщение. Попробуйте еще раз");
         }
     }
   }

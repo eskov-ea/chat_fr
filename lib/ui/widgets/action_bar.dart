@@ -167,7 +167,7 @@ class ActionBarState extends State<ActionBar> {
     try {
       PermissionStatus status = await Permission.microphone.request();
       if (status != PermissionStatus.granted) {
-        customToastMessage(context, "Необходимо разрешить доступ к микрофону!");
+        customToastMessage(context: context, message: "Необходимо разрешить доступ к микрофону!");
         throw RecordingPermissionException("Microphone permission not granted");
       }
 
@@ -175,7 +175,7 @@ class ActionBarState extends State<ActionBar> {
       setState(() {});
     } catch (err) {
       print("ERROR recording audio startRecorder  -->  $err ");
-      customToastMessage(context, "Произошла ошибка при записи голосового сообщения");
+      customToastMessage(context: context, message: "Произошла ошибка при записи голосового сообщения");
       _logger.sendErrorTrace(message: "func record: Произошла ошибка при записи голосового сообщения", err: err.toString());
     }
   }
@@ -188,7 +188,7 @@ class ActionBarState extends State<ActionBar> {
       record(recorder);
     } catch (err) {
       print("ERROR recording an audio message  $err");
-      customToastMessage(context, "Произошла ошибка при записи голосового сообщения");
+      customToastMessage(context: context, message: "Произошла ошибка при записи голосового сообщения");
       _logger.sendErrorTrace(message: "func start: Произошла ошибка при записи голосового сообщения", err: err.toString());
     }
   }
@@ -312,7 +312,7 @@ class ActionBarState extends State<ActionBar> {
                         _sendAudioMessage(file, widget.userId, widget.dialogId);
                       } catch (err) {
                         print("Record message error:   $err");
-                        customToastMessage(context, "Произошла ошибка при записи голосового сообщения");
+                        customToastMessage(context: context, message: "Произошла ошибка при записи голосового сообщения");
                       }
                     },
                     child: GlowingActionButton(

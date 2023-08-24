@@ -59,7 +59,7 @@ class _FilePreviewerWidgetState extends State<FilePreviewerWidget> {
     Navigator.of(context).pop();
 
     if (base64String == null) {
-      customToastMessage(context, "Произошла ошибка при загрузке файла!");
+      customToastMessage(context: context, message: "Произошла ошибка при загрузке файла!");
       return;
     } //TODO: implement this method with desired workflow
     try {
@@ -76,7 +76,7 @@ class _FilePreviewerWidgetState extends State<FilePreviewerWidget> {
     } catch (err) {
       print("fromBase64ToFileOnDevice  error  $err");
       customToastMessage(
-          context, "Произошла ошибка, не удалось сохранить файл!");
+          context: context, message: "Произошла ошибка, не удалось сохранить файл!");
     }
   }
 

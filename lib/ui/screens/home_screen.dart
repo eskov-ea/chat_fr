@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../bloc/calls_bloc/calls_bloc.dart';
 import '../../bloc/calls_bloc/calls_state.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
@@ -65,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String? os;
   bool isActiveCall = false;
   bool isIncomingCall = false;
+  bool isOutgoingCall = false;
   bool isUpdateAvailable = true;
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
   final timer = CallTimer.getInstance();
@@ -106,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         SessionExpiredModalWidget(context);
       } else {
         final String message = _mapErrorToMessage(state.error);
-        customToastMessage(context, "Error message: $message");
+        customToastMessage(context: context, message: "Error message: $message");
       }
     }
   }
@@ -148,9 +150,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (packageInfo.version != settings.version) {
       isUpdateAvailable = true;
       if(os == "android") {
-        customToastMessage(context, "Доступна новая версия приложения. Вы можете обновить ее в разделе Профиль");
+        customToastMessage(context: context, message: "Доступна новая версия приложения. Вы можете обновить ее в разделе Профиль");
       } else {
-        customToastMessage(context, "Доступна новая версия приложения. Свяжитесь с разработчиками, чтобы установить ее");
+        SnackBarAction? action;
+        if (await canLaunchUrl(Uri.parse('https://apps.apple.com/us/app/mcfef-int/id6452551074'))) {
+          action = SnackBarAction(
+            label: 'Обновить',
+            onPressed: () async {
+              await launchUrl(Uri.parse('https://apps.apple.com/us/app/mcfef-int/id6452551074'));
+            },
+          );
+        }
+        customToastMessage(context: context, message: "Доступна новая версия приложения. Свяжитесь с разработчиками, чтобы установить ее", action: action);
       }
     }
   }
@@ -175,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         }
       } catch (err) {
         print("publicDialog err   $err");
-        customToastMessage(context, "Не удалось проверить корпоративные группы и каналы");
+        customToastMessage(context: context, message: "Не удалось проверить корпоративные группы и каналы");
       }
     }
   }
@@ -193,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         }
         getUserCallLog(state.user!.userProfileSettings!);
       } else {
-        customToastMessage(context, "Не удалось получить настройки для Asterisk с сервера. Пожалуйста, сообщите об этой ошибке разработчикам");
+        customToastMessage(context: context, message: "Не удалось получить настройки для Asterisk с сервера. Пожалуйста, сообщите об этой ошибке разработчикам");
       }
       if (state.user?.appSettings != null){
         checkAppVersion(state.user!.appSettings!);
@@ -232,6 +243,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         )
     );
   }
+  void _openOutgoingCallScreen() {
+    if (Platform.isIOS) return;
+    Navigator.of(context).pushNamed(
+        MainNavigationRouteNames.outgoingCallScreen,
+        arguments: CallScreenArguments(
+            callerName: callerName ?? "Не удалось определить номер"
+        )
+    );
+  }
   void _returnToConnectedCallScreen() {
     Navigator.of(context).pushNamed(
         MainNavigationRouteNames.runningCallScreen,
@@ -254,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       callServiceBlocSubscription = BlocProvider.of<CallsBloc>(context).stream.listen((state) async {
         print("CALL_SERVICE_STATE   $state");
         if (state is UnconnectedCallServiceState) {
-          customToastMessage(context, "Произошла ошибка при подключении к SIP-серверу");
+          customToastMessage(context: context, message: "Произошла ошибка при подключении к SIP-серверу");
         } else if (state is IncomingCallState) {
           if(ModalRoute.of(context)?.settings.name == MainNavigationRouteNames.incomingCallScreen) return;
           try {
@@ -263,9 +283,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           } catch (err) {
             callerName = "${state.callerName}";
           }
-          setState(() {
-            isIncomingCall = true;
-          });
+          // setState(() {
+          //   isIncomingCall = true;
+          // });
           _openIncomingCallScreen();
         } else if (state is OutgoingCallServiceState) {
           print("NAVIGATOR outg   ${ModalRoute.of(context)?.settings.name}");
@@ -278,34 +298,34 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           } catch (err) {
             print("OutgoingCallServiceState Error:   $err");
           }
-          setState(() {
-            isActiveCall = true;
-          });
           Navigator.of(context).pushNamed(
               MainNavigationRouteNames.outgoingCallScreen,
               arguments: CallScreenArguments(
                 callerName: callerName ?? state.callerName
               )
           );
+
+          // setState(() {
+          //   isOutgoingCall = true;
+          // });
         } else if(state is ConnectedCallState) {
           timer.start();
-          setState(() {
-            isActiveCall = true;
-            isIncomingCall = false;
-          });
+          if(Platform.isAndroid) {
+            Navigator.pop(context);
+          }
           Navigator.of(context).pushNamed(
               MainNavigationRouteNames.runningCallScreen,
               arguments: CallScreenArguments(
                 callerName: callerName ?? "Не удалось определить номер",
               )
           );
+          // setState(() {
+          //   isActiveCall = true;
+          //   isIncomingCall = false;
+          //   isOutgoingCall = false;
+          // });
         } else if(state is EndedCallServiceState) {
           print("NAVIGATOR end   ${ModalRoute.of(context)?.settings.name}");
-          setState(() {
-            isActiveCall = false;
-            isIncomingCall = false;
-            callerName = null;
-          });
           BlocProvider.of<CallLogsBloc>(context).add(AddCallToLogEvent(call: state.callData));
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
         } else if(state is ErrorCallServiceState) {
@@ -331,7 +351,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           if (_isPushSent == false) {
             _isPushSent = true;
             final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);
-            dialogId ??= await createDialog(chatsBuilderBloc: chatsBuilderBloc, partnerId: int.parse(state.callerName));
+            print("ErrorCallServiceState    caller   $caller");
+            dialogId ??= await createDialog(chatsBuilderBloc: chatsBuilderBloc, partnerId: int.parse(caller));
             _pushNotificationService.sendMissCallPush(
                 userId: caller, userName: myUserName);
             sendMessageUnix(
@@ -343,13 +364,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               parentMessage: null,
             );
           }
+          // setState(() {
+          //   isActiveCall = false;
+          //   isIncomingCall = false;
+          //   isOutgoingCall = false;
+          //   callerName = null;
+          // });
         } else if (state is EndCallWithNoLogServiceState) {
-          setState(() {
-            isActiveCall = false;
-            isIncomingCall = false;
-            callerName = null;
-          });
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
+          // setState(() {
+          //   isActiveCall = false;
+          //   isIncomingCall = false;
+          //   isOutgoingCall = false;
+          //   callerName = null;
+          // });
         }
       });
     }
@@ -393,10 +421,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       body: Column(
         children: [
           isIncomingCall && Platform.isAndroid
-            ? IncomingCallStatusWidget(screenCallback: _openIncomingCallScreen,)
+            ? ActiveCallStatusWidget(message: "Входящий вызов", screenCallback: _openIncomingCallScreen,)
             : SizedBox.shrink(),
+          isOutgoingCall
+              ? ActiveCallStatusWidget(message: "Исходящий вызов", screenCallback: _openOutgoingCallScreen,)
+              : SizedBox.shrink(),
           isActiveCall
-            ? ActiveCallStatusWidget(screenCallback: _returnToConnectedCallScreen)
+            ? RunningCallStatusWidget(screenCallback: _returnToConnectedCallScreen)
             : SizedBox.shrink(),
           Expanded(
             child: IndexedStack(

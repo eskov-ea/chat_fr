@@ -20,6 +20,7 @@ class DialogsLoadedViewCubitState extends DialogsViewCubitState {
       identical(this, other) ||
           other is DialogsLoadedViewCubitState &&
               runtimeType == other.runtimeType &&
+              true == false &&
               compareDialogDataLists(dialogs, other.dialogs) &&
               searchQuery == other.searchQuery &&
               isError == other.isError;

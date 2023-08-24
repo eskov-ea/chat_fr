@@ -182,7 +182,7 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
                       );
                     } else {
                       Navigator.of(context).pop();
-                      customToastMessage(context, "Произошла ошибка. Попробуйте еще раз");
+                      customToastMessage(context: context, message: "Произошла ошибка. Попробуйте еще раз");
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -210,7 +210,7 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
       : Center(
         child: OutlinedButton(
             onPressed: () async {
-              customToastMessage(context, "Секретный p2p чат пока не настроен");
+              customToastMessage(context: context, message: "Секретный p2p чат пока не настроен");
               // print("GROUPLIST  -->  $groupUsersList");
               // print("GROUPLIST  -->  $currentChatType");
               // loadingInProgressModalWidget(context, "Загрузка");

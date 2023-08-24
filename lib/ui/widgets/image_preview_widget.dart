@@ -104,7 +104,7 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
     if (!kIsWeb) {
       GallerySaver.saveImage(imageFile!.path, albumName: null).then((success) {
         if (success == true) {
-          customToastMessage(context, "Сохранено!");
+          customToastMessage(context: context, message: "Сохранено!");
         }
       });
       return;

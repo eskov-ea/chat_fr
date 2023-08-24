@@ -129,8 +129,17 @@ import 'messages/messages_repository.dart';
         ));
   }
 
-  customToastMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  customToastMessage({
+    required BuildContext context,
+    required String message,
+    SnackBarAction? action = null
+  }) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        action: action,
+      ),
+    );
   }
 
   loadFileAndSaveLocally({required String fileName, required attachmentId}) async {

@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../services/helpers/call_timer.dart';
 import '../../theme.dart';
 
 
-class ActiveCallStatusWidget extends StatefulWidget {
-  const ActiveCallStatusWidget({
+class RunningCallStatusWidget extends StatefulWidget {
+  const RunningCallStatusWidget({
     required this.screenCallback,
     Key? key
   }):super(key: key);
@@ -14,10 +13,10 @@ class ActiveCallStatusWidget extends StatefulWidget {
   final void Function() screenCallback;
 
   @override
-  State<ActiveCallStatusWidget> createState() => _ActiveCallStatusWidgetState();
+  State<RunningCallStatusWidget> createState() => _RunningCallStatusWidgetState();
 }
 
-class _ActiveCallStatusWidgetState extends State<ActiveCallStatusWidget> {
+class _RunningCallStatusWidgetState extends State<RunningCallStatusWidget> {
   final timer = CallTimer.getInstance();
   late final StreamSubscription _streamSubscription;
   String callDuration = "00:00:00";
@@ -43,12 +42,12 @@ class _ActiveCallStatusWidgetState extends State<ActiveCallStatusWidget> {
       onTap: widget.screenCallback,
       child: Container(
         width: MediaQuery.of(context).size.width,
-        height: Platform.isIOS ? 80 : 50,
+        height: 80,
         color: AppColors.activeCall,
         child: Align(
-          alignment: Platform.isIOS ? Alignment.bottomCenter : Alignment.center,
+          alignment: Alignment.bottomCenter,
           child: Padding(
-            padding: Platform.isIOS ? EdgeInsets.only(bottom: 10) : EdgeInsets.zero,
+            padding: EdgeInsets.only(bottom: 10),
             child: Text("Вернуться к звонку - $callDuration",
               style: TextStyle(color: Colors.white, fontSize: 16),
             ),
@@ -59,13 +58,15 @@ class _ActiveCallStatusWidgetState extends State<ActiveCallStatusWidget> {
   }
 }
 
-class IncomingCallStatusWidget extends StatelessWidget {
-  const IncomingCallStatusWidget({
+class ActiveCallStatusWidget extends StatelessWidget {
+  const ActiveCallStatusWidget({
     required this.screenCallback,
+    required this.message,
     Key? key
   }) :super(key: key);
 
   final void Function() screenCallback;
+  final String message;
 
   @override
   Widget build(BuildContext context) {
@@ -73,11 +74,15 @@ class IncomingCallStatusWidget extends StatelessWidget {
       onTap: screenCallback,
       child: Container(
         width: MediaQuery.of(context).size.width,
-        height: 50,
+        height: 80,
         color: AppColors.activeCall,
-        child: Center(
-          child: Text("Входящий вызов",
-            style: TextStyle(color: Colors.white, fontSize: 16),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 10),
+            child: Text(message,
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
           ),
         ),
       ),

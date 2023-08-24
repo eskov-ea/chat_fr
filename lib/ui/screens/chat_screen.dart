@@ -163,11 +163,11 @@ class _ChatScreenState extends State<ChatScreen> {
             ChatsBuilderDeleteMessagesEvent(
                 messagesId: selected, dialogId: widget.dialogData!.dialogId));
       } else {
-        customToastMessage(context, 'Не получилось удалить сообщения. Попробуйте еще раз');
+        customToastMessage(context: context, message: 'Не получилось удалить сообщения. Попробуйте еще раз');
       }
     } catch (err) {
       print('deleteMessages  $err');
-      customToastMessage(context, 'Не получилось удалить сообщения. Попробуйте еще раз');
+      customToastMessage(context: context, message: 'Не получилось удалить сообщения. Попробуйте еще раз');
     }
   }
 

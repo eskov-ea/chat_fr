@@ -36,8 +36,6 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
       UsersLoadEvent event, Emitter<UsersState> emit
       ) async {
     try {
-      print("onUsersLoadEvent ++");
-      throw new AppErrorException(AppErrorExceptionType.other, "test", "");
       final String? token = await _secureStorage.getToken();
       List<UserContact> users = await usersRepository.getAllUsers(token);
       final usersMap = usersRepository.getSipContacts(users);

@@ -3,7 +3,6 @@ import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/models/call_model.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/storage/data_storage.dart';
-import 'package:chat/theme.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

@@ -80,6 +80,7 @@ class DialogsProvider {
 
   Future<DialogData> createDialog({required chatType, required users, required chatName, required chatDescription, required isPublic}) async {
     try {
+      print("CREATE DIALOG  -->  chatType:  $chatType, users:  $users, chatName:  $chatName, chatDescription:  $chatDescription, isPublic:  $isPublic");
       final String? token = await _secureStorage.getToken();
       final response = await http.post(
         Uri.parse('https://erp.mcfef.com/api/chat/add'),
@@ -97,7 +98,6 @@ class DialogsProvider {
           }
         }),
       );
-      print("CREATE DIALOG  -->  $chatType");
       print("CREATE DIALOG  -->  ${response.body}");
       if (response.statusCode == 200) {
         DialogData dialog =
