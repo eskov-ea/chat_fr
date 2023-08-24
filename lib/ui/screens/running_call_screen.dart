@@ -206,7 +206,6 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
               GestureDetector(
                 onTap: () {
                   declineCall();
-                  timer.stop();
                   Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
                 },
                 child: Column(

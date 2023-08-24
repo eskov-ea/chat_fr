@@ -283,9 +283,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           } catch (err) {
             callerName = "${state.callerName}";
           }
-          // setState(() {
-          //   isIncomingCall = true;
-          // });
+          setState(() {
+            isIncomingCall = true;
+          });
           _openIncomingCallScreen();
         } else if (state is OutgoingCallServiceState) {
           print("NAVIGATOR outg   ${ModalRoute.of(context)?.settings.name}");
@@ -305,9 +305,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               )
           );
 
-          // setState(() {
-          //   isOutgoingCall = true;
-          // });
+          setState(() {
+            isOutgoingCall = true;
+          });
         } else if(state is ConnectedCallState) {
           timer.start();
           if(Platform.isAndroid) {
@@ -319,16 +319,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 callerName: callerName ?? "Не удалось определить номер",
               )
           );
-          // setState(() {
-          //   isActiveCall = true;
-          //   isIncomingCall = false;
-          //   isOutgoingCall = false;
-          // });
+          setState(() {
+            isActiveCall = true;
+            isIncomingCall = false;
+            isOutgoingCall = false;
+          });
         } else if(state is EndedCallServiceState) {
           print("NAVIGATOR end   ${ModalRoute.of(context)?.settings.name}");
+          timer.stop();
           BlocProvider.of<CallLogsBloc>(context).add(AddCallToLogEvent(call: state.callData));
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
+          setState(() {
+            isActiveCall = false;
+            isIncomingCall = false;
+            isOutgoingCall = false;
+            callerName = null;
+          });
         } else if(state is ErrorCallServiceState) {
+          timer.stop();
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
           final List<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs;
           int? dialogId;
@@ -364,20 +372,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               parentMessage: null,
             );
           }
-          // setState(() {
-          //   isActiveCall = false;
-          //   isIncomingCall = false;
-          //   isOutgoingCall = false;
-          //   callerName = null;
-          // });
+          setState(() {
+            isActiveCall = false;
+            isIncomingCall = false;
+            isOutgoingCall = false;
+            callerName = null;
+          });
         } else if (state is EndCallWithNoLogServiceState) {
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
-          // setState(() {
-          //   isActiveCall = false;
-          //   isIncomingCall = false;
-          //   isOutgoingCall = false;
-          //   callerName = null;
-          // });
+          setState(() {
+            isActiveCall = false;
+            isIncomingCall = false;
+            isOutgoingCall = false;
+            callerName = null;
+          });
         }
       });
     }
