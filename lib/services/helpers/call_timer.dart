@@ -36,6 +36,7 @@ class CallTimer {
   }
 
   Stream<String> stream() {
+    if (_streamController == null) start();
     return _streamController!.stream;
   }
 
