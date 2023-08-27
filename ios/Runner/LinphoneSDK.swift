@@ -90,7 +90,7 @@ class LinphoneSDK : ObservableObject
                     let callStatus: String  = (call.callLog?.status.rawValue == 0) ? "ANSWERED" : "NO ANSWER"
                     let callData = CallData(duration: call.callLog?.duration.description, disposition: callStatus, dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId   )
                         print("CALL_STATUS  \(callData)")
-                    let payload = makeEventPayload(event: "ENDED", callerId: call.remoteAddress?.username, callData: callData)
+                    let payload = makeEventPayload(event: "RELEASED", callerId: call.remoteAddress?.username, callData: callData)
                     print("CALL_ENDED IOS  \(callData)")
                     self.eventSink?(payload)
                     if (self.isCallRunning) {
@@ -117,6 +117,8 @@ class LinphoneSDK : ObservableObject
                     // This state will be reached upon reception of the 180 RINGING
                 } else if (state == .StreamsRunning) {
                     print("Call.State  ->  \(state)")
+                    let payload = makeEventPayload(event: "STREAM_RUNNING", callerId: nil, callData: nil)
+                    self.eventSink?(payload)
                     // This state indicates the call is active.
                     // You may reach this state multiple times, for example after a pause/resume
                     // or after the ICE negotiation completes
@@ -135,6 +137,9 @@ class LinphoneSDK : ObservableObject
                     // When we request a call update, for example when toggling video
                 } else if (state == .UpdatedByRemote) {
                     // When the remote requests a call update
+                } else if (state == .End) {
+                    let payload = makeEventPayload(event: "ENDED", callerId: nil, callData: nil)
+                    self.eventSink?(payload)
                 }
 
             }, onAudioDeviceChanged: { (core: Core, device: AudioDevice) in

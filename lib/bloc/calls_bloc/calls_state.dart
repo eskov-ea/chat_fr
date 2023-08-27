@@ -29,17 +29,17 @@ class ConnectedCallServiceState extends CallState{
   int get hashCode => runtimeType.hashCode;
 }
 
-class EndedCallServiceState extends CallState{
+class EndedCallState extends CallState{
   final CallModel callData;
 
-  EndedCallServiceState({
+  EndedCallState({
     required this.callData
   });
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is EndedCallServiceState &&
+          other is EndedCallState &&
               callData.id == other.callData.id &&
               runtimeType == other.runtimeType;
 
@@ -47,10 +47,10 @@ class EndedCallServiceState extends CallState{
   int get hashCode => callData.hashCode;
 }
 
-class OutgoingCallServiceState extends CallState{
+class OutgoingCallState extends CallState{
   final String callerName;
 
-  OutgoingCallServiceState({required this.callerName});
+  OutgoingCallState({required this.callerName});
 
   @override
   bool operator ==(Object other) =>
@@ -82,10 +82,10 @@ class IncomingCallState extends CallState {
   int get hashCode => callerName.hashCode;
 }
 
-class ErrorCallServiceState extends CallState{
+class ErrorCallState extends CallState{
   final String callerName;
 
-  ErrorCallServiceState({required this.callerName});
+  ErrorCallState({required this.callerName});
 
   @override
   bool operator ==(Object other) =>
@@ -110,12 +110,36 @@ class ConnectedCallState extends CallState{
   int get hashCode => runtimeType.hashCode;
 }
 
-class EndCallWithNoLogServiceState extends CallState{
+class StreamRunningCallState extends CallState{
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is EndCallWithNoLogServiceState &&
+          other is StreamRunningCallState &&
+              runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+}
+
+class StreamStopCallState extends CallState{
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is StreamStopCallState &&
+              runtimeType == other.runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+}
+
+class EndCallWithNoLogState extends CallState{
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is EndCallWithNoLogState &&
               runtimeType == other.runtimeType;
 
   @override

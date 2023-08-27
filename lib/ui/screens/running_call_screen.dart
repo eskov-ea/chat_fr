@@ -34,6 +34,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
 
   @override
   void initState() {
+    callDuration = timer.lastValue;
     _streamSubscription = timer.stream().listen((time) {
       setState(() {
         callDuration = time;
@@ -94,7 +95,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
             height: 3,
           ),
           Text(
-            callDuration ?? "",
+            callDuration ?? "00:00:00",
             style: TextStyle(color: Colors.white, fontSize: 18),
           ),
           Expanded(

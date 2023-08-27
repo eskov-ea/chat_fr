@@ -7,10 +7,13 @@ class CallTimer {
   int hours = 0;
   StreamController<String>? _streamController;
   Timer? _timer;
+  bool isRunning = false;
+  String lastValue = "00:00:00";
 
   static CallTimer getInstance() {
     if (instance == null) {
       instance = CallTimer();
+      instance!.init();
       return instance!;
     } else {
       return instance!;
@@ -18,25 +21,37 @@ class CallTimer {
   }
 
   void start() {
-    if (_streamController == null) {
-      _streamController = StreamController.broadcast();
+    print("TIMER START");
+    if (_streamController == null) init();
+    if (!isRunning) {
+      _startTimer();
+      isRunning = true;
     }
-    _startTimer();
-
   }
 
-  void stop() async {
+  void init() {
+    print("TIMER INIT");
+    _streamController = StreamController.broadcast();
+  }
+
+  void stop() {
     print("Stop the timer");
     _timer?.cancel();
-    await _streamController?.close();
-    _streamController = null;
+    isRunning = false;
     seconds = 0;
     minutes = 0;
     hours = 0;
+    lastValue = "00:00:00";
+  }
+
+  void dispose() async {
+    await _streamController?.close();
+    _streamController = null;
   }
 
   Stream<String> stream() {
-    if (_streamController == null) start();
+    print("TIMER STREAM");
+    // if (_streamController == null) start();
     return _streamController!.stream;
   }
 
@@ -58,7 +73,9 @@ class CallTimer {
       final  digitSeconds = (seconds >= 10) ? "$seconds" : "0$seconds";
       final  digitMinutes = (minutes >= 10) ? "$minutes" : "0$minutes";
       final  digitHours = (hours >= 10) ? "$hours" : "0$hours";
+      print("timer  -->  $digitHours:$digitMinutes:$digitSeconds");
       _streamController!.sink.add("$digitHours:$digitMinutes:$digitSeconds");
+      lastValue = "$digitHours:$digitMinutes:$digitSeconds";
     });
   }
 

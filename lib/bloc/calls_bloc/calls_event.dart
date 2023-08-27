@@ -14,6 +14,10 @@ class MissedCallEvent extends CallsEvent {}
 
 class ConnectedCallEvent extends CallsEvent {}
 
+class StreamRunningCallEvent extends CallsEvent {}
+
+class StreamStopCallEvent extends CallsEvent {}
+
 class ConnectionFailedCallEvent extends CallsEvent {}
 
 class OutgoingCallEvent extends CallsEvent {
@@ -30,14 +34,14 @@ class ErrorCallEvent extends CallsEvent {
 
 class ConnectingCallServiceEvent extends CallsEvent {}
 
-class EndedCallServiceEvent extends CallsEvent {
+class EndedCallEvent extends CallsEvent {
   final CallModel callData;
 
-  EndedCallServiceEvent({
+  EndedCallEvent({
     required this.callData
   });
 }
 
-class EndCallWithNoLogServiceEvent extends CallsEvent {}
+class EndCallWithNoLogEvent extends CallsEvent {}
 
 

@@ -7,7 +7,6 @@ import 'package:chat/bloc/error_handler_bloc/error_handler_state.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/user_profile_model.dart';
 import 'package:chat/storage/data_storage.dart';
-import 'package:chat/ui/widgets/app_bar.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -29,7 +28,6 @@ import '../../bloc/ws_bloc/ws_event.dart';
 import '../../factories/screen_factory.dart';
 import '../../services/dialogs/dialogs_api_provider.dart';
 import '../../services/global.dart';
-import '../../services/helpers/call_timer.dart';
 import '../../services/helpers/message_sender_helper.dart';
 import '../../services/push_notifications/push_notification_service.dart';
 import '../../theme.dart';
@@ -69,7 +67,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool isOutgoingCall = false;
   bool isUpdateAvailable = true;
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
-  final timer = CallTimer.getInstance();
 
 
   Future<bool> isCallRunning () async {
@@ -287,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             isIncomingCall = true;
           });
           _openIncomingCallScreen();
-        } else if (state is OutgoingCallServiceState) {
+        } else if (state is OutgoingCallState) {
           print("NAVIGATOR outg   ${ModalRoute.of(context)?.settings.name}");
           if(ModalRoute.of(context)?.settings.name == MainNavigationRouteNames.outgoingCallScreen) return;
           _isPushSent = false;
@@ -309,8 +306,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             isOutgoingCall = true;
           });
         } else if(state is ConnectedCallState) {
-          timer.start();
-          if(Platform.isAndroid) {
+          if(Platform.isAndroid || isOutgoingCall) {
             Navigator.pop(context);
           }
           Navigator.of(context).pushNamed(
@@ -324,9 +320,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             isIncomingCall = false;
             isOutgoingCall = false;
           });
-        } else if(state is EndedCallServiceState) {
+        } else if(state is EndedCallState) {
           print("NAVIGATOR end   ${ModalRoute.of(context)?.settings.name}");
-          timer.stop();
           BlocProvider.of<CallLogsBloc>(context).add(AddCallToLogEvent(call: state.callData));
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
           setState(() {
@@ -335,8 +330,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             isOutgoingCall = false;
             callerName = null;
           });
-        } else if(state is ErrorCallServiceState) {
-          timer.stop();
+        } else if(state is ErrorCallState) {
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
           final List<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs;
           int? dialogId;
@@ -378,7 +372,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             isOutgoingCall = false;
             callerName = null;
           });
-        } else if (state is EndCallWithNoLogServiceState) {
+        } else if (state is EndCallWithNoLogState) {
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
           setState(() {
             isActiveCall = false;
