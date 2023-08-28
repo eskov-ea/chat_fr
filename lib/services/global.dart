@@ -67,13 +67,13 @@ import 'messages/messages_repository.dart';
 
   Future<bool> toggleMute() async {
     final result = await sipChannel.invokeMethod("TOGGLE_MUTE");
-    print("TOOGLE_RESULT     $result");
+    print("TOGGLE_RESULT     $result");
     return result;
   }
 
   Future<bool> toggleSpeaker() async {
     final result = await sipChannel.invokeMethod("TOGGLE_SPEAKER");
-    print("TOOGLE_RESULT     $result");
+    print("TOGGLE_RESULT     $result");
     return result;
   }
 

@@ -379,22 +379,15 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
     }
 
     fun toggleSpeaker(): Boolean {
-        // Get the currently used audio device
         val currentAudioDevice = core.currentCall?.outputAudioDevice
         val speakerEnabled = currentAudioDevice?.type == AudioDevice.Type.Speaker
+        Log.w("toggleSpeaker currentAudioDevice", currentAudioDevice?.type.toString());
 
-        Log.w("toggleSpeaker", speakerEnabled.toString())
-
-        // We can get a list of all available audio devices using
-        // Note that on tablets for example, there may be no Earpiece device
         for (audioDevice in core.audioDevices) {
-//            Log.w("toggleSpeaker", audioDevice.type.toString())
-
             if (speakerEnabled && audioDevice.type == AudioDevice.Type.Earpiece) {
-                Log.w("toggleSpeaker", "AudioDevice.Type.Microphone")
+//                Log.w("toggleSpeaker", "AudioDevice.Type.Microphone")
 
                 core.currentCall?.outputAudioDevice = audioDevice
-                Log.w("toggleSpeaker", (core.currentCall?.outputAudioDevice?.type == AudioDevice.Type.Speaker).toString())
                 return false
             } else if (!speakerEnabled && audioDevice.type == AudioDevice.Type.Speaker) {
                 Log.w("toggleSpeaker", "AudioDevice.Type.Speaker")

@@ -21,7 +21,6 @@ class CallTimer {
   }
 
   void start() {
-    print("TIMER START");
     if (_streamController == null) init();
     if (!isRunning) {
       _startTimer();
@@ -30,12 +29,10 @@ class CallTimer {
   }
 
   void init() {
-    print("TIMER INIT");
     _streamController = StreamController.broadcast();
   }
 
   void stop() {
-    print("Stop the timer");
     _timer?.cancel();
     isRunning = false;
     seconds = 0;
@@ -50,8 +47,6 @@ class CallTimer {
   }
 
   Stream<String> stream() {
-    print("TIMER STREAM");
-    // if (_streamController == null) start();
     return _streamController!.stream;
   }
 
@@ -78,7 +73,4 @@ class CallTimer {
       lastValue = "$digitHours:$digitMinutes:$digitSeconds";
     });
   }
-
-
-
 }

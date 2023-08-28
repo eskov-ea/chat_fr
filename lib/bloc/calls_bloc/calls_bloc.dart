@@ -51,14 +51,12 @@ class CallsBloc
     });
       on<CallsEvent>((event, emit) async {
         if (event is ConnectingCallServiceEvent) {
-          // timer.init();
           emit(ConnectedCallServiceState());
         } else if (event is ConnectionFailedCallEvent) {
           emit(UnconnectedCallServiceState());
         } else if (event is IncomingCallEvent) {
           emit(IncomingCallState(callerName: event.callerId));
         } else if (event is EndedCallEvent) {
-          // timer.stop();
           emit(EndedCallState(callData: event.callData));
           add(ConnectingCallServiceEvent());
         } else if (event is OutgoingCallEvent) {
@@ -115,6 +113,7 @@ class CallServiceEventModel {
         callData: makeCallDataMap(json["callData"])
     );
   }
+
 }
 
 makeCallDataMap(string) {

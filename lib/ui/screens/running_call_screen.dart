@@ -64,180 +64,188 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
     return Scaffold(
       // appBar: ,
       backgroundColor: const Color(0xFF474747),
-      body: CustomSizeContainer(Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Padding(
-            padding: EdgeInsets.only(top: 80),
-            child: Row(
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/calls_wallpaper.jpg"),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: CustomSizeContainer(
+          Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(top: 80),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 80,
+                    backgroundColor: Colors.grey,
+                    child: Padding(
+                      padding: const EdgeInsets.all(1), // Border radius
+                      child: ClipOval(
+                          child: Image.asset('assets/images/no_avatar.png')),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text(
+              username ?? widget.callerName,
+              style: TextStyle(color: Colors.white, fontSize: 26),
+            ),
+            SizedBox(
+              height: 3,
+            ),
+            Text(
+              callDuration ?? "00:00:00",
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            Expanded(
+              child: SizedBox(),
+            ),
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CircleAvatar(
-                  radius: 80,
-                  backgroundColor: Colors.grey,
-                  child: Padding(
-                    padding: const EdgeInsets.all(1), // Border radius
-                    child: ClipOval(
-                        child: Image.asset('assets/images/no_avatar.png')),
+                GestureDetector(
+                  onTap: () async {
+                    final result = await toggleMute();
+                    setState(() {
+                      isMute = result;
+                    });
+                  },
+                  child: Column(
+                    // A button
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                            color: isMute
+                                ? Colors.white
+                                : const Color(0x80ffffff),
+                            borderRadius: const BorderRadius.all(
+                                Radius.circular(50))),
+                        child: Padding(
+                          padding: const EdgeInsets.all(22),
+                          child: Image.asset(
+                            'assets/images/mute.png',
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+                      ),
+                      const Text("Mute",
+                          style:
+                          TextStyle(color: Colors.white, fontSize: 14)),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    // A button
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: const BoxDecoration(
+                            color: Color(0xFF626262),
+                            borderRadius:
+                            BorderRadius.all(Radius.circular(50))),
+                        child: Padding(
+                          padding: const EdgeInsets.all(22),
+                          child: Image.asset(
+                            'assets/images/message_icon.png',
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+                      ),
+                      const Text("Message",
+                          style: TextStyle(
+                              color: Colors.white, fontSize: 14)),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    final result = await toggleSpeaker();
+                    setState(() {
+                      isSpeaker = result;
+                    });
+                  },
+                  child: Column(
+                    // A button
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: isSpeaker
+                            ? Colors.white
+                            : const Color(0x80ffffff),
+                          borderRadius: const BorderRadius.all(Radius.circular(50))),
+                        child: Padding(
+                          padding: const EdgeInsets.all(22),
+                          child: Image.asset(
+                            'assets/images/speaker_icon.png',
+                            fit: BoxFit.fill,
+                          ),
+                        ),
+                      ),
+                      const Text("Speaker",
+                          style:
+                          TextStyle(color: Colors.white, fontSize: 14)),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Text(
-            username ?? widget.callerName,
-            style: TextStyle(color: Colors.white, fontSize: 26),
-          ),
-          SizedBox(
-            height: 3,
-          ),
-          Text(
-            callDuration ?? "00:00:00",
-            style: TextStyle(color: Colors.white, fontSize: 18),
-          ),
-          Expanded(
-            child: SizedBox(),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: () async {
-                  final result = await toggleMute();
-                  setState(() {
-                    isMute = result;
-                  });
-                },
-                child: Column(
-                  // A button
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                          color: isMute
-                              ? Colors.white
-                              : const Color(0x80ffffff),
-                          borderRadius: const BorderRadius.all(
-                              Radius.circular(50))),
-                      child: Padding(
-                        padding: const EdgeInsets.all(22),
-                        child: Image.asset(
-                          'assets/images/mute.png',
-                          fit: BoxFit.fill,
+            SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    declineCall();
+                    Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
+                  },
+                  child: Column(
+                    // A button
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: const BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.all(Radius.circular(50))),
+                        child: Padding(
+                          padding: const EdgeInsets.all(22),
+                          child: Image.asset(
+                            'assets/images/decline_icon.png',
+                            fit: BoxFit.fill,
+                          ),
                         ),
                       ),
-                    ),
-                    const Text("Mute",
-                        style:
-                        TextStyle(color: Colors.white, fontSize: 14)),
-                  ],
+                      const Text("Decline",
+                          style: TextStyle(color: Colors.white, fontSize: 14)),
+                    ],
+                  ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  // A button
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: const BoxDecoration(
-                          color: Color(0x80ffffff),
-                          borderRadius:
-                          BorderRadius.all(Radius.circular(50))),
-                      child: Padding(
-                        padding: const EdgeInsets.all(22),
-                        child: Image.asset(
-                          'assets/images/message_icon.png',
-                          fit: BoxFit.fill,
-                        ),
-                      ),
-                    ),
-                    const Text("Message",
-                        style: TextStyle(
-                            color: Colors.white, fontSize: 14)),
-                  ],
-                ),
-              ),
-              GestureDetector(
-                onTap: () async {
-                  final result = await toggleSpeaker();
-                  setState(() {
-                    isSpeaker = result;
-                  });
-                },
-                child: Column(
-                  // A button
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                          color: isSpeaker
-                              ? Colors.white
-                              : const Color(0x80ffffff),
-                          borderRadius: const BorderRadius.all(
-                              Radius.circular(50))),
-                      child: Padding(
-                        padding: const EdgeInsets.all(22),
-                        child: Image.asset(
-                          'assets/images/speaker_icon.png',
-                          fit: BoxFit.fill,
-                        ),
-                      ),
-                    ),
-                    const Text("Speaker",
-                        style:
-                        TextStyle(color: Colors.white, fontSize: 14)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  declineCall();
-                  Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
-                },
-                child: Column(
-                  // A button
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: const BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.all(Radius.circular(50))),
-                      child: Padding(
-                        padding: const EdgeInsets.all(22),
-                        child: Image.asset(
-                          'assets/images/decline_icon.png',
-                          fit: BoxFit.fill,
-                        ),
-                      ),
-                    ),
-                    const Text("Decline",
-                        style: TextStyle(color: Colors.white, fontSize: 14)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 50,
-          ),
-        ],
-      ), context)
+              ],
+            ),
+            SizedBox(
+              height: 50,
+            ),
+          ],
+        ), context),
+      )
     );
   }
 }
