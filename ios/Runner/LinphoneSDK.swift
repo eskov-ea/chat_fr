@@ -222,7 +222,7 @@ class LinphoneSDK : ObservableObject
             do {
                 
                 var transport : TransportType
-                transport = TransportType.Tcp
+                transport = TransportType.Tls
                 
                 let authInfo = try Factory.Instance.createAuthInfo(username: username, userid: "", passwd: password, ha1: "", realm: "", domain: domain)
                 authInfo.tlsCert = cert

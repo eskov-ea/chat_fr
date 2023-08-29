@@ -41,16 +41,6 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
       });
     });
     super.initState();
-// print("USEEEERS    ${widget.users}");
-    // username = widget.users.firstWhere((el) => el.id.toString() == widget.callerName).lastname;
-    // callServiceBlocSubscription = widget.callsBloc.stream.listen((state) {
-    //   if (state is EndedCallServiceState) {
-    //     final currentRoute = ModalRoute.of(context)?.settings.name;
-    //     if (currentRoute == "/home_screen/running_call_screen") {
-    //       if (Navigator.canPop(context)) Navigator.pop(context);
-    //     }
-    //   }
-    // });
   }
 
   @override

@@ -39,7 +39,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
         writeSipAccountToStorage(username, password, domain, stunDomain, stunPort, host, displayName, cert)
 
-        val transportType = TransportType.Tcp
+        val transportType = TransportType.Tls
         val authInfo = Factory.instance().createAuthInfo(username, null, password, null, null, domain, null)
 
         authInfo.tlsCert = cert
