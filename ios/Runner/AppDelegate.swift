@@ -118,9 +118,9 @@ import PushKit
                 print("DECLINE_CALL")
                 self?.linphoneSDK.declineCall()
             case "TOGGLE_MUTE":
-                self?.linphoneSDK.muteMicrophone()
+                self?.sipResultCallback?(self?.linphoneSDK.muteMicrophone())
             case "TOGGLE_SPEAKER":
-                self?.linphoneSDK.toggleSpeaker()
+                self?.sipResultCallback?(self?.linphoneSDK.toggleSpeaker())
             case "CHECK_FOR_RUNNING_CALL":
                 let result = self?.linphoneSDK.checkForRunningCall()
                 self?.sipResultCallback?(result)

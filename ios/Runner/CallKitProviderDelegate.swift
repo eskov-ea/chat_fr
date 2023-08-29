@@ -47,6 +47,15 @@ class CallKitProviderDelegate : NSObject
         provider.reportNewIncomingCall(with: incomingCallUUID, update: update, completion: { error in }) // Report to CallKit a call is incoming
     }
     
+    func updateIncomingCall(callerName: String)
+    {
+        let update = CXCallUpdate()
+//        update.remoteHandle = CXHandle(type: .generic, value: callerName)
+        update.localizedCallerName = callerName
+        
+        provider.reportCall(with: incomingCallUUID, updated: update)
+    }
+    
     func outgoingCall()
     {
         if (callkitContext.isOutgoingCallInited == true) {return}

@@ -60,3 +60,4 @@ analysis_options.yaml
 test/
 web/
 windows/
+ios/Podfile.lock

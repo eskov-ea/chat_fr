@@ -69,7 +69,7 @@ class LinphoneSDK : ObservableObject
                     // We're being called by someone (and app is in background)
                     self.mCall = call
                     self.isCallIncoming = true
-                    self.incomingCallName = self.getCallerName()
+                    self.incomingCallName = call.remoteAddress?.displayName ?? "Неизвестен"
                     self.mProviderDelegate.incomingCall()
                 } else if (state == .IncomingReceived) { // When a call is received
                     if (!self.isCallIncoming) {
@@ -80,6 +80,12 @@ class LinphoneSDK : ObservableObject
                         let payload = makeEventPayload(event: "INCOMING", callerId: call.remoteAddress?.username, callData: nil)
                         self.eventSink?(payload)
                         self.mProviderDelegate.incomingCall()
+                    } else {
+                        if(self.incomingCallName == "Неизвестен" ||
+                           self.incomingCallName == "Anonymous") {
+                            let name = self.getCallerName()
+                            self.mProviderDelegate.updateIncomingCall(callerName: name)
+                        }
                     }
                     self.remoteAddress = call.remoteAddress!.asStringUriOnly()
                 } else if (state == .Connected) { // When a call is over
@@ -93,7 +99,7 @@ class LinphoneSDK : ObservableObject
                     let payload = makeEventPayload(event: "RELEASED", callerId: call.remoteAddress?.username, callData: callData)
                     print("CALL_ENDED IOS  \(callData)")
                     self.eventSink?(payload)
-                    if (self.isCallRunning) {
+                    if (self.isCallRunning || self.isCallIncoming) {
                         self.mProviderDelegate.stopCall()
                     }
                     self.remoteAddress = "Nobody yet"
@@ -162,13 +168,13 @@ class LinphoneSDK : ObservableObject
     }
     
     func getCallerName() -> String {
-        let displayName = try mCall?.remoteAddress?.displayName
-        if(displayName != nil) {return displayName!}
+        let displayName = mCall?.remoteAddress?.displayName
+        if(displayName != nil && displayName != "") {return displayName!}
         let callerId: String = mCall?.remoteAddress?.username ?? "Неизвестен"
         do {
             let storedContacts = sm.readDataFromDocuments(jsonFilename: sm.filename)
             let callerName = try storedContacts!.contacts[callerId]
-            return callerName!
+            return callerName ?? callerId
         } catch {
             return callerId
         }
@@ -313,19 +319,23 @@ class LinphoneSDK : ObservableObject
             } catch { NSLog(error.localizedDescription) }
         }
         
-        func muteMicrophone() {
+    func muteMicrophone() -> Bool {
             // The following toggles the microphone, disabling completely / enabling the sound capture
             // from the device microphone
             mCore.micEnabled = !mCore.micEnabled
             isMicrophoneEnabled = !isMicrophoneEnabled
+            
+            return isMicrophoneEnabled
         }
         
-        func toggleSpeaker() {
+    func toggleSpeaker() -> Bool {
             // Get the currently used audio device
             let currentAudioDevice = mCore.currentCall?.outputAudioDevice
             let speakerEnabled = currentAudioDevice?.type == AudioDeviceType.Speaker
             
             let test = currentAudioDevice?.deviceName
+            print("toggleSpeaker   \(speakerEnabled)")
+            print("toggleSpeaker  \(test)")
             // We can get a list of all available audio devices using
             // Note that on tablets for example, there may be no Earpiece device
             for audioDevice in mCore.audioDevices {
@@ -336,17 +346,18 @@ class LinphoneSDK : ObservableObject
                 if (speakerEnabled && audioDevice.type == AudioDeviceType.Microphone) {
                     mCore.currentCall?.outputAudioDevice = audioDevice
                     isSpeakerEnabled = false
-                    return
+                    return false
                 } else if (!speakerEnabled && audioDevice.type == AudioDeviceType.Speaker) {
                     mCore.currentCall?.outputAudioDevice = audioDevice
                     isSpeakerEnabled = true
-                    return
+                    return true
                 }
                 /* If we wanted to route the audio to a bluetooth headset
                 else if (audioDevice.type == AudioDevice.Type.Bluetooth) {
                 core.currentCall?.outputAudioDevice = audioDevice
                 }*/
             }
+            return false
         }
 }
 
