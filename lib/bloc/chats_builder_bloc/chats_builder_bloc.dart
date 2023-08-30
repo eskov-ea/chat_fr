@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -61,7 +62,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       } else if (event is ChatsBuilderDeleteMessagesEvent){
         onChatsBuilderDeleteMessagesEvent(event, emit);
       }
-    });
+    }, transformer: sequential());
   }
 
 
@@ -73,15 +74,10 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     // emit(ChatsBuilderInProgressState(chats: state.chats, counter: state.counter));
     final userId = await dataProvider.getUserId();
     try {
-      Timer? timer;
-      int time =0;
       List<MessageData> messages = await messagesRepository.getMessages(
           userId, event.dialogId, event.pageNumber);
       print("Loaded messages:   pg:  ${event.pageNumber}   $messages");
-      timer = Timer.periodic(Duration(milliseconds: 100), (timer){
-        time = time + 100;
-        print("Time --> ${time}");
-      });
+      print("Loaded messages:   ids: ${messages.first.messageId}");
       var chatExist = false;
       final Map<String, bool> newMessagesDictionary = state.messagesDictionary;
       for (var chat in state.chats) {
@@ -102,7 +98,6 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         state.chats.add(ChatsData.makeChatsData(event.dialogId, messages));
       }
       // final newState = state.copyWith(updatedChats: state.chats, updatedCounter: state.counter++);
-      timer?.cancel();
       emit(ChatsBuilderState(
         chats: state.chats,
         messagesDictionary: newMessagesDictionary,
@@ -110,6 +105,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         isError: false
       ));
     } catch (err) {
+      if (err.runtimeType == StateError) return;
       final e = err as AppErrorException;
       if (e.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: e));

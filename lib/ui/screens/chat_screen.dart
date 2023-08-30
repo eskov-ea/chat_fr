@@ -401,12 +401,14 @@ class _MessageListState extends State<_MessageList> {
     setupScrollListener(
       scrollController: _scrollController,
       onAtTop: () {
+        print("Loaded messages:   onAtTop    $pageNumber");
         loadNextMessages();
       }
     );
   }
 
   void loadNextMessages() {
+    print("Loaded messages:   loadNextMessages  1    $pageNumber");
     BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderLoadMessagesEvent(dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
     pageNumber++;
   }
@@ -437,11 +439,13 @@ class _MessageListState extends State<_MessageList> {
   Widget build(BuildContext context) {
     return BlocBuilder<ChatsBuilderBloc, ChatsBuilderState>(
           builder: (context, state) {
+            print("Loaded messages:   ChatsBuilderState    ${state.messagesDictionary.length}");
             if (state is ChatsBuilderState) {
               final ChatsData? currentState = findChat(state.chats, widget.dialogData.dialogId);
               if (currentState == null) {
-                BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderLoadMessagesEvent(dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
-                pageNumber++;
+                loadNextMessages();
+                // BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderLoadMessagesEvent(dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
+                // pageNumber++;
                 return const Center(child: CircularProgressIndicator(),);
               }
               if ( currentState.messages.isEmpty) return const Center(child: Text('Нет сообщений'),);
