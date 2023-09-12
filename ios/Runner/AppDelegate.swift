@@ -71,13 +71,17 @@ import PushKit
             }
             if call.method == "SAVE_SIP_CONTACTS" {
                 let args = call.arguments as? Dictionary<String, Any>
-                let type = args!["type"] as? String
-                let data = args!["data"] as? Dictionary<String, String>
+//                let type = args!["type"] as? String
+//                let text = args!["data"] as? String
+//                let d = text?.data(using: .utf8)
+//                let data = try JSONSerialization.jsonObject(with: d!, options: .mutableContainers) as? Dictionary<String, Any>
+                let data = args?["data"] as? String
+//                let d = data as? Dictionary<String, Any>
                 if (data != nil) {
                     let sm = StorageManager()
-                    sm.saveDataToDocuments(data!, jsonFilename: sm.filename)
+                    sm.saveDataToDocuments(data)
                 } else {
-                    print("Data error:  \(args)  \(type)")
+                    print("Data error:  \(data)")
                 }
             }
         })

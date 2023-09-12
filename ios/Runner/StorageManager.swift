@@ -16,9 +16,14 @@ class StorageManager {
     
     let filename = "mcfef_sip_contacts.json"
     
-    func saveDataToDocuments(_ data: Dictionary<String, String>, jsonFilename: String) {
-        let jsonFileURL = getDocumentsDirectory().appendingPathComponent(jsonFilename)
-        let json = encode(data: SipContacts(contacts: data))
+    func saveDataToDocuments(_ data: String?) {
+        if (data == nil) {
+            return
+        }
+        let encodedData = decodeStringToContacts(data: data!)
+        let jsonFileURL = getDocumentsDirectory().appendingPathComponent(filename)
+        if (encodedData == nil) { return }
+        let json = encode(data: SipContacts(contacts: encodedData!))
         if (json != nil) {
             do {
                 try json!.write(to: jsonFileURL)
@@ -28,8 +33,8 @@ class StorageManager {
         }
     }
     
-    func readDataFromDocuments(jsonFilename: String) -> SipContacts? {
-        let jsonFileURL = getDocumentsDirectory().appendingPathComponent(jsonFilename)
+    func readDataFromDocuments() -> SipContacts? {
+        let jsonFileURL = getDocumentsDirectory().appendingPathComponent(filename)
         
         do {
             let data = try self.decode(data: Data.init(contentsOf: jsonFileURL))
@@ -38,6 +43,20 @@ class StorageManager {
             print("Error reading sip contacts \(error)")
             return nil
         }
+    }
+    
+    private func decodeStringToContacts(data: String) -> Dictionary<String, String>? {
+        var contacts: Dictionary<String, String> = [:]
+        var str = data
+        str.remove(at: str.startIndex)
+        str.remove(at: str.index(before: str.endIndex))
+        let array = str.components(separatedBy: ",")
+        array.map {
+            let arr = $0.split(separator: ":")
+            contacts.updateValue(String(arr[1])
+                .trimmingCharacters(in: .whitespaces), forKey: String(arr[0]).trimmingCharacters(in: .whitespacesAndNewlines))
+        }
+        return contacts
     }
     
     private func encode(data: SipContacts) -> Data? {

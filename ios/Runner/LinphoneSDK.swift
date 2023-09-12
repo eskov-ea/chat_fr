@@ -172,7 +172,7 @@ class LinphoneSDK : ObservableObject
         if(displayName != nil && displayName != "") {return displayName!}
         let callerId: String = mCall?.remoteAddress?.username ?? "Неизвестен"
         do {
-            let storedContacts = sm.readDataFromDocuments(jsonFilename: sm.filename)
+            let storedContacts = sm.readDataFromDocuments()
             let callerName = try storedContacts!.contacts[callerId]
             return callerName ?? callerId
         } catch {
