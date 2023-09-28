@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:ui';
-import 'package:chat/bloc/calls_bloc/calls_bloc.dart';
 import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
 import 'package:chat/helpers.dart';
 import 'package:chat/models/chat_builder_model.dart';
@@ -12,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../bloc/ws_bloc/ws_state.dart';
 import '../../../services/messages/messages_repository.dart';
-import '../../bloc/calls_bloc/calls_state.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_state.dart';
@@ -439,8 +437,8 @@ class _MessageListState extends State<_MessageList> {
   Widget build(BuildContext context) {
     return BlocBuilder<ChatsBuilderBloc, ChatsBuilderState>(
           builder: (context, state) {
-            print("Loaded messages:   ChatsBuilderState    ${state.messagesDictionary.length}");
             if (state is ChatsBuilderState) {
+              print("Finding chats:   ${state.chats}");
               final ChatsData? currentState = findChat(state.chats, widget.dialogData.dialogId);
               if (currentState == null) {
                 loadNextMessages();

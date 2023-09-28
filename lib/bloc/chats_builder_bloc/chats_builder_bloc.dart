@@ -71,13 +71,11 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       ) async {
     print("onChatsBuilderLoadMessagesEvent");
     // TODO: refactor this part if necessary
-    // emit(ChatsBuilderInProgressState(chats: state.chats, counter: state.counter));
     final userId = await dataProvider.getUserId();
     try {
       List<MessageData> messages = await messagesRepository.getMessages(
           userId, event.dialogId, event.pageNumber);
       print("Loaded messages:   pg:  ${event.pageNumber}   $messages");
-      print("Loaded messages:   ids: ${messages.first.messageId}");
       var chatExist = false;
       final Map<String, bool> newMessagesDictionary = state.messagesDictionary;
       for (var chat in state.chats) {

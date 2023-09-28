@@ -20,6 +20,7 @@ class DialogData {
   final String? description;
   final int messageCount;
   final List<ChatUser> chatUsers;
+  final DateTime? createdAt;
 
   DialogData({
     required this.dialogId,
@@ -30,7 +31,8 @@ class DialogData {
     required this.description,
     required this.lastMessage,
     required this.messageCount,
-    required this.chatUsers
+    required this.chatUsers,
+    required this.createdAt
   });
 
   static DialogData fromJson(json) {
@@ -46,6 +48,7 @@ class DialogData {
               .toList(),
           lastMessage: LastMessageData.fromJson(json["message"]),
           messageCount: json["message_count"],
+          createdAt: DateTime.tryParse(json["created_at"]),
           chatUsers: json["chat_users"] != null
               ? json["chat_users"]
                   .map<ChatUser>((chatUser) => ChatUser.fromJson(chatUser))

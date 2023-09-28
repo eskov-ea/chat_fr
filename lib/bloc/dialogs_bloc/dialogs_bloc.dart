@@ -260,14 +260,11 @@ Map<String, dynamic> makeJsonMessage(MessageData message) {
 
 
 sortDialogsByLastMessage(List<DialogData> dialogs){
-  // TODO: refactor, for now the chats being sorted on every state update.
-  // It would be more optimize to sort only updated chat on received update.
   dialogs.sort((a, b) {
-    if (b.lastMessage.time == null || a.lastMessage.time == null) {
-      if (b.lastMessage.time != null && a.lastMessage.time == null) return 1;
-      return 0;
-    }
-    return b.lastMessage.time!.millisecondsSinceEpoch.compareTo(a.lastMessage.time!.millisecondsSinceEpoch);
+    final DateTime? aTime = a.lastMessage.time ?? a.createdAt;
+    final DateTime? bTime = b.lastMessage.time ?? b.createdAt;
+
+    return bTime!.millisecondsSinceEpoch.compareTo(aTime!.millisecondsSinceEpoch);
   });
   return dialogs;
 }

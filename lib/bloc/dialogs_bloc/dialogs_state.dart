@@ -62,7 +62,8 @@ class DialogsState {
           description: dialog.description,
           lastMessage: LastMessageData.from(dialog.lastMessage),
           messageCount: dialog.messageCount,
-          chatUsers: [...dialog.chatUsers]
+          chatUsers: [...dialog.chatUsers],
+          createdAt: dialog.createdAt
         );
         dialogs.add(d);
       }

@@ -1,8 +1,10 @@
-import 'package:chat/ui/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 import '../../../models/contact_model.dart';
+import '../../../models/dialog_model.dart';
 import '../../../services/dialogs/dialogs_api_provider.dart';
 import '../../../services/global.dart';
+import '../../../services/helpers/navigation_helpers.dart';
+import '../../../storage/data_storage.dart';
 import '../../../view_models/user/users_view_cubit.dart';
 import '../../navigation/main_navigation.dart';
 
@@ -76,7 +78,7 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
           builder: (BuildContext context) {
             return TextButton(
               child: const Text(
-                'Cancel',
+                'Отменить',
                 style: TextStyle(color: Colors.white, fontSize: 20),
               ),
               onPressed: () {
@@ -171,16 +173,25 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
               SizedBox(height: 30,),
               OutlinedButton(
                   onPressed: () async {
-                    //TODO: optimize
-                    print("GROUPLIST  -->  $groupUsersList");
-                    print("GROUPLIST  -->  $currentChatType");
                     loadingInProgressModalWidget(context, "Загрузка");
-                    final newGroup = await _dialogsProvider.createDialog(chatType: currentChatType, users: widget.usersList, chatName: _textNameFieldController.text, chatDescription: _textDescriptionFieldController.text, isPublic: isPublic);
-                    if (newGroup != null) {
+                    final String? userId = await DataProvider().getUserId();
+                    final DialogData? dialogData = await _dialogsProvider.createDialog(chatType: currentChatType, users: widget.usersList, chatName: _textNameFieldController.text, chatDescription: _textDescriptionFieldController.text, isPublic: isPublic);
+                    if (dialogData != null) {
                       Navigator.of(context).pushNamed(
                           MainNavigationRouteNames.homeScreen
                       );
-                    } else {
+                      try {
+                        openChatScreen(
+                          context: context,
+                          userId: int.parse(userId!),
+                          partnerId: dialogData.chatUsers.first.userId,
+                          dialogData: dialogData,
+                          username: dialogData.name
+                        );
+                      } catch (err) {
+                        print("group chat navigation:   $err");
+                      }
+                          } else {
                       Navigator.of(context).pop();
                       customToastMessage(context: context, message: "Произошла ошибка. Попробуйте еще раз");
                     }
