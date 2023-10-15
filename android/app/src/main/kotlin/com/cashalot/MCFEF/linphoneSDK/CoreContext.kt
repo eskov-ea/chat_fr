@@ -1,4 +1,4 @@
-package com.example.MCFEF.linphoneSDK
+package com.cashalot.MCFEF.linphoneSDK
 
 import android.content.Context
 import org.linphone.core.Core

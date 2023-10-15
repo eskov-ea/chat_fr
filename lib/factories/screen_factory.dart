@@ -7,7 +7,7 @@ import 'package:chat/ui/widgets/pdf_viewer_widget.dart';
 import 'package:flutter/material.dart';
 import '../ui/pages/call_info_page.dart';
 import '../ui/pages/group_chat/group_chat_info_page.dart';
-import '../ui/pages/own_profile_page.dart';
+import '../ui/screens/own_profile_screen.dart';
 import '../ui/pages/reset_password_page.dart';
 import '../ui/pages/user_profile_info_page.dart';
 import '../ui/screens/auth_screen.dart';
@@ -33,8 +33,8 @@ class ScreenFactory {
     return const CallsPage();
   }
 
-  Widget makeProfilePage(bool isUpdateAvailable) {
-    return ProfilePage(isUpdateAvailable: isUpdateAvailable);
+  Widget makeProfilePage(bool isUpdateAvailable, fakeCallFn) {
+    return ProfilePage(isUpdateAvailable: isUpdateAvailable, fakeCallFn: fakeCallFn);
   }
 
   Widget makeLoaderWidget() {

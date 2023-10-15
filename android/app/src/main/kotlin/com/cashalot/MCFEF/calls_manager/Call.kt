@@ -1,4 +1,4 @@
-package com.example.MCFEF.calls_manager
+package com.cashalot.MCFEF.calls_manager
 
 import android.os.Bundle
 
@@ -65,7 +65,7 @@ data class Data(val args: Map<String, Any?>) {
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
-        val e: com.example.MCFEF.calls_manager.Data = other as com.example.MCFEF.calls_manager.Data
+        val e: com.cashalot.MCFEF.calls_manager.Data = other as com.cashalot.MCFEF.calls_manager.Data
         return this.id == e.id
     }
 
@@ -116,7 +116,7 @@ data class Data(val args: Map<String, Any?>) {
 
     companion object {
 
-        fun fromBundle(bundle: Bundle): com.example.MCFEF.calls_manager.Data {
+        fun fromBundle(bundle: Bundle): com.cashalot.MCFEF.calls_manager.Data {
             val data = Data(emptyMap())
             data.id = bundle.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_ID, "")
             data.nameCaller =

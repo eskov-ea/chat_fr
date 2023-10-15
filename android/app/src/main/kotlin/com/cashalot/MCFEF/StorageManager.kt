@@ -1,12 +1,6 @@
-package com.example.MCFEF
+package com.cashalot.MCFEF
 import android.content.Context
-import com.example.MCFEF.linphoneSDK.CoreContext
-import java.io.BufferedReader
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.InputStreamReader
-import io.flutter.Log
-import java.io.File
+import com.cashalot.MCFEF.linphoneSDK.CoreContext
 
 class StorageManager constructor(var context: Context) {
 

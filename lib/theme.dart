@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_fonts/google_fonts.dart';
 
 abstract class AppColors {
   static const secondary = Color(0xFF3B76F6);
@@ -41,10 +41,10 @@ abstract class AppTheme {
   /// Light theme and its settings.
   static ThemeData light() => ThemeData(
         brightness: Brightness.light,
-        accentColor: accentColor,
+        hintColor: accentColor,
         visualDensity: visualDensity,
-        textTheme:
-            GoogleFonts.mulishTextTheme().apply(bodyColor: AppColors.textDark),
+        // textTheme:
+        //     GoogleFonts.mulishTextTheme().apply(bodyColor: AppColors.textDark),
         backgroundColor: LightColors.background,
         scaffoldBackgroundColor: LightColors.background,
         cardColor: LightColors.card,
@@ -57,10 +57,10 @@ abstract class AppTheme {
   /// Dark theme and its settings.
   static ThemeData dark() => ThemeData(
         brightness: Brightness.dark,
-        accentColor: accentColor,
+        hintColor: accentColor,
         visualDensity: visualDensity,
-        textTheme:
-            GoogleFonts.interTextTheme().apply(bodyColor: AppColors.textLigth),
+        // textTheme:
+        //     GoogleFonts.interTextTheme().apply(bodyColor: AppColors.textLigth),
         backgroundColor: _DarkColors.background,
         scaffoldBackgroundColor: _DarkColors.background,
         cardColor: _DarkColors.card,

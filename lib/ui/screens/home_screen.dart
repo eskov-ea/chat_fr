@@ -94,6 +94,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  void fakeCallFn() async {
+    await sipChannel.invokeMethod('FAKE_CALL', {});
+  }
+
   void _subscribeToErrorsBlocStream() {
     _errorHandlerBlocSubscription = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.errorHandlerBloc.stream.listen(_onErrorState);
   }
@@ -438,7 +442,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 _screenFactory.makeMessagesPage(),
                 _screenFactory.makeCallsPage(),
                 _screenFactory.makeContactsPage(),
-                _screenFactory.makeProfilePage(isUpdateAvailable),
+                _screenFactory.makeProfilePage(isUpdateAvailable, fakeCallFn),
               ],
             ),
           )

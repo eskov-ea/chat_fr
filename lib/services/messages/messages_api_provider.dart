@@ -388,14 +388,12 @@ class MessagesProvider {
 
 
 
-Future<File> _compressAndGetFile(File file, String targetPath) async {
+Future<XFile> _compressAndGetFile(File file, String targetPath) async {
   var result = await FlutterImageCompress.compressAndGetFile(
     file.absolute.path, targetPath,
     quality: 20,
   );
 
-  print(file.lengthSync());
-  print(result?.lengthSync());
 
   return result!;
 }

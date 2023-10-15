@@ -1,12 +1,11 @@
-package com.example.MCFEF;
+package com.cashalot.MCFEF;
 
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
-import com.example.MCFEF.linphoneSDK.CoreContext
-import com.example.MCFEF.linphoneSDK.LinphoneCore
+import com.cashalot.MCFEF.linphoneSDK.CoreContext
+import com.cashalot.MCFEF.linphoneSDK.LinphoneCore
 import io.flutter.Log
 
 

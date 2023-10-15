@@ -1,4 +1,4 @@
-package com.example.MCFEF
+package com.cashalot.MCFEF
 
 
 import android.content.ComponentName

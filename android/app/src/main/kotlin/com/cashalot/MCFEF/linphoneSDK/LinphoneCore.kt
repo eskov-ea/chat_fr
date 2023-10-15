@@ -1,19 +1,16 @@
-package com.example.MCFEF.linphoneSDK
+package com.cashalot.MCFEF.linphoneSDK
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.widget.Toast
-import androidx.core.app.ActivityCompat.requestPermissions
-import com.example.MCFEF.MainActivity
-import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver
-import com.example.MCFEF.calls_manager.Data
-import com.example.MCFEF.makeCallDataPayload
-import com.example.MCFEF.makePlatformEventPayload
-import com.google.firebase.messaging.FirebaseMessaging
+import com.cashalot.MCFEF.MainActivity
+import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver
+import com.cashalot.MCFEF.calls_manager.Data
+import com.cashalot.MCFEF.makeCallDataPayload
+import com.cashalot.MCFEF.makePlatformEventPayload
 import io.flutter.Log
 import org.linphone.core.*
-import com.example.MCFEF.StorageManager
+import com.cashalot.MCFEF.StorageManager
+import com.cashalot.MCFEF.calls_manager.CallsNotificationManager
 
 class LinphoneCore constructor(var core: Core, var context: Context) {
 
@@ -64,6 +61,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         val nat = core.createNatPolicy()
 //        nat.stunServer = "aster.mcfef.com:3478"
         nat.stunServer = "$stunDomain:$stunPort"
+        nat.stunServer
         nat.enableTcpTurnTransport(true)
         nat.stunServerUsername = username
 
@@ -185,13 +183,13 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     )
 
                     val data = Data(args).toBundle()
-
-                    context.sendBroadcast(
-                        CallsManagerBroadcastReceiver.getIntentIncoming(
-                            context,
-                            data
-                        )
-                    )
+                    CallsNotificationManager(context).showIncomingNotification(data)
+//                    context.sendBroadcast(
+//                        CallsManagerBroadcastReceiver.getIntentIncoming(
+//                            context,
+//                            data
+//                        )
+//                    )
                     val callArgs = makePlatformEventPayload("INCOMING", call.remoteAddress.username, null)
 
                     MainActivity.callServiceEventSink?.success(callArgs)

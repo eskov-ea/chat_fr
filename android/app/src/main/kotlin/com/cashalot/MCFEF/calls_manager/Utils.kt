@@ -1,4 +1,4 @@
-package com.example.MCFEF.calls_manager
+package com.cashalot.MCFEF.calls_manager
 
 import android.content.Context
 import android.content.Intent

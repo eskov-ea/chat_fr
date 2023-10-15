@@ -1,8 +1,9 @@
-package com.example.MCFEF
+package com.cashalot.MCFEF
 
 
 import android.Manifest
 import android.Manifest.permission.*
+import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
@@ -11,26 +12,29 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.RingtoneManager
+import android.net.Uri
 import android.os.*
 import android.provider.DocumentsContract
+import android.provider.Settings
 import android.util.Base64
-import android.widget.*
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import com.example.MCFEF.linphoneSDK.CoreContext
-import com.example.MCFEF.linphoneSDK.LinphoneCore
-import com.example.MCFEF.StorageManager
+import com.cashalot.MCFEF.linphoneSDK.CoreContext
+import com.cashalot.MCFEF.linphoneSDK.LinphoneCore
+import com.cashalot.MCFEF.calls_manager.CallsNotificationManager
+import com.cashalot.MCFEF.calls_manager.Data
 import com.google.android.gms.tasks.OnCompleteListener
-import com.google.common.base.Charsets
 import com.google.firebase.messaging.FirebaseMessaging
 import io.flutter.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
-import org.linphone.core.*
+import androidx.activity.ComponentActivity
 
 
 class MainActivity: FlutterActivity() {
@@ -148,6 +152,19 @@ class MainActivity: FlutterActivity() {
                 } else {
                     result.success(false)
                 }
+            } else if (call.method.equals(("FAKE_CALL"))) {
+                val android: Map<String, Any?> = mapOf(
+                    "isCustomNotification" to true,
+                    "isShowLogo" to false,
+                    "isShowCallback" to false,
+                    "isShowMissedCallNotification" to true,
+                    "ringtonePath" to "system_ringtone_default",
+                    "backgroundColor" to "#0955fa",
+                    "backgroundUrl" to "https://i.pravatar.cc/500",
+                    "actionColor" to "#4CAF50"
+                )
+                val data = Data(android).toBundle()
+                CallsNotificationManager(context).showIncomingNotification(data)
             }
         }
 
@@ -188,7 +205,8 @@ class MainActivity: FlutterActivity() {
 
         if (Build.VERSION.SDK_INT > 32) {
             if (!shouldShowRequestPermissionRationale("112")){
-                getNotificationPermission();
+                getNotificationPermission()
+//                askNotificationPermission()
             }
         }
 
@@ -242,6 +260,53 @@ class MainActivity: FlutterActivity() {
                 Log.w("SAVEFILE", e.toString())
             }
         }
+    }
+
+    private val requestPermissionLauncher = ComponentActivity().registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            Toast.makeText(this, "Уведомления включены", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "Уведомления отключены. Включить уведомления можно в настройках. Уведомления необходимы для корректной работы приложения", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun askNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+                showPermissionDialog()
+// Display an educational UI explaining to the user the features that will be enabled
+                //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
+                //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
+                //       If the user selects "No thanks," allow the user to continue without notifications.
+            } else {
+                // Directly ask for the permission
+                showPermissionDialog()
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
+    private fun showPermissionDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Permission required")
+        builder.setMessage("Some permissions are needed to be allowed to use this app without any problems.")
+        builder.setPositiveButton("Grant") { dialog, which ->
+            dialog.cancel()
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            val uri = Uri.fromParts("package", this.packageName, null)
+            intent.data = uri
+            startActivity(intent)
+        }
+        builder.setNegativeButton("Cancel") { dialog, which ->
+            dialog.dismiss()
+        }
+        val alert = builder.create()
+        alert.setCanceledOnTouchOutside(false)
+        alert.show()
+        builder.show()
     }
 
     fun createNotificationChannel() {
