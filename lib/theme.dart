@@ -35,13 +35,13 @@ abstract class _DarkColors {
 
 /// Reference to the application theme.
 abstract class AppTheme {
-  static const accentColor = AppColors.accent;
+  static const accentColor = AppColors.cardDark;
   static final visualDensity = VisualDensity.adaptivePlatformDensity;
 
   /// Light theme and its settings.
   static ThemeData light() => ThemeData(
         brightness: Brightness.light,
-        accentColor: accentColor,
+        hintColor: accentColor,
         visualDensity: visualDensity,
         textTheme:
             GoogleFonts.mulishTextTheme().apply(bodyColor: AppColors.textDark),
@@ -57,7 +57,7 @@ abstract class AppTheme {
   /// Dark theme and its settings.
   static ThemeData dark() => ThemeData(
         brightness: Brightness.dark,
-        accentColor: accentColor,
+        hintColor: accentColor,
         visualDensity: visualDensity,
         textTheme:
             GoogleFonts.interTextTheme().apply(bodyColor: AppColors.textLigth),

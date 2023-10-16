@@ -397,6 +397,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         BlocProvider.of<CallLogsBloc>(context).add(UpdateCallLogsEvent(passwd: passwd));
         break;
       case AppLifecycleState.paused:
+
+      default:
     }
   }
 

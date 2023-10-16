@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
+// import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../bloc/error_handler_bloc/error_types.dart';
 import '../../models/dialog_model.dart';
@@ -388,17 +388,17 @@ class MessagesProvider {
 
 
 
-Future<File> _compressAndGetFile(File file, String targetPath) async {
-  var result = await FlutterImageCompress.compressAndGetFile(
-    file.absolute.path, targetPath,
-    quality: 20,
-  );
+// Future<File> _compressAndGetFile(File file, String targetPath) async {
+  // var result = await FlutterImageCompress.compressAndGetFile(
+  //   file.absolute.path, targetPath,
+  //   quality: 20,
+  // );
 
-  print(file.lengthSync());
-  print(result?.lengthSync());
-
-  return result!;
-}
+  // print(file.lengthSync());
+  // print(result?.lengthSync());
+  //
+  // return result!;
+// }
 
 Future<File> createTemporaryFile() async {
   final dir = await getTemporaryDirectory();
@@ -410,19 +410,19 @@ Future<File> createTemporaryFile() async {
 }
 
 /// file as bites
-Future<Uint8List?> testCompressFile(File file) async {
-  print("testCompressFile");
-  final result = await FlutterImageCompress.compressWithFile(
-    file.absolute.path,
-    minWidth: 2300,
-    minHeight: 1500,
-    quality: 50,
-    rotate: 180,
-  );
-  print(file.lengthSync());
-  print(result?.length);
-  return result;
-}
+// Future<Uint8List?> testCompressFile(File file) async {
+//   print("testCompressFile");
+//   final result = await FlutterImageCompress.compressWithFile(
+//     file.absolute.path,
+//     minWidth: 2300,
+//     minHeight: 1500,
+//     quality: 50,
+//     rotate: 180,
+//   );
+//   print(file.lengthSync());
+//   print(result?.length);
+//   return result;
+// }
 
 String? resizeImage(Uint8List data) {
   try {
