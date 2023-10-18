@@ -94,10 +94,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  void fakeCallFn() async {
-    await sipChannel.invokeMethod('FAKE_CALL', {});
-  }
-
   void _subscribeToErrorsBlocStream() {
     _errorHandlerBlocSubscription = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.errorHandlerBloc.stream.listen(_onErrorState);
   }
@@ -325,9 +321,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             isOutgoingCall = false;
           });
         } else if(state is EndedCallState) {
-          print("NAVIGATOR end   ${ModalRoute.of(context)?.settings.name}");
+          try {
+            Navigator.of(context).popUntil((route) =>
+                route.settings.name == MainNavigationRouteNames.homeScreen);
+          } catch (err) {
+            Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.loaderWidget);
+          }
           BlocProvider.of<CallLogsBloc>(context).add(AddCallToLogEvent(call: state.callData));
-          Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
           setState(() {
             isActiveCall = false;
             isIncomingCall = false;
@@ -335,7 +335,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             callerName = null;
           });
         } else if(state is ErrorCallState) {
-          Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
+          try {
+            Navigator.of(context).popUntil((route) =>
+                route.settings.name == MainNavigationRouteNames.homeScreen);
+          } catch (err) {
+            Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.loaderWidget);
+          }
           final List<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs;
           int? dialogId;
           String caller = '';
@@ -442,7 +447,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 _screenFactory.makeMessagesPage(),
                 _screenFactory.makeCallsPage(),
                 _screenFactory.makeContactsPage(),
-                _screenFactory.makeProfilePage(isUpdateAvailable, fakeCallFn),
+                _screenFactory.makeProfilePage(isUpdateAvailable),
               ],
             ),
           )

@@ -23,11 +23,9 @@ import '../widgets/avatar_widget.dart';
 class ProfilePage extends StatelessWidget {
 
   final bool isUpdateAvailable;
-  final fakeCallFn;
 
   const ProfilePage({
     required this.isUpdateAvailable,
-    required this.fakeCallFn,
     Key? key
   }) : super(key: key);
 
@@ -112,20 +110,6 @@ class ProfilePage extends StatelessWidget {
                               )
                             )
                           : SizedBox.shrink(),
-                      OutlinedButton(
-                          onPressed: fakeCallFn,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isUpdateAvailable ? LightColors.profilePageButton : Colors.white10,
-                            minimumSize: const Size.fromHeight(50),
-                            shape: RoundedRectangleBorder(
-                                side: BorderSide(color:isUpdateAvailable ? Colors.black54 : Colors.black12, width: 2, style: BorderStyle.solid),
-                                borderRadius: BorderRadius.zero),
-                          ),
-                          child: Text(
-                            'Fake call',
-                            style: TextStyle(color: isUpdateAvailable ? Colors.black54 : Colors.black26, fontSize: 20, fontWeight: FontWeight.w300),
-                          )
-                      ),
                       OutlinedButton(
                           onPressed: () async {
                             //TODO: check if logout consistently works through add event

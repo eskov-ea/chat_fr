@@ -8,13 +8,13 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
 import android.os.*
+import android.util.Log
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.TextView
 import com.cashalot.MCFEF.R
-import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.ACTION_CALL_INCOMING
 import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_DURATION
 import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_INCOMING_DATA
 import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_NAME_CALLER
@@ -27,11 +27,12 @@ class IncomingCallActivity : Activity() {
         const val ACTION_ENDED_CALL_INCOMING =
                 "com.cashalot.MCFEF.calls_manager.ACTION_ENDED_CALL_INCOMING"
 
+        const val ACTION_CALL_INCOMING = "com.cashalot.MCFEF.ACTION_CALL_INCOMING_ACTIVITY"
+
         fun getIntent(data: Bundle) = Intent(ACTION_CALL_INCOMING).apply {
             action = ACTION_CALL_INCOMING
             putExtra(EXTRA_CALLKIT_INCOMING_DATA, data)
-            flags =
-                    Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
 
         fun getIntentEnded() =
@@ -59,7 +60,9 @@ class IncomingCallActivity : Activity() {
     private lateinit var tvDecline: TextView
 
 
+    @Suppress("DEPRECATION")
     public override fun onCreate(savedInstanceState: Bundle?) {
+        Log.v("INCOMING_ACTIVITY", intent.toString())
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -72,6 +75,7 @@ class IncomingCallActivity : Activity() {
             window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
         }
 
+        transparentStatusAndNavigation()
         setContentView(R.layout.incoming_call)
         initView()
         incomingData(intent)

@@ -1,28 +1,14 @@
 package com.cashalot.MCFEF
 import android.content.Context
 import com.cashalot.MCFEF.linphoneSDK.CoreContext
+import io.flutter.Log
 
 class StorageManager constructor(var context: Context) {
-
-//    private val filename: String = "mcfef_sip_contacts.txt"
-//    private val file: File = File(context.filesDir.absolutePath, filename)
-//    var fIn: FileOutputStream = FileOutputStream(file)
-//    var fOut: FileInputStream = FileInputStream(file)
-
-//    fun readData(): String? {
-//        val bufferedReader: BufferedReader = file.bufferedReader()
-//        return bufferedReader.use { it.readText() }
-//    }
-//
-//    fun writeData(data: ByteArray) {
-//        fIn.use {
-//            it.write(data)
-//        }
-//    }
 
     fun readData(): String? {
         val sharedPreference =  context.getSharedPreferences(CoreContext.PREFERENCE_FILENAME,Context.MODE_PRIVATE)
         val contacts = sharedPreference.getString("contacts", null)
+        Log.i("SIP_CONTACTS readData", contacts.toString())
         return contacts
     }
 

@@ -65,12 +65,6 @@
             </intent-filter>
         </activity>
 
-<!--       <service android:name="org.linphone.core.tools.firebase.FirebaseMessaging"-->
-<!--           android:exported="false">-->
-<!--           <intent-filter>-->
-<!--               <action android:name="com.google.firebase.MESSAGING_EVENT" />-->
-<!--           </intent-filter>-->
-<!--       </service>-->
        <receiver android:name=".PushBroadcastReceiver"
            android:exported="false">
            <intent-filter>
@@ -104,49 +98,38 @@
            </intent-filter>
        </service>
 
+       <service android:name="org.linphone.core.tools.firebase.FirebaseMessaging" android:exported="false">
+           <intent-filter>
+               <action android:name="com.google.firebase.MESSAGING_EVENT" />
+           </intent-filter>
+       </service>
+
 
        <activity
            android:name="com.cashalot.MCFEF.calls_manager.IncomingCallActivity"
+           android:taskAffinity="com.cashalot.MCFEF.calls_manager.INCOMING_CALL_AFFINITY"
            android:excludeFromRecents="true"
            android:showOnLockScreen="true"
            android:turnScreenOn="true"
            android:resizeableActivity="true"
            android:launchMode="singleTask"
-
+           android:noHistory="true"
            android:exported="true">
            <intent-filter>
-               <action android:name="com.cashalot.MCFEF.calls_manager.ACTION_CALL_INCOMING" />
+               <action android:name="com.cashalot.MCFEF.ACTION_CALL_INCOMING_ACTIVITY" />
                <category android:name="android.intent.category.DEFAULT" />
            </intent-filter>
        </activity>
-
-
-<!--       <activity-->
-<!--           android:name="com.example.MCFEF.calls_manager.CurrentCall"-->
-<!--           android:excludeFromRecents="true"-->
-<!--           android:showOnLockScreen="true"-->
-<!--           android:exported="false">-->
-<!--           <intent-filter>-->
-<!--               <action android:name="com.example.MCFEF.calls_manager.ACTION_ENDED_CALL" />-->
-<!--               <category android:name="android.intent.category.DEFAULT" />-->
-<!--           </intent-filter>-->
-<!--       </activity>-->
-
-<!--       <activity-->
-<!--           android:name="com.example.MCFEF.calls_manager.RingingCall"-->
-<!--           android:excludeFromRecents="true"-->
-<!--           android:showOnLockScreen="true"-->
-<!--           android:exported="false">-->
-<!--           <intent-filter>-->
-<!--               <action android:name="com.example.MCFEF.calls_manager.ACTION_ENDED_CALL" />-->
-<!--               <category android:name="android.intent.category.DEFAULT" />-->
-<!--           </intent-filter>-->
-<!--       </activity>-->
 
        <activity
            android:exported="false"
            android:name="com.cashalot.MCFEF.calls_manager.TransparentActivity"
            android:process=":CallView"/>
+
+       <service
+           android:enabled="true"
+           android:exported="true"
+           android:name="com.cashalot.MCFEF.calls_manager.CallsSoundPlayerService"/>
 
        <receiver
            android:name="com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver"

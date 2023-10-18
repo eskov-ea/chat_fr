@@ -3,6 +3,7 @@ package com.cashalot.MCFEF
 
 import android.content.ComponentName
 import android.content.Intent
+import android.widget.Toast
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import io.flutter.Log
@@ -15,7 +16,8 @@ class MyFirebaseMessaging: FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
 
-        Log.d("MyFirebaseMessaging", "[Push] RECEIVED")
+//        Toast.makeText(this, "[Push] RECEIVED Firebase", Toast.LENGTH_SHORT).show()
+        Log.d("MyFirebaseMessaging", "${message.messageId} ; ${message.notification}")
 
         if (!message.data.isEmpty()) {
             val intent = Intent()

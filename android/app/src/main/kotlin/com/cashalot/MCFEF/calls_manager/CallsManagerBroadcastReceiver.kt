@@ -57,11 +57,15 @@ class CallsManagerBroadcastReceiver : BroadcastReceiver() {
         const val EXTRA_CALLKIT_IS_CUSTOM_SMALL_EX_NOTIFICATION =
                 "EXTRA_CALLKIT_IS_CUSTOM_SMALL_EX_NOTIFICATION"
         const val EXTRA_CALLKIT_ACTION_FROM = "EXTRA_CALLKIT_ACTION_FROM"
+        const val EXTRA_CALLKIT_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME =
+            "EXTRA_CALLKIT_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME"
+        const val EXTRA_CALLKIT_MISSED_CALL_NOTIFICATION_CHANNEL_NAME =
+            "EXTRA_CALLKIT_MISSED_CALL_NOTIFICATION_CHANNEL_NAME"
 
 
         fun getIntent(context: Context, action: String, data: Bundle?) =
                 Intent(context, CallsManagerBroadcastReceiver::class.java).apply {
-                    this.action = "${context.packageName}.${action}"
+                    this.action = action
                     putExtra(EXTRA_CALLKIT_INCOMING_DATA, data)
                 }
         fun getIntentDecline(context: Context, data: Bundle?) =
@@ -97,12 +101,14 @@ class CallsManagerBroadcastReceiver : BroadcastReceiver() {
         val callkitNotificationManager = CallsNotificationManager(context)
         val action = intent.action ?: return
         val data = intent.extras?.getBundle(EXTRA_CALLKIT_INCOMING_DATA) ?: return
+        Log.v("BROADCAST_RECEIVER", intent.toString())
         when (action) {
             ACTION_CALL_INCOMING -> {
                 try {
                     callkitNotificationManager.showIncomingNotification(data)
                     val soundPlayerServiceIntent = Intent(context, CallsSoundPlayerService::class.java)
                     soundPlayerServiceIntent.putExtras(data)
+                    Log.v("SOUNDPLAYER_SERVICE", soundPlayerServiceIntent.toString())
                     context.startService(soundPlayerServiceIntent)
                 } catch (error: Exception) {
                     error.printStackTrace()

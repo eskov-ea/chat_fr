@@ -96,13 +96,13 @@ class MainActivity: FlutterActivity() {
                 }
             }
             if (call.method == "SAVE_SIP_CONTACTS") {
-//                var data= call.argument<String?>("data")
-//                if (data != null) {
-//                    var sm = StorageManager(context)
+                var data= call.argument<String?>("data")
+                if (data != null) {
+                    var sm = StorageManager(context)
 //                    var bytes: ByteArray = data.toByteArray()
-////                    sm.writeData(bytes)
-//                    sm.writeData(data)
-//                }
+//                    sm.writeData(bytes)
+                    sm.writeData(data)
+                }
             }
         }
 
@@ -147,24 +147,12 @@ class MainActivity: FlutterActivity() {
             } else if (call.method.equals(("CHECK_FOR_RUNNING_CALL"))) {
                 if (linphoneCore.core.currentCall != null) {
                     result.success(true)
+                    Log.v("CHECK_FOR_RUNNING_CALL", linphoneCore.core.currentCall!!.remoteAddress.username.toString())
                     val args = makePlatformEventPayload("CONNECTED", linphoneCore.core.currentCall!!.remoteAddress.username, null)
                     callServiceEventSink?.success(args)
                 } else {
                     result.success(false)
                 }
-            } else if (call.method.equals(("FAKE_CALL"))) {
-                val android: Map<String, Any?> = mapOf(
-                    "isCustomNotification" to true,
-                    "isShowLogo" to false,
-                    "isShowCallback" to false,
-                    "isShowMissedCallNotification" to true,
-                    "ringtonePath" to "system_ringtone_default",
-                    "backgroundColor" to "#0955fa",
-                    "backgroundUrl" to "https://i.pravatar.cc/500",
-                    "actionColor" to "#4CAF50"
-                )
-                val data = Data(android).toBundle()
-                CallsNotificationManager(context).showIncomingNotification(data)
             }
         }
 

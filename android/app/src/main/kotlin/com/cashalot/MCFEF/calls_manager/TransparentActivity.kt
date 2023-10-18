@@ -24,7 +24,6 @@ class TransparentActivity : Activity() {
             val intent = Intent(context, TransparentActivity::class.java)
             intent.action = action
             intent.putExtra("data", data)
-            intent.putExtra("type", "ACCEPT")
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
@@ -42,7 +41,6 @@ class TransparentActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.w("TransparentActivity", "TransparentActivity")
         val data = intent.getBundleExtra("data")
 
         val broadcastIntent = CallsManagerBroadcastReceiver.getIntent(this, intent.action!!, data)
@@ -52,23 +50,6 @@ class TransparentActivity : Activity() {
         val activityIntent = AppUtils.getAppIntent(this, intent.action, data)
         startActivity(activityIntent)
 
-//        when (intent.getStringExtra("type")) {
-//            "ACCEPT" -> {
-//                val data = intent.getBundleExtra("data")
-//                val acceptIntent = CallsManagerBroadcastReceiver.getIntentAccept(this, data)
-//                sendBroadcast(acceptIntent)
-//            }
-//            "CALLBACK" -> {
-//                val data = intent.getBundleExtra("data")
-//                val acceptIntent = CallsManagerBroadcastReceiver.getIntentCallback(this, data)
-//                sendBroadcast(acceptIntent)
-//            }
-//            else -> { // Note the block
-//                val data = intent.getBundleExtra("data")
-//                val acceptIntent = CallsManagerBroadcastReceiver.getIntentAccept(this, data)
-//                sendBroadcast(acceptIntent)
-//            }
-//        }
         finish()
         overridePendingTransition(0, 0)
     }

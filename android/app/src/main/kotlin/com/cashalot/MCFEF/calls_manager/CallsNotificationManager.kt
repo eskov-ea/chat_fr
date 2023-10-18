@@ -17,6 +17,7 @@ import android.provider.Settings
 import android.text.TextUtils
 import android.view.View
 import android.widget.RemoteViews
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -28,6 +29,7 @@ import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.
 import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_NAME_CALLER
 import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_TEXT_CALLBACK
 import com.cashalot.MCFEF.R
+import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME
 import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_IS_CUSTOM_NOTIFICATION
 import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_IS_CUSTOM_SMALL_EX_NOTIFICATION
 import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_TEXT_ACCEPT
@@ -47,14 +49,13 @@ class CallsNotificationManager(private val context: Context) {
     private var notificationViews: RemoteViews? = null
     private var notificationHeadsUpViews: RemoteViews? = null
     private var notificationSmallViews: RemoteViews? = null
-    private var notificationId: Int = 96962
+    private var notificationId: Int = 9696
     private var dataNotificationPermission: Map<String, Any> = HashMap()
 
 
     fun showIncomingNotification(data: Bundle) {
         data.putLong(EXTRA_TIME_START_CALL, System.currentTimeMillis())
-
-        notificationId = data.getString(EXTRA_CALLKIT_ID, NOTIFICATION_CHANNEL_ID_INCOMING).hashCode()
+        notificationId = data.getString(EXTRA_CALLKIT_ID, "callkit_incoming").hashCode()
         createNotificationChanel()
 
         notificationBuilder = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID_INCOMING)
@@ -98,7 +99,6 @@ class CallsNotificationManager(private val context: Context) {
         val isCustomSmallExNotification =
                 data.getBoolean(EXTRA_CALLKIT_IS_CUSTOM_SMALL_EX_NOTIFICATION, false)
 
-        Log.i("MY_NOTIFICATION", "SHOW INCOMING NOTIFICATION WITH DATA:  ${data}")
         if (isCustomNotification) {
             notificationViews =
                     RemoteViews(context.packageName, R.layout.layout_custom_notification)
@@ -140,7 +140,7 @@ class CallsNotificationManager(private val context: Context) {
             val textAccept = data.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_TEXT_ACCEPT, "Accept")
             val acceptAction: NotificationCompat.Action = NotificationCompat.Action.Builder(
                     R.drawable.ic_accept,
-                    if (TextUtils.isEmpty(textDecline)) context.getString(com.hiennv.flutter_callkit_incoming.R.string.text_accept) else textAccept,
+                    if (TextUtils.isEmpty(textAccept)) context.getString(com.hiennv.flutter_callkit_incoming.R.string.text_accept) else textAccept,
                     getAcceptPendingIntent(notificationId, data)
             ).build()
             notificationBuilder.addAction(acceptAction)
@@ -325,6 +325,15 @@ class CallsNotificationManager(private val context: Context) {
         notificationId = data.getString(EXTRA_CALLKIT_ID, NOTIFICATION_CHANNEL_ID_INCOMING).hashCode()
         getNotificationManager().cancel(notificationId)
     }
+    fun incomingChannelEnabled(): Boolean = getNotificationManager().run {
+        val channel = getNotificationChannel(NOTIFICATION_CHANNEL_ID_INCOMING)
+
+        return areNotificationsEnabled() &&
+                (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                        channel != null &&
+                        channel.importance > NotificationManagerCompat.IMPORTANCE_NONE) ||
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.O
+    }
 
     private fun getAppPendingIntent(id: Int, data: Bundle): PendingIntent {
         val intent: Intent? = context.packageManager.getLaunchIntentForPackage(context.packageName)
@@ -341,31 +350,10 @@ class CallsNotificationManager(private val context: Context) {
         )
     }
     private fun getAcceptPendingIntent(id: Int, data: Bundle): PendingIntent {
-
-        val intentTransparent = CallsManagerBroadcastReceiver.getIntentAccept(context, data)
-        TransparentActivity.getIntent(context, CallsManagerBroadcastReceiver.ACTION_CALL_ACCEPT, data)
+        Log.v("GET_INTENT_INFO", "CNTX:  ${context.packageName}")
+        val intentTransparent = TransparentActivity.getIntent(context, CallsManagerBroadcastReceiver.ACTION_CALL_ACCEPT, data)
         return PendingIntent.getActivity(context, id, intentTransparent, getFlagPendingIntent())
 
-//        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.cloneFilter()
-//        intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//        if (intent != null) {
-//            val intentTransparent = TransparentActivity.getIntentAccept(context, data)
-//            return PendingIntent.getActivities(
-//                    context,
-//                    id,
-//                    arrayOf(intent, intentTransparent),
-////                    intent,
-//                    getFlagPendingIntent()
-//            )
-//        } else {
-//            val acceptIntent = CallsManagerBroadcastReceiver.getIntentAccept(context, data)
-//            return PendingIntent.getBroadcast(
-//                    context,
-//                    id,
-//                    acceptIntent,
-//                    getFlagPendingIntent()
-//            )
-//        }
     }
 
     private fun getCallbackPendingIntent(id: Int, data: Bundle): PendingIntent {
@@ -378,8 +366,8 @@ class CallsNotificationManager(private val context: Context) {
     }
 
     private fun getActivityPendingIntent(id: Int, data: Bundle): PendingIntent {
-        val intent = AppUtils.getAppIntent(context, data= data)
-//        val intent = IncomingCallActivity.getIntent(data)
+//        val intent = AppUtils.getAppIntent(context, data= data)
+        val intent = IncomingCallActivity.getIntent(data)
         return PendingIntent.getActivity(context, id, intent, getFlagPendingIntent())
     }
 
