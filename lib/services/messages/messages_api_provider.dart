@@ -77,7 +77,6 @@ class MessagesProvider {
     } on AppErrorException {
       rethrow;
     } catch (err) {
-      print("MessagesProvider err   $err");
       _logger.sendErrorTrace(message: "MessagesProvider.getNewUpdatesOnResume", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.getNewUpdatesOnResume");
     }
@@ -133,7 +132,6 @@ class MessagesProvider {
             'Authorization': 'Bearer $token'
           }
       );
-      print(" RESPONSE UPDATE ${res.body}");
       //TODO: process 401 error
     } catch (err) {
       _logger.sendErrorTrace(message: "MessagesProvider.updateMessageStatuses", err: err.toString());
@@ -317,7 +315,6 @@ class MessagesProvider {
           }
         }
       });
-      print("base64file postData   $postData");
       final response = await http.post(
           Uri.parse('https://erp.mcfef.com/api/chat/message/add/$dialogId'),
           headers: <String, String>{
@@ -374,11 +371,9 @@ class MessagesProvider {
             'Authorization': 'Bearer $token'
           },
           body: postData);
-      print("RESPONSEIMAGE   ${response.body}");
 
       return response.body;
     } catch (err) {
-      print("sendMessageWithFileBase64ForWeb $err");
       _logger.sendErrorTrace(message: "MessagesProvider.sendMessageWithFileBase64", err: err.toString());
       throw Exception('Error sending file base64 message on web');
     }

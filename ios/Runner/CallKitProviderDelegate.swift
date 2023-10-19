@@ -39,7 +39,6 @@ class CallKitProviderDelegate : NSObject
     func incomingCall()
     {
         incomingCallUUID = UUID()
-        print("INCOMING UUID  ->  \(String(describing: incomingCallUUID))")
         let update = CXCallUpdate()
         
         update.remoteHandle = CXHandle(type:.generic, value: callkitContext.incomingCallName)
@@ -50,7 +49,6 @@ class CallKitProviderDelegate : NSObject
     func updateIncomingCall(callerName: String)
     {
         let update = CXCallUpdate()
-//        update.remoteHandle = CXHandle(type: .generic, value: callerName)
         update.localizedCallerName = callerName
         
         provider.reportCall(with: incomingCallUUID, updated: update)

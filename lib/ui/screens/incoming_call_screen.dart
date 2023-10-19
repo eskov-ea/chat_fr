@@ -65,7 +65,6 @@ class IncomingCallScreen extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      print("NAVIGATOR   inc   ${ModalRoute.of(context)?.settings.name}");
                       acceptCall();
                     },
                     child: Column(
@@ -94,7 +93,6 @@ class IncomingCallScreen extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      print("NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
                       declineCall();
                       Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
                     },

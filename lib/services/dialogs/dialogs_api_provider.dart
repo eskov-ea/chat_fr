@@ -28,7 +28,6 @@ class DialogsProvider {
             collection.map((dialog) => DialogData.fromJson(dialog)).toList();
         return dialogs;
       } else if (response.statusCode == 401) {
-        print("Get dialogs print   ${response.statusCode}  ${response.body}");
         throw AppErrorException(AppErrorExceptionType.auth, null, "DialogsProvider, loading dialogs no auth");
       } else {
         return throw AppErrorException(AppErrorExceptionType.getData, null, "DialogsProvider, loading dialogs");
@@ -80,7 +79,6 @@ class DialogsProvider {
 
   Future<DialogData> createDialog({required chatType, required users, required chatName, required chatDescription, required isPublic}) async {
     try {
-      print("CREATE DIALOG  -->  chatType:  $chatType, users:  $users, chatName:  $chatName, chatDescription:  $chatDescription, isPublic:  $isPublic");
       final String? token = await _secureStorage.getToken();
       final response = await http.post(
         Uri.parse('https://erp.mcfef.com/api/chat/add'),
@@ -98,7 +96,6 @@ class DialogsProvider {
           }
         }),
       );
-      print("CREATE DIALOG  -->  ${response.body}");
       if (response.statusCode == 200) {
         DialogData dialog =
             DialogData.fromJson(jsonDecode(response.body)["data"]);
@@ -121,7 +118,6 @@ class DialogsProvider {
   }
 
   Future<ChatUser> joinDialog(userId, dialogId) async {
-    print("JOINDIALOG SERVICE  START");
     try {
       final String? token = await _secureStorage.getToken();
       final response = await http.get(
@@ -131,7 +127,6 @@ class DialogsProvider {
           'Authorization': 'Bearer $token',
         },
       );
-      print("JOINDIALOG SERVICE  ${response.body}");
       if (response.statusCode == 200) {
         return ChatUser.fromJson(jsonDecode(response.body)["data"]);
       } else if (response.statusCode == 403) {
@@ -162,7 +157,6 @@ class DialogsProvider {
           'Authorization': 'Bearer $token',
         },
       );
-      print("EXITDIALOG  ${response.body}");
       if (response.statusCode == 401) {
         throw AppErrorException(AppErrorExceptionType.auth, null, "DialogsProvider, creating dialogs");
       }

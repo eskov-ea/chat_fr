@@ -42,7 +42,6 @@ class _MessagesPageState extends State<MessagesPage> {
         onlineMembers = state.onlineUsersDictionary;
         counter++;
       });
-      print("onlineMembers    ${onlineMembers}");
     });
     super.initState();
   }
@@ -90,7 +89,6 @@ class _MessagesPageState extends State<MessagesPage> {
             } else{
               return RefreshIndicator(
                 onRefresh: () async {
-                  print("we refresh it here");
                   refreshAllData(context);
                 },
                 child: CustomScrollView(
@@ -160,7 +158,7 @@ class _DialogItem extends StatelessWidget {
     if (data.chatType.p2p == 1) {
       for (var i = 0; i < data.usersList.length; i++)  {
         if (data.usersList[i].id != userId) {
-          return "${data.usersList[i].firstname} ${data.usersList[i].lastname}";
+          return "${data.usersList[i].lastname} ${data.usersList[i].firstname}";
         }
       }
     } else {
@@ -207,8 +205,8 @@ class _DialogItem extends StatelessWidget {
             partnerId: partners.first.id,
             dialogData: dialogData,
             username: userId == dialogData.usersList.first.id
-                ? "${dialogData.usersList.last.firstname} ${dialogData.usersList.last.lastname}"
-                : "${dialogData.usersList.first.firstname} ${dialogData.usersList.first.lastname}"
+                ? "${dialogData.usersList.last.lastname} ${dialogData.usersList.last.firstname}"
+                : "${dialogData.usersList.first.lastname} ${dialogData.usersList.first.firstname}"
         );
       },
       child: Container(

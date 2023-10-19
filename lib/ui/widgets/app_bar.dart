@@ -1,4 +1,4 @@
-import 'package:chat/ui/pages/new_message_page.dart';
+import 'package:chat/ui/pages/new_group_options_page.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:chat/view_models/websocket/websocket_view_cubit.dart';
 import 'package:flutter/material.dart';

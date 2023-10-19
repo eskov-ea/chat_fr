@@ -88,7 +88,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     });
                     if (_emailTextFieldController.text != '' && isValidEmail(_emailTextFieldController.text)) {
                       await AuthRepository().resetPassword(_emailTextFieldController.text);
-                      Navigator.pop(context);
+                      ResetPasswordAlertModalWidget(context);
                     } else {
                       setState(() {
                         isError = true;
@@ -105,4 +105,34 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       ),
     );
   }
+}
+
+Future<void> ResetPasswordAlertModalWidget(BuildContext context) {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Запрос на смену пароля успешно отправлен'),
+        content: const Text(
+          'Пожалуйста, проверьте\n'
+              'свой почтовый ящик.\n'
+              '\n'
+              'Нажмите кнопку "Ок" чтобы перейти на экран авторизации.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text('Ок'),
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      );
+    },
+  );
 }

@@ -33,6 +33,7 @@ abstract class _DarkColors {
   static const card = AppColors.cardDark;
 }
 
+
 /// Reference to the application theme.
 abstract class AppTheme {
   static const accentColor = AppColors.textDark;

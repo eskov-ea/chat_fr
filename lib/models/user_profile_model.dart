@@ -92,7 +92,6 @@ class UserProfileAsteriskSettings extends Equatable{
   });
 
   static UserProfileAsteriskSettings? fromJson(json) {
-    print("UserProfileAsteriskSettings    $json");
     return json == null
         ? null
         : UserProfileAsteriskSettings(

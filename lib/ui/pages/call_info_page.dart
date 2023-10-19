@@ -20,7 +20,6 @@ class CallInfoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("CallInfoPage route  -->  ${ModalRoute.of(context)?.settings.name}");
     return Scaffold(
       appBar: AppBar(
         iconTheme: Theme.of(context).iconTheme,

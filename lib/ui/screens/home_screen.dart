@@ -66,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool isIncomingCall = false;
   bool isOutgoingCall = false;
   bool isUpdateAvailable = true;
+  bool isCallBeenAnswered = false;
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
 
 
@@ -99,7 +100,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _onErrorState(ErrorHandlerState state){
-    print("ErrorHandlerState log ${state}");
     if (state is ErrorHandlerWithErrorState) {
       if (state.error.type == AppErrorExceptionType.auth) {
         SessionExpiredModalWidget(context);
@@ -182,7 +182,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           if(isJoined == true) refreshAllData(context);
         }
       } catch (err) {
-        print("publicDialog err   $err");
         customToastMessage(context: context, message: "Не удалось проверить корпоративные группы и каналы");
       }
     }
@@ -191,7 +190,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Future<void> _onBlocProfileStateChanged(UserProfileState state) async {
     if (state is UserProfileLoadedState) {
       myUserName = "${state.user?.firstname} ${state.user?.lastname}";
-      print("asterisk  --> ${state.user!.userProfileSettings!.asteriskUserPassword} ");
       if (kIsWeb) return;
       if (!await isCallRunning()){
         if (state.user != null && state.user?.userProfileSettings != null
@@ -212,7 +210,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void shouldDownloadData() async {
     if (context.read<ProfileBloc>().state is UserProfileLoggedOutState) {
-      print("There was logout");
       BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLoadingEvent());
       BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.add(DialogsLoadEvent());
       BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(InitializeSocketEvent());
@@ -258,6 +255,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
+  void _sendMissCallNotification({required int? dialogId, required String caller, required String? userId}) async {
+    _isPushSent = true;
+    final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);
+    dialogId ??= await createDialog(chatsBuilderBloc: chatsBuilderBloc, partnerId: int.parse(caller));
+    _pushNotificationService.sendMissCallPush(
+        userId: caller, userName: myUserName);
+    sendMessageUnix(
+      userId: int.parse(userId!),
+      dialogId: dialogId!,
+      bloc: chatsBuilderBloc,
+      messageText: "Пропущенный звонок",
+      file: null,
+      parentMessage: null,
+    );
+  }
+
 
   @override
   void initState() {
@@ -269,7 +282,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     getOs();
     if (!kIsWeb) {
       callServiceBlocSubscription = BlocProvider.of<CallsBloc>(context).stream.listen((state) async {
-        print("CALL_SERVICE_STATE   $state");
         if (state is UnconnectedCallServiceState) {
           customToastMessage(context: context, message: "Произошла ошибка при подключении к SIP-серверу");
         } else if (state is IncomingCallState) {
@@ -285,10 +297,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           });
           _openIncomingCallScreen();
         } else if (state is OutgoingCallState) {
-          print("NAVIGATOR outg   ${ModalRoute.of(context)?.settings.name}");
           if(ModalRoute.of(context)?.settings.name == MainNavigationRouteNames.outgoingCallScreen) return;
           _isPushSent = false;
-          print("Route name:  ${ModalRoute.of(context)?.settings.name}");
           try {
             final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => "${SipConfig.getPrefix()}${el.id}" == state.callerName);
             callerName = "${callerUser.firstname} ${callerUser.lastname}";
@@ -316,6 +326,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               )
           );
           setState(() {
+            isCallBeenAnswered = true;
             isActiveCall = true;
             isIncomingCall = false;
             isOutgoingCall = false;
@@ -328,6 +339,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.loaderWidget);
           }
           BlocProvider.of<CallLogsBloc>(context).add(AddCallToLogEvent(call: state.callData));
+          if (_isPushSent == false && !isCallBeenAnswered && isOutgoingCall) {
+            final String? userId = await _dataProvider.getUserId();
+            int? dialogId;
+            String caller = '';
+            final List<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs;
+            if (dialogs != null && dialogs.isNotEmpty) {
+              caller = state.callData.fromCaller.substring(1, state.callData.fromCaller.length);
+              for (var dialog in dialogs) {
+                if (dialog.chatType.typeId == 1) {
+                  for (var user in dialog.usersList) {
+                    if (user.id.toString() == caller) {
+                      dialogId = dialog.dialogId;
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+            _sendMissCallNotification(dialogId: dialogId, caller: caller, userId: userId);
+          }
           setState(() {
             isActiveCall = false;
             isIncomingCall = false;
@@ -359,23 +390,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             }
           }
 
-          if (_isPushSent == false) {
-            _isPushSent = true;
-            final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);
-            print("ErrorCallServiceState    caller   $caller");
-            dialogId ??= await createDialog(chatsBuilderBloc: chatsBuilderBloc, partnerId: int.parse(caller));
-            _pushNotificationService.sendMissCallPush(
-                userId: caller, userName: myUserName);
-            sendMessageUnix(
-              userId: int.parse(userId!),
-              dialogId: dialogId!,
-              bloc: chatsBuilderBloc,
-              messageText: "Пропущенный звонок",
-              file: null,
-              parentMessage: null,
-            );
+          if (_isPushSent == false && !isCallBeenAnswered && isOutgoingCall) {
+            _sendMissCallNotification(dialogId: dialogId, caller: caller, userId: userId);
           }
           setState(() {
+            isCallBeenAnswered = false;
             isActiveCall = false;
             isIncomingCall = false;
             isOutgoingCall = false;
@@ -420,6 +439,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
   @override
   void dispose() {
+    WidgetsBinding.instance?.removeObserver(this);
     callServiceBlocSubscription.cancel();
     userProfileDataSubscription.cancel();
     _errorHandlerBlocSubscription.cancel();
