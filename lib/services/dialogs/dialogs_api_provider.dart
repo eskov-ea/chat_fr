@@ -24,6 +24,7 @@ class DialogsProvider {
       );
       if (response.statusCode == 200) {
         List<dynamic> collection = jsonDecode(response.body)["data"];
+        print("Loading dialogs:   ${response.body}");
         List<DialogData> dialogs =
             collection.map((dialog) => DialogData.fromJson(dialog)).toList();
         return dialogs;

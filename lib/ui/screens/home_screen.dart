@@ -131,35 +131,41 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  void getOs() async {
-    os = await _dataProvider.getOs();
-  }
 
   void updateUserProfileData() async {
     BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLoadingEvent());
   }
 
   void checkAppVersion(AppSettings settings) async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    String version = packageInfo.version;
-    String buildNumber = packageInfo.buildNumber;
-    print("Current app version is $version  $buildNumber");
-    if (packageInfo.version != settings.version) {
-      isUpdateAvailable = true;
-      if(os == "android") {
-        customToastMessage(context: context, message: "Доступна новая версия приложения. Вы можете обновить ее в разделе Профиль");
-      } else {
-        SnackBarAction? action;
-        if (await canLaunchUrl(Uri.parse('https://apps.apple.com/us/app/mcfef-int/id6452551074'))) {
-          action = SnackBarAction(
-            label: 'Обновить',
-            onPressed: () async {
-              await launchUrl(Uri.parse('https://apps.apple.com/us/app/mcfef-int/id6452551074'));
-            },
-          );
+    try {
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      final String currentVersion = packageInfo.version;
+      final String? availableVersion = Platform.isAndroid ? settings.versionAndroid : Platform.isIOS ? settings.versionIos : null;
+      print("Current app version is $currentVersion, available version is $availableVersion");
+      if(availableVersion == null) return;
+      final List<String> currentVersionArray = currentVersion.split(".");
+      final List<String> availableVersionArray = availableVersion.split(".");
+      for(var i=0; i<currentVersionArray.length; ++i) {
+        if(int.parse(currentVersionArray[i]) < int.parse(availableVersionArray[i])) {
+          isUpdateAvailable = true;
+          if(Platform.isAndroid) {
+            customToastMessage(context: context, message: "Доступна новая версия приложения. Вы можете обновить ее в разделе Профиль");
+          } else {
+            SnackBarAction? action;
+            if (await canLaunchUrl(Uri.parse('https://apps.apple.com/us/app/mcfef-int/id6452551074'))) {
+              action = SnackBarAction(
+                label: 'Обновить',
+                onPressed: () async {
+                  await launchUrl(Uri.parse('https://apps.apple.com/us/app/mcfef-int/id6452551074'));
+                },
+              );
+            }
+            customToastMessage(context: context, message: "Доступна новая версия приложения. Свяжитесь с разработчиками, чтобы установить ее", action: action);
+          }
         }
-        customToastMessage(context: context, message: "Доступна новая версия приложения. Свяжитесь с разработчиками, чтобы установить ее", action: action);
       }
+    } catch(_) {
+      return;
     }
   }
 
@@ -279,7 +285,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     userProfileDataSubscription =  BlocProvider.of<ProfileBloc>(context).stream.listen(_onBlocProfileStateChanged);
     _subscribeToErrorsBlocStream();
     updateUserProfileData();
-    getOs();
     if (!kIsWeb) {
       callServiceBlocSubscription = BlocProvider.of<CallsBloc>(context).stream.listen((state) async {
         if (state is UnconnectedCallServiceState) {
