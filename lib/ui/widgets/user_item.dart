@@ -36,7 +36,7 @@ class UserItem extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AvatarWidget(userId: user.id),
+            UserAvatarWidget(userId: user.id),
             Padding(
               padding: const EdgeInsets.only(left: 12.0),
               child: Column(

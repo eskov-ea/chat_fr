@@ -67,11 +67,13 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       ChatsBuilderLoadMessagesEvent event, Emitter<ChatsBuilderState> emit
       ) async {
     // TODO: refactor this part if necessary
+    emit(state.copyWith(isLoadingMessages: true));
     final userId = await dataProvider.getUserId();
     try {
       List<MessageData> messages = await messagesRepository.getMessages(
           userId, event.dialogId, event.pageNumber);
       var chatExist = false;
+      state.copyWith(isLoadingMessages: false);
       final Map<String, bool> newMessagesDictionary = state.messagesDictionary;
       for (var chat in state.chats) {
         if (chat.chatId == event.dialogId) {
@@ -90,12 +92,14 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         }
         state.chats.add(ChatsData.makeChatsData(event.dialogId, messages));
       }
+      // final List<ChatsData> newChats = [...state.chats, ChatsData.makeChatsData(event.dialogId, messages)];
       // final newState = state.copyWith(updatedChats: state.chats, updatedCounter: state.counter++);
       emit(ChatsBuilderState(
         chats: state.chats,
         messagesDictionary: newMessagesDictionary,
         error: null,
-        isError: false
+        isError: false,
+        isLoadingMessages: false
       ));
     } catch (err) {
       if (err.runtimeType == StateError) return;
@@ -107,7 +111,8 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
           updatedChats: state.chats,
           updatedMessagesDictionary: state.messagesDictionary,
           error: e,
-          isError: true
+          isError: true,
+          isLoadingMessages: false
         );
         emit(errorState);
       }

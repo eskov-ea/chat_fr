@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../services/global.dart';
 
-class AvatarWidget extends StatefulWidget {
-  const AvatarWidget({
+class UserAvatarWidget extends StatefulWidget {
+  const UserAvatarWidget({
     required this.userId,
     double this.size = 28,
     Key? key,
@@ -13,10 +13,10 @@ class AvatarWidget extends StatefulWidget {
   final double size;
 
   @override
-  State<AvatarWidget> createState() => _AvatarWidgetState();
+  State<UserAvatarWidget> createState() => _UserAvatarWidgetState();
 }
 
-class _AvatarWidgetState extends State<AvatarWidget> {
+class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   File? image;
 
   @override

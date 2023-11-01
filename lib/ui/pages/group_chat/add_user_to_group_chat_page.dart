@@ -85,7 +85,7 @@ class _AddingUserToGroupChatPageState extends State<AddingUserToGroupChatPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          AvatarWidget(userId: users[index].id, size: 20),
+                          UserAvatarWidget(userId: users[index].id, size: 20),
                           const SizedBox(width: 20,),
                           Expanded(
                             child: Container(

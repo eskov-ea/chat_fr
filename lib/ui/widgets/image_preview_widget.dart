@@ -172,8 +172,8 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
   }
 }
 
-Widget? getImagePreview(
-    {required MessageAttachmentsData? file,
+Widget? getImagePreview({
+    required MessageAttachmentsData? file,
     required File? localFileAttachment,
     required bool isDownloading,
     required Function downloadImageFunction,
@@ -182,7 +182,8 @@ Widget? getImagePreview(
     required Function saveImageFunction,
     required String messageTime,
     required Widget status,
-    required bool isMe}) {
+    required bool isMe
+  }) {
   if (localFileAttachment != null || fileBytesRepresentation != null) {
     return GestureDetector(
         onTap: () {
@@ -194,19 +195,54 @@ Widget? getImagePreview(
                   width: null,
                   saveCallback: saveImageFunction));
         },
-        child: kIsWeb
-            ? Image.memory(
-                fileBytesRepresentation!,
-                width: 186,
-                height: 232,
-                fit: BoxFit.cover,
-              )
-            : Image.file(
+        child: Stack(
+          children: [
+            kIsWeb
+                ? Image.memory(
+              fileBytesRepresentation!,
+              width: 186,
+              height: 232,
+              fit: BoxFit.cover,
+            )
+                : Image.file(
                 localFileAttachment!,
                 width: 186,
                 height: 232,
                 fit: BoxFit.cover
-              ));
+            ),
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: Container(
+                width: 250,
+                height: 30,
+                padding: EdgeInsets.all(5),
+                alignment: Alignment.bottomRight,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    stops: [0.4, 1],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.transparent,
+                      Colors.grey,
+                    ],
+                  )),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      messageTime,
+                      style: TextStyle(color: AppColors.backgroundLight),
+                    ),
+                    isMe ? status : SizedBox.shrink()
+                  ],
+                )
+              ),
+            ),
+          ],
+        )
+    );
   }
   if (file != null) {
     try {

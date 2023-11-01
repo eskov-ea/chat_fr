@@ -18,7 +18,7 @@ class UserProfileWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 20,),
-            AvatarWidget(userId: user.id, size: 70,),
+            UserAvatarWidget(userId: user.id, size: 70,),
             const SizedBox(height: 20,),
             Text(user.lastname + " " + user.firstname + " " + user.middlename,
                 textAlign: TextAlign.center,

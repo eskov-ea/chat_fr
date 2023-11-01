@@ -185,7 +185,7 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              AvatarWidget(userId: stateUsers[index].user.id, size: 20),
+                              UserAvatarWidget(userId: stateUsers[index].user.id, size: 20),
                               // CircleAvatar(
                               //   radius: 20,
                               //   backgroundColor: Colors.grey,

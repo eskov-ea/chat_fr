@@ -62,7 +62,7 @@ class ProfilePage extends StatelessWidget {
                           ListView(
                             children: [
                               const SizedBox(height: 20,),
-                              AvatarWidget(userId: state.user?.id, size: 70,),
+                              UserAvatarWidget(userId: state.user?.id, size: 70,),
                               const SizedBox(height: 20,),
                               Text(state.user!.lastname + " " + state.user!.firstname + " " + state.user!.middlename,
                                   textAlign: TextAlign.center,

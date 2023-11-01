@@ -44,13 +44,14 @@ abstract class AppTheme {
         brightness: Brightness.light,
         hintColor: accentColor,
         visualDensity: visualDensity,
+        checkboxTheme: CheckboxThemeData(checkColor: MaterialStateProperty.all(AppColors.secondary)),
         // textTheme:
         //     GoogleFonts.mulishTextTheme().apply(bodyColor: AppColors.textDark),
         backgroundColor: LightColors.background,
         scaffoldBackgroundColor: LightColors.background,
         cardColor: LightColors.card,
         primaryTextTheme: const TextTheme(
-          headline6: TextStyle(color: AppColors.textDark),
+          titleLarge: TextStyle(color: AppColors.textDark),
         ),
         iconTheme: const IconThemeData(color: AppColors.iconDark),
       );

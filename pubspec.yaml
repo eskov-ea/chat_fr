@@ -42,7 +42,7 @@ dependencies:
   flutter_ringtone_player: 3.2.0
   file_picker: 5.5.0
   permission_handler: 10.2.0
-  audioplayers: 2.0.0
+  audioplayers: 5.2.0
   path_provider_foundation: ^2.1.2
   flutter_callkit_incoming: ^2.0.0+2
   flutter_image_compress: ^2.0.0
@@ -64,6 +64,7 @@ flutter:
   assets:
    - assets/images/DV-rybak-logo-cropped.png
    - assets/images/no_avatar.png
+   - assets/images/no_avatar_group_version.png
    - assets/images/mute.png
    - assets/images/message_icon.png
    - assets/images/speaker_icon.png
