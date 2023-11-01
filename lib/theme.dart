@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_fonts/google_fonts.dart';
 
 abstract class AppColors {
   static const secondary = Color(0xFF3B76F6);
@@ -33,9 +33,10 @@ abstract class _DarkColors {
   static const card = AppColors.cardDark;
 }
 
+
 /// Reference to the application theme.
 abstract class AppTheme {
-  static const accentColor = AppColors.cardDark;
+  static const accentColor = AppColors.textDark;
   static final visualDensity = VisualDensity.adaptivePlatformDensity;
 
   /// Light theme and its settings.
@@ -43,13 +44,14 @@ abstract class AppTheme {
         brightness: Brightness.light,
         hintColor: accentColor,
         visualDensity: visualDensity,
-        textTheme:
-            GoogleFonts.mulishTextTheme().apply(bodyColor: AppColors.textDark),
+        checkboxTheme: CheckboxThemeData(checkColor: MaterialStateProperty.all(AppColors.secondary)),
+        // textTheme:
+        //     GoogleFonts.mulishTextTheme().apply(bodyColor: AppColors.textDark),
         backgroundColor: LightColors.background,
         scaffoldBackgroundColor: LightColors.background,
         cardColor: LightColors.card,
         primaryTextTheme: const TextTheme(
-          headline6: TextStyle(color: AppColors.textDark),
+          titleLarge: TextStyle(color: AppColors.textDark),
         ),
         iconTheme: const IconThemeData(color: AppColors.iconDark),
       );
@@ -59,8 +61,8 @@ abstract class AppTheme {
         brightness: Brightness.dark,
         hintColor: accentColor,
         visualDensity: visualDensity,
-        textTheme:
-            GoogleFonts.interTextTheme().apply(bodyColor: AppColors.textLigth),
+        // textTheme:
+        //     GoogleFonts.interTextTheme().apply(bodyColor: AppColors.textLigth),
         backgroundColor: _DarkColors.background,
         scaffoldBackgroundColor: _DarkColors.background,
         cardColor: _DarkColors.card,

@@ -164,7 +164,6 @@ class _ChatScreenState extends State<ChatScreen> {
         customToastMessage(context: context, message: 'Не получилось удалить сообщения. Попробуйте еще раз');
       }
     } catch (err) {
-      print('deleteMessages  $err');
       customToastMessage(context: context, message: 'Не получилось удалить сообщения. Попробуйте еще раз');
     }
   }
@@ -262,7 +261,7 @@ class _ChatScreenState extends State<ChatScreen> {
               onTap: (){
                 setSelectedMode(false);
               },
-              child: Padding(
+              child: const Padding(
                 padding: EdgeInsets.only(right: 10),
                 child: Center(
                   child: Text('Отменить',
@@ -274,7 +273,7 @@ class _ChatScreenState extends State<ChatScreen> {
             if (!isSelectedMode && !kIsWeb && ( widget.dialogData == null || widget.dialogData!.chatType.p2p == 1)) Padding(
               padding: const EdgeInsets.only(right: 20),
               child: IconButton(
-                icon: Icon(
+                icon: const Icon(
                   CupertinoIcons.phone,
                   color: AppColors.secondary ,
                   size: 30
@@ -290,7 +289,7 @@ class _ChatScreenState extends State<ChatScreen> {
           // color: AppColors.backgroundChatScreen,
           height: double.infinity,
           width: double.infinity,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             image: DecorationImage(
               image: AssetImage("assets/images/chat_background.jpg"),
               fit: BoxFit.cover,
@@ -329,12 +328,14 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                     ),
                     if (replyMessage != null) _ReplyMessageBar(replyMessage: replyMessage!, cancelReplyMessage: cancelReplyMessage, senderName: senderReplyName!,),
-                    ActionBar(userId: widget.userId, partnerId: widget.partnerId, dialogId: widget.dialogData?.dialogId,
-                      setDialogData: setDialogData, rootWidget: widget, username: widget.username,
-                      focusNode: focusNode, setRecording: setRecording, isRecording: isRecording, dialogData: widget.dialogData,
-                      dialogCubit: widget.dialogCubit, cancelReplyMessage: cancelReplyMessage, parentMessage: replyedParentMsg, isSelectedMode: isSelectedMode,
-                      selected: selected, deleteMessages: deleteMessages
-                    ),
+                    isUserAllowedToWrite(widget.dialogData!, widget.userId)
+                      ? ActionBar(userId: widget.userId, partnerId: widget.partnerId, dialogId: widget.dialogData?.dialogId,
+                          setDialogData: setDialogData, rootWidget: widget, username: widget.username,
+                          focusNode: focusNode, setRecording: setRecording, isRecording: isRecording, dialogData: widget.dialogData,
+                          dialogCubit: widget.dialogCubit, cancelReplyMessage: cancelReplyMessage, parentMessage: replyedParentMsg, isSelectedMode: isSelectedMode,
+                          selected: selected, deleteMessages: deleteMessages
+                        )
+                      : ReadOnlyChannelMode(context)
                   ],
                 ),
         ),
@@ -380,7 +381,7 @@ class _MessageListState extends State<_MessageList> {
   final ScrollController _scrollController = ScrollController();
   bool _shouldAutoscroll = true;
   int pageNumber = 1;
-  bool isLoading = false;
+  bool isLoadingMessages = true;
   late final StreamSubscription _newMessagesSubscription;
 
   @override
@@ -406,9 +407,16 @@ class _MessageListState extends State<_MessageList> {
   }
 
   void loadNextMessages() {
-    print("Loaded messages:   loadNextMessages  1    $pageNumber");
     BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderLoadMessagesEvent(dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
     pageNumber++;
+  }
+
+  void resetMessagesAndReload() {
+    setState(() {
+      pageNumber = 1;
+      isLoadingMessages = true;
+    });
+
   }
 
   void setupScrollListener(
@@ -444,67 +452,106 @@ class _MessageListState extends State<_MessageList> {
                 loadNextMessages();
                 // BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderLoadMessagesEvent(dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
                 // pageNumber++;
-                return const Center(child: CircularProgressIndicator(),);
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CircularProgressIndicator(),
+                      // Transform.translate(
+                      //   offset: const Offset(0, 50),
+                      //   child: const Text("Данные загружаются подозрительно долго, возможно причина в Интернет-подключении",
+                      //     textAlign: TextAlign.center,
+                      //     style: TextStyle(fontSize: 16),
+                      //   ),
+                      // ),
+                      // Transform.translate(
+                      //   offset: const Offset(0, 80),
+                      //   child: ElevatedButton(
+                      //     onPressed: () { loadNextMessages(); },
+                      //     child: const Text("Обновить"),
+                      //   ),
+                      // )
+                    ],
+                  ),
+                );
               }
               if ( currentState.messages.isEmpty) return const Center(child: Text('Нет сообщений'),);
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: currentState.messages.length,
-                    reverse: true,
-                    itemBuilder: (context, index) {
-                      return Column(
-                        children: [
-                          if (index == currentState.messages.length -1 || (index < currentState.messages.length -1 &&
-                              currentState.messages[index].messageDate != currentState.messages[index+1].messageDate))
-                            Container(
-                              decoration: const BoxDecoration(
-                                color: Colors.white54,
-                                borderRadius:  BorderRadius.all(Radius.circular(10)),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                child: Text(
+              return Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: currentState.messages.length,
+                      reverse: true,
+                      itemBuilder: (context, index) {
+                        return Column(
+                          children: [
+                            if (index == currentState.messages.length -1 || (index < currentState.messages.length -1 &&
+                                currentState.messages[index].messageDate != currentState.messages[index+1].messageDate))
+                              Container(
+                                decoration: const BoxDecoration(
+                                  color: Colors.white54,
+                                  borderRadius:  BorderRadius.all(Radius.circular(10)),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  child: Text(
                                     currentState.messages[index].messageDate,
+                                  ),
                                 ),
                               ),
-                            ),
-                          if (index == currentState.messages.length -1 || (index < currentState.messages.length -1 &&
-                              currentState.messages[index].messageDate != currentState.messages[index+1].messageDate))
-                            SizedBox(
-                              height: 8,
-                            ),
-                          MessageWidget(
-                            key: ValueKey<int>(currentState.messages[index].messageId),
-                            index: index,
-                            senderId: currentState.messages[index].senderId,
-                            userId: widget.userId,
-                            selected: widget.selected,
-                            selectedMode: widget.isSelectedMode,
-                            setSelectedMode: widget.setSelectedMode,
-                            setSelected: widget.setSelected,
-                            messageId: currentState.messages[index].messageId,
-                            message: currentState.messages[index].message,
-                            messageDate: currentState.messages[index].messageDate,
-                            messageTime: currentState.messages[index].messageTime,
-                            focusNode: widget.focusNode,
-                            setReplyMessage: widget.setReplyMessage,
-                            status: Helpers.checkPartnerReadMessage(currentState.messages[index].status, widget.userId),
-                            file: currentState.messages[index].file,
-                            p2p: widget.dialogData.chatType.p2p,
-                            senderName: getSenderName(widget.usersCubit.state.users, currentState.messages[index].senderId),
-                            parentMessage: currentState.messages[index].parentMessage,
-                            isError: currentState.messages[index].isError,
-                            repliedMsgSenderName: currentState.messages[index].parentMessage != null
+                            if (index == currentState.messages.length -1 || (index < currentState.messages.length -1 &&
+                                currentState.messages[index].messageDate != currentState.messages[index+1].messageDate))
+                              SizedBox(
+                                height: 8,
+                              ),
+                            MessageWidget(
+                              key: ValueKey<int>(currentState.messages[index].messageId),
+                              index: index,
+                              senderId: currentState.messages[index].senderId,
+                              userId: widget.userId,
+                              selected: widget.selected,
+                              selectedMode: widget.isSelectedMode,
+                              setSelectedMode: widget.setSelectedMode,
+                              setSelected: widget.setSelected,
+                              messageId: currentState.messages[index].messageId,
+                              message: currentState.messages[index].message,
+                              messageDate: currentState.messages[index].messageDate,
+                              messageTime: currentState.messages[index].messageTime,
+                              focusNode: widget.focusNode,
+                              setReplyMessage: widget.setReplyMessage,
+                              status: Helpers.checkPartnerReadMessage(currentState.messages[index].status, widget.userId),
+                              file: currentState.messages[index].file,
+                              p2p: widget.dialogData.chatType.p2p,
+                              senderName: getSenderName(widget.usersCubit.state.users, currentState.messages[index].senderId),
+                              parentMessage: currentState.messages[index].parentMessage,
+                              isError: currentState.messages[index].isError,
+                              repliedMsgSenderName: currentState.messages[index].parentMessage != null
                                   ? getSenderName(widget.usersCubit.state.users, currentState.messages[index].parentMessage?.senderId)
                                   : null,
-                            repliedMsgId: currentState.messages[index].parentMessage?.parentMessageId,
-                            dialogId: widget.dialogData.dialogId,
-                          )
-                        ],
-                      );
-                    }),
+                              repliedMsgId: currentState.messages[index].parentMessage?.parentMessageId,
+                              dialogId: widget.dialogData.dialogId,
+                            )
+                          ],
+                        );
+                      }),
+                  ),
+
+                  // state.isLoadingMessages
+                  // ?  Row(
+                  //     mainAxisAlignment: MainAxisAlignment.center,
+                  //     children: [
+                  //       CircularProgressIndicator(),
+                  //       SizedBox(width: 30,),
+                  //       ElevatedButton(
+                  //         onPressed: (){},
+                  //         child: Text("Обновить")
+                  //       )
+                  //     ],
+                  // )
+                  // :   const SizedBox.shrink()
+                ]
               );
             // );
           } else {
@@ -554,11 +601,18 @@ class _ReplyMessageBar extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(senderName),
+                  Text(senderName,
+                    style: TextStyle(
+                        color: Color(0xFFC07602)
+                    ),
+                  ),
                   const SizedBox(height: 5,),
                   Text(
                     replyMessage,
                     maxLines: 1,
+                    style: TextStyle(
+                      color: Colors.white70
+                    ),
                   ),
                 ]
               ),
@@ -573,6 +627,38 @@ class _ReplyMessageBar extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+Widget ReadOnlyChannelMode(BuildContext context) {
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+    height: 30,
+    width: MediaQuery.of(context).size.width,
+    decoration: BoxDecoration(
+      borderRadius: const BorderRadius.all(Radius.circular(8)),
+      border: Border.all(width: 1, color: Color(0xFFCCD9FD)),
+      color: const Color(0xFFE7EDFF)
+    ),
+    child: const Center(
+      child: Text("В режиме чтония",
+        style: TextStyle(fontSize: 16, color: Color(0xFF575757)),
+      ),
+    ),
+  );
+}
+
+bool isUserAllowedToWrite(DialogData dialogData, int userId) {
+  if (dialogData.chatType.typeName != "Групповой для чтения") {
+    return true;
+  } else {
+    for(var i=0; i < dialogData.chatUsers.length; ++i) {
+      if(dialogData.chatUsers[i].userId == userId &&
+          dialogData.chatUsers[i].chatUserRole == 1) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 
@@ -610,6 +696,7 @@ class ChatPageArguments {
 }
 
 String? getSenderName(usersCubit, senderId){
+  if (senderId == 5) return "MCFEF Бот";
   String name = "Вы";
   usersCubit.forEach((user) {
     if (user.id == senderId) {

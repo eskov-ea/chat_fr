@@ -1,19 +1,19 @@
-package com.example.MCFEF.linphoneSDK
+package com.cashalot.MCFEF.linphoneSDK
 
-import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
+import android.content.Intent
 import android.widget.Toast
-import androidx.core.app.ActivityCompat.requestPermissions
-import com.example.MCFEF.MainActivity
-import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver
-import com.example.MCFEF.calls_manager.Data
-import com.example.MCFEF.makeCallDataPayload
-import com.example.MCFEF.makePlatformEventPayload
-import com.google.firebase.messaging.FirebaseMessaging
+import androidx.core.content.ContextCompat.startActivity
+import com.cashalot.MCFEF.MainActivity
+import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver
+import com.cashalot.MCFEF.calls_manager.Data
+import com.cashalot.MCFEF.makeCallDataPayload
+import com.cashalot.MCFEF.makePlatformEventPayload
 import io.flutter.Log
 import org.linphone.core.*
-import com.example.MCFEF.StorageManager
+import com.cashalot.MCFEF.StorageManager
+import com.cashalot.MCFEF.calls_manager.CallsNotificationManager
+import com.cashalot.MCFEF.calls_manager.IncomingCallActivity
 
 class LinphoneCore constructor(var core: Core, var context: Context) {
 
@@ -55,7 +55,8 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         address?.transport = transportType
 
         accountParams.serverAddress = address
-        accountParams.registerEnabled = true
+//        accountParams.registerEnabled = true
+//        accountParams.ensureRegistered()
         accountParams.pushNotificationAllowed = true
         accountParams.remotePushNotificationAllowed = true
 
@@ -64,13 +65,13 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         val nat = core.createNatPolicy()
 //        nat.stunServer = "aster.mcfef.com:3478"
         nat.stunServer = "$stunDomain:$stunPort"
-        nat.enableTcpTurnTransport(true)
+        nat.setTcpTurnTransportEnabled(true)
         nat.stunServerUsername = username
 
 
-        nat.enableStun(true)
-        nat.enableTurn(true)
-        nat.enableIce(true)
+        nat.setStunEnabled(true)
+        nat.setTurnEnabled(true)
+        nat.setIceEnabled(true)
         core.natPolicy = nat
         accountParams.natPolicy = nat
 
@@ -136,6 +137,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
     }
 
     fun getCallerFromContacts(id: String): String {
+        Log.i("SIP_CONTACTS", contacts.toString())
         if (contacts == null) return id
         val mapped = contacts!!.substring(1, contacts!!.length -1).trim()
         val map: Map<String, String> = mapped.split(",").associate {
@@ -173,8 +175,8 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
             when (state) {
                 Call.State.IncomingReceived -> {
                     val caller = if(call.remoteAddress.displayName != null) {
-                        getCallerFromContacts(call.remoteAddress.username.toString())
-//                        call.remoteAddress.displayName!!
+//                        getCallerFromContacts(call.remoteAddress.username.toString())
+                        call.remoteAddress.displayName!!
                     } else {
                         getCallerFromContacts(call.remoteAddress.username.toString())
                     }
@@ -185,7 +187,6 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     )
 
                     val data = Data(args).toBundle()
-
                     context.sendBroadcast(
                         CallsManagerBroadcastReceiver.getIntentIncoming(
                             context,
@@ -223,28 +224,28 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                 }
                 Call.State.End -> {
                     Log.w("ACTIVE_CALL", "Ended   ${call.remoteAddress.username}")
-//                    val caller = if(call.remoteAddress.displayName != null) {
-//                        call.remoteAddress.displayName!!
-//                    } else {
-//                        call.remoteAddress.username.toString()
-//                    }
-//                    val dargs: Map<String, Any?> = mapOf(
-//                            "nameCaller" to caller,
-//                            "android" to android
-//                    )
-//
-//                    val data = Data(dargs).toBundle()
-//                    context.sendBroadcast(
-//                            CallsManagerBroadcastReceiver.getIntentDecline(
-//                                    context,
-//                                    data
-//                            )
-//                    )
-//                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
-//                            callStatus = if (call.callLog.status.name == "Success")  "ANSWERED" else "NO ANSWER",
-//                            fromCaller = call.callLog.fromAddress.username,
-//                            toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
-//                            callId = call.callLog.callId)
+                    val caller = if(call.remoteAddress.displayName != null) {
+                        call.remoteAddress.displayName!!
+                    } else {
+                        call.remoteAddress.username.toString()
+                    }
+                    val dargs: Map<String, Any?> = mapOf(
+                            "nameCaller" to caller,
+                            "android" to android
+                    )
+
+                    val data = Data(dargs).toBundle()
+                    context.sendBroadcast(
+                            CallsManagerBroadcastReceiver.getIntentDecline(
+                                    context,
+                                    data
+                            )
+                    )
+                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
+                            callStatus = if (call.callLog.status.name == "Success")  "ANSWERED" else "NO ANSWER",
+                            fromCaller = call.callLog.fromAddress.username,
+                            toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
+                            callId = call.callLog.callId)
                     val args = makePlatformEventPayload("ENDED", null, null)
 
                     MainActivity.callServiceEventSink?.success(args)
@@ -373,9 +374,13 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
     }
 
     fun toggleMute(): Boolean {
-        core.enableMic(!core.micEnabled())
-
-        return !core.micEnabled()
+        return if (core.isMicEnabled) {
+            core.isMicEnabled = false
+            false
+        } else {
+            core.isMicEnabled = true
+            true
+        }
     }
 
     fun toggleSpeaker(): Boolean {

@@ -222,18 +222,6 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
         child: OutlinedButton(
             onPressed: () async {
               customToastMessage(context: context, message: "Секретный p2p чат пока не настроен");
-              // print("GROUPLIST  -->  $groupUsersList");
-              // print("GROUPLIST  -->  $currentChatType");
-              // loadingInProgressModalWidget(context, "Загрузка");
-              // final newGroup = await _dialogsProvider.createDialog(chatType: currentChatType, users: widget.usersList, chatName: _textNameFieldController.text, chatDescription: _textDescriptionFieldController.text, isPublic: isPublic);
-              // if (newGroup != null) {
-              //   Navigator.of(context).pushNamed(
-              //       MainNavigationRouteNames.homeScreen
-              //   );
-              // } else {
-              //   Navigator.of(context).pop();
-              //   customToastMessage(context, "Произошла ошибка. Попробуйте еще раз");
-              // }
             },
             style: ElevatedButton.styleFrom(
               primary: Colors.blue,
@@ -273,7 +261,7 @@ Widget _groupUsersList(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                  "${groupUsersList[index].firstname} ${groupUsersList[index].lastname}"),
+                  "${groupUsersList[index].lastname} ${groupUsersList[index].firstname}"),
               IconButton(
                 padding: EdgeInsets.all(0),
                 alignment: Alignment.centerRight,

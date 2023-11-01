@@ -30,14 +30,11 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     newMessageSubscription = webSocketBloc.stream.listen((streamState) {
       print("streamState   ${streamState}");
       if (streamState is WsStateReceiveNewMessage){
-        print("ChatsBuilderAddMessageEvent");
         add(ChatsBuilderAddMessageEvent(message: streamState.message, dialogId: streamState.message.dialogId));
       } else if (streamState is WsStateUpdateStatus){
-        print("WsStateUpdateStatus ololo   ${streamState.statuses}");
         add(ChatsBuilderReceivedUpdatedMessageStatusesEvent(statuses: streamState.statuses));
       }
     });
-    print("newMessageSubscription $newMessageSubscription");
 
     on<ChatsBuilderEvent>((event, emit) async {
       print("ChatsBuilderEvent   $event");
@@ -69,14 +66,14 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
   Future<void> onChatsBuilderLoadMessagesEvent (
       ChatsBuilderLoadMessagesEvent event, Emitter<ChatsBuilderState> emit
       ) async {
-    print("onChatsBuilderLoadMessagesEvent");
     // TODO: refactor this part if necessary
+    emit(state.copyWith(isLoadingMessages: true));
     final userId = await dataProvider.getUserId();
     try {
       List<MessageData> messages = await messagesRepository.getMessages(
           userId, event.dialogId, event.pageNumber);
-      print("Loaded messages:   pg:  ${event.pageNumber}   $messages");
       var chatExist = false;
+      state.copyWith(isLoadingMessages: false);
       final Map<String, bool> newMessagesDictionary = state.messagesDictionary;
       for (var chat in state.chats) {
         if (chat.chatId == event.dialogId) {
@@ -95,12 +92,14 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         }
         state.chats.add(ChatsData.makeChatsData(event.dialogId, messages));
       }
+      // final List<ChatsData> newChats = [...state.chats, ChatsData.makeChatsData(event.dialogId, messages)];
       // final newState = state.copyWith(updatedChats: state.chats, updatedCounter: state.counter++);
       emit(ChatsBuilderState(
         chats: state.chats,
         messagesDictionary: newMessagesDictionary,
         error: null,
-        isError: false
+        isError: false,
+        isLoadingMessages: false
       ));
     } catch (err) {
       if (err.runtimeType == StateError) return;
@@ -112,7 +111,8 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
           updatedChats: state.chats,
           updatedMessagesDictionary: state.messagesDictionary,
           error: e,
-          isError: true
+          isError: true,
+          isLoadingMessages: false
         );
         emit(errorState);
       }
@@ -122,15 +122,12 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
   Future<void> onChatsBuilderAddMessageEvent (
       ChatsBuilderAddMessageEvent event, Emitter<ChatsBuilderState> emit
       ) async {
-    print("TRY TO ADD MESSAGE");
     if (state.messagesDictionary["${event.message.messageId}"] != null) {
-      print("Message already in the list   ${event.message.messageId}");
       return;
     } else {
       final newDictionary = state.messagesDictionary;
       for (var chat in state.chats) {
         if (chat.chatId == event.dialogId) {
-          print("ADD MESSAGE  ${event.message}");
           chat.messages.insert(0, event.message);
           newDictionary["${event.message.messageId}"] = true;
         }
@@ -152,7 +149,6 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
   Future<void> onChatsBuilderUpdateStatusMessagesEvent (
       ChatsBuilderUpdateStatusMessagesEvent event, Emitter<ChatsBuilderState> emit
       ) async {
-    print("UPDATE CHAT MESSAGES STATUSES");
     messagesRepository.updateMessageStatuses(dialogId: event.dialogId);
   }
 
@@ -186,7 +182,6 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     final chats = state.chats;
     for (var chat in chats) {
       if (chat.chatId == event.dialogId) {
-        print("ChatsBuilderUpdateLocalMessageEvent  ${event.message}   ${chat.messages.first.status}");
         final message = chat.messages.firstWhere((element) => element.messageId == event.localMessageId);
         message.messageId = event.message.messageId;
         if (event.message.file != null) {
@@ -203,11 +198,9 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
   Future<void> onChatsBuilderUpdateLocalMessageWithErrorEvent (
       ChatsBuilderUpdateMessageWithErrorEvent event, Emitter<ChatsBuilderState> emit
       ) async {
-    print("TRY TO UPDATE ERROR MESSAGE");
     final chats = [...state.chats];
     for (var chat in chats) {
       if (chat.chatId == event.dialog) {
-        print("UPDATE MESSAGE WITH ERROR  ${event.message}");
         for (var message in chat.messages) {
           if (message.messageId == event.message.messageId) {
             message.isError = true;
@@ -229,7 +222,6 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       RefreshChatsBuilderEvent event,
       Emitter<ChatsBuilderState> emit
     ) {
-    print("onRefreshChatsBuilderEvent ${state.chats.length}");
     final newState = state.copyWith(updatedChats: [], updatedCounter: 0);
     emit(newState);
   }
@@ -238,7 +230,6 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       DeleteAllChatsEvent event,
       Emitter<ChatsBuilderState> emit
     ) {
-    print("onRefreshChatsBuilderEvent ${state.chats.length}");
     final newState = state.copyWith(updatedChats: [], updatedCounter: 0);
     emit(newState);
   }

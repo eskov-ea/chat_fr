@@ -1,4 +1,4 @@
-package com.example.MCFEF.calls_manager.widgets
+package com.cashalot.MCFEF.calls_manager.widgets
 
 import android.animation.Animator
 import android.animation.AnimatorSet

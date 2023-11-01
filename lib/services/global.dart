@@ -52,7 +52,6 @@ import 'messages/messages_repository.dart';
 
   const sipChannel = MethodChannel("com.application.chat/sip");
   Future<void> callNumber(BuildContext context, String userId) async {
-    print("OUTGOING CALL NUMBER");
     await sipChannel.invokeMethod(
         "OUTGOING_CALL", {"number": "sip:${SipConfig.getPrefix()}${userId}@${SipConfig.getDomain()}"});
   }
@@ -67,13 +66,11 @@ import 'messages/messages_repository.dart';
 
   Future<bool> toggleMute() async {
     final result = await sipChannel.invokeMethod("TOGGLE_MUTE");
-    print("TOGGLE_RESULT     $result");
     return result;
   }
 
   Future<bool> toggleSpeaker() async {
     final result = await sipChannel.invokeMethod("TOGGLE_SPEAKER");
-    print("TOGGLE_RESULT     $result");
     return result;
   }
 
@@ -146,12 +143,9 @@ import 'messages/messages_repository.dart';
     final Directory documentDirectory = await getApplicationDocumentsDirectory();
     final String path = documentDirectory.path;
     final File file = File('$path/$fileName');
-    print("Documents directory is    $path");
     if (await file.exists()) {
-      print("file exists");
       return file;
     } else {
-      print("file not exists");
       final fileData = await MessagesRepository().loadAttachmentData(
           attachmentId: attachmentId.toString());
       if (fileData == null)
@@ -169,7 +163,6 @@ import 'messages/messages_repository.dart';
     final File file = File('$path/avatar.$userId.jpg');
 
     if (await file.exists()) {
-      print("Image status: read from disk");
       return file;
     } else {
       final UserProfileProvider userProfileProvider = UserProfileProvider();
@@ -177,7 +170,6 @@ import 'messages/messages_repository.dart';
       if (data == null) return null;
       final bytes = base64Decode(data);
       await file.writeAsBytes(bytes);
-      print("Image status: fetch from the Internet");
       return file;
     }
   }
@@ -186,7 +178,6 @@ import 'messages/messages_repository.dart';
     final Directory documentDirectory = await getApplicationDocumentsDirectory();
     final String path = documentDirectory.path;
     final File file = File('$path/$fileName');
-    print("isLocalFileExist   $path    //   $fileName");
     if (await file.exists()) {
       return file;
     }
@@ -216,7 +207,6 @@ import 'messages/messages_repository.dart';
   void refreshAllData(BuildContext context){
     BlocProvider.of<DialogsViewCubit>(context).refreshAllDialogs();
     BlocProvider.of<ChatsBuilderBloc>(context).add(RefreshChatsBuilderEvent());
-    // BlocProvider.of<WsBloc>(context).add(WsEventDisconnect());
   }
 
   getMonthRussianName(int month){
@@ -256,7 +246,6 @@ import 'messages/messages_repository.dart';
     if (dialogs == null) return null;
 
     while(dialogs.moveNext()) {
-      print("current dialog findDialog ${dialogs.current} ");
       if (dialogs.current.usersList.first.id == userId &&
           dialogs.current.usersList.last.id == partnerId &&
           dialogs.current.chatType.p2p == 1 ||
@@ -270,7 +259,6 @@ import 'messages/messages_repository.dart';
   }
 
   double _computeWidth(double width) {
-    print("Width is:  $width");
     if (width < 500) {
       return width;
     } else {

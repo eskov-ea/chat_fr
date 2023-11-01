@@ -88,7 +88,7 @@ class _CallsPageState extends State<CallsPage> {
             userId: int.parse(userId!),
             callName:
                 call.callStatus == "ANSWERED" ? "Входящий" : "Пропущенный",
-            callerName: "${user.firstname} ${user.lastname}",
+            callerName: "${user.lastname} ${user.firstname}",
             callerNumber: fromCaller,
             callDate: DateTime.parse(call.date),
             callDuration: call.duration);
@@ -97,14 +97,13 @@ class _CallsPageState extends State<CallsPage> {
         data = CallRenderData(
             userId: int.parse(userId!),
             callName: "Исходящий",
-            callerName: "${user.firstname} ${user.lastname}",
+            callerName: "${user.lastname} ${user.firstname}",
             callerNumber: toCaller,
             callDate: DateTime.parse(call.date),
             callDuration: call.duration);
       }
       return GestureDetector(
         onTap: () {
-          print("Get call info");
           Navigator.of(context).pushNamed(
               MainNavigationRouteNames.callInfoPage,
               arguments: data);

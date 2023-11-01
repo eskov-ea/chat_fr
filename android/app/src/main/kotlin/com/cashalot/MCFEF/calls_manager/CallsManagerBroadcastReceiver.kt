@@ -1,4 +1,4 @@
-package com.example.MCFEF.calls_manager
+package com.cashalot.MCFEF.calls_manager
 
 import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
@@ -7,9 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import com.example.MCFEF.MainActivity
-import com.example.MCFEF.linphoneSDK.CoreContext
-
+import com.cashalot.MCFEF.linphoneSDK.CoreContext
 import org.linphone.core.Reason
 
 class CallsManagerBroadcastReceiver : BroadcastReceiver() {
@@ -18,19 +16,19 @@ class CallsManagerBroadcastReceiver : BroadcastReceiver() {
 
     companion object {
         const val ACTION_CALL_INCOMING =
-                "com.example.MCFEF.calls_manager.ACTION_CALL_INCOMING"
+                "com.cashalot.MCFEF.calls_manager.ACTION_CALL_INCOMING"
         const val ACTION_CALL_ACCEPT =
-                "com.example.MCFEF.calls_manager.ACTION_CALL_ACCEPT"
+                "com.cashalot.MCFEF.calls_manager.ACTION_CALL_ACCEPT"
         const val ACTION_CALL_DECLINE =
-                "com.example.MCFEF.calls_manager.ACTION_CALL_DECLINE"
+                "com.cashalot.MCFEF.calls_manager.ACTION_CALL_DECLINE"
         const val ACTION_CALL_ENDED =
-                "com.example.MCFEF.calls_manager.ACTION_CALL_ENDED"
+                "com.cashalot.MCFEF.calls_manager.ACTION_CALL_ENDED"
         const val ACTION_CALL_TIMEOUT =
-                "com.example.MCFEF.calls_manager.ACTION_CALL_TIMEOUT"
+                "com.cashalot.MCFEF.calls_manager.ACTION_CALL_TIMEOUT"
         const val ACTION_CALL_CALLBACK =
-                "com.example.MCFEF.calls_manager.ACTION_CALL_CALLBACK"
+                "com.cashalot.MCFEF.calls_manager.ACTION_CALL_CALLBACK"
         const val ACTION_CALL_ACCEPTED =
-                "com.example.MCFEF.calls_manager.ACTION_CALL_ACCEPTED"
+                "com.cashalot.MCFEF.calls_manager.ACTION_CALL_ACCEPTED"
 
 
         const val EXTRA_CALLKIT_INCOMING_DATA = "EXTRA_CALLKIT_INCOMING_DATA"
@@ -56,10 +54,20 @@ class CallsManagerBroadcastReceiver : BroadcastReceiver() {
         const val EXTRA_CALLKIT_BACKGROUND_COLOR = "EXTRA_CALLKIT_BACKGROUND_COLOR"
         const val EXTRA_CALLKIT_BACKGROUND_URL = "EXTRA_CALLKIT_BACKGROUND_URL"
         const val EXTRA_CALLKIT_ACTION_COLOR = "EXTRA_CALLKIT_ACTION_COLOR"
-
+        const val EXTRA_CALLKIT_IS_CUSTOM_SMALL_EX_NOTIFICATION =
+                "EXTRA_CALLKIT_IS_CUSTOM_SMALL_EX_NOTIFICATION"
         const val EXTRA_CALLKIT_ACTION_FROM = "EXTRA_CALLKIT_ACTION_FROM"
+        const val EXTRA_CALLKIT_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME =
+            "EXTRA_CALLKIT_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME"
+        const val EXTRA_CALLKIT_MISSED_CALL_NOTIFICATION_CHANNEL_NAME =
+            "EXTRA_CALLKIT_MISSED_CALL_NOTIFICATION_CHANNEL_NAME"
 
 
+        fun getIntent(context: Context, action: String, data: Bundle?) =
+                Intent(context, CallsManagerBroadcastReceiver::class.java).apply {
+                    this.action = action
+                    putExtra(EXTRA_CALLKIT_INCOMING_DATA, data)
+                }
         fun getIntentDecline(context: Context, data: Bundle?) =
                 Intent(context, CallsManagerBroadcastReceiver::class.java).apply {
                     action = ACTION_CALL_DECLINE
@@ -93,12 +101,14 @@ class CallsManagerBroadcastReceiver : BroadcastReceiver() {
         val callkitNotificationManager = CallsNotificationManager(context)
         val action = intent.action ?: return
         val data = intent.extras?.getBundle(EXTRA_CALLKIT_INCOMING_DATA) ?: return
+        Log.v("BROADCAST_RECEIVER", intent.toString())
         when (action) {
             ACTION_CALL_INCOMING -> {
                 try {
                     callkitNotificationManager.showIncomingNotification(data)
                     val soundPlayerServiceIntent = Intent(context, CallsSoundPlayerService::class.java)
                     soundPlayerServiceIntent.putExtras(data)
+                    Log.v("SOUNDPLAYER_SERVICE", soundPlayerServiceIntent.toString())
                     context.startService(soundPlayerServiceIntent)
                 } catch (error: Exception) {
                     error.printStackTrace()
@@ -109,11 +119,6 @@ class CallsManagerBroadcastReceiver : BroadcastReceiver() {
                 try {
                     context.stopService(Intent(context, CallsSoundPlayerService::class.java))
                     callkitNotificationManager.clearIncomingNotification(data)
-//                    val intent = Intent(context, CurrentCall::class.java).apply {
-//                        flags =
-//                                Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-//                    }
-//                    context.startActivity(intent)
                     call!!.currentCall?.accept()
                 } catch (error: Exception) {
                     error.printStackTrace()

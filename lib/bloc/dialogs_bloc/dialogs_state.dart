@@ -63,7 +63,8 @@ class DialogsState {
           lastMessage: LastMessageData.from(dialog.lastMessage),
           messageCount: dialog.messageCount,
           chatUsers: [...dialog.chatUsers],
-          createdAt: dialog.createdAt
+          createdAt: dialog.createdAt,
+          picture: dialog.picture
         );
         dialogs.add(d);
       }

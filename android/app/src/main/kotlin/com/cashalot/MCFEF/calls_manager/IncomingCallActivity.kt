@@ -1,4 +1,4 @@
-package com.example.MCFEF.calls_manager
+package com.cashalot.MCFEF.calls_manager
 
 import android.app.Activity
 import android.app.KeyguardManager
@@ -8,31 +8,16 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
 import android.os.*
-import android.text.TextUtils
+import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
-import android.view.animation.AnimationUtils
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
-import com.example.MCFEF.R
-import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.ACTION_CALL_INCOMING
-import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_TEXT_ACCEPT
-import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_TEXT_DECLINE
-import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_BACKGROUND_COLOR
-import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_DURATION
-import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_INCOMING_DATA
-import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_NAME_CALLER
-import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_HANDLE
-import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_HEADERS
-import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_IS_SHOW_LOGO
-import com.example.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_TYPE
-import com.example.MCFEF.linphoneSDK.CoreContext
-import com.example.MCFEF.calls_manager.widgets.RippleRelativeLayout
-import com.hiennv.flutter_callkit_incoming.CallkitIncomingBroadcastReceiver
-import io.flutter.Log
+import com.cashalot.MCFEF.R
+import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_DURATION
+import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_INCOMING_DATA
+import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver.Companion.EXTRA_CALLKIT_NAME_CALLER
 import kotlin.math.abs
 
 class IncomingCallActivity : Activity() {
@@ -40,13 +25,14 @@ class IncomingCallActivity : Activity() {
     companion object {
 
         const val ACTION_ENDED_CALL_INCOMING =
-                "com.example.MCFEF.calls_manager.ACTION_ENDED_CALL_INCOMING"
+                "com.cashalot.MCFEF.calls_manager.ACTION_ENDED_CALL_INCOMING"
+
+        const val ACTION_CALL_INCOMING = "com.cashalot.MCFEF.ACTION_CALL_INCOMING_ACTIVITY"
 
         fun getIntent(data: Bundle) = Intent(ACTION_CALL_INCOMING).apply {
             action = ACTION_CALL_INCOMING
             putExtra(EXTRA_CALLKIT_INCOMING_DATA, data)
-            flags =
-                    Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
 
         fun getIntentEnded() =
@@ -74,7 +60,9 @@ class IncomingCallActivity : Activity() {
     private lateinit var tvDecline: TextView
 
 
+    @Suppress("DEPRECATION")
     public override fun onCreate(savedInstanceState: Bundle?) {
+        Log.v("INCOMING_ACTIVITY", intent.toString())
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -87,6 +75,7 @@ class IncomingCallActivity : Activity() {
             window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
         }
 
+        transparentStatusAndNavigation()
         setContentView(R.layout.incoming_call)
         initView()
         incomingData(intent)
@@ -187,34 +176,18 @@ class IncomingCallActivity : Activity() {
 
     private fun onAcceptClick(){
         val data = intent.extras?.getBundle(EXTRA_CALLKIT_INCOMING_DATA)
-        val intent = packageManager.getLaunchIntentForPackage(packageName)?.cloneFilter()
-        if (isTaskRoot) {
-            intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        } else {
-            intent?.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        }
-        if (intent != null) {
-            val intentTransparent = TransparentActivity.getIntentAccept(this, data)
-            startActivities(arrayOf(intent, intentTransparent))
-        } else {
-            val acceptIntent = CallsManagerBroadcastReceiver.getIntentAccept(this, data)
-            sendBroadcast(acceptIntent)
-        }
+        val acceptIntent = TransparentActivity.getIntent(this, CallsManagerBroadcastReceiver.ACTION_CALL_ACCEPT, data)
+        startActivity(acceptIntent)
+
+        dismissKeyguard()
+        finish()
+    }
+    private fun dismissKeyguard() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
             keyguardManager.requestDismissKeyguard(this, null)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            finishAndRemoveTask()
-        } else {
-            finish()
-        }
     }
-//    private  fun onDeclineClick(){
-//        this.stopService(Intent(this, CallkitSoundPlayerService::class.java))
-//        call.currentCall?.decline(Reason.Declined)
-//        finish()
-//    }
     private fun onDeclineClick() {
         val data = intent.extras?.getBundle(EXTRA_CALLKIT_INCOMING_DATA)
         val intent =

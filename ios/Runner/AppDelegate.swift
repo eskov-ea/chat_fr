@@ -35,7 +35,6 @@ import PushKit
             [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
             self?.deviceIdResultCallback = result
             if call.method == "getDeviceToken" {
-                print("getDeviceToken")
                 self?.registerForPushNotifications()
             } else {
                 result(FlutterMethodNotImplemented)

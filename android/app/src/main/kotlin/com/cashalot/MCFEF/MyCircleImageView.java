@@ -1,4 +1,4 @@
-package com.example.MCFEF;
+package com.cashalot.MCFEF;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -28,6 +28,8 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.RequiresApi;
+
+import com.cashalot.MCFEF.R;
 
 @SuppressWarnings("UnusedDeclaration")
 public class MyCircleImageView extends ImageView {

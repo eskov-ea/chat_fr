@@ -89,31 +89,31 @@ class _AuthScreenState extends State<AuthScreen> {
         listener: _onAuthViewCubitStateChange,
         child:  Scaffold(
           body: SafeArea(
-                child: SingleChildScrollView(
-                  child: CustomSizeContainer(GestureDetector(
-                    onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                    child: Column(
-                      children: [
-                        Center(
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 60),
-                              child: Image.asset(
-                                'assets/images/DV-rybak-logo-cropped.png',
-                                height: 150,
-                              ),
-                            )),
-                        Padding(
-                          padding: const EdgeInsets.only(left: 30, right: 30, top: 30),
-                          child: LoginFormWidget(context, cubit),
-                        ),
-                      ],
+            child: SingleChildScrollView(
+              child: CustomSizeContainer(GestureDetector(
+                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                child: Column(
+                  children: [
+                    Center(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 60),
+                          child: Image.asset(
+                            'assets/images/DV-rybak-logo-cropped.png',
+                            height: 150,
+                          ),
+                        )),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 30, right: 30, top: 30),
+                      child: LoginFormWidget(context, cubit),
                     ),
-                  ), context),
+                  ],
                 ),
-              ),
+              ), context),
+            ),
+          ),
         )
-          );
-        }
+      );
+    }
 
   Widget LoginFormWidget(context, cubit) {
     return Form(

@@ -9,6 +9,7 @@ import '../../../models/contact_model.dart';
 import '../../../services/dialogs/dialogs_api_provider.dart';
 import '../../../theme.dart';
 import '../../../view_models/user/users_view_cubit.dart';
+import '../../widgets/avatar_widget.dart';
 import '../../widgets/slidable_widget.dart';
 import 'add_user_to_group_chat_page.dart';
 
@@ -184,18 +185,19 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              CircleAvatar(
-                                radius: 20,
-                                backgroundColor: Colors.grey,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4), // Border radius
-                                  child: ClipOval(
-                                      child: false
-                                          ? Image.network("")
-                                          : Image.asset('assets/images/no_avatar.png')
-                                  ),
-                                ),
-                              ),
+                              UserAvatarWidget(userId: stateUsers[index].user.id, size: 20),
+                              // CircleAvatar(
+                              //   radius: 20,
+                              //   backgroundColor: Colors.grey,
+                              //   child: Padding(
+                              //     padding: const EdgeInsets.all(4), // Border radius
+                              //     child: ClipOval(
+                              //         child: false
+                              //             ? Image.network("")
+                              //             : Image.asset('assets/images/no_avatar.png')
+                              //     ),
+                              //   ),
+                              // ),
                               const SizedBox(width: 20,),
                               Expanded(
                                 child: Container(
@@ -207,7 +209,7 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                                         : BorderSide(width: 1, color: Colors.black26)
                                     )
                                   ),
-                                  child: Text("${stateUsers[index].user.firstname} ${stateUsers[index].user.lastname}",
+                                  child: Text("${stateUsers[index].user.lastname} ${stateUsers[index].user.firstname}",
                                     style: TextStyle(fontSize: 20),
                                   ),
                                 ),
@@ -232,7 +234,7 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                                                   mainAxisAlignment: MainAxisAlignment.end,
                                                   crossAxisAlignment: CrossAxisAlignment.end,
                                                   children: [
-                                                    Text('Удалить ${stateUsers[index].user.firstname} ${stateUsers[index].user.lastname} из списка участников?',
+                                                    Text('Удалить ${stateUsers[index].user.lastname} ${stateUsers[index].user.firstname} из списка участников?',
                                                       style: TextStyle(fontSize: 18, color: Colors.black),
                                                     ),
                                                     SizedBox(

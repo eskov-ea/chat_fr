@@ -101,7 +101,12 @@ class _OutgoingCallScreenState extends State<OutgoingCallScreen> {
                       print(
                           "NAVIGATOR   ${ModalRoute.of(context)?.settings.name}");
                       declineCall();
-                      Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
+                      try {
+                        Navigator.of(context).popUntil((route) =>
+                        route.settings.name == MainNavigationRouteNames.homeScreen);
+                      } catch (err) {
+                        Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.loaderWidget);
+                      }
                     },
                     child: Column(
                       // A button

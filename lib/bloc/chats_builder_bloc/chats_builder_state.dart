@@ -10,14 +10,15 @@ class ChatsBuilderState extends Equatable {
    final Map<String, bool> messagesDictionary;
    final AppErrorException? error;
    final bool isError;
+   final bool isLoadingMessages;
 
    ChatsBuilderState.initial()
       : chats =  <ChatsData>[], messagesDictionary = {},
-         error = null, isError = false;
+         error = null, isError = false, isLoadingMessages = false;
 
-  ChatsBuilderState({
+  const ChatsBuilderState({
     required this.chats, required this.messagesDictionary,
-    required this.error, required this.isError
+    required this.error, required this.isError, required this.isLoadingMessages
   });
 
 
@@ -42,64 +43,19 @@ class ChatsBuilderState extends Equatable {
     updatedCounter,
     updatedMessagesDictionary,
     AppErrorException? error,
-    bool? isError
+    bool? isError,
+    bool? isLoadingMessages
   }) {
     return ChatsBuilderState(
       chats: updatedChats ?? this.chats,
       messagesDictionary: updatedMessagesDictionary ?? this.messagesDictionary,
       error: error ?? this.error,
-      isError: isError ?? this.isError
+      isError: isError ?? this.isError,
+      isLoadingMessages: isLoadingMessages ?? this.isLoadingMessages
     );
   }
 
-  // List<ChatsData> from() {
-  //   List<ChatsData> chats = [];
-  //   this.chats.forEach((chat) {
-  //     List<MessageData> messages = [];
-  //     chat.messages.forEach((message) {
-  //       List<MessageStatuses> statuses = [];
-  //       message.status.forEach((status) {
-  //         final s = MessageStatuses(
-  //             id: status.id,
-  //             userId: status.userId,
-  //             statusId: status.statusId,
-  //             messageId: status.messageId,
-  //             dialogId: status.dialogId,
-  //             createdAt: status.createdAt
-  //         );
-  //         statuses.add(s);
-  //       });
-  //       final m = MessageData(
-  //         messageId: message.messageId,
-  //         senderId: message.senderId,
-  //         dialogId: message.dialogId,
-  //         message: message.message,
-  //         messageDate: message.messageDate,
-  //         messageTime: message.messageTime,
-  //         rawDate: message.rawDate,
-  //         status: statuses,
-  //         file: message.file,
-  //         parentMessageId: message.parentMessageId,
-  //         isError: message.isError,
-  //         parentMessage: message.parentMessage
-  //       );
-  //       messages.add(m);
-  //     });
-  //     final c = ChatsData(chatId: chat.chatId, messages: messages);
-  //     chats.add(c);
-  //   });
-  //   return chats;
-  // }
 
   @override
   List<Object?> get props => [chats, messagesDictionary, error, isError];
 }
-
-// class ChatsBuilderInProgressState extends ChatsBuilderState{
-//   ChatsBuilderInProgressState({required List<ChatsData> chats,
-//     required int counter, required Map<String, bool> messagesDictionary,
-//     required AppErrorException? error, required bool isError}) :
-//         super(chats: chats, messagesDictionary: messagesDictionary,
-//           error: error, isError: isError
-//       );
-// }

@@ -1,12 +1,9 @@
 import 'package:chat/models/dialog_model.dart';
-import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../bloc/dialogs_bloc/dialogs_event.dart';
 import '../../../models/contact_model.dart';
 import '../../../services/dialogs/dialogs_api_provider.dart';
+import '../../widgets/avatar_widget.dart';
 import '../../widgets/search_widget.dart';
 
 class AddingUserToGroupChatPage extends StatefulWidget {
@@ -64,6 +61,7 @@ class _AddingUserToGroupChatPageState extends State<AddingUserToGroupChatPage> {
     return Scaffold(
       body: Column(
         children: [
+          SizedBox(height: 50,),
           Padding(
               padding:
               const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
@@ -87,18 +85,7 @@ class _AddingUserToGroupChatPageState extends State<AddingUserToGroupChatPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: Colors.grey,
-                            child: Padding(
-                              padding: const EdgeInsets.all(4), // Border radius
-                              child: ClipOval(
-                                  child: false
-                                      ? Image.network("")
-                                      : Image.asset('assets/images/no_avatar.png')
-                              ),
-                            ),
-                          ),
+                          UserAvatarWidget(userId: users[index].id, size: 20),
                           const SizedBox(width: 20,),
                           Expanded(
                             child: Container(
@@ -110,7 +97,7 @@ class _AddingUserToGroupChatPageState extends State<AddingUserToGroupChatPage> {
                                           : BorderSide(width: 1, color: Colors.black26)
                                   )
                               ),
-                              child: Text("${users[index].firstname} ${users[index].lastname}",
+                              child: Text("${users[index].lastname} ${users[index].firstname} ",
                                 style: TextStyle(fontSize: 20),
                               ),
                             ),

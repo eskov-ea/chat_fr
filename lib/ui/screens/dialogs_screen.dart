@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:chat/helpers.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/theme.dart';
+import 'package:chat/ui/widgets/dialog_avatar_widget.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit_state.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +43,6 @@ class _MessagesPageState extends State<MessagesPage> {
         onlineMembers = state.onlineUsersDictionary;
         counter++;
       });
-      print("onlineMembers    ${onlineMembers}");
     });
     super.initState();
   }
@@ -71,26 +71,27 @@ class _MessagesPageState extends State<MessagesPage> {
       body: BlocBuilder<DialogsViewCubit, DialogsViewCubitState>(
         builder: (context, state) {
           if (state is DialogsLoadedViewCubitState && userId != null) {
-            if (state.isError) return Container(
+            if (state.isError) {
+              return Container(
               width: MediaQuery.of(context).size.width,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text("Произошла ошибка при загрузке диалогов"),
-                  SizedBox(height: 20,),
+                  const Text("Произошла ошибка при загрузке диалогов"),
+                  const SizedBox(height: 20,),
                   ElevatedButton(
                     onPressed: (){refreshAllData(context);},
-                    child: Text("Обновить")
+                    child: const Text("Обновить")
                   )
                 ],
               ),
             );
+            }
             if (state.dialogs.isEmpty) {
               return const Center(child: Text("Нет диалогов"),);
             } else{
               return RefreshIndicator(
                 onRefresh: () async {
-                  print("we refresh it here");
                   refreshAllData(context);
                 },
                 child: CustomScrollView(
@@ -119,6 +120,7 @@ class _MessagesPageState extends State<MessagesPage> {
                                       description: state.dialogs[index].description,
                                       chatUsers: state.dialogs[index].chatUsers,
                                       messageCount: state.dialogs[index].messageCount,
+                                      picture: state.dialogs[index].picture,
                                       createdAt: state.dialogs[index].createdAt
                                     ),
                                   ),
@@ -134,7 +136,16 @@ class _MessagesPageState extends State<MessagesPage> {
           }
           else {
             _readUserId();
-            return const Shimmer(child: ShimmerLoading(child: DialogsSkeletonWidget()));
+            return RefreshIndicator(
+              onRefresh: () async {
+                refreshAllData(context);
+              },
+              child: const Shimmer(
+                child: ShimmerLoading(
+                  child: DialogsSkeletonWidget()
+                )
+              )
+            );
           }
         }),
     );
@@ -160,7 +171,7 @@ class _DialogItem extends StatelessWidget {
     if (data.chatType.p2p == 1) {
       for (var i = 0; i < data.usersList.length; i++)  {
         if (data.usersList[i].id != userId) {
-          return "${data.usersList[i].firstname} ${data.usersList[i].lastname}";
+          return "${data.usersList[i].lastname} ${data.usersList[i].firstname}";
         }
       }
     } else {
@@ -191,6 +202,14 @@ class _DialogItem extends StatelessWidget {
     }
   }
 
+  Widget _setDialogAvatar({required DialogData dialogData, required List<UserContact> partners}) {
+    if (dialogData.chatType.name == "Приват" || dialogData.chatType.name == "Приват безопасный") {
+      return UserAvatarWidget(userId: partners.first.id);
+    } else {
+      return DialogAvatar(base64String: dialogData.picture,);
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -207,8 +226,8 @@ class _DialogItem extends StatelessWidget {
             partnerId: partners.first.id,
             dialogData: dialogData,
             username: userId == dialogData.usersList.first.id
-                ? "${dialogData.usersList.last.firstname} ${dialogData.usersList.last.lastname}"
-                : "${dialogData.usersList.first.firstname} ${dialogData.usersList.first.lastname}"
+                ? "${dialogData.usersList.last.lastname} ${dialogData.usersList.last.firstname}"
+                : "${dialogData.usersList.first.lastname} ${dialogData.usersList.first.firstname}"
         );
       },
       child: Container(
@@ -228,9 +247,7 @@ class _DialogItem extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 12.0),
               child: Center(
-                child: dialogData.chatType.p2p == 1
-                    ? AvatarWidget(userId: partners.first.id)
-                    : AvatarWidget(userId: null)
+                child: _setDialogAvatar(dialogData: dialogData, partners: partners)
               )
             ),
             Expanded(

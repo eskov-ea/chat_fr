@@ -1,8 +1,12 @@
-package com.example.MCFEF
+package com.cashalot.MCFEF
 
 
 import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
+import android.os.Build
+import android.widget.Toast
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import io.flutter.Log
@@ -15,14 +19,19 @@ class MyFirebaseMessaging: FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
 
-        Log.d("MyFirebaseMessaging", "[Push] RECEIVED")
+//        Toast.makeText(this, "[Push] RECEIVED Firebase", Toast.LENGTH_SHORT).show()
+        Log.v("MyFirebaseMessaging. We got PUSH", "${message.messageId} ; ${message.notification}")
 
         if (!message.data.isEmpty()) {
             val intent = Intent()
             intent.action = "org.linphone.core.action.PUSH_RECEIVED"
 
             val pm = packageManager
-            val matches = pm.queryBroadcastReceivers(intent, 0)
+            val matches: List<ResolveInfo> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                pm.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(PackageManager.MATCH_ALL.toLong()))
+            } else {
+                pm.queryBroadcastReceivers(intent, 0)
+            }
 
             for (resolveInfo in matches) {
                 val packageName = resolveInfo.activityInfo.applicationInfo.packageName

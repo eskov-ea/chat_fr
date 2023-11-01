@@ -16,9 +16,7 @@ import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../services/global.dart';
 import '../../services/helpers/message_sender_helper.dart';
-import '../../services/messages/messages_repository.dart';
 import '../../theme.dart';
-import '../../view_models/dialogs_page/dialogs_view_cubit.dart';
 import '../navigation/main_navigation.dart';
 import 'audioplayer_widget.dart';
 
@@ -93,8 +91,6 @@ class _MessageWidgetState extends State<MessageWidget>  with SingleTickerProvide
     if (widget.file != null && !kIsWeb){
       localFileAttachment = await isLocalFileExist(fileName: widget.file!.name);
       if (localFileAttachment != null) setState(() {});
-      print("Check if file exists -->  $localFileAttachment");
-      print("Check if file exists  w filename-->  ${widget.file!.name}");
     }
   }
 
@@ -431,12 +427,8 @@ class _MessageTile extends StatelessWidget {
                                     child: SelectableLinkify (
                                       onOpen: (link) => _launchUrl(Uri.tryParse(link.url)),
                                       text: message,
-                                      style: isMe
-                                          ? const TextStyle(color: Colors.black, fontSize: 16)
-                                          : const TextStyle(color: Colors.black, fontSize: 16),
-                                      linkStyle: isMe
-                                          ? const TextStyle(color: Colors.white, fontSize: 16)
-                                          : const TextStyle(color: Colors.blueAccent, fontSize: 16),
+                                      style: const TextStyle(color: Colors.black, fontSize: 16),
+                                      linkStyle: const TextStyle(color: Colors.blueAccent, fontSize: 16),
                                     )
                                   ),
                                   Row(

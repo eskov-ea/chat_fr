@@ -1,4 +1,4 @@
-package com.example.MCFEF.calls_manager
+package com.cashalot.MCFEF.calls_manager
 
 import android.app.Service
 import android.content.Context
@@ -10,6 +10,7 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.*
 import android.text.TextUtils
+import android.util.Log
 
 class CallsSoundPlayerService: Service() {
 
@@ -27,6 +28,7 @@ class CallsSoundPlayerService: Service() {
         this.prepare()
         this.playSound(intent)
         this.playVibrator()
+        Log.v("SOUNDPLAYER_SERVICE", intent.toString())
         return Service.START_STICKY;
     }
 

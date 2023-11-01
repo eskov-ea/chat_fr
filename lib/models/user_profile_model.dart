@@ -35,8 +35,8 @@ class UserProfileData extends Equatable{
 
   static UserProfileData fromJson(json) => UserProfileData(
           id: json['user']['id'],
-          firstname: json['user']['staff']['firstname'],
-          lastname: json['user']['staff']['lastname'],
+          firstname: json['user']['staff']['firstname'] ?? "",
+          lastname: json['user']['staff']['lastname'] ?? "",
           middlename: json['user']['staff']['middlename'] ?? "",
           company: json['user']['staff']['company'] ?? "",
           position: json['user']['staff']['position'] ?? "",
@@ -92,7 +92,6 @@ class UserProfileAsteriskSettings extends Equatable{
   });
 
   static UserProfileAsteriskSettings? fromJson(json) {
-    print("UserProfileAsteriskSettings    $json");
     return json == null
         ? null
         : UserProfileAsteriskSettings(
@@ -115,10 +114,14 @@ class UserProfileAsteriskSettings extends Equatable{
 }
 class AppSettings extends Equatable{
   final String? version;
+  final String? versionIos;
+  final String? versionAndroid;
   final String downloadUrlAndroid;
 
   const AppSettings({
     required this.version,
+    required this.versionIos,
+    required this.versionAndroid,
     required this.downloadUrlAndroid
   });
 
@@ -127,12 +130,14 @@ class AppSettings extends Equatable{
         ? null
         : AppSettings(
           version: json['app']["version"],
+          versionAndroid: json['app']["version_android"],
+          versionIos: json['app']["version_ios"],
           downloadUrlAndroid: json['app']["download_url_android"]
         );
   }
 
   @override
-  List<Object?> get props => [version, downloadUrlAndroid];
+  List<Object?> get props => [version, versionAndroid, versionIos, downloadUrlAndroid];
 
 }
 class ChatSettings extends Equatable{
