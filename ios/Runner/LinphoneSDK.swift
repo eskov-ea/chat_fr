@@ -88,13 +88,13 @@ class LinphoneSDK : ObservableObject
                         }
                     }
                     self.remoteAddress = call.remoteAddress!.asStringUriOnly()
-                } else if (state == .Connected) { // When a call is over
-                    let payload = makeEventPayload(event: "CONNECTED", callerId: call.remoteAddress?.username, callData: nil)
-                    self.eventSink?(payload)
+                } else if (state == .Connected) { // When a call
                     self.isCallRunning = true
+                    let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
+                    let payload = makeEventPayload(event: "CONNECTED", callerId: call.remoteAddress?.username, callData: callData)
+                    self.eventSink?(payload)
                 } else if ( state == .Released ) {
-                    let callStatus: String  = (call.callLog?.status.rawValue == 0) ? "ANSWERED" : "NO ANSWER"
-                    let callData = CallData(duration: call.callLog?.duration.description, disposition: callStatus, dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId   )
+                    let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId   )
                         print("CALL_STATUS  \(callData)")
                     let payload = makeEventPayload(event: "RELEASED", callerId: call.remoteAddress?.username, callData: callData)
                     print("CALL_ENDED IOS  \(callData)")
@@ -103,27 +103,30 @@ class LinphoneSDK : ObservableObject
                         self.mProviderDelegate.stopCall()
                     }
                     self.remoteAddress = "Nobody yet"
+                } else if (state == .End) {
+                    let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
+                    let payload = makeEventPayload(event: "ENDED", callerId: call.remoteAddress?.username, callData: callData)
+                    self.eventSink?(payload)
                 } else if (state == .Error) {
-                    print("ERROR CALL")
-                    let payload = makeEventPayload(event: "ERROR", callerId: call.remoteAddress?.username, callData: nil)
+                    let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
+                    let payload = makeEventPayload(event: "ERROR", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                     self.mProviderDelegate.stopCall()
                 }  else if (state == .OutgoingInit) {
-                    print("OUTGOING INIT CALL")
-                    let payload = makeEventPayload(event: "OUTGOING", callerId: call.remoteAddress?.username, callData: nil)
+                    let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
+                    let payload = makeEventPayload(event: "OUTGOING", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
-//                    self.incomingCallName = call.toAddress?.username ?? "Unknown"
-//                    self.mProviderDelegate.outgoingCall()
                 } else if (state == .OutgoingProgress) {
                     print("Call.State  ->  \(state)")
                     // Right after outgoing init
                 } else if (state == .OutgoingRinging) {
-                    print("Call.State  ->  \(state)")
                     self.isCallRunning = true
-                    // This state will be reached upon reception of the 180 RINGING
+                    let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
+                    let payload = makeEventPayload(event: "OUTGOING_RINGING", callerId: call.remoteAddress?.username, callData: callData)
+                    self.eventSink?(payload)
                 } else if (state == .StreamsRunning) {
-                    print("Call.State  ->  \(state)")
-                    let payload = makeEventPayload(event: "STREAM_RUNNING", callerId: nil, callData: nil)
+                    let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
+                    let payload = makeEventPayload(event: "STREAM_RUNNING", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                     // This state indicates the call is active.
                     // You may reach this state multiple times, for example after a pause/resume
@@ -133,7 +136,7 @@ class LinphoneSDK : ObservableObject
                     
                     // Only enable toggle camera button if there is more than 1 camera
                     // We check if core.videoDevicesList.size > 2 because of the fake camera with static image created by our SDK (see below)
-                    self.canChangeCamera = core.videoDevicesList.count > 2
+//                    self.canChangeCamera = core.videoDevicesList.count > 2
                 } else if (state == .Paused) {
                     // When you put a call in pause, it will became Paused
                     self.canChangeCamera = false
@@ -359,6 +362,26 @@ class LinphoneSDK : ObservableObject
             }
             return false
         }
+    
+    func getCallStatus(code: Int?) -> String {
+        if (code == 0) {
+            return "ANSWERED"
+        } else if (code == 1) {
+            return "DECLINED"
+        } else if (code == 2) {
+            return "NO ANSWER"
+        } else if (code == 3) {
+            return "DECLINED"
+        } else if (code == 4) {
+            return "NO ANSWER"
+        } else if (code == 5) {
+            return "ANSWERED"
+        } else if (code == 6) {
+            return "DECLINED"
+        } else {
+            return "ANSWERED"
+        }
+    }
 }
 
 func makeEventPayload(event: String, callerId: String?, callData: CallData?) -> String? {

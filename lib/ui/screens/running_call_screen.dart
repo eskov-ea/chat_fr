@@ -97,6 +97,13 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
         isCallingOutgoing = true;
         isCallInProgress = false;
       });
+    } else if (state is OutgoingRingingCallState) {
+      setUsername(state.callData.toCaller);
+      setState(() {
+        isCallingIncoming = false;
+        isCallingOutgoing = true;
+        isCallInProgress = false;
+      });
     }
   }
 

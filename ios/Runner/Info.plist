@@ -19,13 +19,15 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.13</string>
+	<string>1.0.17</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.3</string>
+	<string>1.0.6</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Доступ к музыкальной библиотеке дает возможность воспроизведения музыкальных композиций</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_dartobservatory._tcp</string>
@@ -38,11 +40,10 @@
 	<string>Доступ к галерее необходим при отправке медиафайлов другим пользователям и возмозможности сохренения медиафайлов, полученных от других пользователей</string>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>Уведомления могут содержать напоминания, звуки и наклейки значков. Их конфигурирование возможно в Настройках.</string>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>Доступ к музыкальной библиотеке дает возможность воспроизведения музыкальных композиций</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
+		<string>location</string>
 		<string>remote-notification</string>
 		<string>voip</string>
 	</array>

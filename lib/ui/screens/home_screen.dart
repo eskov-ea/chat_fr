@@ -239,8 +239,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _openCallScreen() {
+    print("_openCallScreen()");
     final CallState state = BlocProvider.of<CallsBloc>(context).state;
-    if (Platform.isIOS && state is OutgoingCallState || !Platform.isIOS) {
+    if (Platform.isIOS && state is! IncomingCallState || !Platform.isIOS) {
       Navigator.of(context).pushNamed(
         MainNavigationRouteNames.runningCallScreen,
         arguments: CallScreenArguments(userId: userId)
