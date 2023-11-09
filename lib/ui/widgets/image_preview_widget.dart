@@ -201,7 +201,7 @@ Widget? getImagePreview({
                 ? Image.memory(
               fileBytesRepresentation!,
               width: 186,
-              height: 232,
+              height: 202,
               fit: BoxFit.cover,
             )
                 : Image.file(
@@ -251,9 +251,9 @@ Widget? getImagePreview({
         children: [
           file.preview != ""
               ? Image.memory(base64Decode(file.preview!),
-                  height: 232, width: 186, fit: BoxFit.cover)
+                  height: 202, width: 186, fit: BoxFit.cover)
               : Image.asset("assets/blured_img_icon.jpg",
-                  height: 232, width: 186, fit: BoxFit.cover),
+                  height: 202, width: 186, fit: BoxFit.cover),
           isDownloading
               ? Container(
                   width: 65,

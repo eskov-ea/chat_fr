@@ -37,15 +37,12 @@ class _AuthScreenState extends State<AuthScreen> {
   bool flag = true;
 
   Future<void> _checkDeviceToken() async {
-    // if ( await _dataProvider.getDeviceID() != null) return;
     try {
-      //TODO: refactor with safe bool getters
       try{
         os = Platform.operatingSystem;
       } catch (e) {
         os = "Browser";
       }
-      print('requesting token');
       if (!kIsWeb) {
         deviceToken = await methodChannel.invokeMethod('getDeviceToken');
         _dataProvider.setDeviceID(deviceToken);
@@ -168,9 +165,9 @@ class _AuthScreenState extends State<AuthScreen> {
           onTap: (){
             Navigator.of(context).pushNamed(MainNavigationRouteNames.resetPasswordScreen);
           },
-          child: Container(
+          child: SizedBox(
             width: MediaQuery.of(context).size.width,
-            child: Text(
+            child: const Text(
               'Забыли пароль?',
               textAlign: TextAlign.left,
               style: TextStyle(
@@ -180,7 +177,7 @@ class _AuthScreenState extends State<AuthScreen> {
             ),
           ),
         ),
-        SizedBox(height: 20,),
+        const SizedBox(height: 20,),
         ElevatedButton(
           child: cubit.state is AuthViewCubitAuthProgressState
             ? const SizedBox(
@@ -198,8 +195,8 @@ class _AuthScreenState extends State<AuthScreen> {
           ),
           onPressed: () {
             FocusManager.instance.primaryFocus?.unfocus();
-            _login(_loginTextFieldController.text,
-              _passwordTextFieldController.text, context,
+            _login(_loginTextFieldController.text.trim(),
+              _passwordTextFieldController.text.trim(), context,
               os, deviceToken
             );
           },

@@ -201,8 +201,7 @@ class ActionBarState extends State<ActionBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(bottom: 20.0),
-      height: 88,
+      padding: const EdgeInsets.only(bottom: 0.0),
       color: AppColors.backgroundLight,
       child: widget.isSelectedMode
           ? _actionBarMessagesFunctions()
@@ -221,12 +220,7 @@ class ActionBarState extends State<ActionBar> {
                     padding: const EdgeInsets.only(left: 16.0, right: 3.0),
                     child: GestureDetector(
                       onTap: (){
-                        // TODO: implement taking/ sending pictures/ files functionality
                         openCameraOptions(createDialogAndSendMessage);
-                        final dia = BlocProvider.of<ChatsBuilderBloc>(context).state.chats.firstWhere((chat) => chat.chatId == widget.dialogId);
-                        print(" ${dia.messages[0].messageId} ${dia.messages[0].message} ${dia.messages[0].file?.attachmentId } ");
-                        print(" ${dia.messages[1].messageId} ${dia.messages[1].message} ${dia.messages[1].file?.attachmentId }");
-                        print(" ${dia.messages[2].messageId} ${dia.messages[2].message} ${dia.messages[2].file?.attachmentId }");
                       },
                       child: widget.isRecording
                         ? Text(
@@ -243,7 +237,7 @@ class ActionBarState extends State<ActionBar> {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8.0, top: 10.0, bottom:  10.0),
                     child: TextFormField(
-                      maxLines: 10,
+                      maxLines: 5,
                       minLines: 1,
                       textCapitalization: TextCapitalization.sentences,
                       focusNode: widget.focusNode,
@@ -261,7 +255,7 @@ class ActionBarState extends State<ActionBar> {
                       },
                       style: const TextStyle(fontSize: 16, color: LightColors.mainText),
                       decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.symmetric(vertical: 0.0, horizontal: 10.0),
+                        contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
                         filled: true,
                         fillColor: Colors.white,
                         enabledBorder: OutlineInputBorder(

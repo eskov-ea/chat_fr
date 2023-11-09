@@ -328,7 +328,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                     ),
                     if (replyMessage != null) _ReplyMessageBar(replyMessage: replyMessage!, cancelReplyMessage: cancelReplyMessage, senderName: senderReplyName!,),
-                    isUserAllowedToWrite(widget.dialogData!, widget.userId)
+                    isUserAllowedToWrite(widget.dialogData, widget.userId)
                       ? ActionBar(userId: widget.userId, partnerId: widget.partnerId, dialogId: widget.dialogData?.dialogId,
                           setDialogData: setDialogData, rootWidget: widget, username: widget.username,
                           focusNode: focusNode, setRecording: setRecording, isRecording: isRecording, dialogData: widget.dialogData,
@@ -648,7 +648,8 @@ Widget ReadOnlyChannelMode(BuildContext context) {
   );
 }
 
-bool isUserAllowedToWrite(DialogData dialogData, int userId) {
+bool isUserAllowedToWrite(DialogData? dialogData, int userId) {
+  if(dialogData == null) return true;
   if (dialogData.chatType.typeName != "Групповой для чтения") {
     return true;
   } else {

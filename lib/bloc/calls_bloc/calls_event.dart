@@ -5,31 +5,45 @@ import '../../models/call_model.dart';
 abstract class CallsEvent{}
 
 class IncomingCallEvent extends CallsEvent {
-  final String callerId;
+  final CallModel callData;
 
-  IncomingCallEvent({required this.callerId});
+  IncomingCallEvent({required this.callData});
 }
 
 class MissedCallEvent extends CallsEvent {}
 
-class ConnectedCallEvent extends CallsEvent {}
+class ConnectedCallEvent extends CallsEvent {
+  final CallModel callData;
 
-class StreamRunningCallEvent extends CallsEvent {}
+  ConnectedCallEvent({required this.callData});
+}
+
+class StreamRunningCallEvent extends CallsEvent {
+  final CallModel callData;
+
+  StreamRunningCallEvent({required this.callData});
+}
 
 class StreamStopCallEvent extends CallsEvent {}
 
 class ConnectionFailedCallEvent extends CallsEvent {}
 
 class OutgoingCallEvent extends CallsEvent {
-  final String callerId;
+  final CallModel callData;
 
-  OutgoingCallEvent({required this.callerId});
+  OutgoingCallEvent({required this.callData});
+}
+
+class OutgoingRingingCallEvent extends CallsEvent {
+  final CallModel callData;
+
+  OutgoingRingingCallEvent({required this.callData});
 }
 
 class ErrorCallEvent extends CallsEvent {
-  final String callerId;
+  final CallModel callData;
 
-  ErrorCallEvent({required this.callerId});
+  ErrorCallEvent({required this.callData});
 }
 
 class ConnectingCallServiceEvent extends CallsEvent {}

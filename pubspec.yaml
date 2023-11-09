@@ -77,4 +77,6 @@ flutter:
    - assets/file_icon_2.png
    - assets/download_icon.png
    - assets/blured_img_icon.jpg
+   - assets/sounds/connecting_sound.mp3
+   - assets/sounds/error_call_sound.mp3
 

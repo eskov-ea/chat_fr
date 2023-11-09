@@ -84,20 +84,20 @@ class MainNavigation {
           settings: const RouteSettings(name: name),
           builder: (BuildContext context) => _screenFactory.makeRunningCallScreen(arguments)
         );
-      case MainNavigationRouteNames.incomingCallScreen:
-        final arguments = settings.arguments as CallScreenArguments;
-        const String name = MainNavigationRouteNames.incomingCallScreen;
-        return MaterialPageRoute(
-            settings: const RouteSettings(name: name),
-            builder: (BuildContext context) => _screenFactory.makeIncomingCallScreen(arguments)
-        );
-      case MainNavigationRouteNames.outgoingCallScreen:
-        final arguments = settings.arguments as CallScreenArguments;
-        const String name = MainNavigationRouteNames.outgoingCallScreen;
-        return MaterialPageRoute(
-            settings: const RouteSettings(name: name),
-            builder: (BuildContext context) => _screenFactory.makeOutgoingCallScreen(arguments)
-        );
+      // case MainNavigationRouteNames.incomingCallScreen:
+      //   final arguments = settings.arguments as CallScreenArguments;
+      //   const String name = MainNavigationRouteNames.incomingCallScreen;
+      //   return MaterialPageRoute(
+      //       settings: const RouteSettings(name: name),
+      //       builder: (BuildContext context) => _screenFactory.makeIncomingCallScreen(arguments)
+      //   );
+      // case MainNavigationRouteNames.outgoingCallScreen:
+      //   final arguments = settings.arguments as CallScreenArguments;
+      //   const String name = MainNavigationRouteNames.outgoingCallScreen;
+      //   return MaterialPageRoute(
+      //       settings: const RouteSettings(name: name),
+      //       builder: (BuildContext context) => _screenFactory.makeOutgoingCallScreen(arguments)
+      //   );
       case MainNavigationRouteNames.pdfViewPage:
         final arguments = settings.arguments as AttachmentViewPageArguments;
         const String name = MainNavigationRouteNames.pdfViewPage;

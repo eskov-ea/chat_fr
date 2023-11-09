@@ -14,7 +14,8 @@ class CoreContext (val context: Context) {
 
     private fun createCore() {
         val factory = Factory.instance()
-        factory.setDebugMode(true, "Hello Linphone")
+        factory.setDebugMode(false, "Hello Linphone")
+        factory.enableLogcatLogs(false)
         factory.enableLogcatLogs(true)
         core = factory.createCore(null, null, context)
         core!!.isPushNotificationEnabled = true

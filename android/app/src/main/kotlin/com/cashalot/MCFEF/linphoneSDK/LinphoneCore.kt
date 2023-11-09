@@ -171,6 +171,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
             message: String
         ) {
             Log.i("onCallStateChanged", state.toString())
+            Log.i("LINPHONE_CALL", call.remoteAddress.username.toString())
             // When a call is received
             when (state) {
                 Call.State.IncomingReceived -> {
@@ -193,7 +194,22 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                             data
                         )
                     )
-                    val callArgs = makePlatformEventPayload("INCOMING", call.remoteAddress.username, null)
+                    val callStatus: String = when (call.callLog.status.name) {
+                        "Success" -> "ANSWERED"
+                        "Aborted" -> "DECLINED"
+                        "Missed" -> "NO ANSWER"
+                        "Declined" -> "DECLINED"
+                        "EarlyAborted" -> "NO ANSWER"
+                        "AcceptedElsewhere" -> "ANSWERED"
+                        "DeclinedElsewhere" -> "DECLINED"
+                        else -> "ERRORED"
+                    }
+                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
+                        callStatus = callStatus,
+                        fromCaller = call.callLog.fromAddress.username,
+                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
+                        callId = call.callLog.callId)
+                    val callArgs = makePlatformEventPayload("INCOMING", call.remoteAddress.username, callData)
 
                     MainActivity.callServiceEventSink?.success(callArgs)
 
@@ -205,7 +221,22 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     } else {
                         call.remoteAddress.username.toString()
                     }
-                    val args = makePlatformEventPayload("CONNECTED", call.remoteAddress.username, null)
+                    val callStatus: String = when (call.callLog.status.name) {
+                        "Success" -> "ANSWERED"
+                        "Aborted" -> "DECLINED"
+                        "Missed" -> "NO ANSWER"
+                        "Declined" -> "DECLINED"
+                        "EarlyAborted" -> "NO ANSWER"
+                        "AcceptedElsewhere" -> "ANSWERED"
+                        "DeclinedElsewhere" -> "DECLINED"
+                        else -> "ERRORED"
+                    }
+                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
+                        callStatus = callStatus,
+                        fromCaller = call.callLog.fromAddress.username,
+                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
+                        callId = call.callLog.callId)
+                    val args = makePlatformEventPayload("CONNECTED", call.remoteAddress.username, callData)
 
                     MainActivity.callServiceEventSink?.success(args)
 
@@ -241,12 +272,23 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                                     data
                             )
                     )
+
+                    val callStatus: String = when (call.callLog.status.name) {
+                        "Success" -> "ANSWERED"
+                        "Aborted" -> "DECLINED"
+                        "Missed" -> "NO ANSWER"
+                        "Declined" -> "DECLINED"
+                        "EarlyAborted" -> "NO ANSWER"
+                        "AcceptedElsewhere" -> "ANSWERED"
+                        "DeclinedElsewhere" -> "DECLINED"
+                        else -> "ERRORED"
+                    }
                     val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
-                            callStatus = if (call.callLog.status.name == "Success")  "ANSWERED" else "NO ANSWER",
+                            callStatus = callStatus,
                             fromCaller = call.callLog.fromAddress.username,
                             toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
                             callId = call.callLog.callId)
-                    val args = makePlatformEventPayload("ENDED", null, null)
+                    val args = makePlatformEventPayload("ENDED", null, callData)
 
                     MainActivity.callServiceEventSink?.success(args)
                 }
@@ -258,7 +300,22 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     } else {
                         call.remoteAddress.username.toString()
                     }
-                    val args = makePlatformEventPayload("OUTGOING", call.remoteAddress.username, null)
+                    val callStatus: String = when (call.callLog.status.name) {
+                        "Success" -> "ANSWERED"
+                        "Aborted" -> "DECLINED"
+                        "Missed" -> "NO ANSWER"
+                        "Declined" -> "DECLINED"
+                        "EarlyAborted" -> "NO ANSWER"
+                        "AcceptedElsewhere" -> "ANSWERED"
+                        "DeclinedElsewhere" -> "DECLINED"
+                        else -> "ERRORED"
+                    }
+                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
+                        callStatus = callStatus,
+                        fromCaller = call.callLog.fromAddress.username,
+                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
+                        callId = call.callLog.callId)
+                    val args = makePlatformEventPayload("OUTGOING", call.remoteAddress.username, callData)
 
                     MainActivity.callServiceEventSink?.success(args)
                 }
@@ -267,6 +324,24 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                 }
                 Call.State.OutgoingRinging -> {
                     Log.w("OUTGOING_CALL", "OutgoingRinging")
+                    val callStatus: String = when (call.callLog.status.name) {
+                        "Success" -> "ANSWERED"
+                        "Aborted" -> "DECLINED"
+                        "Missed" -> "NO ANSWER"
+                        "Declined" -> "DECLINED"
+                        "EarlyAborted" -> "NO ANSWER"
+                        "AcceptedElsewhere" -> "ANSWERED"
+                        "DeclinedElsewhere" -> "DECLINED"
+                        else -> "ERRORED"
+                    }
+                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
+                        callStatus = callStatus,
+                        fromCaller = call.callLog.fromAddress.username,
+                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
+                        callId = call.callLog.callId)
+                    val args = makePlatformEventPayload("OUTGOING_RINGING", call.remoteAddress.username, callData)
+
+                    MainActivity.callServiceEventSink?.success(args)
                 }
                 Call.State.PushIncomingReceived -> {
 
@@ -280,7 +355,23 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                 Call.State.StreamsRunning -> {
                     Log.w("ACTIVE_CALL", "StreamsRunning")
 
-                    val args = makePlatformEventPayload("STREAM_RUNNING", null, null)
+                    val callStatus: String = when (call.callLog.status.name) {
+                        "Success" -> "ANSWERED"
+                        "Aborted" -> "DECLINED"
+                        "Missed" -> "NO ANSWER"
+                        "Declined" -> "DECLINED"
+                        "EarlyAborted" -> "NO ANSWER"
+                        "AcceptedElsewhere" -> "ANSWERED"
+                        "DeclinedElsewhere" -> "DECLINED"
+                        else -> "ERRORED"
+                    }
+                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
+                        callStatus = callStatus,
+                        fromCaller = call.callLog.fromAddress.username,
+                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
+                        callId = call.callLog.callId)
+
+                    val args = makePlatformEventPayload("STREAM_RUNNING", null, callData)
 
                     MainActivity.callServiceEventSink?.success(args)
                 }
@@ -302,7 +393,25 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     } else {
                         call.remoteAddress.username.toString()
                     }
-                    val args = makePlatformEventPayload("ERROR", call.remoteAddress.username, null)
+                    Log.v("CALLS FIND ERROR", call.remoteAddress.username.toString())
+
+                    val callStatus: String = when (call.callLog.status.name) {
+                        "Success" -> "ANSWERED"
+                        "Aborted" -> "DECLINED"
+                        "Missed" -> "NO ANSWER"
+                        "Declined" -> "DECLINED"
+                        "EarlyAborted" -> "NO ANSWER"
+                        "AcceptedElsewhere" -> "ANSWERED"
+                        "DeclinedElsewhere" -> "DECLINED"
+                        else -> "ERRORED"
+                    }
+                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
+                        callStatus = callStatus,
+                        fromCaller = call.callLog.fromAddress.username,
+                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
+                        callId = call.callLog.callId)
+
+                    val args = makePlatformEventPayload("ERROR", call.remoteAddress.username, callData)
 
                     MainActivity.callServiceEventSink?.success(args)
                 }
@@ -319,6 +428,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
                 }
                 Call.State.Released -> {
+                    Log.w("ACTIVE_CALL", "Released   ${call.remoteAddress.username}")
                     val caller = if(call.remoteAddress.displayName != null) {
                         call.remoteAddress.displayName!!
                     } else {
@@ -336,11 +446,22 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                             data
                         )
                     )
+                    val callStatus: String = when (call.callLog.status.name) {
+                        "Success" -> "ANSWERED"
+                        "Aborted" -> "DECLINED"
+                        "Missed" -> "NO ANSWER"
+                        "Declined" -> "DECLINED"
+                        "EarlyAborted" -> "NO ANSWER"
+                        "AcceptedElsewhere" -> "ANSWERED"
+                        "DeclinedElsewhere" -> "DECLINED"
+                        else -> "ERRORED"
+                    }
                     val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
-                        callStatus = if (call.callLog.status.name == "Success")  "ANSWERED" else "NO ANSWER",
+                        callStatus = callStatus,
                         fromCaller = call.callLog.fromAddress.username,
                         toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
                         callId = call.callLog.callId)
+
                     val args = makePlatformEventPayload("RELEASED", call.remoteAddress.username, callData)
 
                     MainActivity.callServiceEventSink?.success(args)

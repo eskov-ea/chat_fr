@@ -1,6 +1,8 @@
+import 'package:equatable/equatable.dart';
 import '../../models/call_model.dart';
 
-abstract class CallState  {
+
+abstract class CallState extends Equatable {
   const CallState();
 
 }
@@ -8,140 +10,99 @@ abstract class CallState  {
 class UnconnectedCallServiceState extends CallState{
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is UnconnectedCallServiceState &&
-              runtimeType == other.runtimeType;
-
-  @override
-  int get hashCode => runtimeType.hashCode;
+  List<Object?> get props => [runtimeType];
 }
 
 class ConnectedCallServiceState extends CallState{
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is ConnectedCallServiceState &&
-              runtimeType == other.runtimeType;
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  List<Object?> get props => [runtimeType];
 }
 
 class EndedCallState extends CallState{
   final CallModel callData;
 
-  EndedCallState({
+  const EndedCallState({
     required this.callData
   });
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is EndedCallState &&
-              callData.id == other.callData.id &&
-              runtimeType == other.runtimeType;
-
-  @override
-  int get hashCode => callData.hashCode;
+  List<Object?> get props => [runtimeType, callData];
 }
 
 class OutgoingCallState extends CallState{
-  final String callerName;
+  final CallModel callData;
 
-  OutgoingCallState({required this.callerName});
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is IncomingCallState &&
-              callerName == other.callerName &&
-              runtimeType == other.runtimeType;
+  const OutgoingCallState({required this.callData});
 
   @override
-  int get hashCode => callerName.hashCode;
+  List<Object?> get props => [runtimeType, callData];
+
+}
+
+class OutgoingRingingCallState extends CallState{
+  final CallModel callData;
+
+  const OutgoingRingingCallState({required this.callData});
+
+  @override
+  List<Object?> get props => [runtimeType, callData];
+
 }
 
 class IncomingCallState extends CallState {
 
-  final String callerName;
+  final CallModel callData;
 
   const IncomingCallState({
-    required this.callerName
+    required this.callData
   });
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is IncomingCallState &&
-              callerName == other.callerName &&
-              runtimeType == other.runtimeType;
+  List<Object?> get props => [runtimeType, callData];
 
-  @override
-  int get hashCode => callerName.hashCode;
-}
-
-class ErrorCallState extends CallState{
-  final String callerName;
-
-  ErrorCallState({required this.callerName});
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is IncomingCallState &&
-              callerName == other.callerName &&
-              runtimeType == other.runtimeType;
-
-  @override
-  int get hashCode => callerName.hashCode;
 }
 
 class ConnectedCallState extends CallState{
+  final CallModel callData;
+  const ConnectedCallState({required this.callData});
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is ConnectedCallState &&
-              runtimeType == other.runtimeType;
+  List<Object?> get props => [runtimeType,callData];
+}
+
+class ErrorCallState extends CallState{
+  final CallModel callData;
+  const ErrorCallState({required this.callData});
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  List<Object?> get props => [runtimeType,callData];
 }
 
 class StreamRunningCallState extends CallState{
+  final CallModel callData;
+
+
+  const StreamRunningCallState({required this.callData});
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is StreamRunningCallState &&
-              runtimeType == other.runtimeType;
-
-  @override
-  int get hashCode => runtimeType.hashCode;
+  List<Object?> get props => [runtimeType];
 }
 
 class StreamStopCallState extends CallState{
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is StreamStopCallState &&
-              runtimeType == other.runtimeType;
+  const StreamStopCallState();
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  List<Object?> get props => [runtimeType];
 }
 
 class EndCallWithNoLogState extends CallState{
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is EndCallWithNoLogState &&
-              runtimeType == other.runtimeType;
+  const EndCallWithNoLogState();
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  List<Object?> get props => [runtimeType];
+
 }

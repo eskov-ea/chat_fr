@@ -1,6 +1,5 @@
 import '../services/global.dart';
 
-const time_zone = 10;
 
 class CallModel {
   final String date;
@@ -38,10 +37,39 @@ class CallModel {
     id: json["uniqueid"] ?? json["call_id"]
   );
 
+  static CallModel fromJsonOnOutgoingCall(json) => CallModel(
+      date: getDateFromUnix(json["calldate"] ?? json["date"]),
+      fromCaller: json["src"] ?? json["sip_from"],
+      toCaller: json["dst"] ?? json["sip_to"],
+      duration: json["duration"] ?? "00:00:00",
+      callStatus: json["disposition"] ?? json["reason"],
+      id: "unspecified"
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+        other is CallModel &&
+        runtimeType == other.runtimeType &&
+        date == other.date &&
+        fromCaller == other.fromCaller &&
+        toCaller == other.toCaller &&
+        duration == other.duration &&
+        callStatus == other.callStatus &&
+        id == other.id;
+
+  @override
+  int get hashCode => date.hashCode ^ fromCaller.hashCode ^
+    toCaller.hashCode ^ duration.hashCode ^ callStatus.hashCode ^ id.hashCode;
+
+
+
+
 }
 
 String gerCallReason(String reason) {
-  return reason == "Decline" ? "NO ANSWER" : "ANSWERED";
+  // Ok, Decline, Request Timeout, Busy here, Ringing
+  return reason == "Ok" ? "ANSWERED" : "NO ANSWER";
 }
 
 String getDateFromUnix(json) {

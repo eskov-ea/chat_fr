@@ -7,11 +7,16 @@ import 'package:chat/ui/navigation/main_navigation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../bloc/call_logs_bloc/call_logs_event.dart';
 import '../../bloc/call_logs_bloc/call_logs_state.dart';
+import '../../bloc/profile_bloc/profile_bloc.dart';
 import '../../services/global.dart';
 import '../../view_models/user/users_view_cubit.dart';
+import '../../view_models/user/users_view_cubit_state.dart';
 import '../widgets/app_bar.dart';
 
+
+enum CallStatus {answered, declined, noAnswer, errored}
 
 class CallsPage extends StatefulWidget {
   const CallsPage({Key? key, helper}) : super(key: key);
@@ -25,59 +30,142 @@ class _CallsPageState extends State<CallsPage> {
 
   late final StreamSubscription _usersSubscription;
   String? userId;
-  Map<String, UserContact> users = {};
-  late final StreamSubscription _errorSubscription;
-  bool isError = false;
+  late UsersViewCubitState _usersState;
 
   @override
   void initState() {
     DataProvider().getUserId().then( (val) {
       userId = val;
     });
-    _errorSubscription = BlocProvider.of<CallLogsBloc>(context).stream.listen((state) {
-      _onState(state);
+    setState(() {
+      _usersState = BlocProvider.of<UsersViewCubit>(context).state;
     });
     _usersSubscription = BlocProvider.of<UsersViewCubit>(context).stream.listen((state) {
       setState(() {
-        users = state.usersDictionary ;
+        _usersState = state;
       });
     });
     super.initState();
   }
 
-  void _onState(state) {
-    if (state is CallLogErrorState) {
-      setState(() {
-        isError = true;
-      });
+  Future<void> _onRefresh() async {
+    final asterPass = BlocProvider.of<ProfileBloc>(context).state.user?.userProfileSettings?.asteriskUserPassword;
+    if (asterPass == null) {
+      customToastMessage(context: context, message: 'Произошла ошибка при получении данных пользователя');
+    } else {
+      BlocProvider.of<CallLogsBloc>(context).add(
+          LoadCallLogsEvent(passwd: asterPass)
+      );
     }
   }
 
+
   @override
   void dispose() {
-    _errorSubscription.cancel();
     _usersSubscription.cancel();
     super.dispose();
   }
 
-  // String getDate(String callDate) {
-  //   final now = DateTime.now();
-  //   final callTime = DateTime.parse(callDate);
-  //   final timeDiff = now.difference(callTime).inDays;
-  //   switch(timeDiff) {
-  //     case 0:
-  //       if (callTime.hour < 10 && callTime.minute < 10) return "0${callTime.hour}:0${callTime.minute}";
-  //       if (callTime.hour < 10) return "0${callTime.hour}:${callTime.minute}";
-  //       if (callTime.minute < 10) return "${callTime.hour}:0${callTime.minute}";
-  //       return "${callTime.hour}:${callTime.minute}";
-  //     case 1:
-  //       return "Вчера";
-  //     default:
-  //       return "${callTime.day}.${callTime.month}.${callTime.year}";
-  //   }
-  // }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: CustomAppBar(context),
+      body: kIsWeb
+          ? const Center(child: Text("Недоступно в веб-версии"),)
+          : BlocBuilder<CallLogsBloc, CallLogsBlocState>(
+              builder: (context, state) {
+                if (state is CallsLoadedLogState) {
+                  if (_usersState is UsersViewCubitLoadedState) {
+                    if (state.callLog.isEmpty) {
+                      return const Center(
+                        child: Text("Нет истории звонков"),
+                      );
+                   } else {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 16),
+                            child: Text(
+                              "Журнал звонков",
+                              style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700),
+                            )
+                          ),
+                          Divider(
+                            color: Colors.grey[600],
+                            thickness: 0.4,
+                            height: 8,
+                          ),
+                          Expanded(
+                            child: RefreshIndicator(
+                              onRefresh: _onRefresh,
+                              child: ListView.builder(
+                                itemCount: state.callLog.length,
+                                itemBuilder: (context, index) {
+                                return getCallInfo(
+                                  _usersState.usersDictionary,
+                                  state.callLog[index],
+                                  index
+                                );
+                              }),
+                            ),
+                          ),
+                        ],
+                      );
+                      }
+                  } else if (_usersState is UsersViewCubitErrorState) {
+                    return _errorWidget("Произошла техническая ошибка при загрузке журнала звонков. Попробуйте еще раз.");
+                  } else if (_usersState is UsersViewCubitLoadingState) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else {
+                    return _errorWidget("Произошла ошибка при загрузке журнала звонков. Попробуйте еще раз.");
+                  }
+                } else if (state is CallLogInitialState) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else if (state is CallLogErrorState) {
+                  return _errorWidget("Произошла ошибка при загрузке журнала звонков. Попробуйте еще раз.");
+                } else {
+                  return  _errorWidget("Произошла техническая ошибка при загрузке журнала звонков. Попробуйте еще раз.");
+                }
+            }
+          )
+    );
+  }
+
+  Widget _errorWidget(String errorMessage) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return RefreshIndicator(
+          onRefresh: _onRefresh,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight
+              ),
+              child: Center(
+                child: Text(errorMessage,
+                  textAlign: TextAlign.center,
+                )
+              )
+            )
+          )
+        );
+      }
+    );
+  }
+
 
   Widget getCallInfo(Map<String, UserContact>  users, CallModel call, int index) {
+    print("CALL model   ${call.fromCaller}  ->  ${call.toCaller}   :  ${call.callStatus}");
     try {
       CallRenderData? data;
       final toCaller = call.toCaller.replaceAll(new RegExp(r'[^0-9]'), '').substring(1);
@@ -164,58 +252,6 @@ class _CallsPageState extends State<CallsPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(context),
-      body: kIsWeb
-        ? const Center(child: Text("Недоступно в веб-версии"),)
-        : isError
-          ? Center(child: Text("Произошла ошибка при загрузке истории звонков"),)
-          : BlocBuilder<CallLogsBloc, CallLogsBlocState>(
-              builder: (context, state) {
-                final usersState = BlocProvider.of<UsersViewCubit>(context).state;
-                if (state is CallsLoadedLogState && users.isNotEmpty) {
-                  if (state.callLog.isEmpty) {
-                    return Center(
-                      child: Text("Нет истории звонков"),
-                    );
-                  } else {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                          child: Text("Журнал звонков",
-                            style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w700
-                            ),
-                          )
-                        ),
-                        Divider(
-                          color: Colors.grey[600],
-                          thickness: 0.4,
-                          height: 8,
-                        ),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: state.callLog.length,
-                            itemBuilder: (context, index) {
-                              return getCallInfo(users, state.callLog[index], index);
-                          }),
-                        ),
-                      ],
-                    );
-                  }
-                } else {
-                  return Center(
-                    child: CircularProgressIndicator(),
-                  );
-                }
-              }
-      ),
-    );
-  }
 }
 
 

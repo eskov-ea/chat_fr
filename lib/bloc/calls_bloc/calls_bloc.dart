@@ -27,9 +27,11 @@ class CallsBloc
       } else if (callEvent.event == "REGISTRATION_FAILED") {
         add(ConnectionFailedCallEvent());
       } else if (callEvent.event == "CONNECTED") {
-        add(ConnectedCallEvent());
+        final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
+        add(ConnectedCallEvent(callData: callData));
       } else if (callEvent.event == "STREAM_RUNNING") {
-        add(StreamRunningCallEvent());
+        final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
+        add(StreamRunningCallEvent(callData: callData));
       } else if (callEvent.event == "ENDED") {
         add(StreamStopCallEvent());
       } else if (callEvent.event == "RELEASED") {
@@ -41,12 +43,17 @@ class CallsBloc
           final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
           add(EndedCallEvent(callData: callData));
       } else if (callEvent.event == "INCOMING") {
-        add(IncomingCallEvent(callerId: callEvent.callerId!));
+        final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
+        add(IncomingCallEvent(callData: callData));
       } else if (callEvent.event == "OUTGOING") {
-        add(OutgoingCallEvent(callerId: callEvent.callerId!));
+        final callData = CallModel.fromJsonOnOutgoingCall(callEvent.callData);
+        add(OutgoingCallEvent(callData: callData));
       } else if (callEvent.event == "ERROR") {
-        print("ERROR_CALL  -->  ${callEvent.callerId}");
-        add(ErrorCallEvent(callerId: callEvent.callerId!));
+        final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
+        add(ErrorCallEvent(callData: callData));
+      } else if (callEvent.event == "OUTGOING_RINGING") {
+        final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
+        add(OutgoingRingingCallEvent(callData: callData));
       }
     });
       on<CallsEvent>((event, emit) async {
@@ -55,25 +62,28 @@ class CallsBloc
         } else if (event is ConnectionFailedCallEvent) {
           emit(UnconnectedCallServiceState());
         } else if (event is IncomingCallEvent) {
-          emit(IncomingCallState(callerName: event.callerId));
+          emit(IncomingCallState(callData: event.callData));
         } else if (event is EndedCallEvent) {
+          timer.stop();
           emit(EndedCallState(callData: event.callData));
           add(ConnectingCallServiceEvent());
         } else if (event is OutgoingCallEvent) {
-          emit(OutgoingCallState(callerName: event.callerId));
+          emit(OutgoingCallState(callData: event.callData));
         } else if (event is ConnectedCallEvent) {
-          emit(ConnectedCallState());
+          emit(ConnectedCallState(callData: event.callData));
         } else if (event is StreamRunningCallEvent) {
           timer.start();
-          emit(StreamRunningCallState());
+          emit(StreamRunningCallState(callData: event.callData));
         } else if (event is StreamStopCallEvent) {
           timer.stop();
-          emit(StreamStopCallState());
+          emit(const StreamStopCallState());
         } else if (event is ErrorCallEvent) {
           timer.stop();
-          emit(ErrorCallState(callerName: event.callerId));
+          emit(ErrorCallState(callData: event.callData));
+        } else if (event is OutgoingRingingCallEvent) {
+          emit(OutgoingRingingCallState(callData: event.callData));
         } else if (event is EndCallWithNoLogEvent) {
-          emit(EndCallWithNoLogState());
+          emit(const EndCallWithNoLogState());
         }
       });
     }

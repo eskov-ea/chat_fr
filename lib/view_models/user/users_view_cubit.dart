@@ -28,7 +28,6 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
 
   void _onState(UsersState state) {
     if (state is UsersLoadedState){
-      print("UsersLoadedState   ${state.clientEventsDictionary[193]}   ${state.clientEventsDictionary[193]?.fromUser}");
       final users = state.users;
       final Map<String, UserContact> usersDictionary = {};
       users.forEach((user) {

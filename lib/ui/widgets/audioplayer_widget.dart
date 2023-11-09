@@ -6,7 +6,6 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_sound/public/flutter_sound_player.dart';
 import 'package:flutter_sound_platform_interface/flutter_sound_platform_interface.dart';
 import '../../services/global.dart';
-import '../../services/messages/messages_repository.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   const AudioPlayerWidget({

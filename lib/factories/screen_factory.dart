@@ -78,24 +78,20 @@ class ScreenFactory {
   }
 
   Widget makeRunningCallScreen(CallScreenArguments arguments) {
-    return RunningCallScreen(
-      callerName: arguments.callerName,
-      // callsBloc: arguments.callsBloc!,
-      // users: arguments.users,
-    );
+    return RunningCallScreen(userId: arguments.userId);
   }
 
-  Widget makeOutgoingCallScreen(CallScreenArguments arguments) {
-    return OutgoingCallScreen(
-        callerName: arguments.callerName
-    );
-  }
+  // Widget makeOutgoingCallScreen(CallScreenArguments arguments) {
+  //   return OutgoingCallScreen(
+  //       callerName: arguments.callerName
+  //   );
+  // }
 
-  Widget makeIncomingCallScreen(CallScreenArguments arguments) {
-    return IncomingCallScreen(
-        callerName: arguments.callerName
-    );
-  }
+  // Widget makeIncomingCallScreen(CallScreenArguments arguments) {
+  //   return IncomingCallScreen(
+  //       callerName: arguments.callerName
+  //   );
+  // }
 
   Widget makeImageScreen(ImageScreenArguments arguments) {
     return  ImageScreen(

@@ -331,7 +331,7 @@ class _MessageTile extends StatelessWidget {
                         //TODO: refactor 3 widgets with one function/widget to avoid unnecessary code
                         file != null && file!.filetype == "jpg" || file != null && file!.filetype == "jpeg" || file != null && file!.filetype == "png"
                           ? Container(
-                            height: 240,
+                            height: (p2p != 1 && !isMe) ? 270 : 240,
                             width: 186,
                             child: ImagePreviewWidget(
                                 key: ValueKey<int>(file!.attachmentId),

@@ -24,6 +24,7 @@ class CallLogService {
       final response = await http.post(
           Uri.parse('http://aster.mcfef.com/logs/user/last/'),
           body: postData);
+      print("Loading call logs  ${response.body}   ///   $passwd");
       if (response.statusCode == 200) {
         List<dynamic> collection = jsonDecode(response.body)["data"];
         List<CallModel> callLog =

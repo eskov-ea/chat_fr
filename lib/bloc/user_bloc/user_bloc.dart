@@ -21,6 +21,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   final _secureStorage = DataProvider();
   final _logger = Logger.getInstance();
   final _methodChannel = const MethodChannel("com.application.chat/write_files_method");
+  int i = 0;
 
   UsersBloc({
     required this.usersRepository,

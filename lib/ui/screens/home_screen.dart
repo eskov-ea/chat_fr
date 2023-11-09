@@ -13,6 +13,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../bloc/calls_bloc/calls_bloc.dart';
@@ -35,6 +36,7 @@ import '../../view_models/websocket/websocket_view_cubit.dart';
 import '../navigation/main_navigation.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import '../widgets/active_call_widget.dart';
+import '../widgets/call_connecting_audio_player.dart';
 import '../widgets/session_expires_widget.dart';
 import 'running_call_screen.dart';
 
@@ -67,6 +69,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool isOutgoingCall = false;
   bool isUpdateAvailable = true;
   bool isCallBeenAnswered = false;
+  String? userId;
+  late final CallConnectingAudioPlayer callPlayer;
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
 
 
@@ -78,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     SipConfig.sipDomain = settings.userDomain;
     SipConfig.sipPrefix = settings.sipPrefix;
     try {
-      final String? userId = await _dataProvider.getUserId();
+      // final String? userId = await _dataProvider.getUserId();
       print("Trying to register to SIP with    ${SipConfig.getPrefix()}$userId@${settings.asteriskHost} and password ${settings.asteriskUserPassword} and domain  ${settings.userDomain}");
       await sipChannel.invokeMethod('SIP_LOGIN', {
         "username": "${SipConfig.getPrefix()}$userId",
@@ -173,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (settings.autoJoinChats.isNotEmpty) {
       try {
         bool isJoined = false;
-        final String? userId = await _dataProvider.getUserId();
+        // final String? userId = await _dataProvider.getUserId();
         final publicDialogs = await DialogsProvider().getPublicDialogs();
         if (publicDialogs.isNotEmpty) {
           for (var requiredChat in settings.autoJoinChats){
@@ -234,34 +238,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     BlocProvider.of<CallLogsBloc>(context).add(LoadCallLogsEvent(passwd: settings.asteriskUserPassword!));
   }
 
-  void _openIncomingCallScreen() {
-    if (Platform.isIOS) return;
-    Navigator.of(context).pushNamed(
-        MainNavigationRouteNames.incomingCallScreen,
-        arguments: CallScreenArguments(
-            callerName: callerName ?? "Не удалось определить номер"
-        )
-    );
-  }
-  void _openOutgoingCallScreen() {
-    if (Platform.isIOS) return;
-    Navigator.of(context).pushNamed(
-        MainNavigationRouteNames.outgoingCallScreen,
-        arguments: CallScreenArguments(
-            callerName: callerName ?? "Не удалось определить номер"
-        )
-    );
-  }
-  void _returnToConnectedCallScreen() {
-    Navigator.of(context).pushNamed(
+  void _openCallScreen() {
+    final CallState state = BlocProvider.of<CallsBloc>(context).state;
+    if (Platform.isIOS && state is OutgoingCallState || !Platform.isIOS) {
+      Navigator.of(context).pushNamed(
         MainNavigationRouteNames.runningCallScreen,
-        arguments: CallScreenArguments(
-          callerName: callerName ?? "Не удалось определить номер",
-        )
-    );
+        arguments: CallScreenArguments(userId: userId)
+      );
+    }
   }
 
   void _sendMissCallNotification({required int? dialogId, required String caller, required String? userId}) async {
+    print("SEND MISCALL MESSAGE  $dialogId   //   $caller   //   $userId");
     _isPushSent = true;
     final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);
     dialogId ??= await createDialog(chatsBuilderBloc: chatsBuilderBloc, partnerId: int.parse(caller));
@@ -280,6 +268,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    _dataProvider.getUserId().then((v) {
+      userId = v;
+    });
+    CallConnectingAudioPlayer.player.then((v) {
+      callPlayer = v;
+    });
     initialLoadData();
     WidgetsBinding.instance?.addObserver(this);
     userProfileDataSubscription =  BlocProvider.of<ProfileBloc>(context).stream.listen(_onBlocProfileStateChanged);
@@ -287,49 +281,25 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     updateUserProfileData();
     if (!kIsWeb) {
       callServiceBlocSubscription = BlocProvider.of<CallsBloc>(context).stream.listen((state) async {
+        print("callServiceBlocSubscription   $state");
         if (state is UnconnectedCallServiceState) {
           customToastMessage(context: context, message: "Произошла ошибка при подключении к SIP-серверу");
         } else if (state is IncomingCallState) {
           if(ModalRoute.of(context)?.settings.name == MainNavigationRouteNames.incomingCallScreen) return;
-          try {
-            final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => "${SipConfig.getPrefix()}${el.id}" == state.callerName);
-            callerName = "${callerUser.firstname} ${callerUser.lastname}";
-          } catch (err) {
-            callerName = "${state.callerName}";
-          }
           setState(() {
             isIncomingCall = true;
           });
-          _openIncomingCallScreen();
+          _openCallScreen();
         } else if (state is OutgoingCallState) {
           if(ModalRoute.of(context)?.settings.name == MainNavigationRouteNames.outgoingCallScreen) return;
+          callPlayer.startPlayConnectingSound();
           _isPushSent = false;
-          try {
-            final callerUser = BlocProvider.of<UsersViewCubit>(context).usersBloc.state.users.firstWhere((el) => "${SipConfig.getPrefix()}${el.id}" == state.callerName);
-            callerName = "${callerUser.firstname} ${callerUser.lastname}";
-          } catch (err) {
-            print("OutgoingCallServiceState Error:   $err");
-          }
-          Navigator.of(context).pushNamed(
-              MainNavigationRouteNames.outgoingCallScreen,
-              arguments: CallScreenArguments(
-                callerName: callerName ?? state.callerName
-              )
-          );
-
+          _openCallScreen();
           setState(() {
             isOutgoingCall = true;
           });
         } else if(state is ConnectedCallState) {
-          if(Platform.isAndroid || isOutgoingCall) {
-            Navigator.pop(context);
-          }
-          Navigator.of(context).pushNamed(
-              MainNavigationRouteNames.runningCallScreen,
-              arguments: CallScreenArguments(
-                callerName: callerName ?? "Не удалось определить номер",
-              )
-          );
+          callPlayer.stopPlayConnectingSound();
           setState(() {
             isCallBeenAnswered = true;
             isActiveCall = true;
@@ -337,6 +307,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             isOutgoingCall = false;
           });
         } else if(state is EndedCallState) {
+          callPlayer.stopPlayConnectingSound();
+          setState(() {
+            isActiveCall = false;
+            isIncomingCall = false;
+            isOutgoingCall = false;
+            callerName = null;
+          });
           try {
             Navigator.of(context).popUntil((route) =>
                 route.settings.name == MainNavigationRouteNames.homeScreen);
@@ -345,12 +322,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           }
           BlocProvider.of<CallLogsBloc>(context).add(AddCallToLogEvent(call: state.callData));
           if (_isPushSent == false && !isCallBeenAnswered && isOutgoingCall) {
-            final String? userId = await _dataProvider.getUserId();
             int? dialogId;
             String caller = '';
             final List<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs;
             if (dialogs != null && dialogs.isNotEmpty) {
-              caller = state.callData.fromCaller.substring(1, state.callData.fromCaller.length);
+              caller = state.callData.toCaller.substring(1, state.callData.toCaller.length);
               for (var dialog in dialogs) {
                 if (dialog.chatType.typeId == 1) {
                   for (var user in dialog.usersList) {
@@ -364,48 +340,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             }
             _sendMissCallNotification(dialogId: dialogId, caller: caller, userId: userId);
           }
-          setState(() {
-            isActiveCall = false;
-            isIncomingCall = false;
-            isOutgoingCall = false;
-            callerName = null;
-          });
-        } else if(state is ErrorCallState) {
-          try {
-            Navigator.of(context).popUntil((route) =>
-                route.settings.name == MainNavigationRouteNames.homeScreen);
-          } catch (err) {
-            Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.loaderWidget);
-          }
-          final List<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs;
-          int? dialogId;
-          String caller = '';
-          final String? userId = await _dataProvider.getUserId();
-          if (dialogs != null && dialogs.isNotEmpty) {
-            caller = state.callerName.substring(1, state.callerName.length);
-            for (var dialog in dialogs) {
-              if (dialog.chatType.typeId == 1) {
-                for (var user in dialog.usersList) {
-                  if (user.id.toString() == caller) {
-                    dialogId = dialog.dialogId;
-                    break;
-                  }
-                }
-              }
-            }
-          }
-
-          if (_isPushSent == false && !isCallBeenAnswered && isOutgoingCall) {
-            _sendMissCallNotification(dialogId: dialogId, caller: caller, userId: userId);
-          }
-          setState(() {
-            isCallBeenAnswered = false;
-            isActiveCall = false;
-            isIncomingCall = false;
-            isOutgoingCall = false;
-            callerName = null;
-          });
+        } else if (state is StreamRunningCallState) {
+          callPlayer.stopPlayConnectingSound();
+        } else if (state is ErrorCallState) {
+          callPlayer.stopPlayConnectingSound();
+        } else if (state is OutgoingRingingCallState) {
+          callPlayer.stopPlayConnectingSound();
         } else if (state is EndCallWithNoLogState) {
+          callPlayer.stopPlayConnectingSound();
           Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
           setState(() {
             isActiveCall = false;
@@ -459,13 +401,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       body: Column(
         children: [
           isIncomingCall && Platform.isAndroid
-            ? ActiveCallStatusWidget(message: "Входящий вызов", screenCallback: _openIncomingCallScreen,)
+            ? ActiveCallStatusWidget(message: "Входящий вызов", screenCallback: _openCallScreen,)
             : SizedBox.shrink(),
           isOutgoingCall
-              ? ActiveCallStatusWidget(message: "Исходящий вызов", screenCallback: _openOutgoingCallScreen,)
+              ? ActiveCallStatusWidget(message: "Исходящий вызов", screenCallback: _openCallScreen,)
               : SizedBox.shrink(),
           isActiveCall
-            ? RunningCallStatusWidget(screenCallback: _returnToConnectedCallScreen)
+            ? RunningCallStatusWidget(screenCallback: _openCallScreen)
             : SizedBox.shrink(),
           Expanded(
             child: IndexedStack(

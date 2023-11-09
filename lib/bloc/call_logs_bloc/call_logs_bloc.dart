@@ -16,6 +16,7 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
   }) : super(initialState) {
     on<CallLogsEvent>((event, emit) async {
       if(event is LoadCallLogsEvent) {
+        emit(CallLogInitialState());
         try {
           final logs = await _callLogService.getCallLogs(passwd: event.passwd);
           logs.forEach((call) {
