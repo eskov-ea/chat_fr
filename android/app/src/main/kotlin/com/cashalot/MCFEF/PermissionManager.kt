@@ -5,8 +5,6 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.os.Build
-import android.util.Log
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
@@ -19,8 +17,6 @@ class PermissionManager(val activity: Activity, val list: List<String>, val code
         result = isPermissionsGranted()
         if(result != PackageManager.PERMISSION_GRANTED) {
             showAlert()
-        } else {
-            Toast.makeText(activity, "Permissions already granted.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -32,16 +28,13 @@ class PermissionManager(val activity: Activity, val list: List<String>, val code
             if (permission == Manifest.permission.READ_EXTERNAL_STORAGE) {
                 if (Build.VERSION.SDK_INT < 29) {
                     counter += ContextCompat.checkSelfPermission(activity, permission)
-                    Log.i("MyPermissionManager", "$permission  ->  $counter  / SDK  ${Build.VERSION.SDK_INT}")
                 }
             } else if (permission == Manifest.permission.READ_MEDIA_IMAGES) {
                 if (Build.VERSION.SDK_INT > 32) {
                     counter += ContextCompat.checkSelfPermission(activity, permission)
-                    Log.i("MyPermissionManager", "$permission  ->  $counter  / SDK  ${Build.VERSION.SDK_INT}")
                 }
             } else {
                 counter += ContextCompat.checkSelfPermission(activity, permission)
-                Log.i("MyPermissionManager", "$permission  ->  $counter  / SDK  ${Build.VERSION.SDK_INT}")
             }
         }
         return counter

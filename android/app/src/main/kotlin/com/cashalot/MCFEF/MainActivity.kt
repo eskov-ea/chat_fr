@@ -201,29 +201,12 @@ class MainActivity: FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        Log.v("savedInstanceState: Bundle", "Create")
         val core = CoreContext(context).getInstance()
         linphoneCore = LinphoneCore(core, context)
 
         createNotificationChannel()
         getDeviceToken()
-
-
-//        lifecycleScope.launch {
-//            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-//
-//            } else {
-//                Log.w("ASK PERMISSION", "TO WRITE TO EXTERNAL STORAGE ")
-//                requestPermissions(arrayOf(WRITE_EXTERNAL_STORAGE, MANAGE_EXTERNAL_STORAGE), 0)
-//            }
-//            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-//
-//            } else {
-//                Log.w("ASK PERMISSION", "TO RECORD_AUDIO ")
-//                requestPermissions(arrayOf(RECORD_AUDIO), PERMISSION_REQUEST_CODE)
-//            }
-//
-//
-//        }
     }
 
     override fun onDestroy() {
