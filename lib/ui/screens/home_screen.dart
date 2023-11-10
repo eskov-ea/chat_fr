@@ -277,7 +277,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       callPlayer = v;
     });
     initialLoadData();
-    permissionMethodChannel.invokeMethod("CHECK_APP_PERMISSION");
+    if (Platform.isAndroid) {
+      permissionMethodChannel.invokeMethod("CHECK_APP_PERMISSION");
+    }
     WidgetsBinding.instance?.addObserver(this);
     userProfileDataSubscription =  BlocProvider.of<ProfileBloc>(context).stream.listen(_onBlocProfileStateChanged);
     _subscribeToErrorsBlocStream();
