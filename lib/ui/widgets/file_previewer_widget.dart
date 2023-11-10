@@ -28,7 +28,7 @@ class FilePreviewerWidget extends StatefulWidget {
 
 class _FilePreviewerWidgetState extends State<FilePreviewerWidget> {
   final _messagesRepository = MessagesRepository();
-  final filePermissionChannel = const MethodChannel("com.application.chat/write_files_method");
+  final filePermissionChannel = const MethodChannel("com.application.chat/permission_method_channel");
   final filePermissionServiceEventChannel = const EventChannel("event.channel/write_files_service");
   bool isPermissionGranted = false;
   bool isLoadingData = false;
@@ -43,14 +43,13 @@ class _FilePreviewerWidgetState extends State<FilePreviewerWidget> {
     try {
       return await filePermissionChannel.invokeMethod('CHECK_WRITE_FILES_PERMISSION', {});
     } catch (err) {
-      print("ERROR CHECK_PERMISSIONS");
+      customToastMessage(context: context, message: "Загрузка отклонена системой, так как недостаточно прав доступа");
       print(err);
       return false;
     }
   }
 
   void fromBase64ToFileOnDevice() async {
-    print("started saving file");
 
     loadingInProgressModalWidget(context, "Загрузка");
 
@@ -74,7 +73,6 @@ class _FilePreviewerWidgetState extends State<FilePreviewerWidget> {
         webPlatformSaveFile(bytes: bytes, filename: widget.fileName);
       }
     } catch (err) {
-      print("fromBase64ToFileOnDevice  error  $err");
       customToastMessage(
           context: context, message: "Произошла ошибка, не удалось сохранить файл!");
     }

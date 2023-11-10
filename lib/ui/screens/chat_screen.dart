@@ -641,7 +641,7 @@ Widget ReadOnlyChannelMode(BuildContext context) {
       color: const Color(0xFFE7EDFF)
     ),
     child: const Center(
-      child: Text("В режиме чтония",
+      child: Text("В режиме чтения",
         style: TextStyle(fontSize: 16, color: Color(0xFF575757)),
       ),
     ),

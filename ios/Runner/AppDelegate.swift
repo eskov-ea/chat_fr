@@ -7,7 +7,7 @@ import PushKit
 @objc class AppDelegate: FlutterAppDelegate, FlutterStreamHandler {
     private let deviceTokenMethodChannel = "com.application.chat/method"
     private let sipMethodChannel = "com.application.chat/sip"
-    private let writeFilesMethodChannel = "com.application.chat/write_files_method"
+    private let writeFilesMethodChannel = "com.application.chat/permission_method_channel"
     var callServiceEventChannelName = "event.channel/call_service"
     var deviceIdResultCallback: FlutterResult? = nil
     var sipResultCallback: FlutterResult? = nil

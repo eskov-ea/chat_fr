@@ -54,6 +54,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   final sipChannel = const MethodChannel("com.application.chat/sip");
+  final permissionMethodChannel = const MethodChannel("com.application.chat/permission_method_channel");
   final callServiceEventChannel = const EventChannel("event.channel/call_service");
   late final StreamSubscription callServiceBlocSubscription;
   late final StreamSubscription sipEventChannelSubscription;
@@ -276,6 +277,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       callPlayer = v;
     });
     initialLoadData();
+    permissionMethodChannel.invokeMethod("CHECK_APP_PERMISSION");
     WidgetsBinding.instance?.addObserver(this);
     userProfileDataSubscription =  BlocProvider.of<ProfileBloc>(context).stream.listen(_onBlocProfileStateChanged);
     _subscribeToErrorsBlocStream();

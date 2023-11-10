@@ -3,6 +3,7 @@ package com.cashalot.MCFEF
 
 import android.Manifest
 import android.Manifest.permission.*
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -35,17 +36,25 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 import androidx.activity.ComponentActivity
+import androidx.core.content.ContextCompat
 
 
 class MainActivity: FlutterActivity() {
     private val METHOD_CHANNEL_NAME = "com.application.chat/method"
-    private val METHOD_CHANNEL_WRITE_FILES_PERMISSON = "com.application.chat/write_files_method"
+    private val METHOD_CHANNEL_WRITE_FILES_PERMISSON = "com.application.chat/permission_method_channel"
     private val METHOD_CHANNEL_SIP = "com.application.chat/sip"
     val CREATE_FILE = 0
     var arrayBytesToWrite: String? = null
     lateinit var linphoneCore : LinphoneCore
     val PERMISSION_REQUEST_CODE = 112
-
+    private val listPermissions = listOf<String>(
+        POST_NOTIFICATIONS,
+        RECORD_AUDIO,
+        CAMERA,
+        READ_EXTERNAL_STORAGE,
+        READ_MEDIA_IMAGES
+    )
+    private lateinit var permissionManager: PermissionManager
 
     companion object {
 
@@ -83,7 +92,6 @@ class MainActivity: FlutterActivity() {
                 startActivityForResult(intent, CREATE_FILE)
             }
             if (call.method == "CHECK_WRITE_FILES_PERMISSION") {
-                Log.w("SAVEFILE", "STARTED")
                 ActivityCompat.requestPermissions(
                         this,
                         arrayOf(ACTION_OPEN_DOCUMENT_TREE),
@@ -95,12 +103,16 @@ class MainActivity: FlutterActivity() {
                     result.success( false )
                 }
             }
+            if (call.method == "CHECK_APP_PERMISSION") {
+
+                permissionManager = PermissionManager(this, listPermissions, PERMISSION_REQUEST_CODE)
+                permissionManager.checkPermissions()
+
+            }
             if (call.method == "SAVE_SIP_CONTACTS") {
                 var data= call.argument<String?>("data")
                 if (data != null) {
                     var sm = StorageManager(context)
-//                    var bytes: ByteArray = data.toByteArray()
-//                    sm.writeData(bytes)
                     sm.writeData(data)
                 }
             }
@@ -184,19 +196,10 @@ class MainActivity: FlutterActivity() {
         }
             deviceToken = task.result
         })
-//        return await token
-//        return FirebaseInstanceId.getInstance().getToken()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        if (Build.VERSION.SDK_INT > 32) {
-            if (!shouldShowRequestPermissionRationale("112")){
-                getNotificationPermission()
-//                askNotificationPermission()
-            }
-        }
 
         val core = CoreContext(context).getInstance()
         linphoneCore = LinphoneCore(core, context)
@@ -204,16 +207,23 @@ class MainActivity: FlutterActivity() {
         createNotificationChannel()
         getDeviceToken()
 
-        lifecycleScope.launch {
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 
-            } else {
-                Log.w("ASK PERMISSION", "TO WRITE TO EXTERNAL STORAGE ")
-                requestPermissions(arrayOf(WRITE_EXTERNAL_STORAGE, MANAGE_EXTERNAL_STORAGE), 0)
-            }
-
-
-        }
+//        lifecycleScope.launch {
+//            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+//
+//            } else {
+//                Log.w("ASK PERMISSION", "TO WRITE TO EXTERNAL STORAGE ")
+//                requestPermissions(arrayOf(WRITE_EXTERNAL_STORAGE, MANAGE_EXTERNAL_STORAGE), 0)
+//            }
+//            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+//
+//            } else {
+//                Log.w("ASK PERMISSION", "TO RECORD_AUDIO ")
+//                requestPermissions(arrayOf(RECORD_AUDIO), PERMISSION_REQUEST_CODE)
+//            }
+//
+//
+//        }
     }
 
     override fun onDestroy() {
@@ -234,6 +244,7 @@ class MainActivity: FlutterActivity() {
         }
     }
 
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == CREATE_FILE && resultCode == RESULT_OK) {
@@ -248,53 +259,6 @@ class MainActivity: FlutterActivity() {
                 Log.w("SAVEFILE", e.toString())
             }
         }
-    }
-
-    private val requestPermissionLauncher = ComponentActivity().registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            Toast.makeText(this, "Уведомления включены", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "Уведомления отключены. Включить уведомления можно в настройках. Уведомления необходимы для корректной работы приложения", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun askNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-                showPermissionDialog()
-// Display an educational UI explaining to the user the features that will be enabled
-                //       by them granting the POST_NOTIFICATION permission. This UI should provide the user
-                //       "OK" and "No thanks" buttons. If the user selects "OK," directly request the permission.
-                //       If the user selects "No thanks," allow the user to continue without notifications.
-            } else {
-                // Directly ask for the permission
-                showPermissionDialog()
-                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
-        }
-    }
-
-    private fun showPermissionDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Permission required")
-        builder.setMessage("Some permissions are needed to be allowed to use this app without any problems.")
-        builder.setPositiveButton("Grant") { dialog, which ->
-            dialog.cancel()
-            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            val uri = Uri.fromParts("package", this.packageName, null)
-            intent.data = uri
-            startActivity(intent)
-        }
-        builder.setNegativeButton("Cancel") { dialog, which ->
-            dialog.dismiss()
-        }
-        val alert = builder.create()
-        alert.setCanceledOnTouchOutside(false)
-        alert.show()
-        builder.show()
     }
 
     fun createNotificationChannel() {

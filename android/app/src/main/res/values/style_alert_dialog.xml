@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="PermissionAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">#000000</item>
+        <item name="android:textColorPrimary">#CB000000</item>
+        <item name="android:background">#CBEBE0FF</item>
+        <item name="android:radius">20sp</item>
+        <item name="android:buttonBarButtonStyle">@style/PermissionAlertDialogButton</item>
+    </style>
+
+    <style name="PermissionAlertDialogButton"  parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:backgroundTint">#693AAA</item>
+        <item name="android:textColor">#CBEBE0FF</item>
+    </style>
+</resources>

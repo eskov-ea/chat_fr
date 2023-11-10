@@ -20,7 +20,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   final ErrorHandlerBloc errorHandlerBloc;
   final _secureStorage = DataProvider();
   final _logger = Logger.getInstance();
-  final _methodChannel = const MethodChannel("com.application.chat/write_files_method");
+  final _methodChannel = const MethodChannel("com.application.chat/permission_method_channel");
   int i = 0;
 
   UsersBloc({
