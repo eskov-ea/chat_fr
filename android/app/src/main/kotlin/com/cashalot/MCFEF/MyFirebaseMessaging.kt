@@ -18,8 +18,7 @@ class MyFirebaseMessaging: FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-
-//        Toast.makeText(this, "[Push] RECEIVED Firebase", Toast.LENGTH_SHORT).show()
+        super.onMessageReceived(message)
         Log.v("MyFirebaseMessaging. We got PUSH", "${message.messageId} ; ${message.notification}")
 
         if (!message.data.isEmpty()) {
@@ -46,6 +45,4 @@ class MyFirebaseMessaging: FirebaseMessagingService() {
         }
 
     }
-
-
 }

@@ -176,7 +176,6 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
             when (state) {
                 Call.State.IncomingReceived -> {
                     val caller = if(call.remoteAddress.displayName != null) {
-//                        getCallerFromContacts(call.remoteAddress.username.toString())
                         call.remoteAddress.displayName!!
                     } else {
                         getCallerFromContacts(call.remoteAddress.username.toString())

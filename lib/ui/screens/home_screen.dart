@@ -83,7 +83,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     SipConfig.sipDomain = settings.userDomain;
     SipConfig.sipPrefix = settings.sipPrefix;
     try {
-      // final String? userId = await _dataProvider.getUserId();
       print("Trying to register to SIP with    ${SipConfig.getPrefix()}$userId@${settings.asteriskHost} and password ${settings.asteriskUserPassword} and domain  ${settings.userDomain}");
       await sipChannel.invokeMethod('SIP_LOGIN', {
         "username": "${SipConfig.getPrefix()}$userId",

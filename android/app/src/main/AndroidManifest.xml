@@ -68,10 +68,11 @@
         </activity>
 
        <receiver android:name=".PushBroadcastReceiver"
-           android:exported="false">
+           android:exported="true">
            <intent-filter>
                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-               <action android:name="org.linphone.core.action.PUSH_RECEIVED"/>
+               <action android:name="com.google.firebase.MESSAGING_EVENT" />
+               <category android:name="${applicationId}" />
            </intent-filter>
        </receiver>
 
@@ -92,12 +93,13 @@
 
        <service
            android:name="com.cashalot.MCFEF.MyFirebaseMessaging"
-           android:exported="false"
+           android:exported="true"
            android:enabled="true"
            android:stopWithTask="false"
            android:permission=""
            android:directBootAware="true">
            <intent-filter android:priority="100">
+               <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
            </intent-filter>
