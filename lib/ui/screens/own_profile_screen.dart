@@ -13,6 +13,7 @@ import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/user_bloc/user_event.dart';
 import '../../bloc/ws_bloc/ws_event.dart';
 import '../../services/auth/auth_repo.dart';
+import '../../services/logger/logger_service.dart';
 import '../../view_models/dialogs_page/dialogs_view_cubit.dart';
 import '../../view_models/user/users_view_cubit.dart';
 import '../../view_models/websocket/websocket_view_cubit.dart';
@@ -134,8 +135,7 @@ class ProfilePage extends StatelessWidget {
                             'Выйти из аккаунта',
                             style: TextStyle(color: Colors.red, fontSize: 20, fontWeight: FontWeight.w600),
                           )
-                      ),
-                      SizedBox(height: 5,),
+                      )
                     ]
                   ),
                 );
@@ -153,6 +153,47 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
+
+  // Future<void> _openLogfileOptionsModal(BuildContext context) async {
+  //   return showDialog<void>(
+  //     context: context,
+  //     barrierDismissible: true,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: const Text('Лог-файл'),
+  //         content: const SingleChildScrollView(
+  //           child: ListBody(
+  //             children: <Widget>[
+  //               Text('Лог файл содержит записи об ошибках приложения на '
+  //                   'устройстве. Со временем, когда ошибки происходят, файл может увеличиваться в размере, что отнимает полезную память устройства. '
+  //                   'В таком случае файл можно отправить разработчикам и затем он будет очищен.'),
+  //             ],
+  //           ),
+  //         ),
+  //         actions: <Widget>[
+  //           TextButton(
+  //             child: const Text('Назад'),
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //           ),
+  //           TextButton(
+  //             child: const Text('Crash test'),
+  //             onPressed: () async {
+  //               final result = await Logger.getInstance().sendUnhandledErrorsFromLog();
+  //               if (result) {
+  //                 customToastMessage(message: "Лог файл был успешно отправлен и очищен", context: context);
+  //               } else {
+  //                 customToastMessage(message: "Произошла ошибка при очистке\ отправке лог-файла. Попробуйте еще раз", context: context);
+  //               }
+  //               Navigator.of(context).pop();
+  //             },
+  //           )
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 }
 
 void downLoadNewAppVersion(String? url) async {

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:http/http.dart' as http;
@@ -38,6 +39,7 @@ class DialogsProvider {
     } on AppErrorException{
       rethrow;
     } catch(err) {
+      print("DialogsProvider.getDialogs    $err");
       _logger.sendErrorTrace(message: "DialogsProvider.getDialogs", err: err.toString());
       return throw AppErrorException(AppErrorExceptionType.other, null, "DialogsProvider, loading dialogs");
     }

@@ -110,10 +110,10 @@ import 'messages/messages_repository.dart';
         builder: (BuildContext context) => Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
+            const SizedBox(
               width: 30,
               height: 30,
-              child: const CircularProgressIndicator()
+              child: CircularProgressIndicator()
             ),
             const SizedBox(
               height: 30,
@@ -129,11 +129,21 @@ import 'messages/messages_repository.dart';
   customToastMessage({
     required BuildContext context,
     required String message,
-    SnackBarAction? action = null
+    SnackBarAction? action,
+    Icon? icon
   }) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(text: message),
+              if (icon != null) WidgetSpan(
+                child: icon,
+              ),
+            ]
+          )
+        ),
         action: action,
       ),
     );

@@ -29,8 +29,5 @@ class LoaderWidget extends StatelessWidget {
         ? MainNavigationRouteNames.homeScreen
         : MainNavigationRouteNames.auth;
     Navigator.of(context).pushReplacementNamed(nextScreen);
-    // Navigator.pushAndRemoveUntil(context, MaterialPageRoute( builder: (BuildContext context)  => const OutgoingCallScreen() ) , (route) => false);
-    // Navigator.pushAndRemoveUntil(context, MaterialPageRoute( builder: (BuildContext context)  => const TestWidget() ) , (route) => false);
-    // Navigator.pushAndRemoveUntil(context, MaterialPageRoute( builder: (BuildContext context)  => const IncomingCall(user: "Andrey",) ) , (route) => false);
   }
 }

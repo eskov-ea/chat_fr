@@ -45,9 +45,13 @@ dependencies:
   path_provider_foundation: ^2.1.2
   flutter_callkit_incoming: ^2.0.0+2
   flutter_image_compress: ^2.0.0
+  firebase_crashlytics: ^3.4.5
+
+  firebase_analytics: ^10.7.1 # Do we need it?
 
   flutter:
     sdk: flutter
+  firebase_core: ^2.23.0
 
 dev_dependencies:
   flutter_lints: ^1.0.0

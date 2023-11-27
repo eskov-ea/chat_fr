@@ -2,6 +2,7 @@ import 'package:chat/bloc/auth_bloc/auth_event.dart';
 import 'package:chat/bloc/auth_bloc/auth_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../services/auth/auth_repo.dart';
+import '../../services/logger/logger_service.dart';
 import '../../storage/data_storage.dart';
 
 
@@ -44,7 +45,6 @@ class AuthBloc
       } catch (err) {
         print(err);
         emit(Unauthenticated());
-        // emit(AuthenticatingFailure(error: err));
       }
     }
 
@@ -55,13 +55,15 @@ class AuthBloc
       try {
         final String? token = await _dataProvider.getToken();
         print("AuthCheckStatusEvent  $token");
-        // final bool auth = await authRepo.checkAuthStatus(token);
-        // if (!auth) await _dataProvider.deleteToken();
+        final bool auth = await authRepo.checkAuthStatus(token);
+        if (!auth) {
+          Logger().sendErrorTrace(message: "Check auth state", err: "");
+        }
+        if (!auth) await _dataProvider.deleteToken();
         final newState =
-        token != null ? const Authenticated() : Unauthenticated();
+        auth ? const Authenticated() : Unauthenticated();
         emit(newState);
       } catch (err) {
-        print("Platform error: $err");
         await _dataProvider.deleteToken();
         emit(Unauthenticated());
       }

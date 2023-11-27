@@ -37,9 +37,13 @@ import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 import androidx.activity.ComponentActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 
 
-class MainActivity: FlutterActivity() {
+class MainActivity : FlutterActivity() {
     private val METHOD_CHANNEL_NAME = "com.application.chat/method"
     private val METHOD_CHANNEL_WRITE_FILES_PERMISSON = "com.application.chat/permission_method_channel"
     private val METHOD_CHANNEL_SIP = "com.application.chat/sip"
@@ -61,12 +65,11 @@ class MainActivity: FlutterActivity() {
         var eventSink: EventChannel.EventSink? = null
         var callServiceEventSink: EventChannel.EventSink? = null
         var deviceToken: String? = null
-
     }
     private val callServiceEventChannel = "event.channel/call_service"
 
-
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_NAME).setMethodCallHandler {
             call, result ->
@@ -197,6 +200,9 @@ class MainActivity: FlutterActivity() {
             deviceToken = task.result
         })
     }
+
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

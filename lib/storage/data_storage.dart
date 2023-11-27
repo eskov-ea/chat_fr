@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:chat/services/logger/logger_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 abstract class _Keys {
@@ -15,7 +16,12 @@ class DataProvider {
   Future<String?> getToken() => _secureStorage.read(key: _Keys.token);
 
   Future<void> setToken(String value) {
-    return _secureStorage.write(key: _Keys.token, value: value);
+    try {
+      return _secureStorage.write(key: _Keys.token, value: value);
+    } catch(err) {
+      Logger().sendErrorTrace(message: "setToken", err: err.toString());
+      rethrow;
+    }
   }
 
   Future<String?> getOs() => _secureStorage.read(key: _Keys.os);

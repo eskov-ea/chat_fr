@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 import 'package:chat/bloc/auth_bloc/auth_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_state.dart';
@@ -19,8 +21,11 @@ import 'package:chat/view_models/dialogs_page/dialogs_view_cubit_state.dart';
 import 'package:chat/view_models/loader/loader_view_cubit.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:chat/view_models/websocket/websocket_view_cubit.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 import 'bloc/calls_bloc/calls_bloc.dart';
 import 'bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import 'bloc/chats_builder_bloc/chats_builder_event.dart';
@@ -29,7 +34,10 @@ import 'bloc/dialogs_bloc/dialogs_state.dart';
 import 'bloc/profile_bloc/profile_bloc.dart';
 import 'bloc/user_bloc/user_bloc.dart';
 import 'bloc/ws_bloc/ws_state.dart';
+import 'firebase_options.dart';
 import 'services/auth/auth_repo.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -40,8 +48,36 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
+// errorHandler(FlutterErrorDetails error) async {
+//
+//   print("Catched error:::: ${error.stack}");
+//   final Directory directory = await getApplicationDocumentsDirectory();
+//   final File file = File('${directory.path}/logs.txt');
+//   await file.writeAsString("\r\n" + DateTime.now().toString(), mode: FileMode.writeOnlyAppend);
+//   await file.writeAsString(error.stack.toString(), mode: FileMode.writeOnlyAppend);
+//   throw error;
+// }
+
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   HttpOverrides.global = MyHttpOverrides();
+  FlutterError.onError = (errorDetails) async {
+    final userId = await DataProvider().getUserId();
+    FirebaseCrashlytics.instance.recordError(
+      errorDetails.exception,
+      errorDetails.stack,
+      information: ["[ USER ID ]: $userId"]
+    );
+
+    // FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
   runApp(const MyApp());
 }
 

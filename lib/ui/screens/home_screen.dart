@@ -287,7 +287,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       callServiceBlocSubscription = BlocProvider.of<CallsBloc>(context).stream.listen((state) async {
         print("callServiceBlocSubscription   $state");
         if (state is UnconnectedCallServiceState) {
-          customToastMessage(context: context, message: "Произошла ошибка при подключении к SIP-серверу");
+          customToastMessage(context: context, message: "Произошла ошибка при подключении к SIP-серверу",
+              icon: const Icon(Icons.error, color: Color(0xFFC7112A), size: 14));
+        } else if (state is ConnectedCallServiceState) {
+          customToastMessage(context: context, message: "Подключение к SIP-серверу",
+              icon: const Icon(Icons.done_outline, color: Color(0xFF11C751), size: 14));
         } else if (state is IncomingCallState) {
           if(ModalRoute.of(context)?.settings.name == MainNavigationRouteNames.incomingCallScreen) return;
           setState(() {
