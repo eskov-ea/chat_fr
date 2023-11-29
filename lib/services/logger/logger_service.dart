@@ -20,6 +20,7 @@ class Logger {
   }
 
   Future<bool> sendErrorTrace({required String message, required String err, String? level}) async {
+    print("TODAY::::: logger ${err}");
     level == null ? 'debug' : level;
     final String? token = await _secureStorage.getToken();
     final postData = jsonEncode(<String, Object>{

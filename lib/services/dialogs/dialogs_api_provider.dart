@@ -13,7 +13,6 @@ class DialogsProvider {
   final _logger = Logger.getInstance();
 
   Future<List<DialogData>> getDialogs() async {
-
     try {
       final String? token = await _secureStorage.getToken();
       final response = await http.get(
@@ -22,7 +21,7 @@ class DialogsProvider {
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',
         },
-      );
+      );;
       if (response.statusCode == 200) {
         List<dynamic> collection = jsonDecode(response.body)["data"];
         print("Loading dialogs:   ${response.body}");
@@ -38,8 +37,9 @@ class DialogsProvider {
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, loading dialogs");
     } on AppErrorException{
       rethrow;
-    } catch(err) {
-      print("DialogsProvider.getDialogs    $err");
+    } catch(err, stack) {
+
+      log("DialogsProvider.getDialogs    $stack ");
       _logger.sendErrorTrace(message: "DialogsProvider.getDialogs", err: err.toString());
       return throw AppErrorException(AppErrorExceptionType.other, null, "DialogsProvider, loading dialogs");
     }

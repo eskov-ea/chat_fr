@@ -105,9 +105,9 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       final newState = state.copyWith(dialogs: dialogs);
       emit(newState);
     } catch(err) {
-      print(err);
       err as AppErrorException;
       if (err.type == AppErrorExceptionType.auth) {
+        _logger.sendErrorTrace(message: "DialogsProvider.getDialogs", err: "${err.type},  ${err.message}");
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
         _logger.sendErrorTrace(message: "DialogsProvider.getDialogs", err: "${err.type},  ${err.message}");

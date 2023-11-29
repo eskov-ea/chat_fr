@@ -65,6 +65,8 @@ void main() async {
   );
   HttpOverrides.global = MyHttpOverrides();
   FlutterError.onError = (errorDetails) async {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+
     final userId = await DataProvider().getUserId();
     FirebaseCrashlytics.instance.recordError(
       errorDetails.exception,
@@ -72,7 +74,6 @@ void main() async {
       information: ["[ USER ID ]: $userId"]
     );
 
-    // FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
   };
   PlatformDispatcher.instance.onError = (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
