@@ -104,13 +104,13 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       print("Dialogs  $dialogs");
       final newState = state.copyWith(dialogs: dialogs);
       emit(newState);
-    } catch(err) {
+    } catch(err, stackTrace) {
+      print("onDialogsLoadEvent::::: $err");
       err as AppErrorException;
+      _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.type.toString());
       if (err.type == AppErrorExceptionType.auth) {
-        _logger.sendErrorTrace(message: "DialogsProvider.getDialogs", err: "${err.type},  ${err.message}");
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
-        _logger.sendErrorTrace(message: "DialogsProvider.getDialogs", err: "${err.type},  ${err.message}");
         final errorState = state.copyWith(dialogs: [], searchQuery: "", isErrorHappened: true);
         emit(errorState);
       }
@@ -145,8 +145,8 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
           return;
         }
       }
-    } catch (err) {
-      print(err);
+    } catch (err, stackTrace) {
+      _logger.sendErrorTrace(stackTrace: stackTrace);
     }
   }
 

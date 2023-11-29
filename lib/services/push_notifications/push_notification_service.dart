@@ -42,7 +42,6 @@ class PushNotificationService {
     } on AppErrorException {
       rethrow;
     } catch (err) {
-      Logger.getInstance().sendErrorTrace(message: "PushNotificationService.sendMissCallPush", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, null, "PushNotificationService.sendMissCallPush");
     }
   }

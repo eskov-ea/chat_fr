@@ -5,6 +5,7 @@ import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/chat_builder_model.dart';
 import '../../models/message_model.dart';
+import '../../services/logger/logger_service.dart';
 import '../error_handler_bloc/error_handler_bloc.dart';
 import '../error_handler_bloc/error_handler_events.dart';
 import '../error_handler_bloc/error_types.dart';
@@ -21,6 +22,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
   final ErrorHandlerBloc errorHandlerBloc;
   final DataProvider dataProvider;
   late final StreamSubscription newMessageSubscription;
+  final Logger _logger = Logger();
 
   ChatsBuilderBloc({
     required this.webSocketBloc,
@@ -101,9 +103,13 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         isError: false,
         isLoadingMessages: false
       ));
-    } catch (err) {
-      if (err.runtimeType == StateError) return;
+    } catch (err, stackTrace) {
+      if (err.runtimeType == StateError) {
+        _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.runtimeType.toString());
+        return;
+      }
       final e = err as AppErrorException;
+      _logger.sendErrorTrace(stackTrace: stackTrace, errorType: e.type.toString());
       if (e.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: e));
       } else {

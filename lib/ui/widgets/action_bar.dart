@@ -173,10 +173,9 @@ class ActionBarState extends State<ActionBar> {
 
       await recorder!.startRecorder(codec: _codec, toFile: _mPath, audioSource: AudioSource.microphone);
       setState(() {});
-    } catch (err) {
-      print("ERROR recording audio startRecorder  -->  $err ");
+    } catch (err, stackTrace) {
       customToastMessage(context: context, message: "Произошла ошибка при записи голосового сообщения");
-      _logger.sendErrorTrace(message: "func record: Произошла ошибка при записи голосового сообщения", err: err.toString());
+      _logger.sendErrorTrace(stackTrace: stackTrace);
     }
   }
 
@@ -186,10 +185,9 @@ class ActionBarState extends State<ActionBar> {
         return null;
       }
       record(recorder);
-    } catch (err) {
-      print("ERROR recording an audio message  $err");
+    } catch (err, stackTrace) {
       customToastMessage(context: context, message: "Произошла ошибка при записи голосового сообщения");
-      _logger.sendErrorTrace(message: "func start: Произошла ошибка при записи голосового сообщения", err: err.toString());
+      _logger.sendErrorTrace(stackTrace: stackTrace);
     }
   }
 

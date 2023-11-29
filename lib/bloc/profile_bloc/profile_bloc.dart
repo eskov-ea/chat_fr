@@ -35,13 +35,12 @@ class ProfileBloc extends Bloc<ProfileBlocEvent, UserProfileState> {
       final userProfile = await _userProfileRepository.getUserProfile(token);
       final newState = UserProfileLoadedState(user: userProfile);
       emit(newState);
-    } catch (err) {
+    } catch (err, stackTrace) {
       err as AppErrorException;
+      _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.type.toString());
       if(err.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
-        print("ERROR: onProfileBlocLoadingEvent ${err.message}");
-        _logger.sendErrorTrace(message: "ProfileBloc.onProfileBlocLoadingEvent", err: err.toString());
         emit(UserProfileErrorState());
       }
     }

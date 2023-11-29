@@ -1,4 +1,4 @@
-enum AppErrorExceptionType { network, auth, other, sessionExpired, access, parsing, getData }
+enum AppErrorExceptionType { network, auth, other, sessionExpired, access, parsing, getData, secureStorage }
 
 class AppErrorException implements Exception {
   final AppErrorExceptionType type;

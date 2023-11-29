@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String? userId;
   late final CallConnectingAudioPlayer callPlayer;
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
-
+  String? currentVersion;
 
   Future<bool> isCallRunning () async {
     return await sipChannel.invokeMethod('CHECK_FOR_RUNNING_CALL');
@@ -132,6 +132,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         return 'Произошла ошибка при обработки данных. Попробуйте еще раз';
       case AppErrorExceptionType.getData:
         return 'Произошла ошибка при загрузке данных. Попробуйте еще раз';
+      case AppErrorExceptionType.secureStorage:
+        return 'Произошла ошибка при обращении к хранилищу данных. Попробуйте еще раз';
     }
   }
 
@@ -143,11 +145,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void checkAppVersion(AppSettings settings) async {
     try {
       PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      final String currentVersion = packageInfo.version;
+      currentVersion = packageInfo.version;
       final String? availableVersion = Platform.isAndroid ? settings.versionAndroid : Platform.isIOS ? settings.versionIos : null;
       print("Current app version is $currentVersion, available version is $availableVersion");
       if(availableVersion == null) return;
-      final List<String> currentVersionArray = currentVersion.split(".");
+      final List<String> currentVersionArray = currentVersion!.split(".");
       final List<String> availableVersionArray = availableVersion.split(".");
       for(var i=0; i<currentVersionArray.length; ++i) {
         if(int.parse(currentVersionArray[i]) < int.parse(availableVersionArray[i])) {
@@ -423,7 +425,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 _screenFactory.makeMessagesPage(),
                 _screenFactory.makeCallsPage(),
                 _screenFactory.makeContactsPage(),
-                _screenFactory.makeProfilePage(isUpdateAvailable),
+                _screenFactory.makeProfilePage(isUpdateAvailable, currentVersion),
               ],
             ),
           )

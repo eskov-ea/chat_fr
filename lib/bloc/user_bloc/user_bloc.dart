@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/bloc/user_bloc/user_event.dart';
 import 'package:chat/bloc/user_bloc/user_state.dart';
-import 'package:chat/bloc/user_bloc/users_list_container.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +11,6 @@ import '../../services/users/users_repository.dart';
 import '../../storage/data_storage.dart';
 import '../error_handler_bloc/error_handler_bloc.dart';
 import '../error_handler_bloc/error_handler_events.dart';
-import '../ws_bloc/ws_bloc.dart';
 
 
 class UsersBloc extends Bloc<UsersEvent, UsersState> {
@@ -67,13 +65,12 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
             clientEventsDictionary: state.clientEventsDictionary
         ));
       }
-    } catch (err) {
+    } catch (err, stackTrace) {
       err as AppErrorException;
+      _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.type.toString());
       if(err.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
-        print("ERROR: onUsersLoadEvent ${err}");
-        _logger.sendErrorTrace(message: "UsersBloc.onUsersLoadEvent", err: err.toString());
         emit(UsersErrorState());
       }
     }
@@ -167,9 +164,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
             clientEvent: newClientEventDictionary);
         emit(newState);
       }
-    } catch (err) {
-      print("ERROR: onUsersLoadEvent ${err}");
-      _logger.sendErrorTrace(message: "UsersBloc.onUsersLoadEvent", err: err.toString());
+    } catch (err, stackTrace) {
+      _logger.sendErrorTrace(stackTrace: stackTrace);
       emit(UsersErrorState());
     }
   }

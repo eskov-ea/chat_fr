@@ -49,9 +49,9 @@ class AuthRepository {
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, creating dialogs");
     } on AppErrorExceptionType {
         rethrow;
-    } catch (err) {
-        print("auth err  -->  $err");
-        _logger.sendErrorTrace(message: "AuthRepository.login", err: err.toString());
+    } catch (err, stackTrace) {
+        print("auth err  -->  $err, $stackTrace");
+        _logger.sendErrorTrace(stackTrace: stackTrace);
         throw AppErrorException(AppErrorExceptionType.other, "AuthRepository",  err.toString());
     }
   }
@@ -69,8 +69,8 @@ class AuthRepository {
       await _secureStorage.deleteUserId();
       await _secureStorage.deleteToken();
       await _secureStorage.deleteDeviceID();
-    } catch (err) {
-      _logger.sendErrorTrace(message: "AuthRepository.logout", err: err.toString());
+    } catch (err, stackTrace) {
+      _logger.sendErrorTrace(stackTrace: stackTrace);
     }
   }
 
@@ -105,8 +105,8 @@ class AuthRepository {
         ),
       );
       print('RESET_PASSWORD_RESPONSE   ${response.body}');
-    } catch (err) {
-      _logger.sendErrorTrace(message: "AuthRepository.resetPassword", err: err.toString());
+    } catch (err, stackTrace) {
+      _logger.sendErrorTrace(stackTrace: stackTrace);
       print('RESET_PASSWORD_ERROR   $err');
     }
   }

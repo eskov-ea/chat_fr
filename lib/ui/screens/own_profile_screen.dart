@@ -24,9 +24,12 @@ import '../widgets/avatar_widget.dart';
 class ProfilePage extends StatelessWidget {
 
   final bool isUpdateAvailable;
+  final String? currentVersion;
+
 
   const ProfilePage({
     required this.isUpdateAvailable,
+    required this.currentVersion,
     Key? key
   }) : super(key: key);
 
@@ -92,6 +95,9 @@ class ProfilePage extends StatelessWidget {
                               ),
                             ],
                           ), context),
+                        ),
+                        Text("Текущая версия:  ${currentVersion ?? ""}",
+                          style: TextStyle(color: Colors.black54, fontStyle: FontStyle.italic),
                         ),
                       !kIsWeb && Platform.isAndroid
                           ? OutlinedButton(

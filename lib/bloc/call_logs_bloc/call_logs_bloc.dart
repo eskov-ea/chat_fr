@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../services/call_log/call_log_service.dart';
+import '../../services/logger/logger_service.dart';
 import '../error_handler_bloc/error_handler_bloc.dart';
 import '../error_handler_bloc/error_handler_events.dart';
 import '../error_handler_bloc/error_types.dart';
@@ -9,6 +10,7 @@ import 'call_logs_state.dart';
 class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
   final CallLogService _callLogService = CallLogService();
   final ErrorHandlerBloc errorHandlerBloc;
+  final Logger _logger = Logger();
 
   CallLogsBloc({
     required CallLogsBlocState initialState,
@@ -24,9 +26,9 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
           });
           final newState = CallsLoadedLogState(callLog: logs, logsDictionary: state.logsDictionary);
           emit(newState);
-        } catch (err) {
+        } catch (err, stackTrace) {
+          _logger.sendErrorTrace(stackTrace: stackTrace);
           final e = err as AppErrorException;
-          print("Calls log error:  ${err.errorLocation}  ${err.message} ${err.type}");
           errorHandlerBloc.add(ErrorHandlerWithErrorEvent(error: e));
           final errorState = CallLogErrorState();
           emit(errorState);
@@ -40,7 +42,8 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
           });
           final newState = CallsLoadedLogState(callLog: logs, logsDictionary: state.logsDictionary);
           emit(newState);
-        } catch (err) {
+        } catch (err, stackTrace) {
+          _logger.sendErrorTrace(stackTrace: stackTrace);
           final e = err as AppErrorException;
           errorHandlerBloc.add(ErrorHandlerWithErrorEvent(error: e));
           final errorState = CallLogErrorState();

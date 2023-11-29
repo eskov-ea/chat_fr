@@ -40,7 +40,6 @@ class CallLogService {
     } on AppErrorException{
       rethrow;
     } catch (err) {
-      Logger.getInstance().sendErrorTrace(message: "CallLogService.getCallLogs", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, err.toString(), "Call logs service, loading call logs");
     }
   }

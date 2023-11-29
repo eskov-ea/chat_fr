@@ -18,7 +18,6 @@ import './icon_base64.dart';
 
 class MessagesProvider {
   final _secureStorage = DataProvider();
-  final _logger = Logger.getInstance();
 
 
   Future <List<MessageData>> getMessages(userId, dialogId, pageNumber) async {
@@ -47,7 +46,6 @@ class MessagesProvider {
     } on AppErrorException{
       rethrow;
     } catch (err) {
-      _logger.sendErrorTrace(message: "MessagesProvider.getMessages", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.getMessages");
     }
   }
@@ -77,7 +75,6 @@ class MessagesProvider {
     } on AppErrorException {
       rethrow;
     } catch (err) {
-      _logger.sendErrorTrace(message: "MessagesProvider.getNewUpdatesOnResume", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.getNewUpdatesOnResume");
     }
   }
@@ -117,7 +114,6 @@ class MessagesProvider {
     } on AppErrorException {
       rethrow;
     } catch (err) {
-      _logger.sendErrorTrace(message: "MessagesProvider.sendMessage", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.sendMessage");
     }
   }
@@ -134,7 +130,7 @@ class MessagesProvider {
       );
       //TODO: process 401 error
     } catch (err) {
-      _logger.sendErrorTrace(message: "MessagesProvider.updateMessageStatuses", err: err.toString());
+      rethrow;
     }
   }
 
@@ -174,7 +170,6 @@ class MessagesProvider {
     } on AppErrorException {
       rethrow;
     } catch(err) {
-      _logger.sendErrorTrace(message: "MessagesProvider.deleteMessage", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.deleteMessage");
     }
   }
@@ -208,7 +203,6 @@ class MessagesProvider {
     } on AppErrorException {
       rethrow;
     } catch (err) {
-      _logger.sendErrorTrace(message: "MessagesProvider.createDialogAndSendMessage", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.createDialogAndSendMessage");
     }
   }
@@ -237,7 +231,6 @@ class MessagesProvider {
     } on AppErrorException {
       rethrow;
     } catch (err) {
-      _logger.sendErrorTrace(message: "MessagesProvider.loadAttachmentData", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.loadAttachmentData");
     }
   }
@@ -285,7 +278,6 @@ class MessagesProvider {
     } on AppErrorException {
       rethrow;
     } catch (err) {
-      _logger.sendErrorTrace(message: "MessagesProvider.sendAudioMessage", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.sendAudioMessage");
     }
   }
@@ -336,7 +328,6 @@ class MessagesProvider {
     } on AppErrorException {
       rethrow;
     } catch (err) {
-      _logger.sendErrorTrace(message: "MessagesProvider.sendMessageWithFileBase64", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.sendMessageWithFileBase64");
     }
   }
@@ -374,7 +365,6 @@ class MessagesProvider {
 
       return response.body;
     } catch (err) {
-      _logger.sendErrorTrace(message: "MessagesProvider.sendMessageWithFileBase64", err: err.toString());
       throw Exception('Error sending file base64 message on web');
     }
   }

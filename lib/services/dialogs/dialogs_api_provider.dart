@@ -10,7 +10,6 @@ import '../logger/logger_service.dart';
 
 class DialogsProvider {
   final _secureStorage = DataProvider();
-  final _logger = Logger.getInstance();
 
   Future<List<DialogData>> getDialogs() async {
     try {
@@ -21,7 +20,7 @@ class DialogsProvider {
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',
         },
-      );;
+      );
       if (response.statusCode == 200) {
         List<dynamic> collection = jsonDecode(response.body)["data"];
         print("Loading dialogs:   ${response.body}");
@@ -37,10 +36,7 @@ class DialogsProvider {
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, loading dialogs");
     } on AppErrorException{
       rethrow;
-    } catch(err, stack) {
-
-      log("DialogsProvider.getDialogs    $stack ");
-      _logger.sendErrorTrace(message: "DialogsProvider.getDialogs", err: err.toString());
+    } catch(err) {
       return throw AppErrorException(AppErrorExceptionType.other, null, "DialogsProvider, loading dialogs");
     }
   }
@@ -73,7 +69,6 @@ class DialogsProvider {
     }  on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, loading dialogs");
     } catch(err) {
-      _logger.sendErrorTrace(message: "DialogsProvider.getPublicDialogs", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, err.toString(), "DialogsProvider, loading dialogs");
     }
   }
@@ -115,7 +110,6 @@ class DialogsProvider {
     }  on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, creating dialogs");
     } catch(err) {
-      _logger.sendErrorTrace(message: "DialogsProvider.createDialog", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, err.toString(), "DialogsProvider, creating dialogs");
     }
   }
@@ -144,7 +138,6 @@ class DialogsProvider {
     }  on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, joining user to dialog $dialogId");
     } catch(err) {
-      _logger.sendErrorTrace(message: "DialogsProvider.joinDialog", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, err.toString(), "DialogsProvider, joining user to dialog $dialogId");
     }
   }
@@ -168,7 +161,6 @@ class DialogsProvider {
     }  on SocketException{
       throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, exiting user to dialog $dialogId");
     } catch(err) {
-      _logger.sendErrorTrace(message: "DialogsProvider.exitDialog", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, null, "DialogsProvider, exiting user to dialog $dialogId");
     }
   }

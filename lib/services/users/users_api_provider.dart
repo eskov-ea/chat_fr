@@ -34,7 +34,6 @@ class UsersProvider {
     } on AppErrorException{
       rethrow;
     } catch (err) {
-      Logger.getInstance().sendErrorTrace(message: "UsersProvider.getUsers", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, err.toString(), "DialogsProvider, creating dialogs");
     }
   }

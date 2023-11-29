@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
@@ -18,9 +19,8 @@ class DataProvider {
   Future<void> setToken(String value) {
     try {
       return _secureStorage.write(key: _Keys.token, value: value);
-    } catch(err) {
-      Logger().sendErrorTrace(message: "setToken", err: err.toString());
-      rethrow;
+    } catch(err, stackTrace) {
+      throw AppErrorException(AppErrorExceptionType.secureStorage, stackTrace.toString(), "setToken");
     }
   }
 

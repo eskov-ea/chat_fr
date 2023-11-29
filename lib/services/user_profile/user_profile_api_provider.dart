@@ -9,7 +9,6 @@ import '../logger/logger_service.dart';
 
 class UserProfileProvider {
   final _secureStorage = DataProvider();
-  final _logger = Logger.getInstance();
 
 
   Future<UserProfileData> getUserProfile(String? token) async {
@@ -37,7 +36,6 @@ class UserProfileProvider {
     } on AppErrorException{
       rethrow;
     } catch(err) {
-      _logger.sendErrorTrace(message: "UserProfileProvider.getUserProfile", err: err.toString());
       throw AppErrorException(AppErrorExceptionType.other, err.toString(), "UserProfileProvider, getUserProfile");
     }
   }

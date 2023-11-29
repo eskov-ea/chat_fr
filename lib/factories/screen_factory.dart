@@ -33,8 +33,8 @@ class ScreenFactory {
     return const CallsPage();
   }
 
-  Widget makeProfilePage(bool isUpdateAvailable) {
-    return ProfilePage(isUpdateAvailable: isUpdateAvailable);
+  Widget makeProfilePage(bool isUpdateAvailable, String? currentVersion) {
+    return ProfilePage(isUpdateAvailable: isUpdateAvailable, currentVersion: currentVersion);
   }
 
   Widget makeLoaderWidget() {
