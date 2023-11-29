@@ -89,6 +89,7 @@ class CallInfoPage extends StatelessWidget {
                     children: [
                       GestureDetector(
                         onTap: (){
+                          print("CALL STATE::: $state");
                           if (!active) return;
                           callNumber(context, callData.callerNumber);
                         },

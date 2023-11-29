@@ -160,9 +160,12 @@ class LinphoneSDK : ObservableObject
                 NSLog("New registration state is \(state) for user id \( String(describing: account.params?.identityAddress?.asString()))\n")
                 if (state == .Ok) {
                     self.loggedIn = true
-                    NSLog("Account registered Push voip token: \(account.params?.pushNotificationConfig?.voipToken)")
+                    let payload = makeEventPayload(event: "REGISTRATION_SUCCESS", callerId: nil, callData: nil)
+                    self.eventSink?(payload)
                 } else if (state == .Cleared) {
                     self.loggedIn = false
+                    let payload = makeEventPayload(event: "REGISTRATION_FAILED", callerId: nil, callData: nil)
+                    self.eventSink?(payload)
                 }
         })
 

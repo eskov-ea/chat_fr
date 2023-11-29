@@ -661,7 +661,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.0.17;
+				CURRENT_PROJECT_VERSION = 1.0.20;
 				DEVELOPMENT_TEAM = 8T287D8PYU;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -701,7 +701,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.0.17;
+				CURRENT_PROJECT_VERSION = 1.0.20;
 				DEVELOPMENT_TEAM = 8T287D8PYU;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -737,7 +737,7 @@
 				CODE_SIGN_ENTITLEMENTS = NotificationServiceAppExtention/NotificationServiceAppExtention.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.0.17;
+				CURRENT_PROJECT_VERSION = 1.0.20;
 				DEVELOPMENT_TEAM = 8T287D8PYU;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
