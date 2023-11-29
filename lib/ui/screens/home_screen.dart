@@ -68,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool isActiveCall = false;
   bool isIncomingCall = false;
   bool isOutgoingCall = false;
-  bool isUpdateAvailable = true;
+  bool isUpdateAvailable = false;
   bool isCallBeenAnswered = false;
   String? userId;
   late final CallConnectingAudioPlayer callPlayer;
@@ -152,9 +152,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       final List<String> currentVersionArray = currentVersion!.split(".");
       final List<String> availableVersionArray = availableVersion.split(".");
       for(var i=0; i<currentVersionArray.length; ++i) {
+        print("UPDATE:::: ${currentVersionArray[i]}  -->  ${availableVersionArray[i]}");
         if(int.parse(currentVersionArray[i]) < int.parse(availableVersionArray[i])) {
           isUpdateAvailable = true;
-          if(Platform.isAndroid) {
+          if(!Platform.isIOS) {
             customToastMessage(context: context, message: "Доступна новая версия приложения. Вы можете обновить ее в разделе Профиль");
           } else {
             SnackBarAction? action;
@@ -168,6 +169,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             }
             customToastMessage(context: context, message: "Доступна новая версия приложения. Свяжитесь с разработчиками, чтобы установить ее", action: action);
           }
+          return;
         }
       }
     } catch(_) {

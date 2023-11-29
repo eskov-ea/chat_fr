@@ -14,7 +14,13 @@ abstract class _Keys {
 class DataProvider {
   static const _secureStorage = FlutterSecureStorage();
 
-  Future<String?> getToken() => _secureStorage.read(key: _Keys.token);
+  Future<String?> getToken() {
+    try {
+      return _secureStorage.read(key: _Keys.token);
+    } catch(err, stackTrace) {
+      throw AppErrorException(AppErrorExceptionType.secureStorage, stackTrace.toString(), "getToken");
+    }
+  }
 
   Future<void> setToken(String value) {
     try {

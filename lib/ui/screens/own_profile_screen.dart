@@ -96,8 +96,12 @@ class ProfilePage extends StatelessWidget {
                             ],
                           ), context),
                         ),
-                        Text("Текущая версия:  ${currentVersion ?? ""}",
-                          style: TextStyle(color: Colors.black54, fontStyle: FontStyle.italic),
+                        Container(
+                          padding: EdgeInsets.only(left: 10, bottom: 2),
+                          alignment: Alignment.centerLeft,
+                          child: Text("Текущая версия:  ${currentVersion ?? ""}",
+                            style: TextStyle(color: Colors.black54, fontStyle: FontStyle.italic),
+                          ),
                         ),
                       !kIsWeb && Platform.isAndroid
                           ? OutlinedButton(
