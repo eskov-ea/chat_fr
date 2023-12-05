@@ -97,13 +97,11 @@ class SendingImagePreview extends StatelessWidget {
                   isScrollControlled: true,
                   backgroundColor: Colors.black54,
                   context: context,
-                  builder: (BuildContext context) => Column(
+                  builder: (BuildContext context) => const Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       CircularProgressIndicator(),
-                      SizedBox(
-                        height: 30,
-                      ),
+                      SizedBox(height: 30),
                       Text(
                         "Отправка",
                         style: TextStyle(color: Colors.white, fontSize: 24),

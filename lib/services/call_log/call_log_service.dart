@@ -31,16 +31,18 @@ class CallLogService {
         collection.map((call) => CallModel.fromJson(call)).toList();
         return callLog;
       } else if(response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.access, null, "Call logs service, loading call logs");
+        throw AppErrorException(AppErrorExceptionType.access, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+            location: "http://aster.mcfef.com/logs/user/last/");
       } else {
-        throw AppErrorException(AppErrorExceptionType.getData, null, "Call logs service, loading call logs");
+        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+            location: "http://aster.mcfef.com/logs/user/last/");
       }
     }  on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, creating dialogs");
+      throw AppErrorException(AppErrorExceptionType.network, location: "http://aster.mcfef.com/logs/user/last/");
     } on AppErrorException{
       rethrow;
     } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.other, err.toString(), "Call logs service, loading call logs");
+      throw AppErrorException(AppErrorExceptionType.other, location: "http://aster.mcfef.com/logs/user/last/");
     }
   }
 

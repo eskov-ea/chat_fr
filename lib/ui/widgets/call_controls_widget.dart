@@ -147,7 +147,7 @@ class CallControlsWidget extends StatelessWidget {
                   height: 20,
                 ),
                 GestureDetector(
-                  onTap: onCallDecline,
+                  onTap: onCallAccept,
                   child: Row(
                     mainAxisAlignment: isCallingIncoming ? MainAxisAlignment.spaceAround : MainAxisAlignment.center,
                     children: [

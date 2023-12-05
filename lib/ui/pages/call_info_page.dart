@@ -2,7 +2,6 @@ import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../bloc/calls_bloc/calls_bloc.dart';
 import '../../bloc/calls_bloc/calls_state.dart';
 import '../../services/global.dart';
@@ -89,7 +88,6 @@ class CallInfoPage extends StatelessWidget {
                     children: [
                       GestureDetector(
                         onTap: (){
-                          print("CALL STATE::: $state");
                           if (!active) return;
                           callNumber(context, callData.callerNumber);
                         },

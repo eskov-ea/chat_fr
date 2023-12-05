@@ -16,9 +16,9 @@ if (flutterVersionCode == null) {
     flutterVersionCode = '1'
 }
 
-def flutterVersionName = '1.0.4'
+def flutterVersionName = '1.0.20'
 if (flutterVersionName == null) {
-    flutterVersionName = '1.0.4'
+    flutterVersionName = '1.0.20'
 }
 
 apply plugin: 'com.android.application'
@@ -84,7 +84,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0-alpha02"
 //    implementation "org.linphone:linphone-sdk-android:5.0+"
-    implementation "org.linphone:linphone-sdk-android:5.2.107"
+    implementation "org.linphone:linphone-sdk-android:5.2.110"
     implementation 'com.google.code.gson:gson:2.8.5'
 
     implementation platform('com.google.firebase:firebase-bom:31.5.0')

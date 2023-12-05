@@ -30,7 +30,6 @@ class CallConnectingAudioPlayer {
   Future<void> stopPlayConnectingSound() async {
     if(_player != null) {
       await _player!.stop();
-      _player = null;
     }
   }
 
@@ -47,6 +46,13 @@ class CallConnectingAudioPlayer {
     await _player!.setLoopMode(LoopMode.off);
     await _player!.play();
     _player = null;
+  }
+
+  Future<void> destroyPlayer() async {
+    if(_player != null) {
+      await _player!.dispose();
+      _player = null;
+    }
   }
 
 }

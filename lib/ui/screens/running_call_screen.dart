@@ -197,8 +197,8 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
                 });
               },
               onCallDecline: () {
+                Navigator.of(context).pop;
                 declineCall();
-                Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
               },
               onCallAccept: () {
                 acceptCall();

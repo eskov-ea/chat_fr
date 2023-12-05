@@ -23,18 +23,18 @@ class UsersProvider {
         List<UserContact> users = collection.map((user) => UserContact.fromJson(user)).toList();
         return users;
       } else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, null,
-            "DialogsProvider, creating dialogs");
+        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/users');
       } else {
-        throw AppErrorException(AppErrorExceptionType.getData, null,
-            "DialogsProvider, creating dialogs");
+        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/users');
       }
     }  on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, creating dialogs");
+      throw AppErrorException(AppErrorExceptionType.network, location: 'https://erp.mcfef.com/api/users');
     } on AppErrorException{
       rethrow;
     } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.other, err.toString(), "DialogsProvider, creating dialogs");
+      throw AppErrorException(AppErrorExceptionType.other, location: 'https://erp.mcfef.com/api/users');
     }
   }
 

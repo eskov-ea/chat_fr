@@ -14,7 +14,7 @@ class PushBroadcastReceiver: BroadcastReceiver() {
 
 
     override fun onReceive(context: Context, intent: Intent) {
-        Toast.makeText(context, "[Push] RECEIVED + ${CoreContext.isLoggedIn}", Toast.LENGTH_SHORT).show()
+//        Toast.makeText(context, "[Push] RECEIVED + ${CoreContext.isLoggedIn}", Toast.LENGTH_SHORT).show()
         if (CoreContext.core == null || !CoreContext.isLoggedIn) {
             Log.i("PUSH_BROADCAST_RECEIVER", intent.extras.toString())
             val core = CoreContext(context).getInstance()

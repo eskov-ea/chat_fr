@@ -34,7 +34,7 @@ class AuthBloc
         emit(const Authenticated());
       } catch(err, stackTrace) {
         err as AppErrorException;
-        _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.type.toString());
+        _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.type.toString(), additionalInfo: err.message, uri: err.location);
         emit(AuthenticatingFailure(error: err));
       }
     }
@@ -47,7 +47,8 @@ class AuthBloc
         await authRepo.logout();
         emit(Unauthenticated());
       } catch (err, stackTrace) {
-        _logger.sendErrorTrace(stackTrace: stackTrace);
+        err as AppErrorException;
+        _logger.sendErrorTrace(stackTrace: stackTrace, uri: err.location);
         emit(Unauthenticated());
       }
     }
@@ -58,18 +59,14 @@ class AuthBloc
     ) async {
       try {
         final String? token = await _dataProvider.getToken();
-        print("AuthCheckStatusEvent  $token");
         final bool auth = await authRepo.checkAuthStatus(token);
-        if (!auth) {
-          Logger().sendErrorTrace(stackTrace: StackTrace.fromString("Check auth state returned 401 status code"));
-        }
-        if (!auth) await _dataProvider.deleteToken();
         final newState =
         auth ? const Authenticated() : Unauthenticated();
         emit(newState);
       } catch (err, stackTrace) {
+        err as AppErrorException;
         await _dataProvider.deleteToken();
-        _logger.sendErrorTrace(stackTrace: stackTrace);
+        _logger.sendErrorTrace(stackTrace: stackTrace, additionalInfo: err.message, uri: err.location);
         emit(Unauthenticated());
       }
     }

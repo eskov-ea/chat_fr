@@ -43,16 +43,16 @@ class AuthRepository {
         await _secureStorage.setUserId(userId);
         return authToken;
       } else {
-        throw AppErrorException(AppErrorExceptionType.auth, null, "not authorized");
+        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: "https://erp.mcfef.com/api/auth");
       }
     } on SocketException {
-      throw AppErrorException(AppErrorExceptionType.network, null, "DialogsProvider, creating dialogs");
+      throw AppErrorException(AppErrorExceptionType.network, location: "https://erp.mcfef.com/api/auth");
     } on AppErrorExceptionType {
         rethrow;
     } catch (err, stackTrace) {
-        print("auth err  -->  $err, $stackTrace");
-        _logger.sendErrorTrace(stackTrace: stackTrace);
-        throw AppErrorException(AppErrorExceptionType.other, "AuthRepository",  err.toString());
+        _logger.sendErrorTrace(stackTrace: stackTrace, uri: "USER: [ $username ], https://erp.mcfef.com/api/auth");
+        throw AppErrorException(AppErrorExceptionType.other, location: "https://erp.mcfef.com/api/auth");
     }
   }
 
@@ -69,8 +69,8 @@ class AuthRepository {
       await _secureStorage.deleteUserId();
       await _secureStorage.deleteToken();
       await _secureStorage.deleteDeviceID();
-    } catch (err, stackTrace) {
-      _logger.sendErrorTrace(stackTrace: stackTrace);
+    } catch (err) {
+      throw AppErrorException(AppErrorExceptionType.auth, location: "https://erp.mcfef.com/api/logout");
     }
   }
 
@@ -82,11 +82,13 @@ class AuthRepository {
         'Authorization': 'Bearer $token',
       },
     );
-    print("AuthCheckStatusEvent  ${response.body}");
+    print("[ API CHECK ]: ${response.statusCode} ${response.body}");
     if (response.statusCode == 200) {
       return true;
     }
-    return false;
+    throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+      location: "https://erp.mcfef.com/api/profile"
+    );
   }
 
   Future<void> resetPassword(String email) async {
@@ -106,7 +108,7 @@ class AuthRepository {
       );
       print('RESET_PASSWORD_RESPONSE   ${response.body}');
     } catch (err, stackTrace) {
-      _logger.sendErrorTrace(stackTrace: stackTrace);
+      _logger.sendErrorTrace(stackTrace: stackTrace, uri: "https://erp.mcfef.com/api/profile");
       print('RESET_PASSWORD_ERROR   $err');
     }
   }

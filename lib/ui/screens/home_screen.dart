@@ -130,6 +130,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         return 'Произошла ошибка. Попробуйте еще раз';
       case AppErrorExceptionType.parsing:
         return 'Произошла ошибка при обработки данных. Попробуйте еще раз';
+      case AppErrorExceptionType.socket:
+        return 'Произошла ошибка при получении данных по сети';
+      case AppErrorExceptionType.render:
+        return 'Произошла ошибка при создании виджета';
       case AppErrorExceptionType.getData:
         return 'Произошла ошибка при загрузке данных. Попробуйте еще раз';
       case AppErrorExceptionType.secureStorage:
@@ -147,12 +151,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       PackageInfo packageInfo = await PackageInfo.fromPlatform();
       currentVersion = packageInfo.version;
       final String? availableVersion = Platform.isAndroid ? settings.versionAndroid : Platform.isIOS ? settings.versionIos : null;
-      print("Current app version is $currentVersion, available version is $availableVersion");
       if(availableVersion == null) return;
       final List<String> currentVersionArray = currentVersion!.split(".");
       final List<String> availableVersionArray = availableVersion.split(".");
       for(var i=0; i<currentVersionArray.length; ++i) {
-        print("UPDATE:::: ${currentVersionArray[i]}  -->  ${availableVersionArray[i]}");
         if(int.parse(currentVersionArray[i]) < int.parse(availableVersionArray[i])) {
           isUpdateAvailable = true;
           if(!Platform.isIOS) {
@@ -212,12 +214,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           sipRegistration(state.user!.userProfileSettings!, myUserName);
         }
         getUserCallLog(state.user!.userProfileSettings!);
-      } else {
-        customToastMessage(context: context, message: "Не удалось получить настройки для Asterisk с сервера. Пожалуйста, сообщите об этой ошибке разработчикам");
       }
       if (state.user?.appSettings != null){
         checkAppVersion(state.user!.appSettings!);
         _autoJoinChats(state.user!.chatSettings!);
+      } else {
+        customToastMessage(context: context, message: "Не удалось получить настройки для Asterisk с сервера. Пожалуйста, сообщите об этой ошибке разработчикам");
       }
     }
   }
@@ -243,12 +245,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _openCallScreen() {
-    final CallState state = BlocProvider.of<CallsBloc>(context).state;
-    if (Platform.isIOS && state is! IncomingCallState || !Platform.isIOS) {
-      Navigator.of(context).pushNamed(
-        MainNavigationRouteNames.runningCallScreen,
-        arguments: CallScreenArguments(userId: userId)
-      );
+    try {
+      final CallState state = BlocProvider.of<CallsBloc>(context).state;
+      if (Platform.isIOS && state is! IncomingCallState || !Platform.isIOS) {
+        Navigator.of(context).pushNamed(
+            MainNavigationRouteNames.runningCallScreen,
+            arguments: CallScreenArguments(userId: userId));
+      }
+    } catch(_) {
+      setState(() {
+        isActiveCall = false;
+        isIncomingCall = false;
+        isOutgoingCall = false;
+        callerName = null;
+      });
     }
   }
 

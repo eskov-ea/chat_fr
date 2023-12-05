@@ -69,6 +69,10 @@ class AuthViewCubit extends Cubit<AuthViewCubitState> {
         return 'Произошла ошибка. Попробуйте еще раз';
       case AppErrorExceptionType.parsing:
         return 'Произошла ошибка при обработке данных. Если повторится - свяжитесь с разработчиком';
+      case AppErrorExceptionType.socket:
+        return 'Произошла ошибка при получении данных по сети';
+      case AppErrorExceptionType.render:
+        return 'Произошла ошибка при создании виджета';
       case AppErrorExceptionType.getData:
         return 'Произошла ошибка при получении данных с сервера. Попробуйте еще раз';
       case AppErrorExceptionType.secureStorage:

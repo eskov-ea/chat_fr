@@ -37,7 +37,7 @@ class ProfileBloc extends Bloc<ProfileBlocEvent, UserProfileState> {
       emit(newState);
     } catch (err, stackTrace) {
       err as AppErrorException;
-      _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.type.toString());
+      _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.type.toString(), additionalInfo: err.message, uri: err.location);
       if(err.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {

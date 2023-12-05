@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/bloc/ws_bloc/ws_event.dart';
 import 'package:chat/bloc/ws_bloc/ws_state.dart';
+import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/services/messages/messages_api_provider.dart';
 import 'package:dart_pusher_channels/dart_pusher_channels.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -216,26 +218,43 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
   }
 
   void _onSocketEvent(PusherChannelsReadEvent event) {
-    if (event.rootObject["event"] == "pusher_internal:subscription_succeeded" && event.rootObject["data"] != null) {
-      add(WsOnlineUsersInitialEvent(onlineUsers: jsonDecode(event.rootObject["data"])["presence"]["ids"]));
-    } else if (event.rootObject["event"] == "pusher_internal:member_removed") {
-      print('presenceChannel | Member removed, rootObject is ${jsonDecode(event.rootObject["data"])["user_id"].runtimeType}');
-      final int id = int.parse(jsonDecode(event.rootObject["data"])["user_id"]);
-      add(WsOnlineUsersExitEvent(userId: id));
-    } else if (event.rootObject["event"] == "pusher_internal:member_added") {
-      print('presenceChannel | Member added, rootObject is ${jsonDecode(event.rootObject["data"])["user_id"].runtimeType}');
-      add(WsOnlineUsersJoinEvent(userId: jsonDecode(event.rootObject["data"])["user_id"]));
-    } else if (event.rootObject["event"] == "client-user-event") {
-      print("client-user-event  ${event.rootObject}  ${event.rootObject["data"]["event"]}  ${event.rootObject["data"]["fromUser"].runtimeType}");
-      add(WsOnlineUserTypingEvent(
-        clientEvent: ClientUserEvent.fromJson(event.rootObject["data"]),
-        dialogId: event.rootObject["data"]["dialogId"]
-      ));
+    try {
+      if (event.rootObject["event"] ==
+              "pusher_internal:subscription_succeeded" &&
+          event.rootObject["data"] != null) {
+        add(WsOnlineUsersInitialEvent(
+            onlineUsers: jsonDecode(event.rootObject["data"])["presence"]
+                ["ids"]));
+      } else if (event.rootObject["event"] ==
+          "pusher_internal:member_removed") {
+        print(
+            'presenceChannel | Member removed, rootObject is ${jsonDecode(event.rootObject["data"])["user_id"].runtimeType}');
+        final int id =
+            int.parse(jsonDecode(event.rootObject["data"])["user_id"]);
+        add(WsOnlineUsersExitEvent(userId: id));
+      } else if (event.rootObject["event"] == "pusher_internal:member_added") {
+        print(
+            'presenceChannel | Member added, rootObject is ${jsonDecode(event.rootObject["data"])["user_id"].runtimeType}');
+        add(WsOnlineUsersJoinEvent(
+            userId: jsonDecode(event.rootObject["data"])["user_id"]));
+      } else if (event.rootObject["event"] == "client-user-event") {
+        print(
+            "client-user-event  ${event.rootObject}  ${event.rootObject["data"]["event"]}  ${event.rootObject["data"]["fromUser"].runtimeType}");
+        add(WsOnlineUserTypingEvent(
+            clientEvent: ClientUserEvent.fromJson(event.rootObject["data"]),
+            dialogId: event.rootObject["data"]["dialogId"]));
+      }
+    } catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: AppErrorExceptionType.socket.toString(), additionalInfo: "\r\nEvent was: ${event.rootObject}");
     }
   }
 
   void onNewMessageReceived(event, emit) {
-    emit(WsStateReceiveNewMessage(message: event.message));
+    try {
+      emit(WsStateReceiveNewMessage(message: event.message));
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Event message was: [ $event, ${event.message} ]");
+    }
   }
 
   void onWsUserJoinChatEvent(WsUserJoinChatEvent event, emit) {
@@ -391,7 +410,11 @@ void onWsOnlineUsersJoinEvent (WsOnlineUsersJoinEvent event, Emitter<WsBlocState
 }
 
 void onWsOnlineUsersInitialEvent(WsOnlineUsersInitialEvent event, Emitter<WsBlocState> emit) {
-  emit(WsStateOnlineUsersInitialState(onlineUsers: event.onlineUsers));
+  try {
+    emit(WsStateOnlineUsersInitialState(onlineUsers: event.onlineUsers));
+  } catch(err, stackTrace) {
+    Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Event online users were: [ $event, ${event.onlineUsers} ]");
+  }
 }
 
 void onWsOnlineUsersExitEvent (WsOnlineUsersExitEvent event, Emitter<WsBlocState> emit) {
@@ -406,7 +429,7 @@ void onWsOnlineUserTypingEvent(WsOnlineUserTypingEvent event, Emitter<WsBlocStat
   ));
 }
 
-clientSubscribeToChannel(
+clientSubscribeToChannel (
     {required client,
     required String channelName,
     required String? authToken}) {

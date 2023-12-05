@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/bloc/user_bloc/user_event.dart';
 import 'package:chat/bloc/user_bloc/user_state.dart';
+import 'package:chat/bloc/user_bloc/users_list_container.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:flutter/services.dart';
@@ -67,7 +68,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
       }
     } catch (err, stackTrace) {
       err as AppErrorException;
-      _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.type.toString());
+      _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.type.toString(), additionalInfo: err.message, uri: err.location);
       if(err.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
@@ -81,12 +82,10 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
     ) async {
       if (event.searchQuery != "") {
         final query = event.searchQuery.toLowerCase();
-        final container = state.usersContainer;
-        final filteredUsers = filterUsersBySearchQuery(state.users, query);
-        final newContainer = container.copyWith(users: filteredUsers);
-        print("SEARCHWIGET   ${container.users}");
+        final filteredUsers = filterUsersBySearchQuery(state.usersContainer.users, query);
+        final newContainer = UsersListContainer(users: filteredUsers);
         emit(UsersLoadedState(
-            usersContainer: container,
+            usersContainer: state.usersContainer,
             searchQuery: query,
             searchUsersContainer: newContainer,
             onlineUsersDictionary: state.onlineUsersDictionary,
@@ -114,64 +113,69 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   void onUsersUpdateOnlineStatusEvent(
       UsersUpdateOnlineStatusEvent event, emit
   ) {
-    try {
-      final st = state as UsersLoadedState;
-      UsersLoadedState newState;
-      if (event.onlineUsersDictionary != null) {
-        newState = st.copyWith(
-            usersContainer: st.usersContainer,
-            searchUsersContainer: st.searchUsersContainer,
-            searchQuery: st.searchQuery,
-            onlineUsersDictionary: event.onlineUsersDictionary,
-            clientEvent: st.clientEventsDictionary);
-        emit(newState);
-      } else if (event.exitedUser != null) {
-        final int id = event.exitedUser!;
-        st.onlineUsersDictionary.remove(id);
-        newState = st.copyWith(
-            usersContainer: st.usersContainer,
-            searchUsersContainer: st.searchUsersContainer,
-            searchQuery: st.searchQuery,
-            onlineUsersDictionary: st.onlineUsersDictionary,
-            clientEvent: st.clientEventsDictionary);
-        emit(newState);
-      } else if (event.joinedUser != null) {
-        final int id = event.joinedUser!;
-        st.onlineUsersDictionary[id] = true;
-        newState = st.copyWith(
-            usersContainer: st.usersContainer,
-            searchUsersContainer: st.searchUsersContainer,
-            searchQuery: st.searchQuery,
-            onlineUsersDictionary: st.onlineUsersDictionary,
-            clientEvent: st.clientEventsDictionary);
-        emit(newState);
-      } else if (event.clientEvent != null && event.dialogId != null) {
-        Map<int, ClientUserEvent> newClientEventDictionary =
-            st.clientEventsDictionary;
-        print(
-            "onUsersUpdateOnlineStatusEvent     state is   ${newClientEventDictionary.length} ${newClientEventDictionary[193]?.event}  ${event.clientEvent?.event}");
-        if (event.clientEvent?.event == "typing") {
-          newClientEventDictionary[event.dialogId!] = event.clientEvent!;
+    if (state is UsersLoadedState) {
+      try {
+        final st = state as UsersLoadedState;
+        UsersLoadedState newState;
+        if (event.onlineUsersDictionary != null) {
+          newState = st.copyWith(
+              usersContainer: st.usersContainer,
+              searchUsersContainer: st.searchUsersContainer,
+              searchQuery: st.searchQuery,
+              onlineUsersDictionary: event.onlineUsersDictionary,
+              clientEvent: st.clientEventsDictionary);
+          emit(newState);
+        } else if (event.exitedUser != null) {
+          final int id = event.exitedUser!;
+          st.onlineUsersDictionary.remove(id);
+          newState = st.copyWith(
+              usersContainer: st.usersContainer,
+              searchUsersContainer: st.searchUsersContainer,
+              searchQuery: st.searchQuery,
+              onlineUsersDictionary: st.onlineUsersDictionary,
+              clientEvent: st.clientEventsDictionary);
+          emit(newState);
+        } else if (event.joinedUser != null) {
+          final int id = event.joinedUser!;
+          st.onlineUsersDictionary[id] = true;
+          newState = st.copyWith(
+              usersContainer: st.usersContainer,
+              searchUsersContainer: st.searchUsersContainer,
+              searchQuery: st.searchQuery,
+              onlineUsersDictionary: st.onlineUsersDictionary,
+              clientEvent: st.clientEventsDictionary);
+          emit(newState);
+        } else if (event.clientEvent != null && event.dialogId != null) {
+          Map<int, ClientUserEvent> newClientEventDictionary =
+              st.clientEventsDictionary;
+          print(
+              "onUsersUpdateOnlineStatusEvent     state is   ${newClientEventDictionary.length} ${newClientEventDictionary[193]?.event}  ${event.clientEvent?.event}");
+          if (event.clientEvent?.event == "typing") {
+            newClientEventDictionary[event.dialogId!] = event.clientEvent!;
+          }
+          if (event.clientEvent?.event == "finish_typing") {
+            newClientEventDictionary.remove(event.dialogId!);
+          }
+          newState = st.copyWith(
+              usersContainer: st.usersContainer,
+              searchUsersContainer: st.searchUsersContainer,
+              searchQuery: st.searchQuery,
+              onlineUsersDictionary: st.onlineUsersDictionary,
+              clientEvent: newClientEventDictionary);
+          emit(newState);
         }
-        if (event.clientEvent?.event == "finish_typing") {
-          newClientEventDictionary.remove(event.dialogId!);
-        }
-        newState = st.copyWith(
-            usersContainer: st.usersContainer,
-            searchUsersContainer: st.searchUsersContainer,
-            searchQuery: st.searchQuery,
-            onlineUsersDictionary: st.onlineUsersDictionary,
-            clientEvent: newClientEventDictionary);
-        emit(newState);
+      } catch (err, stackTrace) {
+        _logger.sendErrorTrace(stackTrace: stackTrace);
+        emit(UsersErrorState());
       }
-    } catch (err, stackTrace) {
-      _logger.sendErrorTrace(stackTrace: stackTrace);
-      emit(UsersErrorState());
+    } else {
+      add(UsersLoadEvent());
     }
   }
 
 
   List<UserContact> filterUsersBySearchQuery(List<UserContact> users, query) {
+
     final List<UserContact> filteredUsers = [];
     for (var user in users) {
       if (user.firstname.toLowerCase().contains(query) || user.lastname.toLowerCase().contains(query)) {

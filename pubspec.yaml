@@ -63,24 +63,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-   - assets/images/DV-rybak-logo-cropped.png
-   - assets/images/no_avatar.png
-   - assets/images/no_avatar_group_version.png
-   - assets/images/mute.png
-   - assets/images/message_icon.png
-   - assets/images/speaker_icon.png
-   - assets/images/decline_icon.png
-   - assets/images/accept_icon.png
-   - assets/images/chat_background.jpg
-   - assets/images/calls_wallpaper.jpg
-   - assets/PDF_file_icon.png
-   - assets/audio_icon.png
-   - assets/image_icon.png
-   - assets/image_icon_2.png
-   - assets/file_icon.png
-   - assets/file_icon_2.png
-   - assets/download_icon.png
-   - assets/blured_img_icon.jpg
-   - assets/sounds/connecting_sound.mp3
-   - assets/sounds/error_call_sound.mp3
+   - assets/
+   - assets/images/
+   - assets/sounds/
 

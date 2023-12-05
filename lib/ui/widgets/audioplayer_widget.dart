@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:chat/services/logger/logger_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -35,6 +36,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   bool _playerIsInited = false;
   bool _dataIsLoaded = false;
   late final AudioPlayer audioPlayer;
+  bool isError = false;
 
   @override
   void dispose() {
@@ -51,8 +53,14 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       setState(() {
         _playerIsInited = true;
       });
-    decodeBase64File();
+    }).catchError((err, stackTrace) {
+      print("AUDIO ERROR:   $err, $stackTrace");
+      setState(() {
+        isError = true;
+      });
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
     });
+
     super.initState();
   }
 
@@ -69,6 +77,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     });
     player.setSubscriptionDuration(Duration(milliseconds: 100));
     print(_mPlayerSubscription);
+    await decodeBase64File();
   }
 
   void play() async {
@@ -139,7 +148,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   void cancelPlayerSubscriptions() {
     if (player != null) {
-      _mPlayerSubscription!.cancel();
+      _mPlayerSubscription?.cancel();
       _mPlayerSubscription = null;
     }
   }
@@ -165,39 +174,74 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 
   Widget audioWidget() {
-    return Container(
-      child: Row(
-        mainAxisAlignment: widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          _playerIsInited && _dataIsLoaded
-            ? _controlButtons()
-            : SizedBox(
+    if(isError) {
+      return Container(
+        child: Row(
+          mainAxisAlignment: widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            GestureDetector(
+              onTap: () {
+                init().then((value) {
+                  setState(() {
+                    _playerIsInited = true;
+                  });
+                  setState(() {
+                    isError = false;
+                  });
+                }).catchError((_) {
+                  setState(() {
+                    isError = true;
+                  });
+                });
+              },
+              child: SizedBox(
+                width: 30,
+                height: 35,
+                child: Image.asset("assets/images/download.png", fit: BoxFit.fitWidth),
+              ),
+            ),
+            SizedBox(
+              width: 150,
+              height: 35,
+              child: Image.asset("assets/images/voice-message.png", fit: BoxFit.fitWidth),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Container(
+        child: Row(
+          mainAxisAlignment: widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            _playerIsInited && _dataIsLoaded
+                ? _controlButtons()
+                : const SizedBox(
                 width: 15,
                 height: 15,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                 )
             ),
-          SizedBox(
-            width: 150,
-            child: Slider(
-              value: position.inSeconds.toDouble(),
-              min: 0,
-              max: duration.inSeconds.toDouble(),
-              onChanged: setSubscriptionDuration,
-              // divisions: 100
+            SizedBox(
+              width: 150,
+              child: Slider(
+                value: position.inSeconds.toDouble(),
+                min: 0,
+                max: duration.inSeconds.toDouble(),
+                onChanged: setSubscriptionDuration,
+                // divisions: 100
+              ),
             ),
-          ),
-          // _slider(_mSubscriptionDuration, setSubscriptionDuration),
-          // _timing(snapshot.data),
-          Text(
-            getAudioMessageDuration(duration.inSeconds),
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          )
-        ],
-      )
-    );
+            Text(
+              getAudioMessageDuration(duration.inSeconds),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            )
+          ],
+        )
+      );
+    }
   }
 
   Widget _controlButtons() {
@@ -235,11 +279,11 @@ class AudioLoadingMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
+    return const Padding(
+      padding:  EdgeInsets.all(8.0),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: const [
+        children: [
           SizedBox(
             height: 20,
             width: 20,

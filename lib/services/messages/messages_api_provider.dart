@@ -35,18 +35,18 @@ class MessagesProvider {
         List<MessageData> messages = collection.map((message) => MessageData.fromJson(message)).toList();
         return messages;
       } else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, null,
-            "MessagesProvider.getMessages");
+        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/chat/message/pagepull/$dialogId/$pageNumber');
       } else {
-        throw AppErrorException(AppErrorExceptionType.getData, null,
-            "MessagesProvider.getMessages");
+        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/chat/message/pagepull/$dialogId/$pageNumber');
       }
     } on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.getMessages");
+      throw AppErrorException(AppErrorExceptionType.network, location: 'https://erp.mcfef.com/api/chat/message/pagepull/$dialogId/$pageNumber');
     } on AppErrorException{
       rethrow;
     } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.getMessages");
+      throw AppErrorException(AppErrorExceptionType.other, location: 'https://erp.mcfef.com/api/chat/message/pagepull/$dialogId/$pageNumber');
     }
   }
 
@@ -64,18 +64,18 @@ class MessagesProvider {
         Map<String, dynamic> collection = jsonDecode(response.body)["data"];
         return collection;
       } else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, null,
-            "MessagesProvider.getNewUpdatesOnResume");
+        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/chat/pull/4000');
       } else {
-        throw AppErrorException(AppErrorExceptionType.getData, null,
-            "MessagesProvider.getNewUpdatesOnResume");
+        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/chat/pull/4000');
       }
     } on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.getNewUpdatesOnResume");
+      throw AppErrorException(AppErrorExceptionType.network, location: 'https://erp.mcfef.com/api/chat/pull/4000');
     } on AppErrorException {
       rethrow;
     } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.getNewUpdatesOnResume");
+      throw AppErrorException(AppErrorExceptionType.other, location: 'https://erp.mcfef.com/api/chat/pull/4000');
     }
   }
 
@@ -103,18 +103,18 @@ class MessagesProvider {
       if (response.statusCode == 200) {
         return response.body;
       } else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, null,
-            "MessagesProvider.sendMessage");
+        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/chat/message/add/$dialogId');
       } else {
-        throw AppErrorException(AppErrorExceptionType.getData, null,
-            "MessagesProvider.sendMessage");
+        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/chat/message/add/$dialogId');
       }
     } on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.sendMessage");
+      throw AppErrorException(AppErrorExceptionType.network, location: 'https://erp.mcfef.com/api/chat/message/add/$dialogId');
     } on AppErrorException {
       rethrow;
     } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.sendMessage");
+      throw AppErrorException(AppErrorExceptionType.other, location: 'https://erp.mcfef.com/api/chat/message/add/$dialogId');
     }
   }
 
@@ -159,18 +159,18 @@ class MessagesProvider {
       if (response.statusCode == 200){
         return true;
       } else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, null,
-            "MessagesProvider.deleteMessage");
+        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/chat/message/setstatuses');
       } else {
-        throw AppErrorException(AppErrorExceptionType.getData, null,
-            "MessagesProvider.deleteMessage");
+        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/chat/message/setstatuses');
       }
     } on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.sendMessage");
+      throw AppErrorException(AppErrorExceptionType.network, location: 'https://erp.mcfef.com/api/chat/message/setstatuses');
     } on AppErrorException {
       rethrow;
     } catch(err) {
-      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.deleteMessage");
+      throw AppErrorException(AppErrorExceptionType.other, location: 'https://erp.mcfef.com/api/chat/message/setstatuses');
     }
   }
 
@@ -192,18 +192,18 @@ class MessagesProvider {
         DialogId dialog = DialogId.fromJson(jsonDecode(response.body));
         return dialog.dialogId;
       } else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, null,
-            "MessagesProvider.createDialogAndSendMessage");
+        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://web-notifications.ru/api/dialogs');
       } else {
-        throw AppErrorException(AppErrorExceptionType.getData, null,
-            "MessagesProvider.createDialogAndSendMessage");
+        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://web-notifications.ru/api/dialogs');
       }
     } on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.createDialogAndSendMessage");
+      throw AppErrorException(AppErrorExceptionType.network, location: 'https://web-notifications.ru/api/dialogs');
     } on AppErrorException {
       rethrow;
     } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.createDialogAndSendMessage");
+      throw AppErrorException(AppErrorExceptionType.other, location: 'https://web-notifications.ru/api/dialogs');
     }
   }
 
@@ -220,18 +220,18 @@ class MessagesProvider {
       if (response.statusCode == 200) {
         return MessageAttachmentsData.fromJson(jsonDecode(response.body)["data"]);
       } else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, null,
-            "MessagesProvider.loadAttachmentData");
+        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/chat/message/file/$attachmentId');
       } else {
-        throw AppErrorException(AppErrorExceptionType.getData, null,
-            "MessagesProvider.loadAttachmentData");
+        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/chat/message/file/$attachmentId');
       }
     } on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.loadAttachmentData");
+      throw AppErrorException(AppErrorExceptionType.network, location: 'https://erp.mcfef.com/api/chat/message/file/$attachmentId');
     } on AppErrorException {
       rethrow;
     } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.loadAttachmentData");
+      throw AppErrorException(AppErrorExceptionType.other, location: 'https://erp.mcfef.com/api/chat/message/file/$attachmentId');
     }
   }
 
@@ -267,18 +267,18 @@ class MessagesProvider {
       if (response.statusCode == 200) {
         return response.body;
       } else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, null,
-            "MessagesProvider.sendAudioMessage");
+        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/chat/message/add/$dialogId');
       } else {
-        throw AppErrorException(AppErrorExceptionType.getData, null,
-            "MessagesProvider.sendAudioMessage");
+        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/chat/message/add/$dialogId');
       }
     } on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.sendAudioMessage");
+      throw AppErrorException(AppErrorExceptionType.network, location: 'https://erp.mcfef.com/api/chat/message/add/$dialogId');
     } on AppErrorException {
       rethrow;
     } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.sendAudioMessage");
+      throw AppErrorException(AppErrorExceptionType.other, location: 'https://erp.mcfef.com/api/chat/message/add/$dialogId');
     }
   }
 
@@ -317,18 +317,18 @@ class MessagesProvider {
       if (response.statusCode == 200) {
         return response.body;
       } else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, null,
-            "MessagesProvider.sendMessageWithFileBase64");
+        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/chat/message/add/$dialogId');
       } else {
-        throw AppErrorException(AppErrorExceptionType.getData, null,
-            "MessagesProvider.sendMessageWithFileBase64");
+        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/chat/message/add/$dialogId');
       }
     } on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.sendMessageWithFileBase64");
+      throw AppErrorException(AppErrorExceptionType.network, location: 'https://erp.mcfef.com/api/chat/message/add/$dialogId');
     } on AppErrorException {
       rethrow;
     } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.other, null, "MessagesProvider.sendMessageWithFileBase64");
+      throw AppErrorException(AppErrorExceptionType.other, location: 'https://erp.mcfef.com/api/chat/message/add/$dialogId');
     }
   }
 
@@ -363,9 +363,21 @@ class MessagesProvider {
           },
           body: postData);
 
-      return response.body;
+      if (response.statusCode == 200) {
+        return response.body;
+      } else if (response.statusCode == 401) {
+        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+            location: 'WEB:: https://erp.mcfef.com/api/chat/message/add/$dialogId');
+      } else {
+        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+            location: 'WEB:: https://erp.mcfef.com/api/chat/message/add/$dialogId');
+      }
+    } on SocketException{
+      throw AppErrorException(AppErrorExceptionType.network, location: 'WEB:: https://erp.mcfef.com/api/chat/message/add/$dialogId');
+    } on AppErrorException {
+      rethrow;
     } catch (err) {
-      throw Exception('Error sending file base64 message on web');
+      throw AppErrorException(AppErrorExceptionType.other, location: 'WEB:: https://erp.mcfef.com/api/chat/message/add/$dialogId');
     }
   }
 

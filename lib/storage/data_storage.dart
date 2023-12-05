@@ -18,7 +18,7 @@ class DataProvider {
     try {
       return _secureStorage.read(key: _Keys.token);
     } catch(err, stackTrace) {
-      throw AppErrorException(AppErrorExceptionType.secureStorage, stackTrace.toString(), "getToken");
+      throw AppErrorException(AppErrorExceptionType.secureStorage);
     }
   }
 
@@ -26,7 +26,7 @@ class DataProvider {
     try {
       return _secureStorage.write(key: _Keys.token, value: value);
     } catch(err, stackTrace) {
-      throw AppErrorException(AppErrorExceptionType.secureStorage, stackTrace.toString(), "setToken");
+      throw AppErrorException(AppErrorExceptionType.secureStorage);
     }
   }
 

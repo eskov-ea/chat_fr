@@ -31,18 +31,18 @@ class PushNotificationService {
       if (response.statusCode == 200 || response.statusCode == 302) {
         return;
       } else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, null,
-            "PushNotificationService.sendMissCallPush");
+        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/user/push/$userId');
       } else {
-        throw AppErrorException(AppErrorExceptionType.getData, null,
-            "PushNotificationService.MessagesProvider");
+        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/user/push/$userId');
       }
     } on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, null, "MessagesProvider.loadAttachmentData");
+      throw AppErrorException(AppErrorExceptionType.network, location: 'https://erp.mcfef.com/api/user/push/$userId');
     } on AppErrorException {
       rethrow;
     } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.other, null, "PushNotificationService.sendMissCallPush");
+      throw AppErrorException(AppErrorExceptionType.other, location: 'https://erp.mcfef.com/api/user/push/$userId');
     }
   }
 

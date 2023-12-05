@@ -1,8 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
-import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import '../../storage/data_storage.dart';
 
 class Logger {
@@ -19,12 +16,15 @@ class Logger {
     }
   }
 
-  Future<bool> sendErrorTrace({required StackTrace stackTrace, String? errorType, String? level}) async {
+  Future<bool> sendErrorTrace({required StackTrace stackTrace, String? errorType, String? additionalInfo, String? level, String? uri}) async {
     level == null ? 'debug' : level;
     final String? token = await _secureStorage.getToken();
+    final String? userId = await _secureStorage.getUserId();
+    final String additional = additionalInfo ?? '';
+    final String url = uri ?? '';
     final postData = jsonEncode(<String, Object>{
       'data': {
-        'message': errorType != null ? '\r\n$errorType\r\n$stackTrace' : '\r\n$stackTrace',
+        'message': errorType != null ? '\r\nUser ID: [ ${userId ?? "N/A"}], URL was: [ $url ],  Error type: [ $errorType ]\r\n$stackTrace' + additional : '\r\n$stackTrace' + additional,
       }
     });
     final response = await http.post(
@@ -35,8 +35,6 @@ class Logger {
       },
       body: postData
     );
-    print("TODAY::::: logger ${response.body}");
-
     if (response.statusCode == 200) {
       return true;
     } else {

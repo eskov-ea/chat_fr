@@ -251,6 +251,11 @@ class ActionBarState extends State<ActionBar> {
                           });
                         }
                       },
+                      onTapOutside: (event) {
+                        if(widget.focusNode.hasFocus) {
+                          widget.focusNode.unfocus();
+                        }
+                      },
                       style: const TextStyle(fontSize: 16, color: LightColors.mainText),
                       decoration: const InputDecoration(
                         contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
@@ -342,7 +347,7 @@ class ActionBarState extends State<ActionBar> {
           onPressed: (){
             widget.deleteMessages();
           },
-          icon: Icon(
+          icon: const Icon(
             Icons.delete,
             color: Colors.blueAccent,
             size: 40,
@@ -386,40 +391,6 @@ class ActionBarState extends State<ActionBar> {
     );
     _messageController.clear();
   }
-  // _sendMessage(context, ParentMessage? parentMessage) async {
-  //   final messageText = _messageController.text;
-  //   final localMessage = createLocalMessage(replyedMessageId: widget.replyedMessageId,
-  //       dialogId: widget.dialogId!, messageText: messageText, parentMessage: widget.parentMessage, userId: widget.userId);
-  //   print("localMessage  ${localMessage}");
-  //   try {
-  //     _messageController.clear();
-  //     BlocProvider.of<ChatsBuilderBloc>(context).add(
-  //         ChatsBuilderAddMessageEvent(message: localMessage, dialog: widget.dialogId!)
-  //     );
-  //     // TODO: if response status code is 200 else ..
-  //     final sentMessage = await MessagesRepository().sendMessage(dialogId: widget.dialogId!, messageText: messageText, parentMessageId: widget.replyedMessageId, filetype: null, filePath: null, );
-  //     print("sentMessage response  $sentMessage");
-  //     if (sentMessage == null) {
-  //       customToastMessage(context, "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");
-  //       return;
-  //     }
-  //     final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
-  //     BlocProvider.of<ChatsBuilderBloc>(context).add(
-  //         ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: widget.dialogId!, localMessageId: localMessage.messageId)
-  //     );
-  //     widget.dialogCubit.updateLastDialogMessage(localMessage);
-  //   } catch (err) {
-  //     print(err);
-  //     customToastMessage(context, "Ошибка: Произошла ошибка при отправке сообщения, попробуйте еще раз");
-  //     BlocProvider.of<ChatsBuilderBloc>(context).add(
-  //         ChatsBuilderUpdateMessageWithErrorEvent(message: localMessage, dialog: widget.dialogId!)
-  //     );
-  //   }
-  //   BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogId!));
-  //   setState(() {
-  //     isSendButtonDisabled = false;
-  //   });
-  // }
 
   _sendAudioMessage(File file, userId, dialogId) {
     sendMessageUnix(
@@ -432,30 +403,8 @@ class ActionBarState extends State<ActionBar> {
     );
   }
 
-  // void _sendAudioMessage (String filePath, userId, dialogId, String filetype) async {
-  //   if (dialogId == null) {
-  //     await createDialogAndSendMessage(context, widget.rootWidget);
-  //     dialogId = widget.dialogId;
-  //   }
-  //   try {
-  //     final sentMessage = await MessagesProvider().sendAudioMessage(
-  //         filePath: filePath,
-  //         dialogId: dialogId,
-  //         filetype: filetype,
-  //         parentMessageId: widget.replyedMessageId);
-  //     final message = MessageData.fromJson(jsonDecode(sentMessage!)["data"]);
-  //     print("SENTMESSAGE  -->  ${message.file}");
-  //     // BlocProvider.of<ChatsBuilderBloc>(context).add(
-  //     //     ChatsBuilderAddMessageEvent(message: message, dialog: widget.dialogId!)
-  //     // );
-  //   } catch (err) {
-  //     //TODO: add local message with error to save the data
-  //     customToastMessage(context, "Ошибка: Произошла ошибка при отправке сообщения, попробуйте еще раз");
-  //   }
-  // }
 
   createDialogAndSendMessage(context, rootWidget) async {
-    print("CREATE DIALOG");
     //TODO: optimize two sending message and create dialog-sending message methods  ---- first need to create dialog and then send message
     setState(() {
       isSendButtonDisabled = true;
@@ -463,7 +412,7 @@ class ActionBarState extends State<ActionBar> {
     try {
       final newDialog = await DialogsProvider().createDialog(chatType: 1, users: [widget.partnerId], chatName: "p2p", chatDescription: null, isPublic: false);
       setState(() {
-        widget.dialogId = newDialog?.dialogId;
+        widget.dialogId = newDialog.dialogId;
       });
       final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);
       final initLength = chatsBuilderBloc.state.chats.length;
@@ -479,8 +428,8 @@ class ActionBarState extends State<ActionBar> {
       if (newDialog!= null) {
         widget.setDialogData(widget.rootWidget, newDialog);
       }
-    } catch(err) {
-      print("createDialogAndSendMessage error  $err");
+    } catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
     }
     setState(() {
       isSendButtonDisabled = false;

@@ -59,7 +59,7 @@ class DialogData {
               : null);
     } catch (err) {
       print(err);
-      throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "DialogData model, fromJson method");
+      throw AppErrorException(AppErrorExceptionType.parsing);
     }
   }
 
@@ -108,7 +108,7 @@ class DialogType {
           name: json["name"],
           description: json["description"]);
     } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "DialogType model");
+      throw AppErrorException(AppErrorExceptionType.parsing);
     }
   }
 }
@@ -185,7 +185,7 @@ class DialogPartnerData {
           imageUrl: json["imageUrl"] ??
               "https://sushistar73.ru/assets/img/noavatar.png");
     } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "DialogPartnerData model");
+      throw AppErrorException(AppErrorExceptionType.parsing);
     }
   }
 }
@@ -251,7 +251,7 @@ class DialogMessageData {
               : null);
     }
     catch (err) {
-      throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "DialogMessageData model");
+      throw AppErrorException(AppErrorExceptionType.parsing);
       return DialogMessageData.emptyData();
     }
   }
@@ -267,7 +267,7 @@ class SenderMessageData {
         id: json["_id"] ?? '',
       );
     } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "SenderMessageData model");
+      throw AppErrorException(AppErrorExceptionType.parsing);
     }
   }
 }
@@ -297,7 +297,7 @@ class ChatUser {
           active: json["active"],
           user: UserContact.fromJson(json["user"]));
     } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "ChatUser model");
+      throw AppErrorException(AppErrorExceptionType.parsing);
     }
   }
 
@@ -321,7 +321,7 @@ class DialogId {
     try {
       return DialogId(dialogId: json["dialogId"] ?? json["_id"]);
     } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.parsing, err.toString(), "DialogId model");
+      throw AppErrorException(AppErrorExceptionType.parsing);
     }
   }
 }

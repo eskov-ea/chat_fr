@@ -56,8 +56,9 @@ import 'messages/messages_repository.dart';
         "OUTGOING_CALL", {"number": "sip:${SipConfig.getPrefix()}${userId}@${SipConfig.getDomain()}"});
   }
 
-  Future<void> declineCall() async {
-    await sipChannel.invokeMethod("DECLINE_CALL");
+  void declineCall()  {
+    print("CALL DECLINE:::  call method");
+    sipChannel.invokeMethod("DECLINE_CALL");
   }
 
   Future<void> acceptCall() async {
@@ -176,7 +177,7 @@ import 'messages/messages_repository.dart';
       return file;
     } else {
       final UserProfileProvider userProfileProvider = UserProfileProvider();
-      final String? data = await userProfileProvider.loadUserAvatar(userId!);
+      final String? data = await userProfileProvider.loadUserAvatar(userId);
       if (data == null) return null;
       final bytes = base64Decode(data);
       await file.writeAsBytes(bytes);

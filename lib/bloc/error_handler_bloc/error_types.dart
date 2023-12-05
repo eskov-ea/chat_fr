@@ -1,9 +1,9 @@
-enum AppErrorExceptionType { network, auth, other, sessionExpired, access, parsing, getData, secureStorage }
+enum AppErrorExceptionType { network, auth, other, sessionExpired, access, parsing, getData, secureStorage, socket, render }
 
 class AppErrorException implements Exception {
   final AppErrorExceptionType type;
   final String? message;
-  final String errorLocation;
+  final String? location;
 
-  AppErrorException(this.type, this.message, this.errorLocation);
+  AppErrorException(this.type, {this.message, this.location});
 }

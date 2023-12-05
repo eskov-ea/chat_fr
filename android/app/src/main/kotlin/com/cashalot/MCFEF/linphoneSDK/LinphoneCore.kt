@@ -29,6 +29,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
     )
     val sm = StorageManager(context)
     var contacts: String? = null
+//    val mediaPlayerService: SipConnectingSoundPlayerService = SipConnectingSoundPlayerService(context)
 
     init {
         contacts = sm.readData()
@@ -36,14 +37,13 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
     fun login(username: String, password: String, domain: String, stunDomain: String, stunPort: String, host: String, displayName: String?, cert: String) {
         Log.i("SIP_REG", "Register in SIP with [ $username, $password, $domain ]")
-
+//        mediaPlayerService.playAssetConnectingSound()
         writeSipAccountToStorage(username, password, domain, stunDomain, stunPort, host, displayName, cert)
 
         val transportType = TransportType.Tls
         val authInfo = Factory.instance().createAuthInfo(username, null, password, null, null, domain, null)
 
         authInfo.tlsCert = cert
-//        authInfo.tlsCert = this::class.java.classLoader.getResource("assets/certs/aster.mcfef.com.txt").readText()
 
         val accountParams = core.createAccountParams()
         val identity = Factory.instance().createAddress("sip:$username@$domain")
@@ -55,25 +55,22 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         address?.transport = transportType
 
         accountParams.serverAddress = address
-//        accountParams.registerEnabled = true
-//        accountParams.ensureRegistered()
+        accountParams.isRegisterEnabled = true
         accountParams.pushNotificationAllowed = true
         accountParams.remotePushNotificationAllowed = true
 
         Log.e("ADDRESS_HOST", "account domain: [${accountParams.domain}]   /    server address: [${accountParams.serverAddress?.domain}]")
 
-        val nat = core.createNatPolicy()
-//        nat.stunServer = "aster.mcfef.com:3478"
+        val nat: NatPolicy = core.createNatPolicy()
         nat.stunServer = "$stunDomain:$stunPort"
-        nat.setTcpTurnTransportEnabled(true)
+//        nat.isTcpTurnTransportEnabled = true
         nat.stunServerUsername = username
-
-
-        nat.setStunEnabled(true)
-        nat.setTurnEnabled(true)
-        nat.setIceEnabled(true)
-        core.natPolicy = nat
+        nat.isStunEnabled = true
+//        nat.isTurnEnabled = true
+        nat.isIceEnabled = true
+//        core.natPolicy = nat
         accountParams.natPolicy = nat
+
 
         accountParams.contactUriParameters = "sip:$username@$domain"
 
@@ -87,8 +84,9 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         }
 
         Log.w("Account setup params", accountParams.identityAddress.toString())
-        core.addAuthInfo(authInfo)
         val account = core.createAccount(accountParams)
+
+        core.addAuthInfo(authInfo)
         core.addAccount(account)
 
         core.defaultAccount = account
@@ -492,6 +490,17 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
         core.inviteAddressWithParams(remoteAddress, params)
     }
+
+    fun hangUp() {
+        if (core.callsNb == 0) return
+
+        val call = if (core.currentCall != null) core.currentCall else core.calls[0]
+        Log.i("HANGUP", "${call}")
+        call ?: return
+
+        call.terminate()
+    }
+
 
     fun toggleMute(): Boolean {
         return if (core.isMicEnabled) {

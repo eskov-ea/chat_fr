@@ -27,9 +27,9 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
           final newState = CallsLoadedLogState(callLog: logs, logsDictionary: state.logsDictionary);
           emit(newState);
         } catch (err, stackTrace) {
-          _logger.sendErrorTrace(stackTrace: stackTrace);
-          final e = err as AppErrorException;
-          errorHandlerBloc.add(ErrorHandlerWithErrorEvent(error: e));
+          err as AppErrorException;
+          _logger.sendErrorTrace(stackTrace: stackTrace, additionalInfo: err.message, uri: err.location);
+          errorHandlerBloc.add(ErrorHandlerWithErrorEvent(error: err));
           final errorState = CallLogErrorState();
           emit(errorState);
         }
@@ -43,9 +43,9 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
           final newState = CallsLoadedLogState(callLog: logs, logsDictionary: state.logsDictionary);
           emit(newState);
         } catch (err, stackTrace) {
-          _logger.sendErrorTrace(stackTrace: stackTrace);
-          final e = err as AppErrorException;
-          errorHandlerBloc.add(ErrorHandlerWithErrorEvent(error: e));
+          err as AppErrorException;
+          _logger.sendErrorTrace(stackTrace: stackTrace, additionalInfo: err.message, uri: err.location);
+          errorHandlerBloc.add(ErrorHandlerWithErrorEvent(error: err));
           final errorState = CallLogErrorState();
           emit(errorState);
         }

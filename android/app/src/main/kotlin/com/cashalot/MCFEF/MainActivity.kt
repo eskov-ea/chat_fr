@@ -151,7 +151,8 @@ class MainActivity : FlutterActivity() {
                 linphoneCore.core.stop()
             } else if (call.method.equals("DECLINE_CALL")) {
                 Log.w("CALL", "DECLINE_CALL action")
-                linphoneCore.core.currentCall?.terminate()
+//                linphoneCore.core.currentCall?.terminate()
+                linphoneCore.hangUp()
             } else if (call.method.equals("ACCEPT_CALL")) {
                 Log.w("ACCEPT_CALL", "DESTROY_SIP event")
                 linphoneCore.core.currentCall?.accept()

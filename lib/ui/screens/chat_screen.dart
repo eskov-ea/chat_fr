@@ -22,6 +22,7 @@ import '../../services/messages/messages_api_provider.dart';
 import '../../view_models/user/users_view_cubit.dart';
 import '../../view_models/user/users_view_cubit_state.dart';
 import '../widgets/action_bar.dart';
+import '../widgets/chat_screen_call_button.dart';
 import '../widgets/message_widget.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 
@@ -228,7 +229,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     return GestureDetector(
       onTap: (){
-        focusNode.unfocus();
+        // focusNode.unfocus();
       },
       child: Scaffold(
         appBar: AppBar(
@@ -272,16 +273,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             if (!isSelectedMode && !kIsWeb && ( widget.dialogData == null || widget.dialogData!.chatType.p2p == 1)) Padding(
               padding: const EdgeInsets.only(right: 20),
-              child: IconButton(
-                icon: const Icon(
-                  CupertinoIcons.phone,
-                  color: AppColors.secondary ,
-                  size: 30
-                ),
-                onPressed: () {
-                  callNumber(context ,widget.partnerId.toString());
-                },
-              ),
+              child: CallButton(partnerId: widget.partnerId)
             ),
           ],
         ),

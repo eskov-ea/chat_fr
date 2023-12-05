@@ -108,15 +108,15 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.runtimeType.toString());
         return;
       }
-      final e = err as AppErrorException;
-      _logger.sendErrorTrace(stackTrace: stackTrace, errorType: e.type.toString());
-      if (e.type == AppErrorExceptionType.auth) {
-        errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: e));
+      err as AppErrorException;
+      _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.type.toString(), additionalInfo: err.message, uri: err.location);
+      if (err.type == AppErrorExceptionType.auth) {
+        errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
         final errorState = state.copyWith(
           updatedChats: state.chats,
           updatedMessagesDictionary: state.messagesDictionary,
-          error: e,
+          error: err,
           isError: true,
           isLoadingMessages: false
         );

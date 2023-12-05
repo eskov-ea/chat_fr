@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
+import 'package:chat/services/logger/logger_service.dart';
 import 'package:flutter/material.dart';
 import '../../services/global.dart';
 
@@ -31,10 +33,14 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
         userId: widget.userId
     );
 
-    if (file != null) {
-      setState(() {
-        image = file;
-      });
+    try {
+      if (file != null) {
+        setState(() {
+          image = file;
+        });
+      }
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: AppErrorExceptionType.render.toString());
     }
   }
 

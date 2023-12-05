@@ -20,23 +20,24 @@ class UserProfileProvider {
           'Authorization': 'Bearer $token',
         },
       );
+      print("[ API CHECK ]: ${response.statusCode} ${response.body}");
       if (response.statusCode == 200) {
         final UserProfileData profile =
             UserProfileData.fromJson(jsonDecode(response.body)["data"]);
         return profile;
       } else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, null,
-            "UserProfileProvider, getUserProfile");
+        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/profile');
       } else {
-        throw AppErrorException(AppErrorExceptionType.getData, null,
-            "UserProfileProvider, getUserProfile");
+        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+        location: 'https://erp.mcfef.com/api/profile');
       }
     }  on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, null, "UserProfileProvider, getUserProfile");
+      throw AppErrorException(AppErrorExceptionType.network, location: 'https://erp.mcfef.com/api/profile');
     } on AppErrorException{
       rethrow;
     } catch(err) {
-      throw AppErrorException(AppErrorExceptionType.other, err.toString(), "UserProfileProvider, getUserProfile");
+      throw AppErrorException(AppErrorExceptionType.other, location: 'https://erp.mcfef.com/api/profile');
     }
   }
 
@@ -52,12 +53,19 @@ class UserProfileProvider {
           });
       if (response.statusCode == 200) {
         return jsonDecode(response.body)["data"];
+      } else if (response.statusCode == 401) {
+        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+            location: 'https://erp.mcfef.com/api/user/avatar/$userId');
       } else {
-        return null;
+        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
+            location: 'https://erp.mcfef.com/api/user/avatar/$userId');
       }
-    } catch (err) {
-      //TODO: error handling
-      return null;
+    }  on SocketException{
+      throw AppErrorException(AppErrorExceptionType.network, location: 'https://erp.mcfef.com/api/user/avatar/$userId');
+    } on AppErrorException{
+      rethrow;
+    } catch(err) {
+      throw AppErrorException(AppErrorExceptionType.other, location: 'https://erp.mcfef.com/api/user/avatar/$userId');
     }
   }
 }
