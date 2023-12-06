@@ -1,29 +1,35 @@
+import 'package:equatable/equatable.dart';
+
 import 'error_types.dart';
 
 
-class ErrorHandlerState {}
-
-class ErrorHandlerInitialState extends ErrorHandlerState {
-  // final Object? error = null;
-  // final AppErrorTypes? errorType = null;
+class ErrorHandlerState extends Equatable {
+  @override
+  List<Object?> get props => [];
 }
 
-class ErrorHandlerWithErrorState extends ErrorHandlerState{
+class ErrorHandlerInitialState extends ErrorHandlerState {}
+
+class ErrorHandlerWithAppErrorState extends ErrorHandlerState{
   final AppErrorException error;
 
-  ErrorHandlerWithErrorState({
+  ErrorHandlerWithAppErrorState({
     required this.error
   });
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is ErrorHandlerWithErrorState &&
-              runtimeType == other.runtimeType &&
-              error == other.error;
+  List<Object?> get props => [runtimeType, error];
+
+}
+
+class ErrorHandlerWithRuntimeErrorState extends ErrorHandlerState{
+  final Object error;
+
+  ErrorHandlerWithRuntimeErrorState({
+    required this.error
+  });
 
   @override
-  int get hashCode => error.hashCode;
-
+  List<Object?> get props => [runtimeType, error];
 }
 

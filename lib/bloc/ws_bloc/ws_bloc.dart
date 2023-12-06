@@ -124,6 +124,10 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
       }
       await generalEventSubscription?.cancel();
 
+      while (socket == null) {
+        print("Socket null::::");
+        Future.delayed(const Duration(milliseconds: 300));
+      }
       final Channel channel = clientSubscribeToChannel(
           authToken: token, client: socket, channelName: 'private-chatinfo');
       channels[channel.name] = channel;

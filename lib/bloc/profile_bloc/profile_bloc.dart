@@ -1,19 +1,17 @@
 import 'package:chat/bloc/profile_bloc/profile_events.dart';
 import 'package:chat/bloc/profile_bloc/profile_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../services/logger/logger_service.dart';
 import '../../services/user_profile/user_profile_repository.dart';
 import '../../storage/data_storage.dart';
 import '../error_handler_bloc/error_handler_bloc.dart';
 import '../error_handler_bloc/error_handler_events.dart';
 import '../error_handler_bloc/error_types.dart';
 
+
 class ProfileBloc extends Bloc<ProfileBlocEvent, UserProfileState> {
   final UserProfileRepository _userProfileRepository = UserProfileRepository();
   final ErrorHandlerBloc errorHandlerBloc;
   final _secureStorage = DataProvider();
-  final _logger = Logger.getInstance();
 
   ProfileBloc({
     required this.errorHandlerBloc
@@ -35,10 +33,8 @@ class ProfileBloc extends Bloc<ProfileBlocEvent, UserProfileState> {
       final userProfile = await _userProfileRepository.getUserProfile(token);
       final newState = UserProfileLoadedState(user: userProfile);
       emit(newState);
-    } catch (err, stackTrace) {
-      err as AppErrorException;
-      _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.type.toString(), additionalInfo: err.message, uri: err.location);
-      if(err.type == AppErrorExceptionType.auth) {
+    } catch (err) {
+      if(err is AppErrorException && err.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
         emit(UserProfileErrorState());

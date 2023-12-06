@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/storage/data_storage.dart';
@@ -108,17 +109,24 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.runtimeType.toString());
         return;
       }
-      err as AppErrorException;
-      _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.type.toString(), additionalInfo: err.message, uri: err.location);
-      if (err.type == AppErrorExceptionType.auth) {
+      if (err is AppErrorException && err.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
-      } else {
+      } else if (err is AppErrorException) {
         final errorState = state.copyWith(
           updatedChats: state.chats,
           updatedMessagesDictionary: state.messagesDictionary,
           error: err,
           isError: true,
           isLoadingMessages: false
+        );
+        emit(errorState);
+      } else {
+        final errorState = state.copyWith(
+            updatedChats: state.chats,
+            updatedMessagesDictionary: state.messagesDictionary,
+            error: AppErrorException(AppErrorExceptionType.other),
+            isError: true,
+            isLoadingMessages: false
         );
         emit(errorState);
       }

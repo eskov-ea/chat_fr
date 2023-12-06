@@ -55,7 +55,8 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         address?.transport = transportType
 
         accountParams.serverAddress = address
-        accountParams.isRegisterEnabled = true
+//        accountParams.isRegisterEnabled = true
+        accountParams.registerEnabled = true
         accountParams.pushNotificationAllowed = true
         accountParams.remotePushNotificationAllowed = true
 
@@ -65,9 +66,11 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         nat.stunServer = "$stunDomain:$stunPort"
 //        nat.isTcpTurnTransportEnabled = true
         nat.stunServerUsername = username
-        nat.isStunEnabled = true
+//        nat.isStunEnabled = true
+        nat.enableTurn(true)
 //        nat.isTurnEnabled = true
-        nat.isIceEnabled = true
+//        nat.isIceEnabled = true
+        nat.enableIce(true)
 //        core.natPolicy = nat
         accountParams.natPolicy = nat
 
@@ -503,13 +506,14 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
 
     fun toggleMute(): Boolean {
-        return if (core.isMicEnabled) {
-            core.isMicEnabled = false
-            false
-        } else {
-            core.isMicEnabled = true
-            true
-        }
+        return false;
+//        return if (core.isMicEnabled) {
+//            core.isMicEnabled = false
+//            false
+//        } else {
+//            core.isMicEnabled = true
+//            true
+//        }
     }
 
     fun toggleSpeaker(): Boolean {

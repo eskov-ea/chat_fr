@@ -4,6 +4,7 @@ import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:http/http.dart' as http;
 import '../../models/user_profile_model.dart';
 import '../../storage/data_storage.dart';
+import '../helpers/http_error_handler.dart';
 import '../logger/logger_service.dart';
 
 
@@ -20,24 +21,19 @@ class UserProfileProvider {
           'Authorization': 'Bearer $token',
         },
       );
-      print("[ API CHECK ]: ${response.statusCode} ${response.body}");
-      if (response.statusCode == 200) {
+      HttpErrorHandler.handleHttpResponse(response);
         final UserProfileData profile =
             UserProfileData.fromJson(jsonDecode(response.body)["data"]);
         return profile;
-      } else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-        location: 'https://erp.mcfef.com/api/profile');
-      } else {
-        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-        location: 'https://erp.mcfef.com/api/profile');
-      }
-    }  on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, location: 'https://erp.mcfef.com/api/profile');
-    } on AppErrorException{
+    } on SocketException catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+          "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/profile ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on AppErrorException {
       rethrow;
-    } catch(err) {
-      throw AppErrorException(AppErrorExceptionType.other, location: 'https://erp.mcfef.com/api/profile');
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      throw AppErrorException(AppErrorExceptionType.other);
     }
   }
 
@@ -46,26 +42,22 @@ class UserProfileProvider {
     final token = await _secureStorage.getToken();
     try {
       final response = await http.get(
-          Uri.parse('https://erp.mcfef.com/api/user/avatar/$userId'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Authorization': 'Bearer $token',
-          });
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body)["data"];
-      } else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-            location: 'https://erp.mcfef.com/api/user/avatar/$userId');
-      } else {
-        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-            location: 'https://erp.mcfef.com/api/user/avatar/$userId');
-      }
-    }  on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, location: 'https://erp.mcfef.com/api/user/avatar/$userId');
-    } on AppErrorException{
+        Uri.parse('https://erp.mcfef.com/api/user/avatar/$userId'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        });
+      HttpErrorHandler.handleHttpResponse(response);
+      return jsonDecode(response.body)["data"];
+    } on SocketException catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+          "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/user/avatar/$userId ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on AppErrorException {
       rethrow;
-    } catch(err) {
-      throw AppErrorException(AppErrorExceptionType.other, location: 'https://erp.mcfef.com/api/user/avatar/$userId');
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      throw AppErrorException(AppErrorExceptionType.other);
     }
   }
 }

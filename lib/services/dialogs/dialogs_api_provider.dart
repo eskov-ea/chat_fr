@@ -5,6 +5,7 @@ import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:http/http.dart' as http;
 import '../../models/dialog_model.dart';
 import '../../storage/data_storage.dart';
+import '../helpers/http_error_handler.dart';
 import '../logger/logger_service.dart';
 
 
@@ -21,31 +22,24 @@ class DialogsProvider {
           'Authorization': 'Bearer $token',
         },
       );
-      print("[ API CHECK ]: ${response.statusCode} ${response.body}");
-      if (response.statusCode == 200) {
-        List<dynamic> collection = jsonDecode(response.body)["data"];
-        print("Loading dialogs:   ${response.body}");
-        List<DialogData> dialogs =
-            collection.map((dialog) => DialogData.fromJson(dialog)).toList();
-        return dialogs;
-      } else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-        location: "https://erp.mcfef.com/api/chat/chats");
-      } else {
-        return throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-        location: "https://erp.mcfef.com/api/chat/chats");
-      }
-    } on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, location: "https://erp.mcfef.com/api/chat/chats");
-    } on AppErrorException{
+      HttpErrorHandler.handleHttpResponse(response);
+      List<dynamic> collection = jsonDecode(response.body)["data"];
+      List<DialogData> dialogs =
+          collection.map((dialog) => DialogData.fromJson(dialog)).toList();
+      return dialogs;
+    } on SocketException catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+          "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/chats ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on AppErrorException {
       rethrow;
-    } catch(err) {
-      return throw AppErrorException(AppErrorExceptionType.other, location: "https://erp.mcfef.com/api/chat/chats");
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      throw AppErrorException(AppErrorExceptionType.other);
     }
   }
 
   Future<List<DialogData>> getPublicDialogs() async {
-
     try {
       final String? token = await _secureStorage.getToken();
       final response = await http.get(
@@ -55,27 +49,20 @@ class DialogsProvider {
           'Authorization': 'Bearer $token',
         },
       );
-      if (response.statusCode == 200) {
-        List<dynamic> collection = jsonDecode(response.body)["data"];
-        List<DialogData> dialogs =
-        collection.map((dialog) => DialogData.fromJson(dialog)).toList();
-        return dialogs;
-      } else if (response.statusCode == 403) {
-        throw AppErrorException(AppErrorExceptionType.access, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-        location: "https://erp.mcfef.com/api/chat/chats/public");
-      }  else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-        location: "https://erp.mcfef.com/api/chat/chats/public");
-      } else {
-        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-        location: "https://erp.mcfef.com/api/chat/chats/public");
-      }
-    } on AppErrorException{
+      HttpErrorHandler.handleHttpResponse(response);
+      List<dynamic> collection = jsonDecode(response.body)["data"];
+      List<DialogData> dialogs =
+      collection.map((dialog) => DialogData.fromJson(dialog)).toList();
+      return dialogs;
+    } on SocketException catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+          "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/chats/public ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on AppErrorException {
       rethrow;
-    }  on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, location: "https://erp.mcfef.com/api/chat/chats/public");
-    } catch(err) {
-      throw AppErrorException(AppErrorExceptionType.other, location: "https://erp.mcfef.com/api/chat/chats/public");
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      throw AppErrorException(AppErrorExceptionType.other);
     }
   }
 
@@ -100,26 +87,19 @@ class DialogsProvider {
           }
         }),
       );
-      if (response.statusCode == 200) {
+      HttpErrorHandler.handleHttpResponse(response);
         DialogData dialog =
             DialogData.fromJson(jsonDecode(response.body)["data"]);
         return dialog;
-      } else if (response.statusCode == 403) {
-        throw AppErrorException(AppErrorExceptionType.access, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-        location: "https://erp.mcfef.com/api/chat/add");
-      }  else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-        location: "https://erp.mcfef.com/api/chat/add");
-      } else {
-        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-        location: "https://erp.mcfef.com/api/chat/add");
-      }
-    } on AppErrorException{
+    } on SocketException catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+          "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/add ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on AppErrorException {
       rethrow;
-    }  on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, location: "https://erp.mcfef.com/api/chat/add");
-    } catch(err) {
-      throw AppErrorException(AppErrorExceptionType.other, location: "https://erp.mcfef.com/api/chat/add");
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      throw AppErrorException(AppErrorExceptionType.other);
     }
   }
 
@@ -133,30 +113,22 @@ class DialogsProvider {
           'Authorization': 'Bearer $token',
         },
       );
-      if (response.statusCode == 200) {
-        return ChatUser.fromJson(jsonDecode(response.body)["data"]);
-      } else if (response.statusCode == 403) {
-        throw AppErrorException(AppErrorExceptionType.access, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}, \n\rDialog: $dialogId",
-        location: "https://erp.mcfef.com/api/chat/join/$dialogId/$userId}");
-      }  else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}, \n\rDialog: $dialogId",
-        location: "https://erp.mcfef.com/api/chat/join/$dialogId/$userId}");
-      } else {
-        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}, \n\rDialog: $dialogId",
-        location: "https://erp.mcfef.com/api/chat/join/$dialogId/$userId}");
-      }
-    } on AppErrorException{
+      HttpErrorHandler.handleHttpResponse(response);
+      return ChatUser.fromJson(jsonDecode(response.body)["data"]);
+    } on SocketException catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+          "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/join/$dialogId/$userId ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on AppErrorException {
       rethrow;
-    }  on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, location: "https://erp.mcfef.com/api/chat/join/$dialogId/$userId}");
-    } catch(err) {
-      throw AppErrorException(AppErrorExceptionType.other, location: "https://erp.mcfef.com/api/chat/join/$dialogId/$userId}");
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      throw AppErrorException(AppErrorExceptionType.other);
     }
   }
 
   Future<void> exitDialog(userId, dialogId) async {
     final String? token = await _secureStorage.getToken();
-
     try {
       final response = await http.get(
         Uri.parse('https://erp.mcfef.com/api/chat/exit/$dialogId/$userId}'),
@@ -165,16 +137,16 @@ class DialogsProvider {
           'Authorization': 'Bearer $token',
         },
       );
-      if (response.statusCode != 200) {
-        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-        location: 'https://erp.mcfef.com/api/chat/exit/$dialogId/$userId}');
-      }
-    } on AppErrorException{
+      HttpErrorHandler.handleHttpResponse(response);
+    } on SocketException catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+          "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/exit/$dialogId/$userId ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on AppErrorException {
       rethrow;
-    }  on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, location: 'https://erp.mcfef.com/api/chat/exit/$dialogId/$userId}');
-    } catch(err) {
-      throw AppErrorException(AppErrorExceptionType.other, location: 'https://erp.mcfef.com/api/chat/exit/$dialogId/$userId}');
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      throw AppErrorException(AppErrorExceptionType.other);
     }
   }
 

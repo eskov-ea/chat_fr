@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chat/bloc/auth_bloc/auth_event.dart';
 import 'package:chat/bloc/auth_bloc/auth_state.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
@@ -32,9 +34,7 @@ class AuthBloc
       try{
         await authRepo.login(event.email, event.password, event.platform, event.token);
         emit(const Authenticated());
-      } catch(err, stackTrace) {
-        err as AppErrorException;
-        _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.type.toString(), additionalInfo: err.message, uri: err.location);
+      } catch(err) {
         emit(AuthenticatingFailure(error: err));
       }
     }
@@ -46,9 +46,7 @@ class AuthBloc
       try {
         await authRepo.logout();
         emit(Unauthenticated());
-      } catch (err, stackTrace) {
-        err as AppErrorException;
-        _logger.sendErrorTrace(stackTrace: stackTrace, uri: err.location);
+      } catch (err) {
         emit(Unauthenticated());
       }
     }
@@ -64,9 +62,8 @@ class AuthBloc
         auth ? const Authenticated() : Unauthenticated();
         emit(newState);
       } catch (err, stackTrace) {
-        err as AppErrorException;
         await _dataProvider.deleteToken();
-        _logger.sendErrorTrace(stackTrace: stackTrace, additionalInfo: err.message, uri: err.location);
+        _logger.sendErrorTrace(stackTrace: stackTrace, additionalInfo: stackTrace.toString(), uri: 'https://erp.mcfef.com/api/profile');
         emit(Unauthenticated());
       }
     }

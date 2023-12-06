@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -18,6 +19,7 @@ class DataProvider {
     try {
       return _secureStorage.read(key: _Keys.token);
     } catch(err, stackTrace) {
+      log("ERROR:::: $stackTrace");
       throw AppErrorException(AppErrorExceptionType.secureStorage);
     }
   }

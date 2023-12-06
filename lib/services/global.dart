@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/services/user_profile/user_profile_api_provider.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/foundation.dart';
@@ -169,21 +170,27 @@ import 'messages/messages_repository.dart';
 
   Future<File?> loadAndSaveLocallyUserAvatar({required int? userId}) async {
     if (userId == null) return null;
-    final Directory documentDirectory = await getApplicationDocumentsDirectory();
-    final String path = documentDirectory.path;
-    final File file = File('$path/avatar.$userId.jpg');
+    try {
+      final Directory documentDirectory =
+          await getApplicationDocumentsDirectory();
+      final String path = documentDirectory.path;
+      final File file = File('$path/avatar.$userId.jpg');
 
-    if (await file.exists()) {
-      return file;
-    } else {
-      final UserProfileProvider userProfileProvider = UserProfileProvider();
-      final String? data = await userProfileProvider.loadUserAvatar(userId);
-      if (data == null) return null;
-      final bytes = base64Decode(data);
-      await file.writeAsBytes(bytes);
-      return file;
+      if (await file.exists()) {
+        return file;
+      } else {
+        final UserProfileProvider userProfileProvider = UserProfileProvider();
+        final String? data = await userProfileProvider.loadUserAvatar(userId);
+        if (data == null) return null;
+        final bytes = base64Decode(data);
+        await file.writeAsBytes(bytes);
+        return file;
+      }
+  } catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error type: [ ${err.runtimeType} ]");
+      return null;
     }
-  }
+}
 
   Future<File?> isLocalFileExist({required String fileName}) async {
     final Directory documentDirectory = await getApplicationDocumentsDirectory();

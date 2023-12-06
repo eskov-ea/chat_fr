@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/services/logger/logger_service.dart';
@@ -40,6 +41,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
         });
       }
     } catch (err, stackTrace) {
+      log("AVATAR ERROR::::", error: err, stackTrace: stackTrace);
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: AppErrorExceptionType.render.toString());
     }
   }
@@ -47,6 +49,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   @override
   Widget build(BuildContext context) {
     return Center(
+      key: ObjectKey("${widget.userId}_key"),
       child: CircleAvatar(
         radius: widget.size,
         backgroundColor: Colors.grey,

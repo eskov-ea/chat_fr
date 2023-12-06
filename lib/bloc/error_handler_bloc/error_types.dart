@@ -3,7 +3,7 @@ enum AppErrorExceptionType { network, auth, other, sessionExpired, access, parsi
 class AppErrorException implements Exception {
   final AppErrorExceptionType type;
   final String? message;
-  final String? location;
+  // final String? location;
 
-  AppErrorException(this.type, {this.message, this.location});
+  AppErrorException(this.type, {this.message});
 }

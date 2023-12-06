@@ -11,6 +11,13 @@ class ErrorHandlerWithErrorEvent extends ErrorHandlerEvent {
     required this.error
   });
 }
+class ErrorHandlerWithRuntimeErrorEvent extends ErrorHandlerEvent {
+  final Object error;
+
+  ErrorHandlerWithRuntimeErrorEvent({
+    required this.error
+  });
+}
 
 class ErrorHandlerAccessDeniedEvent extends ErrorHandlerEvent{
   final AppErrorException error;

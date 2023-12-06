@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _onErrorState(ErrorHandlerState state){
-    if (state is ErrorHandlerWithErrorState) {
+    if (state is ErrorHandlerWithAppErrorState) {
       if (state.error.type == AppErrorExceptionType.auth) {
         SessionExpiredModalWidget(context);
       } else {

@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/storage/data_storage.dart';
-import 'package:chat/services/exeptions/api_client_exceptions.dart';
 import 'package:chat/models/auth_user_model.dart';
 import 'package:http/http.dart' as http;
 import '../../models/user_profile_model.dart';
+import '../helpers/http_error_handler.dart';
 import '../logger/logger_service.dart';
 import '../user_profile/user_profile_api_provider.dart';
 
@@ -35,24 +35,22 @@ class AuthRepository {
         ),
       );
       print("response.body  -->  ${response.body}  ${response.statusCode}");
-      if (response.statusCode == 200) {
-        final AuthToken authToken = AuthToken.fromJson(json.decode(response.body));
-        await _secureStorage.setToken(authToken.token);
-        final UserProfileData profile = await _profileProvider.getUserProfile(authToken.token);
-        final userId = profile.id;
-        await _secureStorage.setUserId(userId);
-        return authToken;
-      } else {
-        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-        location: "https://erp.mcfef.com/api/auth");
-      }
-    } on SocketException {
-      throw AppErrorException(AppErrorExceptionType.network, location: "https://erp.mcfef.com/api/auth");
-    } on AppErrorExceptionType {
-        rethrow;
+      HttpErrorHandler.handleHttpResponse(response);
+      final AuthToken authToken = AuthToken.fromJson(json.decode(response.body));
+      await _secureStorage.setToken(authToken.token);
+      final UserProfileData profile = await _profileProvider.getUserProfile(authToken.token);
+      final userId = profile.id;
+      await _secureStorage.setUserId(userId);
+      return authToken;
+    } on SocketException catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+          "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/auth ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on AppErrorException {
+      rethrow;
     } catch (err, stackTrace) {
-        _logger.sendErrorTrace(stackTrace: stackTrace, uri: "USER: [ $username ], https://erp.mcfef.com/api/auth");
-        throw AppErrorException(AppErrorExceptionType.other, location: "https://erp.mcfef.com/api/auth");
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      throw AppErrorException(AppErrorExceptionType.other);
     }
   }
 
@@ -69,26 +67,33 @@ class AuthRepository {
       await _secureStorage.deleteUserId();
       await _secureStorage.deleteToken();
       await _secureStorage.deleteDeviceID();
-    } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.auth, location: "https://erp.mcfef.com/api/logout");
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      throw AppErrorException(AppErrorExceptionType.auth);
     }
   }
 
   Future<bool> checkAuthStatus(String? token) async {
-    final response = await http.get(
-      Uri.parse('https://erp.mcfef.com/api/profile'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $token',
-      },
-    );
-    print("[ API CHECK ]: ${response.statusCode} ${response.body}");
-    if (response.statusCode == 200) {
+    try {
+      final response = await http.get(
+        Uri.parse('https://erp.mcfef.com/api/profile'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      HttpErrorHandler.handleHttpResponse(response);
       return true;
+    } on SocketException catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+      "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/auth ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on AppErrorException {
+      rethrow;
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      throw AppErrorException(AppErrorExceptionType.other);
     }
-    throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-      location: "https://erp.mcfef.com/api/profile"
-    );
   }
 
   Future<void> resetPassword(String email) async {
@@ -106,10 +111,16 @@ class AuthRepository {
             }
         ),
       );
-      print('RESET_PASSWORD_RESPONSE   ${response.body}');
+      HttpErrorHandler.handleHttpResponse(response);
+    } on SocketException catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+          "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/user/lostpassword ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on AppErrorException {
+      rethrow;
     } catch (err, stackTrace) {
-      _logger.sendErrorTrace(stackTrace: stackTrace, uri: "https://erp.mcfef.com/api/profile");
-      print('RESET_PASSWORD_ERROR   $err');
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      throw AppErrorException(AppErrorExceptionType.other);
     }
   }
 

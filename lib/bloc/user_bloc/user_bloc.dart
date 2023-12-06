@@ -67,9 +67,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
         ));
       }
     } catch (err, stackTrace) {
-      err as AppErrorException;
-      _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.type.toString(), additionalInfo: err.message, uri: err.location);
-      if(err.type == AppErrorExceptionType.auth) {
+      _logger.sendErrorTrace(stackTrace: stackTrace);
+      if(err is AppErrorException && err.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
         emit(UsersErrorState());

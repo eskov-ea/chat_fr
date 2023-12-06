@@ -19,7 +19,6 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   //TODO: remove WSBloc from this Bloc up to DialogsViewCubit
   final WsBloc webSocketBloc;
   //TODO: remove WSBloc from this Bloc up to DialogsViewCubit
-  final Logger _logger = Logger.getInstance();
   final ErrorHandlerBloc errorHandlerBloc;
 
   DialogsBloc({
@@ -104,11 +103,8 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       print("Dialogs  $dialogs");
       final newState = state.copyWith(dialogs: dialogs);
       emit(newState);
-    } catch(err, stackTrace) {
-      print("onDialogsLoadEvent::::: $err");
-      err as AppErrorException;
-      _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.type.toString(), additionalInfo: err.message, uri: err.location);
-      if (err.type == AppErrorExceptionType.auth) {
+    } catch(err) {
+      if (err is AppErrorException && err.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
         final errorState = state.copyWith(dialogs: [], searchQuery: "", isErrorHappened: true);
@@ -146,7 +142,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         }
       }
     } catch (err, stackTrace) {
-      _logger.sendErrorTrace(stackTrace: stackTrace);
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
     }
   }
 

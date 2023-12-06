@@ -16,11 +16,11 @@ class ErrorHandlerBloc extends Bloc<ErrorHandlerEvent, ErrorHandlerState> {
   }
 
   Future<void> onErrorEventEvent (ErrorHandlerWithErrorEvent event, emit) async {
-    emit(ErrorHandlerWithErrorState(error: event.error));
+    emit(ErrorHandlerWithAppErrorState(error: event.error));
   }
 
   void onErrorHandlerAccessDeniedEvent(ErrorHandlerAccessDeniedEvent event, emit) {
-    emit(ErrorHandlerWithErrorState(error: event.error));
+    emit(ErrorHandlerWithAppErrorState(error: event.error));
   }
 
 }

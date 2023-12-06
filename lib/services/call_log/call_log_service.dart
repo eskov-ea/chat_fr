@@ -7,6 +7,7 @@ import '../../bloc/error_handler_bloc/error_types.dart';
 import '../../storage/data_storage.dart';
 import 'package:http/http.dart' as http;
 
+import '../helpers/http_error_handler.dart';
 import '../logger/logger_service.dart';
 
 
@@ -24,25 +25,20 @@ class CallLogService {
       final response = await http.post(
           Uri.parse('http://aster.mcfef.com/logs/user/last/'),
           body: postData);
-      print("Loading call logs  ${response.body}   ///   $passwd");
-      if (response.statusCode == 200) {
-        List<dynamic> collection = jsonDecode(response.body)["data"];
-        List<CallModel> callLog =
-        collection.map((call) => CallModel.fromJson(call)).toList();
-        return callLog;
-      } else if(response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.access, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-            location: "http://aster.mcfef.com/logs/user/last/");
-      } else {
-        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-            location: "http://aster.mcfef.com/logs/user/last/");
-      }
-    }  on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, location: "http://aster.mcfef.com/logs/user/last/");
-    } on AppErrorException{
+      HttpErrorHandler.handleHttpResponse(response);
+      List<dynamic> collection = jsonDecode(response.body)["data"];
+      List<CallModel> callLog =
+      collection.map((call) => CallModel.fromJson(call)).toList();
+      return callLog;
+    } on SocketException catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+          "address: ${err.address}, port: ${err.port}, url was: http://aster.mcfef.com/logs/user/last/ ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on AppErrorException {
       rethrow;
-    } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.other, location: "http://aster.mcfef.com/logs/user/last/");
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      throw AppErrorException(AppErrorExceptionType.other);
     }
   }
 

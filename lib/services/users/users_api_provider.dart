@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:chat/services/global.dart';
+import 'package:chat/services/helpers/http_error_handler.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import '../../bloc/error_handler_bloc/error_types.dart';
 import '../../models/contact_model.dart';
@@ -18,23 +19,19 @@ class UsersProvider {
           'Authorization': 'Bearer $token'
         },
       );
-      if (response.statusCode == 200) {
-        List<dynamic> collection = jsonDecode(response.body)["data"];
-        List<UserContact> users = collection.map((user) => UserContact.fromJson(user)).toList();
-        return users;
-      } else if (response.statusCode == 401) {
-        throw AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-        location: 'https://erp.mcfef.com/api/users');
-      } else {
-        throw AppErrorException(AppErrorExceptionType.getData, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}",
-        location: 'https://erp.mcfef.com/api/users');
-      }
-    }  on SocketException{
-      throw AppErrorException(AppErrorExceptionType.network, location: 'https://erp.mcfef.com/api/users');
-    } on AppErrorException{
+      HttpErrorHandler.handleHttpResponse(response);
+      List<dynamic> collection = jsonDecode(response.body)["data"];
+      List<UserContact> users = collection.map((user) => UserContact.fromJson(user)).toList();
+      return users;
+    } on SocketException catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+          "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/users ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on AppErrorException {
       rethrow;
-    } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.other, location: 'https://erp.mcfef.com/api/users');
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      throw AppErrorException(AppErrorExceptionType.other);
     }
   }
 

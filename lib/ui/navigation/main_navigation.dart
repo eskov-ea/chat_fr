@@ -54,7 +54,7 @@ class MainNavigation {
               child: child,
            );
           },
-          transitionDuration: Duration(milliseconds: 800),
+          transitionDuration: const Duration(milliseconds: 400),
         );
       case MainNavigationRouteNames.imageScreen:
         final arguments = settings.arguments as ImageScreenArguments;

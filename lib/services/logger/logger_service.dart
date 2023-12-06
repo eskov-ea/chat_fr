@@ -20,11 +20,12 @@ class Logger {
     level == null ? 'debug' : level;
     final String? token = await _secureStorage.getToken();
     final String? userId = await _secureStorage.getUserId();
-    final String additional = additionalInfo ?? '';
-    final String url = uri ?? '';
+    final String additional = additionalInfo ?? 'N/A';
+    final String url = uri ?? 'N/A';
+    final errorT = errorType ?? 'N/A';
     final postData = jsonEncode(<String, Object>{
       'data': {
-        'message': errorType != null ? '\r\nUser ID: [ ${userId ?? "N/A"}], URL was: [ $url ],  Error type: [ $errorType ]\r\n$stackTrace' + additional : '\r\n$stackTrace' + additional,
+        'message': '\r\nUser ID: [ ${userId ?? "N/A"}], URL was: [ $url ],  Error type: [ $errorT ], additional: [ $additional ] \r\n$stackTrace',
       }
     });
     final response = await http.post(
