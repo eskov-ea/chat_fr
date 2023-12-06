@@ -198,144 +198,146 @@ class ActionBarState extends State<ActionBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(bottom: 0.0),
-      color: AppColors.backgroundLight,
-      child: widget.isSelectedMode
-          ? _actionBarMessagesFunctions()
-          : Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      right: BorderSide(
-                        width: 2,
-                        color: Theme.of(context).dividerColor,
+    return SafeArea(
+      child: Container(
+        // padding: const EdgeInsets.only(bottom: 20.0),
+        color: AppColors.backgroundLight,
+        child: widget.isSelectedMode
+            ? _actionBarMessagesFunctions()
+            : Row(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border(
+                        right: BorderSide(
+                          width: 2,
+                          color: Theme.of(context).dividerColor,
+                        ),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 16.0, right: 3.0),
+                      child: GestureDetector(
+                        onTap: (){
+                          openCameraOptions(createDialogAndSendMessage);
+                        },
+                        child: widget.isRecording
+                          ? Text(
+                              getAudioMessageDuration(recordingDuration),
+                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            )
+                          : const Icon(
+                          CupertinoIcons.paperclip, color: AppColors.secondary, size: 30,
+                        ),
                       ),
                     ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 16.0, right: 3.0),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0, top: 10.0, bottom:  10.0),
+                      child: TextFormField(
+                        maxLines: 5,
+                        minLines: 1,
+                        textCapitalization: TextCapitalization.sentences,
+                        focusNode: widget.focusNode,
+                        controller: _messageController,
+                        onChanged: (value) {
+                          if (value.isNotEmpty) {
+                            setState(() {
+                              sendButton = true;
+                            });
+                          } else {
+                            setState(() {
+                              sendButton = false;
+                            });
+                          }
+                        },
+                        onTapOutside: (event) {
+                          if(widget.focusNode.hasFocus) {
+                            widget.focusNode.unfocus();
+                          }
+                        },
+                        style: const TextStyle(fontSize: 16, color: LightColors.mainText),
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                          filled: true,
+                          fillColor: Colors.white,
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Colors.black45,
+                              width: 1
+                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(20.0))
+                          ),
+                          hintText: 'Напишите сообщение...',
+                          focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                  color: Colors.black45,
+                                  width: 1
+                              ),
+                              borderRadius: BorderRadius.all(Radius.circular(20.0))
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 12,
+                      right: 24.0,
+                    ),
                     child: GestureDetector(
-                      onTap: (){
-                        openCameraOptions(createDialogAndSendMessage);
+                      onLongPressStart: (details){
+                        print('START LONG PRESS');
+                        widget.setRecording(true);
+                        if (sendButton == false) _start(_mRecorder);
                       },
-                      child: widget.isRecording
-                        ? Text(
-                            getAudioMessageDuration(recordingDuration),
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                          )
-                        : const Icon(
-                        CupertinoIcons.paperclip, color: AppColors.secondary, size: 30,
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0, top: 10.0, bottom:  10.0),
-                    child: TextFormField(
-                      maxLines: 5,
-                      minLines: 1,
-                      textCapitalization: TextCapitalization.sentences,
-                      focusNode: widget.focusNode,
-                      controller: _messageController,
-                      onChanged: (value) {
-                        if (value.isNotEmpty) {
-                          setState(() {
-                            sendButton = true;
-                          });
-                        } else {
+                      onLongPressEnd: (details) async {
+                        print('END LONG PRESS');
+                        try {
+                          final recordedAudioPath = await _stop(_mRecorder);
+                          print("Record message path:   $recordedAudioPath");
+                          widget.setRecording(false);
+                          final File record = File(recordedAudioPath!);
+                          final Directory documentDirectory = await getApplicationDocumentsDirectory();
+                          final String path = documentDirectory.path;
+                          final String filetype = _mPath.split('.').last;
+                          final int r = Random().nextInt(100000);
+                          final String uniq = DateTime.now().microsecondsSinceEpoch.toString();
+                          final String filename = "voice_m_$r$uniq.$filetype";
+                          final File file = File("$path/$filename");
+                          file.writeAsBytesSync(await record.readAsBytes());
+                          _sendAudioMessage(file, widget.userId, widget.dialogId);
+                        } catch (err) {
+                          print("Record message error:   $err");
+                          customToastMessage(context: context, message: "Произошла ошибка при записи голосового сообщения");
+                        }
+                      },
+                      child: GlowingActionButton(
+                        color: isSendButtonDisabled ? Colors.grey : widget.isRecording ? Colors.red : AppColors.accent ,
+                        icon: !kIsWeb
+                            ? sendButton ? Icons.send_rounded : Icons.mic
+                            : sendButton ? Icons.send_rounded : Icons.send_rounded,
+                        onPressed: () async {
+                          if (isSendButtonDisabled || !sendButton || _messageController.text.trim() == "") return;
+                          if (widget.dialogId != null) {
+                            _sendMessage(context, widget.parentMessage);
+                            widget.cancelReplyMessage();
+                          } else {
+                            await createDialogAndSendMessage(context, widget.rootWidget);
+                            _sendMessage(context, widget.parentMessage);
+                            widget.cancelReplyMessage();
+                          }
                           setState(() {
                             sendButton = false;
                           });
-                        }
-                      },
-                      onTapOutside: (event) {
-                        if(widget.focusNode.hasFocus) {
-                          widget.focusNode.unfocus();
-                        }
-                      },
-                      style: const TextStyle(fontSize: 16, color: LightColors.mainText),
-                      decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                        filled: true,
-                        fillColor: Colors.white,
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Colors.black45,
-                            width: 1
-                          ),
-                          borderRadius: BorderRadius.all(Radius.circular(20.0))
-                        ),
-                        hintText: 'Напишите сообщение...',
-                        focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Colors.black45,
-                                width: 1
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(20.0))
-                        ),
+                        },
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    left: 12,
-                    right: 24.0,
-                  ),
-                  child: GestureDetector(
-                    onLongPressStart: (details){
-                      print('START LONG PRESS');
-                      widget.setRecording(true);
-                      if (sendButton == false) _start(_mRecorder);
-                    },
-                    onLongPressEnd: (details) async {
-                      print('END LONG PRESS');
-                      try {
-                        final recordedAudioPath = await _stop(_mRecorder);
-                        print("Record message path:   $recordedAudioPath");
-                        widget.setRecording(false);
-                        final File record = File(recordedAudioPath!);
-                        final Directory documentDirectory = await getApplicationDocumentsDirectory();
-                        final String path = documentDirectory.path;
-                        final String filetype = _mPath.split('.').last;
-                        final int r = Random().nextInt(100000);
-                        final String uniq = DateTime.now().microsecondsSinceEpoch.toString();
-                        final String filename = "voice_m_$r$uniq.$filetype";
-                        final File file = File("$path/$filename");
-                        file.writeAsBytesSync(await record.readAsBytes());
-                        _sendAudioMessage(file, widget.userId, widget.dialogId);
-                      } catch (err) {
-                        print("Record message error:   $err");
-                        customToastMessage(context: context, message: "Произошла ошибка при записи голосового сообщения");
-                      }
-                    },
-                    child: GlowingActionButton(
-                      color: isSendButtonDisabled ? Colors.grey : widget.isRecording ? Colors.red : AppColors.accent ,
-                      icon: !kIsWeb
-                          ? sendButton ? Icons.send_rounded : Icons.mic
-                          : sendButton ? Icons.send_rounded : Icons.send_rounded,
-                      onPressed: () async {
-                        if (isSendButtonDisabled || !sendButton || _messageController.text.trim() == "") return;
-                        if (widget.dialogId != null) {
-                          _sendMessage(context, widget.parentMessage);
-                          widget.cancelReplyMessage();
-                        } else {
-                          await createDialogAndSendMessage(context, widget.rootWidget);
-                          _sendMessage(context, widget.parentMessage);
-                          widget.cancelReplyMessage();
-                        }
-                        setState(() {
-                          sendButton = false;
-                        });
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                ],
+              ),
+      ),
     );
   }
 

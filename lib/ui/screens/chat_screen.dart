@@ -278,21 +278,21 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
         body: Container(
-          // color: AppColors.backgroundChatScreen,
           height: double.infinity,
           width: double.infinity,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage("assets/images/chat_background.jpg"),
-              fit: BoxFit.cover,
-            ),
-          ),
+          color: AppColors.backgroundLight,
           child: Column(
                   children: [
                     Expanded(
                       child: Stack(
                         children: [
                           Container(
+                            decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                image: AssetImage("assets/images/chat_background.jpg"),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                             child: widget.dialogData?.dialogId != null
                                 ? _MessageList(
                               userId: widget.userId,
