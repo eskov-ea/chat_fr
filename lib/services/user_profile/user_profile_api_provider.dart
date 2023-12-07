@@ -21,7 +21,8 @@ class UserProfileProvider {
           'Authorization': 'Bearer $token',
         },
       );
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
         final UserProfileData profile =
             UserProfileData.fromJson(jsonDecode(response.body)["data"]);
         return profile;
@@ -47,7 +48,8 @@ class UserProfileProvider {
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',
         });
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       return jsonDecode(response.body)["data"];
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "

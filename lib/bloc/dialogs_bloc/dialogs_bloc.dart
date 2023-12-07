@@ -105,6 +105,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       emit(newState);
     } catch(err) {
       if (err is AppErrorException && err.type == AppErrorExceptionType.auth) {
+        print("Authentication error");
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
         final errorState = state.copyWith(dialogs: [], searchQuery: "", isErrorHappened: true);

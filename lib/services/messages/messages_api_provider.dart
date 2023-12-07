@@ -1,18 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../bloc/error_handler_bloc/error_types.dart';
-import '../../models/dialog_model.dart';
 import '../../models/message_model.dart';
 import 'package:http/http.dart' as http;
 import '../../storage/data_storage.dart';
 import 'dart:ui' as UI;
 import 'package:image/image.dart' as IMG;
-import 'dart:typed_data' as typedData;
 import 'dart:convert' as convert;
 import '../helpers/http_error_handler.dart';
 import '../logger/logger_service.dart';
@@ -32,7 +29,8 @@ class MessagesProvider {
           'Authorization': 'Bearer $token'
         },
       );
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       List<dynamic> collection = jsonDecode(response.body)["data"];
       List<MessageData> messages = collection.map((message) => MessageData.fromJson(message)).toList();
       return messages;
@@ -58,7 +56,8 @@ class MessagesProvider {
           'Authorization': 'Bearer $token'
         },
       );
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       Map<String, dynamic> collection = jsonDecode(response.body)["data"];
       return collection;
     } on SocketException catch(err, stackTrace) {
@@ -93,7 +92,8 @@ class MessagesProvider {
           },
           body: postData
       );
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       return response.body;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
@@ -117,7 +117,8 @@ class MessagesProvider {
             'Authorization': 'Bearer $token'
           }
       );
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/message/setchatred/$dialogId ]");
@@ -151,7 +152,8 @@ class MessagesProvider {
           },
           body: postData
       );
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       return true;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
@@ -175,7 +177,8 @@ class MessagesProvider {
           'Authorization': 'Bearer $token'
         },
       );
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       return MessageAttachmentsData.fromJson(jsonDecode(response.body)["data"]);
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
@@ -217,7 +220,8 @@ class MessagesProvider {
             'Authorization': 'Bearer $token'
           },
           body: postData);
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       return response.body;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
@@ -262,7 +266,8 @@ class MessagesProvider {
             'Authorization': 'Bearer $token'
           },
           body: postData);
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       return response.body;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
@@ -306,7 +311,8 @@ class MessagesProvider {
           },
           body: postData);
 
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       return response.body;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "

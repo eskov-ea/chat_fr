@@ -227,110 +227,105 @@ class _ChatScreenState extends State<ChatScreen> {
       });
     }
 
-    return GestureDetector(
-      onTap: (){
-        // focusNode.unfocus();
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          iconTheme: Theme.of(context).iconTheme,
-          centerTitle: false,
-          backgroundColor: AppColors.backgroundLight,
-          elevation: 0,
-          leadingWidth: 54,
-          leading: Align(
-            alignment: Alignment.centerRight,
-            child: IconButton(
-              icon: const Icon(CupertinoIcons.back, color: AppColors.secondary, size: 30,),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ),
-          title: InkWell(
-            onTap: (){
-              if (widget.dialogData == null || widget.dialogData?.chatType.p2p == 1) {
-                openUserProfileInfoPage(context: context, user: findPartnerUserProfile(widget.usersCubit, widget.partnerId), partnerId: widget.partnerId);
-              } else {
-                openGroupChatInfoPage(context: context, usersCubit: widget.usersCubit, dialogData: widget.dialogData, userId: null, dialogCubit: widget.dialogCubit, username: widget.username, partnerId: widget.partnerId, );
-              }
+    return Scaffold(
+      appBar: AppBar(
+        iconTheme: Theme.of(context).iconTheme,
+        centerTitle: false,
+        backgroundColor: AppColors.backgroundLight,
+        elevation: 0,
+        leadingWidth: 54,
+        leading: Align(
+          alignment: Alignment.centerRight,
+          child: IconButton(
+            icon: const Icon(CupertinoIcons.back, color: AppColors.secondary, size: 30,),
+            onPressed: () {
+              Navigator.of(context).pop();
             },
-            child: getDialogName(widget.dialogData, widget.username),
           ),
-          actions: [
-            if (isSelectedMode) GestureDetector(
-              onTap: (){
-                setSelectedMode(false);
-              },
-              child: const Padding(
-                padding: EdgeInsets.only(right: 10),
-                child: Center(
-                  child: Text('Отменить',
-                    style: TextStyle(color: Colors.blueAccent, fontSize: 20, fontWeight: FontWeight.w700),
-                  ),
+        ),
+        title: InkWell(
+          onTap: (){
+            if (widget.dialogData == null || widget.dialogData?.chatType.p2p == 1) {
+              openUserProfileInfoPage(context: context, user: findPartnerUserProfile(widget.usersCubit, widget.partnerId), partnerId: widget.partnerId);
+            } else {
+              openGroupChatInfoPage(context: context, usersCubit: widget.usersCubit, dialogData: widget.dialogData, userId: null, dialogCubit: widget.dialogCubit, username: widget.username, partnerId: widget.partnerId, );
+            }
+          },
+          child: getDialogName(widget.dialogData, widget.username),
+        ),
+        actions: [
+          if (isSelectedMode) GestureDetector(
+            onTap: (){
+              setSelectedMode(false);
+            },
+            child: const Padding(
+              padding: EdgeInsets.only(right: 10),
+              child: Center(
+                child: Text('Отменить',
+                  style: TextStyle(color: Colors.blueAccent, fontSize: 20, fontWeight: FontWeight.w700),
                 ),
               ),
             ),
-            if (!isSelectedMode && !kIsWeb && ( widget.dialogData == null || widget.dialogData!.chatType.p2p == 1)) Padding(
-              padding: const EdgeInsets.only(right: 20),
-              child: CallButton(partnerId: widget.partnerId)
-            ),
-          ],
-        ),
-        body: Container(
-          height: double.infinity,
-          width: double.infinity,
-          color: AppColors.backgroundLight,
-          child: Column(
-                  children: [
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          Container(
-                            decoration: const BoxDecoration(
-                              image: DecorationImage(
-                                image: AssetImage("assets/images/chat_background.jpg"),
-                                fit: BoxFit.cover,
-                              ),
+          ),
+          if (!isSelectedMode && !kIsWeb && ( widget.dialogData == null || widget.dialogData!.chatType.p2p == 1)) Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: CallButton(partnerId: widget.partnerId)
+          ),
+        ],
+      ),
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        color: AppColors.backgroundLight,
+        child: Column(
+                children: [
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        Container(
+                          decoration: const BoxDecoration(
+                            image: DecorationImage(
+                              image: AssetImage("assets/images/chat_background.jpg"),
+                              fit: BoxFit.cover,
                             ),
-                            child: widget.dialogData?.dialogId != null
-                                ? _MessageList(
-                              userId: widget.userId,
-                              dialogData: widget.dialogData!,
-                              focusNode: focusNode,
-                              setReplyMessage: setReplyMessage,
-                              usersCubit: widget.usersCubit,
-                              partnerName: widget.username,
-                              setSelectedMode: setSelectedMode,
-                              isSelectedMode: isSelectedMode,
-                              selected: selected,
-                              setSelected: setSelected
+                          ),
+                          child: widget.dialogData?.dialogId != null
+                              ? _MessageList(
+                            userId: widget.userId,
+                            dialogData: widget.dialogData!,
+                            focusNode: focusNode,
+                            setReplyMessage: setReplyMessage,
+                            usersCubit: widget.usersCubit,
+                            partnerName: widget.username,
+                            setSelectedMode: setSelectedMode,
+                            isSelectedMode: isSelectedMode,
+                            selected: selected,
+                            setSelected: setSelected
+                          )
+                              : const Center(child: Text('Нет сообщений'),)
+                        ),
+                        if (isRecording == true ) Positioned.fill(
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+                              child: Container(
+                                color: Colors.black12,
+                              ),
                             )
-                                : const Center(child: Text('Нет сообщений'),)
-                          ),
-                          if (isRecording == true ) Positioned.fill(
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
-                                child: Container(
-                                  color: Colors.black12,
-                                ),
-                              )
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    if (replyMessage != null) _ReplyMessageBar(replyMessage: replyMessage!, cancelReplyMessage: cancelReplyMessage, senderName: senderReplyName!,),
-                    isUserAllowedToWrite(widget.dialogData, widget.userId)
-                      ? ActionBar(userId: widget.userId, partnerId: widget.partnerId, dialogId: widget.dialogData?.dialogId,
-                          setDialogData: setDialogData, rootWidget: widget, username: widget.username,
-                          focusNode: focusNode, setRecording: setRecording, isRecording: isRecording, dialogData: widget.dialogData,
-                          dialogCubit: widget.dialogCubit, cancelReplyMessage: cancelReplyMessage, parentMessage: replyedParentMsg, isSelectedMode: isSelectedMode,
-                          selected: selected, deleteMessages: deleteMessages
-                        )
-                      : ReadOnlyChannelMode(context)
-                  ],
-                ),
-        ),
+                  ),
+                  if (replyMessage != null) _ReplyMessageBar(replyMessage: replyMessage!, cancelReplyMessage: cancelReplyMessage, senderName: senderReplyName!,),
+                  isUserAllowedToWrite(widget.dialogData, widget.userId)
+                    ? ActionBar(userId: widget.userId, partnerId: widget.partnerId, dialogId: widget.dialogData?.dialogId,
+                        setDialogData: setDialogData, rootWidget: widget, username: widget.username,
+                        focusNode: focusNode, setRecording: setRecording, isRecording: isRecording, dialogData: widget.dialogData,
+                        dialogCubit: widget.dialogCubit, cancelReplyMessage: cancelReplyMessage, parentMessage: replyedParentMsg, isSelectedMode: isSelectedMode,
+                        selected: selected, deleteMessages: deleteMessages
+                      )
+                    : ReadOnlyChannelMode(context)
+                ],
+              ),
       ),
     );
   }
@@ -373,7 +368,8 @@ class _MessageListState extends State<_MessageList> {
   final ScrollController _scrollController = ScrollController();
   bool _shouldAutoscroll = true;
   int pageNumber = 1;
-  bool isLoadingMessages = true;
+  bool isLoadingMessages = false;
+  bool isConnectionThrottling = false;
   late final StreamSubscription _newMessagesSubscription;
 
   @override
@@ -399,8 +395,12 @@ class _MessageListState extends State<_MessageList> {
   }
 
   void loadNextMessages() {
-    BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderLoadMessagesEvent(dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
-    pageNumber++;
+    if (!BlocProvider.of<ChatsBuilderBloc>(context).state.isError) {
+      BlocProvider.of<ChatsBuilderBloc>(context).add(
+          ChatsBuilderLoadMessagesEvent(
+              dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
+      pageNumber++;
+    }
   }
 
   void resetMessagesAndReload() {
@@ -440,24 +440,41 @@ class _MessageListState extends State<_MessageList> {
             if (state is ChatsBuilderState) {
               print("Finding chats:   ${state.chats}");
               final ChatsData? currentState = findChat(state.chats, widget.dialogData.dialogId);
+              if (state.isError) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Text("Произошла ошибка при загрузке сообщений"),
+                    SizedBox(height: 10, width: MediaQuery.of(context).size.width),
+                    ElevatedButton(
+                      onPressed: () {
+                        BlocProvider.of<ChatsBuilderBloc>(context).add(
+                            ChatsBuilderLoadMessagesEvent(
+                                dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
+                        pageNumber++;
+                      },
+                      child: Text("Обновить"),
+                    )
+                  ],
+                );
+              }
               if (currentState == null) {
                 loadNextMessages();
-                // BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderLoadMessagesEvent(dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
-                // pageNumber++;
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const CircularProgressIndicator(),
                       // Transform.translate(
-                      //   offset: const Offset(0, 50),
+                      //   offset: isConnectionThrottling ? const Offset(0, 50) : const Offset(0, -150),
                       //   child: const Text("Данные загружаются подозрительно долго, возможно причина в Интернет-подключении",
                       //     textAlign: TextAlign.center,
                       //     style: TextStyle(fontSize: 16),
                       //   ),
                       // ),
                       // Transform.translate(
-                      //   offset: const Offset(0, 80),
+                      //   offset: isConnectionThrottling ? const Offset(0, 80) : const Offset(0, -180),
                       //   child: ElevatedButton(
                       //     onPressed: () { loadNextMessages(); },
                       //     child: const Text("Обновить"),

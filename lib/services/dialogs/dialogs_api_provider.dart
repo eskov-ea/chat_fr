@@ -22,7 +22,8 @@ class DialogsProvider {
           'Authorization': 'Bearer $token',
         },
       );
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       List<dynamic> collection = jsonDecode(response.body)["data"];
       List<DialogData> dialogs =
           collection.map((dialog) => DialogData.fromJson(dialog)).toList();
@@ -49,7 +50,8 @@ class DialogsProvider {
           'Authorization': 'Bearer $token',
         },
       );
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       List<dynamic> collection = jsonDecode(response.body)["data"];
       List<DialogData> dialogs =
       collection.map((dialog) => DialogData.fromJson(dialog)).toList();
@@ -87,7 +89,8 @@ class DialogsProvider {
           }
         }),
       );
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
         DialogData dialog =
             DialogData.fromJson(jsonDecode(response.body)["data"]);
         return dialog;
@@ -113,7 +116,8 @@ class DialogsProvider {
           'Authorization': 'Bearer $token',
         },
       );
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       return ChatUser.fromJson(jsonDecode(response.body)["data"]);
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
@@ -137,7 +141,8 @@ class DialogsProvider {
           'Authorization': 'Bearer $token',
         },
       );
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/exit/$dialogId/$userId ]");

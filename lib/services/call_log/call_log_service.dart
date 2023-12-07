@@ -25,7 +25,8 @@ class CallLogService {
       final response = await http.post(
           Uri.parse('http://aster.mcfef.com/logs/user/last/'),
           body: postData);
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       List<dynamic> collection = jsonDecode(response.body)["data"];
       List<CallModel> callLog =
       collection.map((call) => CallModel.fromJson(call)).toList();

@@ -35,7 +35,8 @@ class AuthRepository {
         ),
       );
       print("response.body  -->  ${response.body}  ${response.statusCode}");
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       final AuthToken authToken = AuthToken.fromJson(json.decode(response.body));
       await _secureStorage.setToken(authToken.token);
       final UserProfileData profile = await _profileProvider.getUserProfile(authToken.token);
@@ -82,7 +83,8 @@ class AuthRepository {
           'Authorization': 'Bearer $token',
         },
       );
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       return true;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
@@ -91,6 +93,7 @@ class AuthRepository {
     } on AppErrorException {
       rethrow;
     } catch (err, stackTrace) {
+      print("checkAuthStatus   $err");
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
       throw AppErrorException(AppErrorExceptionType.other);
     }
@@ -111,7 +114,8 @@ class AuthRepository {
             }
         ),
       );
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/user/lostpassword ]");

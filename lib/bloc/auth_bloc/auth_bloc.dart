@@ -58,8 +58,9 @@ class AuthBloc
       try {
         final String? token = await _dataProvider.getToken();
         final bool auth = await authRepo.checkAuthStatus(token);
+        print("checkAuthStatus   ${auth}");
         final newState =
-        auth ? const Authenticated() : Unauthenticated();
+        auth == true ? const Authenticated() : Unauthenticated();
         emit(newState);
       } catch (err, stackTrace) {
         await _dataProvider.deleteToken();

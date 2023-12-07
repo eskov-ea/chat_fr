@@ -105,12 +105,17 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         isLoadingMessages: false
       ));
     } catch (err, stackTrace) {
-      if (err.runtimeType == StateError) {
-        _logger.sendErrorTrace(stackTrace: stackTrace, errorType: err.runtimeType.toString());
-        return;
-      }
+      print("$err, $stackTrace");
       if (err is AppErrorException && err.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
+        final errorState = state.copyWith(
+            updatedChats: state.chats,
+            updatedMessagesDictionary: state.messagesDictionary,
+            error: err,
+            isError: true,
+            isLoadingMessages: false
+        );
+        emit(errorState);
       } else if (err is AppErrorException) {
         final errorState = state.copyWith(
           updatedChats: state.chats,

@@ -1,5 +1,6 @@
 package com.cashalot.MCFEF.linphoneSDK
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
@@ -165,6 +166,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
             }
         }
 
+
         override  fun onCallStateChanged(
             core: Core,
             call: Call,
@@ -172,7 +174,6 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
             message: String
         ) {
             Log.i("onCallStateChanged", state.toString())
-            Log.i("LINPHONE_CALL", call.remoteAddress.username.toString())
             // When a call is received
             when (state) {
                 Call.State.IncomingReceived -> {
@@ -293,7 +294,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     MainActivity.callServiceEventSink?.success(args)
                 }
                 Call.State.OutgoingInit -> {
-                    Log.w("OUTGOING_CALL", "OutgoingInit")
+                    Log.w("OUTGOING_CALL", "${call.remoteAddress.username}")
 
                     val caller = if(call.remoteAddress.displayName != null) {
                         call.remoteAddress.displayName!!

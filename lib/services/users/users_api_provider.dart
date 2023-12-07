@@ -19,7 +19,8 @@ class UsersProvider {
           'Authorization': 'Bearer $token'
         },
       );
-      HttpErrorHandler.handleHttpResponse(response);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
       List<dynamic> collection = jsonDecode(response.body)["data"];
       List<UserContact> users = collection.map((user) => UserContact.fromJson(user)).toList();
       return users;
