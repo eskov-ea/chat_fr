@@ -36,6 +36,7 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("currentVersion:  $currentVersion");
     return Scaffold(
       body: SafeArea(
         child: Container(

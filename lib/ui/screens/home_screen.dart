@@ -150,7 +150,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void checkAppVersion(AppSettings settings) async {
     try {
       PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      currentVersion = packageInfo.version;
+      setState(() {
+        currentVersion = packageInfo.version;
+      });
       final String? availableVersion = Platform.isAndroid ? settings.versionAndroid : Platform.isIOS ? settings.versionIos : null;
       if(availableVersion == null) return;
       final List<String> currentVersionArray = currentVersion!.split(".");
