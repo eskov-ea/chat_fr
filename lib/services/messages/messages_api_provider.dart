@@ -38,6 +38,9 @@ class MessagesProvider {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/message/pagepull/$dialogId/$pageNumber ]");
       throw AppErrorException(AppErrorExceptionType.network);
+    } on http.ClientException catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
+      throw AppErrorException(AppErrorExceptionType.network);
     } on AppErrorException{
       rethrow;
     } catch (err, stackTrace) {
@@ -63,7 +66,10 @@ class MessagesProvider {
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/pull/4000 ]");
       throw AppErrorException(AppErrorExceptionType.network);
-    }on AppErrorException {
+    } on http.ClientException catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on AppErrorException {
       rethrow;
     } catch (err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
@@ -99,6 +105,9 @@ class MessagesProvider {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/message/add/$dialogId ]");
       throw AppErrorException(AppErrorExceptionType.network);
+    } on http.ClientException catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
+      throw AppErrorException(AppErrorExceptionType.network);
     } on AppErrorException {
       rethrow;
     } catch (err, stackTrace) {
@@ -122,6 +131,9 @@ class MessagesProvider {
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/message/setchatred/$dialogId ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on http.ClientException catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
       throw AppErrorException(AppErrorExceptionType.network);
     } on AppErrorException {
       rethrow;
@@ -159,6 +171,9 @@ class MessagesProvider {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/message/setstatuses ]");
       throw AppErrorException(AppErrorExceptionType.network);
+    } on http.ClientException catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
+      throw AppErrorException(AppErrorExceptionType.network);
     } on AppErrorException {
       rethrow;
     } catch (err, stackTrace) {
@@ -183,6 +198,9 @@ class MessagesProvider {
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/message/file/$attachmentId ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on http.ClientException catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
       throw AppErrorException(AppErrorExceptionType.network);
     } on AppErrorException {
       rethrow;
@@ -226,6 +244,9 @@ class MessagesProvider {
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/message/add/$dialogId ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on http.ClientException catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
       throw AppErrorException(AppErrorExceptionType.network);
     } on AppErrorException {
       rethrow;
@@ -273,6 +294,9 @@ class MessagesProvider {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/message/add/$dialogId ]");
       throw AppErrorException(AppErrorExceptionType.network);
+    } on http.ClientException catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
+      throw AppErrorException(AppErrorExceptionType.network);
     } on AppErrorException {
       rethrow;
     } catch (err, stackTrace) {
@@ -317,6 +341,9 @@ class MessagesProvider {
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/message/add/$dialogId ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on http.ClientException catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
       throw AppErrorException(AppErrorExceptionType.network);
     } on AppErrorException {
       rethrow;

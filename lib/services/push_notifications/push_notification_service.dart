@@ -41,6 +41,9 @@ class PushNotificationService {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/user/push/$userId ]");
       throw AppErrorException(AppErrorExceptionType.network);
+    } on http.ClientException catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
+      throw AppErrorException(AppErrorExceptionType.network);
     } on AppErrorException {
       rethrow;
     } catch (err, stackTrace) {

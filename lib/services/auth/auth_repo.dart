@@ -47,6 +47,9 @@ class AuthRepository {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/auth ]");
       throw AppErrorException(AppErrorExceptionType.network);
+    } on http.ClientException catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
+      throw AppErrorException(AppErrorExceptionType.network);
     } on AppErrorException {
       rethrow;
     } catch (err, stackTrace) {
@@ -90,6 +93,9 @@ class AuthRepository {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
       "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/auth ]");
       throw AppErrorException(AppErrorExceptionType.network);
+    } on http.ClientException catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
+      throw AppErrorException(AppErrorExceptionType.network);
     } on AppErrorException {
       rethrow;
     } catch (err, stackTrace) {
@@ -119,6 +125,9 @@ class AuthRepository {
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/user/lostpassword ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on http.ClientException catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
       throw AppErrorException(AppErrorExceptionType.network);
     } on AppErrorException {
       rethrow;
