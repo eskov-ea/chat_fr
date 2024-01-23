@@ -312,29 +312,21 @@ import 'messages/messages_repository.dart';
     final hoursSinceDayBeforeYesterday = (now.millisecondsSinceEpoch - dayBeforeYesterday.millisecondsSinceEpoch) / 1000/60/60;
     final hoursSinceLastMonday = (now.millisecondsSinceEpoch - lastMonday.millisecondsSinceEpoch) / 1000/60/60;
 
-    // print("\r\nTIMES::  lastMidnight  $lastMidnight\r\n");
-    // print("\r\nTIMES::  lastMonday $lastMonday\r\n");
-    // print("\r\nTIMES::  diffTime ${diffTime/ 1000/60/60/24}\r\n ${ now.millisecondsSinceEpoch}   -  ${ rawDate.millisecondsSinceEpoch}");
-    // print("\r\nTIMES::  todayDayRange $hoursRange\r\n");
-    // print("\r\nTIMES::  todayWeekRange $todayWeekRange\r\n");
-
-  // get days since last midnight
-
-    //check if message was written in 2 minutes
+    ///check if message was written in 2 minutes
     if (hoursSinceMessageWritten < 0.035) {
       return "Только что";
     } else {
-      //check if message was written in this day range
+      ///check if message was written in this day range
       if (hoursSinceMessageWritten <= hoursSinceLastMidnight) {
         return DateFormat.Hm().format(rawDate.add(getTZ()));
-      //check if message was written yesterday
+      ///check if message was written yesterday
       } else if (hoursSinceMessageWritten > hoursSinceLastMidnight && hoursSinceMessageWritten <= hoursSinceDayBeforeYesterday) {
         return "Вчера";
-      //check if message was written in range of this week
+      ///check if message was written in range of this week
       } else if (hoursSinceMessageWritten > hoursSinceDayBeforeYesterday && hoursSinceMessageWritten <= hoursSinceLastMonday) {
         return _toRussianWeekday(rawDate.weekday);
       } else {
-        final date = DateFormat.yMd().format(rawDate).replaceAll(new RegExp('/'), '.');
+        final date = DateFormat.yMd().format(rawDate).replaceAll(RegExp('/'), '.');
         final splittedDate = date.split('.');
         final tmp = splittedDate[1];
         splittedDate[1] = splittedDate[0];
