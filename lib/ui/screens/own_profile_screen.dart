@@ -104,7 +104,7 @@ class ProfilePage extends StatelessWidget {
                             style: TextStyle(color: Colors.black54, fontStyle: FontStyle.italic),
                           ),
                         ),
-                      !kIsWeb && Platform.isAndroid
+                        Platform.isAndroid
                           ? OutlinedButton(
                               onPressed: () async {
                                 isUpdateAvailable ? downLoadNewAppVersion(state.user?.appSettings?.downloadUrlAndroid) : (){};
