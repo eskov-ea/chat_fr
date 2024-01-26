@@ -1,3 +1,5 @@
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
+import 'package:chat/services/popup_manager.dart';
 import 'package:flutter/material.dart';
 import '../../../models/contact_model.dart';
 import '../../../models/dialog_model.dart';
@@ -39,11 +41,40 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
 
     if (widget.isSecret) {
       currentChatType = 4;
-      // currentChatType = groupUsersList.length > 1 ? 4 : 3;
     } else {
       currentChatType = widget.chatType;
     }
     super.initState();
+  }
+
+  Future<void> _startChat() async {
+    PopupManager.showLoadingPopup(context);
+    try {
+      final String? userId = await DataProvider().getUserId();
+      await Future.delayed(const Duration(milliseconds: 80));
+      final DialogData dialogData = await _dialogsProvider.createDialog(
+        chatType: currentChatType,
+        users: widget.usersList,
+        chatName: _textNameFieldController.text,
+        chatDescription: _textDescriptionFieldController.text,
+        isPublic: isPublic
+      );
+      Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
+
+      openChatScreen(
+          context: context,
+          userId: int.parse(userId!),
+          partnerId: dialogData.chatUsers.first.userId,
+          dialogData: dialogData,
+          username: dialogData.name
+      );
+    } catch (err, stackTrace) {
+      // if (err is AppErrorException ) {
+      //   print("DIALOG::   $err");
+      // }
+      Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
+      PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.error, message: "Произошла ошибка при создании диалога. Попробуйте снова.");
+    }
   }
 
   void _makeGroupUsersList() {
@@ -87,7 +118,7 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
             );
           },
         ),
-        leadingWidth: 100,
+        leadingWidth: 120,
         // title: const Text('New message'),
       ),
       body: currentChatType != 3
@@ -172,30 +203,7 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
               : SizedBox.shrink(),
               SizedBox(height: 30,),
               OutlinedButton(
-                  onPressed: () async {
-                    loadingInProgressModalWidget(context, "Загрузка");
-                    final String? userId = await DataProvider().getUserId();
-                    final DialogData? dialogData = await _dialogsProvider.createDialog(chatType: currentChatType, users: widget.usersList, chatName: _textNameFieldController.text, chatDescription: _textDescriptionFieldController.text, isPublic: isPublic);
-                    if (dialogData != null) {
-                      Navigator.of(context).pushNamed(
-                          MainNavigationRouteNames.homeScreen
-                      );
-                      try {
-                        openChatScreen(
-                          context: context,
-                          userId: int.parse(userId!),
-                          partnerId: dialogData.chatUsers.first.userId,
-                          dialogData: dialogData,
-                          username: dialogData.name
-                        );
-                      } catch (err) {
-                        print("group chat navigation:   $err");
-                      }
-                          } else {
-                      Navigator.of(context).pop();
-                      customToastMessage(context: context, message: "Произошла ошибка. Попробуйте еще раз");
-                    }
-                  },
+                  onPressed: _startChat,
                   style: ElevatedButton.styleFrom(
                     primary: Colors.blue,
                     minimumSize: Size(MediaQuery.of(context).size.width * 0.8, 60),
@@ -246,34 +254,47 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
   }
 }
 
+
 Widget _groupUsersList(
     List<UserContact> groupUsersList, removeUserFromGroupList) {
   return GridView.count(
     crossAxisCount: 2,
+    mainAxisSpacing: 10,
+    crossAxisSpacing: 10,
     childAspectRatio: (1 / .25),
     children: List.generate(groupUsersList.length, (index) {
-      return Padding(
-        padding: EdgeInsets.all(4),
-        child: Container(
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        decoration: const BoxDecoration(
           color: Colors.black12,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                  "${groupUsersList[index].lastname} ${groupUsersList[index].firstname}"),
-              IconButton(
-                padding: EdgeInsets.all(0),
-                alignment: Alignment.centerRight,
+          borderRadius: BorderRadius.all(Radius.circular(6))
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(left: 4),
+                child: Text("${groupUsersList[index].lastname} ${groupUsersList[index].firstname}",
+                  maxLines: 1, softWrap: false,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 30,
+              child: IconButton(
+                padding: const EdgeInsets.all(0),
+                alignment: Alignment.center,
                 onPressed: () {
                   removeUserFromGroupList(index);
                 },
                 icon: const Icon(
                   Icons.close,
                   color: Colors.black54,
-              ))
-            ],
-          ),
+              )),
+            )
+          ],
         ),
       );
     }),

@@ -19,6 +19,7 @@ class UserItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
+      key: ObjectKey("${user.id}_container_key"),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
       child: InkWell(
         onTap:  () async {

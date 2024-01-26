@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:chat/services/messages/messages_repository.dart';
+import 'package:chat/services/popup_manager.dart';
 import 'package:chat/theme.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +52,7 @@ class _FilePreviewerWidgetState extends State<FilePreviewerWidget> {
 
   void fromBase64ToFileOnDevice() async {
 
-    loadingInProgressModalWidget(context, "Загрузка");
+    PopupManager.showLoadingPopup(context);
 
     final base64String = await _messagesRepository.loadAttachmentData(
         attachmentId: widget.attachmentId.toString());

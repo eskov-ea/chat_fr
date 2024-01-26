@@ -103,31 +103,6 @@ import 'messages/messages_repository.dart';
     return minutes + " : " + secondsS;
   }
 
-  loadingInProgressModalWidget(BuildContext context, String message) {
-    showModalBottomSheet(
-        isDismissible: false,
-        isScrollControlled: true,
-        backgroundColor: Colors.black54,
-        context: context,
-        builder: (BuildContext context) => Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(
-              width: 30,
-              height: 30,
-              child: CircularProgressIndicator()
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            Text(
-              message,
-              style: const TextStyle(color: Colors.white, fontSize: 24),
-            )
-          ],
-        ));
-  }
-
   customToastMessage({
     required BuildContext context,
     required String message,

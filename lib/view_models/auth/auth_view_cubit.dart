@@ -76,6 +76,8 @@ class AuthViewCubit extends Cubit<AuthViewCubitState> {
         return 'Произошла ошибка при получении данных с сервера. Попробуйте еще раз';
       case AppErrorExceptionType.secureStorage:
         return 'Произошла ошибка при обращении к хранилищу данных. Попробуйте еще раз';
+      case AppErrorExceptionType.requestError:
+        return 'При отправке на сервер запрос не прошел валидацию - введены неверные данные';
     }
   }
 

@@ -8,12 +8,14 @@ import '../../services/global.dart';
 class UserAvatarWidget extends StatefulWidget {
   const UserAvatarWidget({
     required this.userId,
-    double this.size = 28,
+    this.size = 28,
+    this.objKey,
     Key? key,
   }) : super(key: key);
 
   final int? userId;
   final double size;
+  final ObjectKey? objKey;
 
   @override
   State<UserAvatarWidget> createState() => _UserAvatarWidgetState();
@@ -24,7 +26,6 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
 
   @override
   void initState() {
-    print("AVATAR INIT STATE::");
     fetchUserAvatar();
     super.initState();
   }
@@ -42,7 +43,6 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
         });
       }
     } catch (err, stackTrace) {
-      log("AVATAR ERROR::::", error: err, stackTrace: stackTrace);
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: AppErrorExceptionType.render.toString());
     }
   }
@@ -50,7 +50,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      key: ObjectKey("${widget.userId}_key"),
+      key: widget.objKey,
       child: CircleAvatar(
         radius: widget.size,
         backgroundColor: Colors.grey,

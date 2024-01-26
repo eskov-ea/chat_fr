@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:http/http.dart' as http;
@@ -23,6 +24,7 @@ class DialogsProvider {
       );
       final error = handleHttpResponse(response);
       if (error != null) throw error;
+      print("LOAD DIALOGS:  ${error}");
       List<dynamic> collection = jsonDecode(response.body)["data"];
       List<DialogData> dialogs =
           collection.map((dialog) => DialogData.fromJson(dialog)).toList();
@@ -96,9 +98,8 @@ class DialogsProvider {
       );
       final error = handleHttpResponse(response);
       if (error != null) throw error;
-        DialogData dialog =
-            DialogData.fromJson(jsonDecode(response.body)["data"]);
-        return dialog;
+      DialogData dialog = DialogData.fromJson(jsonDecode(response.body)["data"]);
+      return dialog;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/add ]");

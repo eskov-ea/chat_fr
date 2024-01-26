@@ -115,6 +115,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
   String _mapErrorToMessage(Object error) {
+    print("CATCH ERROR  $error");
     if (error is! AppErrorException) {
       return 'Неизвестная ошибка, поторите попытку';
     }
@@ -139,6 +140,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         return 'Произошла ошибка при загрузке данных. Попробуйте еще раз';
       case AppErrorExceptionType.secureStorage:
         return 'Произошла ошибка при обращении к хранилищу данных. Попробуйте еще раз';
+      case AppErrorExceptionType.requestError:
+        return 'При отправке на сервер запрос не прошел валидацию - введены неверные данные';
     }
   }
 

@@ -123,7 +123,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         return;
       }
     }
-    final newDialogs = [ ...state.dialogs!, event.dialog];
+    final newDialogs = [ event.dialog, ...state.dialogs!];
     final newState = state.copyWith(dialogs: newDialogs);
     print(newState.dialogs?.length);
     emit(newState);

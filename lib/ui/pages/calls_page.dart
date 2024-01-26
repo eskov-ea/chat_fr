@@ -199,48 +199,47 @@ class _CallsPageState extends State<CallsPage> {
           padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           color: index % 2 == 0 ? Colors.transparent : Colors.grey[200],
           child:
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    data.callerName,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: data.callName == "Пропущенный" ? Colors.red[500] : Colors.grey[700]
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      data.callerName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: data.callName == "Пропущенный" ? Colors.red[500] : Colors.grey[700]
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 5,
-                  ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.phone,
-                        size: 20,
-                      ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Text(
-                        data.callName,
-                        style: TextStyle(
-                          color: Colors.grey[700]
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.phone,
+                          size: 20,
                         ),
-                      )
-                    ],
-                  )
-                ],
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Text(
+                          data.callName,
+                          style: TextStyle(
+                            color: Colors.grey[700]
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                ),
               ),
-            ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                // child: Text(dateFormater(data.callDate))),
-                child: Text("01")),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(dateFormater(data.callDate))),
           ]),
         ),
       );

@@ -107,7 +107,6 @@ class _NewMessagePageState extends State<NewMessagePage> {
                         textStyle: const TextStyle(fontSize: 20)
                     ),
                     onPressed: (){
-                      print(selected);
                       Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) =>
                               GroupChatPreviewPage(
@@ -145,10 +144,10 @@ class _NewMessagePageState extends State<NewMessagePage> {
                         shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.only(topLeft: Radius.circular(5), topRight: Radius.circular(5))),
                       ),
-                      child: Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.group_add, color: Colors.black54,),
+                        children: [
+                          Icon(Icons.group_add, color: Colors.black54),
                           SizedBox(width: 15,),
                           Text(
                             'Новый групповой чат',
