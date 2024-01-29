@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/call_model.dart';
 import 'package:chat/models/contact_model.dart';
+import 'package:chat/services/helpers/client_error_handler.dart';
+import 'package:chat/services/popup_manager.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
 import 'package:flutter/foundation.dart';
@@ -51,14 +54,13 @@ class _CallsPageState extends State<CallsPage> {
   Future<void> _onRefresh() async {
     final asterPass = BlocProvider.of<ProfileBloc>(context).state.user?.userProfileSettings?.asteriskUserPassword;
     if (asterPass == null) {
-      customToastMessage(context: context, message: 'Произошла ошибка при получении данных пользователя');
+      PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.warning, message: "Произошла ошибка при получении данных пользователя");
     } else {
       BlocProvider.of<CallLogsBloc>(context).add(
           LoadCallLogsEvent(passwd: asterPass)
       );
     }
   }
-
 
   @override
   void dispose() {
@@ -131,9 +133,9 @@ class _CallsPageState extends State<CallsPage> {
                     child: CircularProgressIndicator(),
                   );
                 } else if (state is CallLogErrorState) {
-                  return _errorWidget("Произошла ошибка при загрузке журнала звонков. Попробуйте еще раз.");
+                  return ClientErrorHandler.makeErrorInfoWidget(state.errorType!, _onRefresh);
                 } else {
-                  return  _errorWidget("Произошла техническая ошибка при загрузке журнала звонков. Попробуйте еще раз.");
+                  return ClientErrorHandler.makeErrorInfoWidget(AppErrorExceptionType.other, _onRefresh);
                 }
             }
           )

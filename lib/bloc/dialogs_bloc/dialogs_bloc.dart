@@ -100,15 +100,14 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     try {
       List<DialogData> dialogs = await dialogRepository.getDialogs();
       if (dialogs.isNotEmpty) sortDialogsByLastMessage(dialogs);
-      print("Dialogs  $dialogs");
       final newState = state.copyWith(dialogs: dialogs);
       emit(newState);
     } catch(err) {
       if (err is AppErrorException && err.type == AppErrorExceptionType.auth) {
-        print("Authentication error");
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
-        final errorState = state.copyWith(dialogs: [], searchQuery: "", isErrorHappened: true);
+        err as AppErrorException;
+        final errorState = state.copyWith(dialogs: [], searchQuery: "", isErrorHappened: true, errorType: err.type);
         emit(errorState);
       }
     }

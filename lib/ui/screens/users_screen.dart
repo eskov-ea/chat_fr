@@ -1,3 +1,5 @@
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
+import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,14 +18,13 @@ class ContactsPage extends StatefulWidget {
 }
 
 class _ContactsPageState extends State<ContactsPage> {
-  void _onRefresh(BuildContext context)  {
-    BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersLoadEvent());
-  }
 
   @override
   Widget build(BuildContext context) {
 
     final cubit = context.read<UsersViewCubit>();
+    void _onRefresh() => cubit.refresh();
+
 
     return Scaffold(
       appBar: CustomAppBar(context),
@@ -40,7 +41,7 @@ class _ContactsPageState extends State<ContactsPage> {
                 Expanded(
                     child: RefreshIndicator(
                       onRefresh: () async {
-                        _onRefresh(context);
+                        _onRefresh();
                       },
                       child: ListView.separated(
                           itemCount: state.users.length,
@@ -66,58 +67,13 @@ class _ContactsPageState extends State<ContactsPage> {
                 ),
               ],
             );
+          } else if (state is UsersViewCubitErrorState) {
+            return ClientErrorHandler.makeErrorInfoWidget(state.errorType, _onRefresh);
           } else {
-            return _errorWidget("Произошла ошибка при загрузке пользователей, попробуйте еще раз");
+            return ClientErrorHandler.makeErrorInfoWidget(AppErrorExceptionType.other, _onRefresh);
           }
         }
       ),
     );
   }
-
-  Widget _errorWidget(String errorMessage) {
-    return LayoutBuilder(
-        builder: (context, constraints) {
-          return RefreshIndicator(
-              onRefresh: () async {
-                _onRefresh(context);
-              },
-              child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                          minHeight: constraints.maxHeight
-                      ),
-                      child: Center(
-                          child: Text(errorMessage,
-                            textAlign: TextAlign.center,
-                          )
-                      )
-                  )
-              )
-          );
-        }
-    );
-  }
 }
-
-
-
-
-// return RefreshIndicator(
-// onRefresh: () async {
-// print("We refresh here");
-// refreshContacts();
-// },
-// child: Container(
-// color: Colors.greenAccent,
-// height: MediaQuery.of(context).size.height,
-// width: MediaQuery.of(context).size.width,
-// child: const Center(
-// child: Text(
-// 'Произошла ошибка при загрузке пользователей, попробуйте еще раз',
-// style: TextStyle(fontSize: 20.0),
-// textAlign: TextAlign.center,
-// ),
-// ),
-// ),
-// );

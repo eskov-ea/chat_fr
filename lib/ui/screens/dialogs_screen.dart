@@ -1,5 +1,9 @@
 import 'dart:async';
+import 'package:chat/bloc/chats_builder_bloc/chats_builder_bloc.dart';
+import 'package:chat/bloc/chats_builder_bloc/chats_builder_event.dart';
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/helpers.dart';
+import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/theme.dart';
 import 'package:chat/ui/widgets/dialog_avatar_widget.dart';
@@ -60,6 +64,11 @@ class _MessagesPageState extends State<MessagesPage> {
     return onlineMembers[id] != null ? true : false;
   }
 
+  void refreshAllData(){
+    BlocProvider.of<DialogsViewCubit>(context).refreshAllDialogs();
+    BlocProvider.of<ChatsBuilderBloc>(context).add(RefreshChatsBuilderEvent());
+  }
+
   @override
   void dispose() {
     presenceOnlineInfoChannelSubscription.cancel();
@@ -74,27 +83,14 @@ class _MessagesPageState extends State<MessagesPage> {
         builder: (context, state) {
           if (state is DialogsLoadedViewCubitState && userId != null) {
             if (state.isError) {
-              return Container(
-              width: MediaQuery.of(context).size.width,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Произошла ошибка при загрузке диалогов"),
-                  const SizedBox(height: 20,),
-                  ElevatedButton(
-                    onPressed: (){refreshAllData(context);},
-                    child: const Text("Обновить")
-                  )
-                ],
-              ),
-            );
+              return ClientErrorHandler.makeErrorInfoWidget(state.errorType!, refreshAllData);
             }
             if (state.dialogs.isEmpty) {
               return const Center(child: Text("Нет диалогов"),);
             } else{
               return RefreshIndicator(
                 onRefresh: () async {
-                  refreshAllData(context);
+                  refreshAllData();
                 },
                 child: CustomScrollView(
                   slivers: [
@@ -139,7 +135,7 @@ class _MessagesPageState extends State<MessagesPage> {
             _readUserId();
             return RefreshIndicator(
               onRefresh: () async {
-                refreshAllData(context);
+                refreshAllData();
               },
               child: Container(
                 child: const Shimmer(

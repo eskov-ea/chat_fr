@@ -315,8 +315,6 @@ Widget? getImagePreview({
         ],
       );
     } catch (err) {
-      print(
-          "ERROR parsing base64 to image data  $err  , attachment id ${file.attachmentId}");
       return Stack(
         alignment: Alignment.center,
         children: [

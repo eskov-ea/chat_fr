@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:io';
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_event.dart';
+import 'package:chat/bloc/chats_builder_bloc/chats_builder_event.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_state.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/user_profile_model.dart';
+import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/cupertino.dart';
@@ -95,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         "cert": settings.asteriskCert
       });
     } catch (err) {
-      print("sipRegistration error  $err");
+      ClientErrorHandler.informErrorHappened(context, "Произошла ошибка при подключению к SIP-сервису, звонки недоступны. Попробуйте перезапустить приложение, при повторном возникновении ошибок - свяжитесь с разработчиками.");
     }
   }
 
@@ -114,6 +116,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       }
     }
   }
+
   String _mapErrorToMessage(Object error) {
     print("CATCH ERROR  $error");
     if (error is! AppErrorException) {
@@ -201,10 +204,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               }
             }
           }
-          if(isJoined == true) refreshAllData(context);
+          if(isJoined == true) {
+            BlocProvider.of<DialogsViewCubit>(context).refreshAllDialogs();
+            BlocProvider.of<ChatsBuilderBloc>(context).add(RefreshChatsBuilderEvent());
+          }
         }
       } catch (err) {
-        customToastMessage(context: context, message: "Не удалось проверить корпоративные группы и каналы");
+        customToastMessage(context: context, message: "Не удалось проверить корпоративные группы и каналы. Проверим в следующий раз.");
       }
     }
   }

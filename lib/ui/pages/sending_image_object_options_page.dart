@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/ui/pages/sending_file_preview.dart';
 import 'package:chat/ui/pages/sending_image_preview.dart';
@@ -60,9 +61,9 @@ Widget SendingObjectOptionsPage({
           isScrollControlled: true,
           backgroundColor: Colors.black54,
           context: context,
-          builder: (BuildContext context) => Column(
+          builder: (BuildContext context) => const Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               CircularProgressIndicator(),
               SizedBox(
                 height: 30,
@@ -81,19 +82,14 @@ Widget SendingObjectOptionsPage({
           print("original bytes size  -->  ${bytes.lengthInBytes}");
 
           String base64 = base64Encode(bytes);
-          final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.name.split('.').last, parentMessageId: parentMessage?.parentMessageId, bytes: bytes);
-          print(response);
-          // final message = MessageData.fromJson(jsonDecode(response)["data"]);
-          // BlocProvider.of<ChatsBuilderBloc>(context).add(
-          //     ChatsBuilderAddMessageEvent(message: message, dialog: dialogId!));
+          await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.name.split('.').last, parentMessageId: parentMessage?.parentMessageId, bytes: bytes);
           BlocProvider.of<ChatsBuilderBloc>(context)
               .add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
           Navigator.pop(context);
           Navigator.pop(context);
         } catch (err) {
-          print("ERROR sending image on web  --> $err");
           Navigator.pop(context);
-          customToastMessage(context: context, message: "Не удалось отправить сообщение. Попробуйте еще раз");
+          ClientErrorHandler.informErrorHappened(context, "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");
         }
     }
   }
@@ -152,9 +148,9 @@ Widget SendingObjectOptionsPage({
         isScrollControlled: true,
         backgroundColor: Colors.black54,
         context: context,
-        builder: (BuildContext context) => Column(
+        builder: (BuildContext context) => const Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children: [
             CircularProgressIndicator(),
             SizedBox(
               height: 30,
@@ -169,18 +165,14 @@ Widget SendingObjectOptionsPage({
         final bytes = result.files.first.bytes;
         String base64 = base64Encode(bytes!);
         final response = await MessagesRepository().messagesProvider.sendMessageWithFileBase64ForWeb(base64: base64, dialogId: dialogId, filetype: result.files.first.name.split('.').last, parentMessageId: parentMessage?.parentMessageId, bytes: null);
-        print(response);
-        final message = MessageData.fromJson(jsonDecode(response)["data"]);
-        print("message -->  $message");
-        // BlocProvider.of<ChatsBuilderBloc>(context).add(
-        //     ChatsBuilderAddMessageEvent(message: message, dialog: dialogId!));
+        MessageData.fromJson(jsonDecode(response)["data"]);
         BlocProvider.of<ChatsBuilderBloc>(context)
             .add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
         Navigator.pop(context);
         Navigator.pop(context);
       } catch (err) {
-        print("ERROR sending image on web  --> $err");
         Navigator.pop(context);
+        ClientErrorHandler.informErrorHappened(context, "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");
       }
     }
   }

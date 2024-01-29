@@ -41,7 +41,7 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
         clientEvent: state.clientEventsDictionary
       ));
     } else if (state is UsersErrorState) {
-      emit(UsersViewCubitErrorState());
+      emit(UsersViewCubitErrorState(errorType: state.errorType));
     }
   }
 
@@ -87,7 +87,12 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
     }
   }
 
-  void searchContact(String text) async {
+  void refresh() {
+    emit(UsersViewCubitLoadingState());
+    usersBloc.add(UsersLoadEvent());
+  }
+
+  void searchContact(String text) {
     usersBloc.add(UsersSearchEvent(searchQuery: text.trim()));
   }
 

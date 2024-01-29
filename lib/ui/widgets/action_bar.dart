@@ -4,7 +4,9 @@ import 'dart:math';
 import 'package:chat/bloc/chats_builder_bloc/chats_builder_state.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/services/global.dart';
+import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/services/logger/logger_service.dart';
+import 'package:chat/services/popup_manager.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -164,19 +166,14 @@ class ActionBarState extends State<ActionBar> {
     await recorder.stopRecorder();
   }
   void record(FlutterSoundRecorder? recorder) async {
-    try {
-      PermissionStatus status = await Permission.microphone.request();
-      if (status != PermissionStatus.granted) {
-        customToastMessage(context: context, message: "Необходимо разрешить доступ к микрофону!");
-        throw RecordingPermissionException("Microphone permission not granted");
-      }
-
-      await recorder!.startRecorder(codec: _codec, toFile: _mPath, audioSource: AudioSource.microphone);
-      setState(() {});
-    } catch (err, stackTrace) {
-      customToastMessage(context: context, message: "Произошла ошибка при записи голосового сообщения");
-      _logger.sendErrorTrace(stackTrace: stackTrace);
+    PermissionStatus status = await Permission.microphone.request();
+    if (status != PermissionStatus.granted) {
+      ClientErrorHandler.informErrorHappened(context, "Доступ к микрофону отключен. Включить доступ можно в настройках.");
+      return;
     }
+
+    await recorder!.startRecorder(codec: _codec, toFile: _mPath, audioSource: AudioSource.microphone);
+    setState(() {});
   }
 
   _start(FlutterSoundRecorder? recorder) async {
@@ -186,7 +183,7 @@ class ActionBarState extends State<ActionBar> {
       }
       record(recorder);
     } catch (err, stackTrace) {
-      customToastMessage(context: context, message: "Произошла ошибка при записи голосового сообщения");
+      ClientErrorHandler.informErrorHappened(context, "Произошла ошибка при записи голосового сообщения. Попробуйте еще раз.", type: PopupType.warning);
       _logger.sendErrorTrace(stackTrace: stackTrace);
     }
   }
@@ -288,15 +285,12 @@ class ActionBarState extends State<ActionBar> {
                     ),
                     child: GestureDetector(
                       onLongPressStart: (details){
-                        print('START LONG PRESS');
                         widget.setRecording(true);
                         if (sendButton == false) _start(_mRecorder);
                       },
                       onLongPressEnd: (details) async {
-                        print('END LONG PRESS');
                         try {
                           final recordedAudioPath = await _stop(_mRecorder);
-                          print("Record message path:   $recordedAudioPath");
                           widget.setRecording(false);
                           final File record = File(recordedAudioPath!);
                           final Directory documentDirectory = await getApplicationDocumentsDirectory();
@@ -308,9 +302,9 @@ class ActionBarState extends State<ActionBar> {
                           final File file = File("$path/$filename");
                           file.writeAsBytesSync(await record.readAsBytes());
                           _sendAudioMessage(file, widget.userId, widget.dialogId);
-                        } catch (err) {
-                          print("Record message error:   $err");
-                          customToastMessage(context: context, message: "Произошла ошибка при записи голосового сообщения");
+                        } catch (err, stackTrace) {
+                          ClientErrorHandler.informErrorHappened(context, "Произошла ошибка при отправке голосового файла. Попробуйте еще раз. ");
+                          _logger.sendErrorTrace(stackTrace: stackTrace);
                         }
                       },
                       child: GlowingActionButton(

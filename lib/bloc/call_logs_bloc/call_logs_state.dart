@@ -1,12 +1,18 @@
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import '../../models/call_model.dart';
 
 abstract class CallLogsBlocState{
   final List<CallModel> callLog = [];
   final Map<String, bool> logsDictionary = {};
+  final AppErrorExceptionType? errorType = null;
 }
 
 class CallLogInitialState extends CallLogsBlocState{}
-class CallLogErrorState extends CallLogsBlocState{}
+class CallLogErrorState extends CallLogsBlocState{
+  final AppErrorExceptionType? errorType;
+
+  CallLogErrorState({required this.errorType});
+}
 
 class CallsLoadedLogState extends CallLogsBlocState{
   final List<CallModel> callLog;

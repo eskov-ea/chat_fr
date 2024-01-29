@@ -26,13 +26,9 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
           });
           final newState = CallsLoadedLogState(callLog: logs, logsDictionary: state.logsDictionary);
           emit(newState);
-        } catch (err, stackTrace) {
-          if (err is AppErrorException) {
-            errorHandlerBloc.add(ErrorHandlerWithErrorEvent(error: err));
-          } else {
-            errorHandlerBloc.add(ErrorHandlerWithRuntimeErrorEvent(error: err));
-          }
-          final errorState = CallLogErrorState();
+        } catch (err) {
+          err as AppErrorException;
+          final errorState = CallLogErrorState(errorType: err.type);
           emit(errorState);
         }
       } else if (event is UpdateCallLogsEvent) {
@@ -45,12 +41,8 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
           final newState = CallsLoadedLogState(callLog: logs, logsDictionary: state.logsDictionary);
           emit(newState);
         } catch (err) {
-          if (err is AppErrorException) {
-            errorHandlerBloc.add(ErrorHandlerWithErrorEvent(error: err));
-          } else {
-            errorHandlerBloc.add(ErrorHandlerWithRuntimeErrorEvent(error: err));
-          }
-          final errorState = CallLogErrorState();
+          err as AppErrorException;
+          final errorState = CallLogErrorState(errorType: err.type);
           emit(errorState);
         }
       } else if (event is AddCallToLogEvent) {

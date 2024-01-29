@@ -1,23 +1,26 @@
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/dialog_model.dart';
-
 import '../../services/helpers/equality_helper.dart';
 
 class DialogsState {
   final List<DialogData>? dialogs;
   final String searchQuery;
   final bool isErrorHappened;
+  final AppErrorExceptionType? errorType;
 
   bool get isSearchMode => searchQuery.isNotEmpty;
 
   const DialogsState.initial()
       : dialogs = null,
         searchQuery = "",
-        isErrorHappened = false;
+        isErrorHappened = false,
+        errorType = null;
 
   DialogsState({
     required this.dialogs,
     required this.searchQuery,
-    required this.isErrorHappened
+    required this.isErrorHappened,
+    required this.errorType
   });
 
   @override
@@ -26,24 +29,28 @@ class DialogsState {
               runtimeType == other.runtimeType &&
               dialogs == other.dialogs &&
               searchQuery == other.searchQuery &&
+              errorType == other.errorType &&
               isErrorHappened == other.isErrorHappened;
 
   @override
   int get hashCode =>
       dialogs.hashCode ^
       searchQuery.hashCode ^
+      errorType.hashCode ^
       isErrorHappened.hashCode;
 
   DialogsState copyWith({
     List<DialogData>? dialogs,
     String? searchQuery,
-    bool? isErrorHappened
+    bool? isErrorHappened,
+    AppErrorExceptionType? errorType
   }) {
-    return new DialogsState(
+    return DialogsState(
       dialogs:
       dialogs ?? this.dialogs,
       searchQuery: searchQuery ?? this.searchQuery,
-      isErrorHappened: isErrorHappened ?? this.isErrorHappened
+      isErrorHappened: isErrorHappened ?? this.isErrorHappened,
+      errorType: errorType ?? this.errorType
     );
   }
 
@@ -71,8 +78,9 @@ class DialogsState {
     }
     return DialogsState(
       dialogs: dialogs,
-      searchQuery: this.searchQuery,
-      isErrorHappened: this.isErrorHappened
+      searchQuery: searchQuery,
+      isErrorHappened: isErrorHappened,
+      errorType: errorType
     );
   }
 }

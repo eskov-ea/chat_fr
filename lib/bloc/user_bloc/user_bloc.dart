@@ -68,10 +68,11 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
       }
     } catch (err, stackTrace) {
       _logger.sendErrorTrace(stackTrace: stackTrace);
-      if(err is AppErrorException && err.type == AppErrorExceptionType.auth) {
+      err as AppErrorException;
+      if(err.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
-        emit(UsersErrorState());
+        emit(UsersErrorState(errorType: err.type));
       }
     }
   }
@@ -165,7 +166,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
         }
       } catch (err, stackTrace) {
         _logger.sendErrorTrace(stackTrace: stackTrace);
-        emit(UsersErrorState());
+        err as AppErrorException;
+        emit(UsersErrorState(errorType: err.type));
       }
     } else {
       add(UsersLoadEvent());

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/services/popup_manager.dart';
 import 'package:chat/theme.dart';
@@ -44,8 +45,7 @@ class _FilePreviewerWidgetState extends State<FilePreviewerWidget> {
     try {
       return await filePermissionChannel.invokeMethod('CHECK_WRITE_FILES_PERMISSION', {});
     } catch (err) {
-      customToastMessage(context: context, message: "Загрузка отклонена системой, так как недостаточно прав доступа");
-      print(err);
+      ClientErrorHandler.informErrorHappened(context, "Загрузка файла отклонена системой, так как недостаточно прав доступа. Пожалуйста, проверьте в настройках что приложение имеет доступ в файлам.");
       return false;
     }
   }
@@ -74,8 +74,7 @@ class _FilePreviewerWidgetState extends State<FilePreviewerWidget> {
         webPlatformSaveFile(bytes: bytes, filename: widget.fileName);
       }
     } catch (err) {
-      customToastMessage(
-          context: context, message: "Произошла ошибка, не удалось сохранить файл!");
+      ClientErrorHandler.informErrorHappened(context, "Произошла ошибка при сохранении файла. Попробуйте еще раз.");
     }
   }
 

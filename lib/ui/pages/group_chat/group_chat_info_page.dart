@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:chat/models/dialog_model.dart';
+import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/cupertino.dart';
@@ -295,7 +296,7 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                               addUserCallback: addUserCallback
                             );
                           } catch (err) {
-                            print(err);
+                            ClientErrorHandler.informErrorHappened(context, "Произошла непредвиденная ошибка. Попробуйте еще раз.");
                           }
                         },
                         style: ElevatedButton.styleFrom(

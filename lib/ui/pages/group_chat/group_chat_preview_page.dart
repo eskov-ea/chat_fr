@@ -1,4 +1,7 @@
+import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
+import 'package:chat/bloc/error_handler_bloc/error_handler_events.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
+import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/services/popup_manager.dart';
 import 'package:flutter/material.dart';
 import '../../../models/contact_model.dart';
@@ -51,7 +54,7 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
     PopupManager.showLoadingPopup(context);
     try {
       final String? userId = await DataProvider().getUserId();
-      await Future.delayed(const Duration(milliseconds: 80));
+      await Future.delayed(const Duration(milliseconds: 40));
       final DialogData dialogData = await _dialogsProvider.createDialog(
         chatType: currentChatType,
         users: widget.usersList,
@@ -68,12 +71,9 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
           dialogData: dialogData,
           username: dialogData.name
       );
-    } catch (err, stackTrace) {
-      // if (err is AppErrorException ) {
-      //   print("DIALOG::   $err");
-      // }
+    } catch (err) {
       Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
-      PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.error, message: "Произошла ошибка при создании диалога. Попробуйте снова.");
+      ClientErrorHandler.handleAppErrorException(context, err);
     }
   }
 

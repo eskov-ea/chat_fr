@@ -197,10 +197,7 @@ import 'messages/messages_repository.dart';
     }
   }
 
-  void refreshAllData(BuildContext context){
-    BlocProvider.of<DialogsViewCubit>(context).refreshAllDialogs();
-    BlocProvider.of<ChatsBuilderBloc>(context).add(RefreshChatsBuilderEvent());
-  }
+
 
   getMonthRussianName(int month){
     switch(month){

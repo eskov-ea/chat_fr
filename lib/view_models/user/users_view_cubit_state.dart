@@ -1,3 +1,5 @@
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
+
 import '../../../../models/contact_model.dart';
 import '../../models/dialog_model.dart';
 
@@ -58,4 +60,8 @@ class UsersViewCubitLoadedState extends UsersViewCubitState {
 
 class UsersViewCubitLoadingState extends UsersViewCubitState{}
 
-class UsersViewCubitErrorState extends UsersViewCubitState{}
+class UsersViewCubitErrorState extends UsersViewCubitState{
+  final AppErrorExceptionType errorType;
+
+  UsersViewCubitErrorState({required this.errorType});
+}

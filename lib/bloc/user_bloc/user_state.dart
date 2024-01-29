@@ -1,3 +1,4 @@
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/bloc/user_bloc/users_list_container.dart';
 import '../../models/contact_model.dart';
 import '../../models/dialog_model.dart';
@@ -82,5 +83,7 @@ class UsersLoadedState extends UsersState {
 }
 
 class UsersErrorState extends UsersState {
+  final AppErrorExceptionType errorType;
 
+  UsersErrorState({required this.errorType});
 }
