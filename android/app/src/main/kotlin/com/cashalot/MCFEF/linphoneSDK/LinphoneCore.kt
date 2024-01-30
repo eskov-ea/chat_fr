@@ -107,11 +107,9 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
     }
 
     fun logout() {
-        Log.v("SIP_LOGOUT core1", "${core.accountList.size} ${core.proxyConfigList.size}")
         core.clearAccounts()
         core.clearProxyConfig()
         core.clearAllAuthInfo()
-        Log.v("SIP_LOGOUT core2", "${core.accountList.size} ${core.proxyConfigList.size}")
 
         deleteSipAccountCredentialFromStorage()
 
@@ -129,18 +127,6 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         editor.putString("stun_port",null)
         editor.putString("cert",null)
         editor.apply()
-
-
-        val username = sharedPreference.getString("username", null)
-        val displayName = sharedPreference.getString("display_name", null)
-        val password = sharedPreference.getString("password", null)
-        val domain = sharedPreference.getString("domain", null)
-        val stunDomain = sharedPreference.getString("stun_domain", null)
-        val stunPort = sharedPreference.getString("stun_port", null)
-        val host = sharedPreference.getString("host", null)
-        val cert = sharedPreference.getString("cert", null)
-
-        Log.v("SIP_LOGOUT prefs", "uname: $username, dname: $displayName, domain: $domain")
     }
 
     private fun writeSipAccountToStorage(username: String, password: String, domain: String, stunDomain: String, stunPort: String,  host: String, displayName: String?, cert: String) {

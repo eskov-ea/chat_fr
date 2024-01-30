@@ -8,6 +8,7 @@ import 'package:chat/theme.dart';
 import 'package:chat/ui/widgets/unauthenticated_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
@@ -124,17 +125,9 @@ class ProfilePage extends StatelessWidget {
                           : SizedBox.shrink(),
                       OutlinedButton(
                           onPressed: () async {
-                            //TODO: check if logout consistently works through add event
-                            logoutHelper(context);
-                            // BlocProvider.of<DialogsViewCubit>(context).deleteAllDialogs();
-                            // BlocProvider.of<ChatsBuilderBloc>(context).add(DeleteAllChatsEvent());
-                            // BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLogoutEvent());
-                            // BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(WsEventCloseConnection());
-                            // BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersDeleteUsersEvent());
-                            // await AuthRepository().logout();
-                            // // BlocProvider.of<AuthViewCubit>(context).logout(context);
-                            // Navigator.of(context)
-                            //     .pushReplacementNamed(MainNavigationRouteNames.auth);
+                            // logoutHelper(context);
+                            final sipChannel = const MethodChannel("com.application.chat/sip");
+                            sipChannel.invokeMethod('SIP_LOGOUT');
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: LightColors.profilePageButton,

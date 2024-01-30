@@ -1,10 +1,11 @@
 package com.cashalot.MCFEF
 
 
-import android.Manifest
-import android.Manifest.permission.*
-import android.app.Activity
-import android.app.AlertDialog
+import android.Manifest.permission.CAMERA
+import android.Manifest.permission.POST_NOTIFICATIONS
+import android.Manifest.permission.READ_EXTERNAL_STORAGE
+import android.Manifest.permission.READ_MEDIA_IMAGES
+import android.Manifest.permission.RECORD_AUDIO
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
@@ -13,21 +14,17 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.RingtoneManager
-import android.net.Uri
-import android.os.*
+import android.os.Build
+import android.os.Bundle
 import android.provider.DocumentsContract
-import android.provider.Settings
 import android.util.Base64
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import com.cashalot.MCFEF.linphoneSDK.CoreContext
 import com.cashalot.MCFEF.linphoneSDK.LinphoneCore
-import com.cashalot.MCFEF.calls_manager.CallsNotificationManager
-import com.cashalot.MCFEF.calls_manager.Data
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import io.flutter.Log
@@ -35,12 +32,7 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
-import androidx.activity.ComponentActivity
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
+import kotlinx.coroutines.launch
 
 
 class MainActivity : FlutterActivity() {
@@ -50,6 +42,7 @@ class MainActivity : FlutterActivity() {
     val CREATE_FILE = 0
     var arrayBytesToWrite: String? = null
     lateinit var linphoneCore : LinphoneCore
+    var notificationManager: NotificationManagerCompat? = null
     val PERMISSION_REQUEST_CODE = 112
     private val listPermissions = listOf<String>(
         POST_NOTIFICATIONS,
@@ -216,6 +209,9 @@ class MainActivity : FlutterActivity() {
 
         createNotificationChannel()
         getDeviceToken()
+
+        notificationManager = NotificationManagerCompat.from(this)
+        notificationManager!!.cancelAll()
     }
 
     override fun onDestroy() {
@@ -272,6 +268,11 @@ class MainActivity : FlutterActivity() {
             val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(mChannel)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        notificationManager!!.cancelAll()
     }
 
 }
