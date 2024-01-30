@@ -259,6 +259,24 @@ class LinphoneSDK : ObservableObject
             } catch { NSLog(error.localizedDescription) }
         }
     
+        func logout() {
+            mCore.clearAccounts()
+            mCore.clearProxyConfig()
+            mCore.clearAllAuthInfo()
+            
+            let factory = Factory.Instance
+            let configDir = factory.getConfigDir(context: nil)
+            let path = "\(configDir)/linphonerc"
+            if (FileManager.default.fileExists(atPath: path)) {
+                do {
+                    try FileManager.default.removeItem(atPath: path)
+                    print("File deleted")
+                } catch {
+                    print("Could not delete file \(error)")
+                }
+            }
+        }
+    
         func declineCall() {
             do {
                 try mCore?.currentCall?.terminate()

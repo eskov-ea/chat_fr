@@ -105,6 +105,8 @@ import PushKit
                 } else {
                     print("No data to login into SIP account")
                 }
+            case "SIP_LOGOUT":
+                self?.linphoneSDK.logout()
             case "OUTGOING_CALL":
                 print("OUTGOING_CALL FLUTTER")
                 let args = call.arguments as? Dictionary<String, Any>

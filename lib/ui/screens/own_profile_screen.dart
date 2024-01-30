@@ -125,9 +125,7 @@ class ProfilePage extends StatelessWidget {
                           : SizedBox.shrink(),
                       OutlinedButton(
                           onPressed: () async {
-                            // logoutHelper(context);
-                            final sipChannel = const MethodChannel("com.application.chat/sip");
-                            sipChannel.invokeMethod('SIP_LOGOUT');
+                            logoutHelper(context);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: LightColors.profilePageButton,

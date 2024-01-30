@@ -95,6 +95,10 @@ import 'messages/messages_repository.dart';
     BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(WsEventCloseConnection());
     BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersDeleteUsersEvent());
     BlocProvider.of<CallLogsBloc>(context).add(DeleteCallsOnLogoutEvent());
+
+    final sipChannel = const MethodChannel("com.application.chat/sip");
+    sipChannel.invokeMethod('SIP_LOGOUT');
+
     BlocProvider.of<AuthViewCubit>(context).logout(context);
   }
 
