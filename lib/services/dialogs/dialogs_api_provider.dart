@@ -21,7 +21,9 @@ class DialogsProvider {
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',
         },
-      );
+      ).timeout(const Duration(seconds: 20), onTimeout: () {
+        throw SocketException("Timed out");
+      });
       final error = handleHttpResponse(response);
       if (error != null) throw error;
       print("LOAD DIALOGS:  ${error}");

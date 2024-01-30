@@ -48,7 +48,7 @@ class ClientErrorHandler {
     String message = '';
     String imagePath = "assets/icons/popup-data-other-error-icon.png";
     if (type == AppErrorExceptionType.network || type == AppErrorExceptionType.socket) {
-      message = "Произошла ошибка сети при загрузке данных. Возможные причины- Плохое интернет-соединения, ошибка сети. Попробуйте еще раз";
+      message = "Произошла ошибка сети при загрузке данных. Возможные причины- плохое интернет-соединение, ошибка сети. Попробуйте еще раз";
       imagePath = "assets/icons/popup-data-network-error-icon.png";
     } else if (type == AppErrorExceptionType.requestError) {
       message = "Произошла ошибка сети при загрузке данных. Отправленные на сервер данные не прошли валидацию, пожалуйста, проверьте, что все необходимые поля заполнены и попробуйте снова";
@@ -92,17 +92,26 @@ class ClientErrorHandler {
           ),
           Transform.translate(
             offset: Offset(0, 80),
-            child: Container(
-              alignment: Alignment.center,
-              width: 250,
-              height: 50,
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(6)),
-                color: Color(0xFF2F63E8)
-              ),
-              child: InkWell(
-                onTap: callback,
-                child: Text("Обновить", style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 16))
+            child: Material(
+              color: Colors.transparent,
+              child: Ink(
+                width: 250,
+                height: 50,
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                  color: Color(0xFF2F63E8)
+                ),
+                child: InkWell(
+                  onTap: callback,
+                  splashColor: Color(0xFF5282FF),
+                  customBorder: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6)
+                  ),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text("Обновить", style: TextStyle(color: Color(0xFFFFFFFF), fontSize: 16))
+                  )
+                ),
               ),
             ),
           )

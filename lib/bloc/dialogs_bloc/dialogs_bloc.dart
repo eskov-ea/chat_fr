@@ -103,10 +103,12 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       if (dialogs.isNotEmpty) sortDialogsByLastMessage(dialogs);
       final newState = state.copyWith(dialogs: dialogs, isAuthenticated: true, isErrorHappened: false);
       emit(newState);
-    } catch(err) {
+    } catch(err, stack) {
+      print("LOAD D ERROR  $err \r\n$stack");
       if (err is AppErrorException && err.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
+        await Future.delayed(const Duration(milliseconds: 300));
         err as AppErrorException;
         final errorState = state.copyWith(dialogs: [], searchQuery: "", isErrorHappened: true, errorType: err.type);
         emit(errorState);
