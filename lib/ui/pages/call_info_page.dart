@@ -8,7 +8,7 @@ import '../../services/global.dart';
 import '../../view_models/dialogs_page/dialogs_view_cubit.dart';
 import '../navigation/main_navigation.dart';
 import '../screens/chat_screen.dart';
-import 'calls_page.dart';
+import '../screens/call_logs_screen.dart';
 
 class CallInfoPage extends StatelessWidget {
   

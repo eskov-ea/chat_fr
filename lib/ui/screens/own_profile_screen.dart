@@ -5,6 +5,7 @@ import 'package:chat/bloc/profile_bloc/profile_events.dart';
 import 'package:chat/bloc/profile_bloc/profile_state.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/theme.dart';
+import 'package:chat/ui/widgets/unauthenticated_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -56,8 +57,7 @@ class ProfilePage extends StatelessWidget {
                     ],
                   ),
                 );
-              }
-              if (state is UserProfileLoadedState){
+              } else if (state is UserProfileLoadedState){
                 return SizedBox(
                   width: MediaQuery.of(context).size.width,
                   child: Column(
@@ -125,15 +125,16 @@ class ProfilePage extends StatelessWidget {
                       OutlinedButton(
                           onPressed: () async {
                             //TODO: check if logout consistently works through add event
-                            BlocProvider.of<DialogsViewCubit>(context).deleteAllDialogs();
-                            BlocProvider.of<ChatsBuilderBloc>(context).add(DeleteAllChatsEvent());
-                            BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLogoutEvent());
-                            BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(WsEventCloseConnection());
-                            BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersDeleteEvent());
-                            await AuthRepository().logout();
-                            // BlocProvider.of<AuthViewCubit>(context).logout(context);
-                            Navigator.of(context)
-                                .pushReplacementNamed(MainNavigationRouteNames.auth);
+                            logoutHelper(context);
+                            // BlocProvider.of<DialogsViewCubit>(context).deleteAllDialogs();
+                            // BlocProvider.of<ChatsBuilderBloc>(context).add(DeleteAllChatsEvent());
+                            // BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLogoutEvent());
+                            // BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(WsEventCloseConnection());
+                            // BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersDeleteUsersEvent());
+                            // await AuthRepository().logout();
+                            // // BlocProvider.of<AuthViewCubit>(context).logout(context);
+                            // Navigator.of(context)
+                            //     .pushReplacementNamed(MainNavigationRouteNames.auth);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: LightColors.profilePageButton,
@@ -149,6 +150,14 @@ class ProfilePage extends StatelessWidget {
                       )
                     ]
                   ),
+                );
+              } else if (state is UserProfileLoggedOutState) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: 56),
+                    UnauthenticatedWidget()
+                  ],
                 );
               } else {
                 return Column(children: [

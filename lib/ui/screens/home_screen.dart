@@ -4,6 +4,7 @@ import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_event.dart';
 import 'package:chat/bloc/chats_builder_bloc/chats_builder_event.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
+import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_state.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/user_profile_model.dart';
@@ -15,7 +16,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:just_audio/just_audio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../bloc/calls_bloc/calls_bloc.dart';
@@ -102,12 +102,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _subscribeToErrorsBlocStream() {
-    _errorHandlerBlocSubscription = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.errorHandlerBloc.stream.listen(_onErrorState);
+    _errorHandlerBlocSubscription = BlocProvider.of<ErrorHandlerBloc>(context).stream.listen(_onErrorState);
   }
 
   void _onErrorState(ErrorHandlerState state){
-    print("ErrorHandlerState  $state");
     if (state is ErrorHandlerWithAppErrorState) {
+    print("ErrorHandlerState  $state  ${state.error}");
       if (state.error.type == AppErrorExceptionType.auth) {
         SessionExpiredModalWidget(context);
       } else {
@@ -247,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void initialLoadData() async {
     BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLoadingEvent());
-    BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.add(DialogsLoadEvent());
+    BlocProvider.of<DialogsViewCubit>(context).loadDialogs();
     BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(InitializeSocketEvent());
     BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersLoadEvent());
   }

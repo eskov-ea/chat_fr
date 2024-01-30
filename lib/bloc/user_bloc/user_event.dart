@@ -1,6 +1,4 @@
-import 'package:chat/models/contact_model.dart';
 import 'package:equatable/equatable.dart';
-
 import '../../models/dialog_model.dart';
 
 abstract class UsersEvent extends Equatable{
@@ -10,7 +8,7 @@ abstract class UsersEvent extends Equatable{
 
 class UsersLoadEvent extends UsersEvent {}
 
-class UsersDeleteEvent extends UsersEvent{}
+class UsersDeleteUsersEvent extends UsersEvent{}
 
 class UsersUpdateOnlineStatusEvent extends UsersEvent{
   final Map<int, bool>? onlineUsersDictionary;

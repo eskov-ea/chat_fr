@@ -9,12 +9,14 @@ class DialogsLoadedViewCubitState extends DialogsViewCubitState {
   final List<DialogData> dialogs;
   final String searchQuery;
   final bool isError;
+  final bool isAuthenticated;
   final AppErrorExceptionType? errorType;
 
   DialogsLoadedViewCubitState({
     required this.dialogs,
     required this.searchQuery,
     required this.isError,
+    required this.isAuthenticated,
     required this.errorType
   });
 
@@ -27,15 +29,17 @@ class DialogsLoadedViewCubitState extends DialogsViewCubitState {
               compareDialogDataLists(dialogs, other.dialogs) &&
               searchQuery == other.searchQuery &&
               errorType == other.errorType &&
+              isAuthenticated == other.isAuthenticated &&
               isError == other.isError;
 
   @override
-  int get hashCode => dialogs.hashCode ^ dialogs.length.hashCode ^ searchQuery.hashCode ^ isError.hashCode ^ errorType.hashCode;
+  int get hashCode => dialogs.hashCode ^ dialogs.length.hashCode ^ searchQuery.hashCode ^ isError.hashCode ^ isAuthenticated.hashCode ^ errorType.hashCode;
 
   DialogsLoadedViewCubitState copyWith({
     List<DialogData>? dialogs,
     String? searchQuery,
     bool? isError,
+    bool? isAuthenticated,
     AppErrorExceptionType? errorType
   }) {
     return DialogsLoadedViewCubitState(
@@ -43,6 +47,7 @@ class DialogsLoadedViewCubitState extends DialogsViewCubitState {
       dialogs ?? this.dialogs,
       searchQuery: searchQuery ?? this.searchQuery,
       isError: isError ?? this.isError,
+      isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       errorType: errorType ?? this.errorType
     );
   }

@@ -9,6 +9,7 @@ import 'package:chat/theme.dart';
 import 'package:chat/ui/widgets/dialog_avatar_widget.dart';
 import 'package:chat/ui/widgets/dialogs/dialog_item.dart';
 import 'package:chat/ui/widgets/dialogs/dialogs_skeleton.dart';
+import 'package:chat/ui/widgets/unauthenticated_widget.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit_state.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:flutter/material.dart';
@@ -84,6 +85,9 @@ class _MessagesPageState extends State<MessagesPage> {
           if (state is DialogsLoadedViewCubitState && userId != null) {
             if (state.isError) {
               return ClientErrorHandler.makeErrorInfoWidget(state.errorType!, refreshAllData);
+            }
+            if (!state.isAuthenticated) {
+              return UnauthenticatedWidget();
             }
             if (state.dialogs.isEmpty) {
               return const Center(child: Text("Нет диалогов"),);

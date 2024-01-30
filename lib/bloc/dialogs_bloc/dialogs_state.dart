@@ -6,6 +6,7 @@ class DialogsState {
   final List<DialogData>? dialogs;
   final String searchQuery;
   final bool isErrorHappened;
+  final bool isAuthenticated;
   final AppErrorExceptionType? errorType;
 
   bool get isSearchMode => searchQuery.isNotEmpty;
@@ -14,13 +15,15 @@ class DialogsState {
       : dialogs = null,
         searchQuery = "",
         isErrorHappened = false,
+        isAuthenticated = true,
         errorType = null;
 
   DialogsState({
     required this.dialogs,
     required this.searchQuery,
     required this.isErrorHappened,
-    required this.errorType
+    required this.errorType,
+    required this.isAuthenticated
   });
 
   @override
@@ -30,6 +33,7 @@ class DialogsState {
               dialogs == other.dialogs &&
               searchQuery == other.searchQuery &&
               errorType == other.errorType &&
+              isAuthenticated == other.isAuthenticated &&
               isErrorHappened == other.isErrorHappened;
 
   @override
@@ -37,12 +41,14 @@ class DialogsState {
       dialogs.hashCode ^
       searchQuery.hashCode ^
       errorType.hashCode ^
+      isAuthenticated.hashCode ^
       isErrorHappened.hashCode;
 
   DialogsState copyWith({
     List<DialogData>? dialogs,
     String? searchQuery,
     bool? isErrorHappened,
+    bool? isAuthenticated,
     AppErrorExceptionType? errorType
   }) {
     return DialogsState(
@@ -50,7 +56,8 @@ class DialogsState {
       dialogs ?? this.dialogs,
       searchQuery: searchQuery ?? this.searchQuery,
       isErrorHappened: isErrorHappened ?? this.isErrorHappened,
-      errorType: errorType ?? this.errorType
+      errorType: errorType ?? this.errorType,
+      isAuthenticated: isAuthenticated ?? this.isAuthenticated
     );
   }
 
@@ -80,7 +87,8 @@ class DialogsState {
       dialogs: dialogs,
       searchQuery: searchQuery,
       isErrorHappened: isErrorHappened,
-      errorType: errorType
+      errorType: errorType,
+      isAuthenticated: isAuthenticated
     );
   }
 }

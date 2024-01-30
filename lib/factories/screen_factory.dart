@@ -1,4 +1,4 @@
-import 'package:chat/ui/pages/calls_page.dart';
+import 'package:chat/ui/screens/call_logs_screen.dart';
 import 'package:chat/ui/screens/users_screen.dart';
 import 'package:chat/ui/screens/dialogs_screen.dart';
 import 'package:chat/ui/screens/chat_screen.dart';

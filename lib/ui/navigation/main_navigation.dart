@@ -2,7 +2,7 @@ import 'package:chat/factories/screen_factory.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/ui/screens/image_screen.dart';
 import 'package:flutter/material.dart';
-import '../pages/calls_page.dart';
+import '../screens/call_logs_screen.dart';
 import '../pages/user_profile_info_page.dart';
 import '../screens/running_call_screen.dart';
 import '../screens/chat_screen.dart';

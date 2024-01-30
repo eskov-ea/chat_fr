@@ -25,6 +25,7 @@ Future<void> SessionExpiredModalWidget(BuildContext context) {
             child: const Text('Ок'),
             onPressed: () {
               logoutHelper(context);
+              Navigator.of(context).pop();
             },
           ),
         ],

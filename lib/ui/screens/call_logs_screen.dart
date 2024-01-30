@@ -7,6 +7,7 @@ import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/services/popup_manager.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
+import 'package:chat/ui/widgets/unauthenticated_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -76,6 +77,7 @@ class _CallsPageState extends State<CallsPage> {
           ? const Center(child: Text("Недоступно в веб-версии"),)
           : BlocBuilder<CallLogsBloc, CallLogsBlocState>(
               builder: (context, state) {
+                print("Calls state  $state");
                 if (state is CallsLoadedLogState) {
                   if (_usersState is UsersViewCubitLoadedState) {
                     if (state.callLog.isEmpty) {
@@ -134,6 +136,8 @@ class _CallsPageState extends State<CallsPage> {
                   );
                 } else if (state is CallLogErrorState) {
                   return ClientErrorHandler.makeErrorInfoWidget(state.errorType!, _onRefresh);
+                }  else if (state is CallsLogLogoutState) {
+                  return UnauthenticatedWidget();
                 } else {
                   return ClientErrorHandler.makeErrorInfoWidget(AppErrorExceptionType.other, _onRefresh);
                 }

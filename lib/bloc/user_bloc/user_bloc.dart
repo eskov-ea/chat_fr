@@ -28,7 +28,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   }) :  super(UsersState()) {
     on<UsersLoadEvent>(onUsersLoadEvent);
     on<UsersSearchEvent>(onUsersSearchEvent);
-    on<UsersDeleteEvent>(onUsersDeleteEvent);
+    on<UsersDeleteUsersEvent>(onUsersDeleteEvent);
     on<UsersUpdateOnlineStatusEvent>(onUsersUpdateOnlineStatusEvent);
   }
 
@@ -53,7 +53,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
             searchQuery: query,
             searchUsersContainer: newContainer,
             onlineUsersDictionary: state.onlineUsersDictionary,
-            clientEventsDictionary: state.clientEventsDictionary
+            clientEventsDictionary: state.clientEventsDictionary,
+            isAuthenticated: true
         ));
       } else {
         final container = state.usersContainer;
@@ -63,7 +64,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
             searchQuery: '',
             searchUsersContainer: state.searchUsersContainer,
             onlineUsersDictionary: state.onlineUsersDictionary,
-            clientEventsDictionary: state.clientEventsDictionary
+            clientEventsDictionary: state.clientEventsDictionary,
+            isAuthenticated: true
         ));
       }
     } catch (err, stackTrace) {
@@ -89,7 +91,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
             searchQuery: query,
             searchUsersContainer: newContainer,
             onlineUsersDictionary: state.onlineUsersDictionary,
-            clientEventsDictionary: state.clientEventsDictionary
+            clientEventsDictionary: state.clientEventsDictionary,
+            isAuthenticated: true
         ));
       } else {
         final container = state.usersContainer;
@@ -99,15 +102,24 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
             searchQuery: '',
             searchUsersContainer: state.searchUsersContainer,
             onlineUsersDictionary: state.onlineUsersDictionary,
-            clientEventsDictionary: state.clientEventsDictionary
+            clientEventsDictionary: state.clientEventsDictionary,
+            isAuthenticated: true
         ));
       }
   }
 
   void onUsersDeleteEvent(
-      UsersDeleteEvent event, emit
-      ) {
-   emit(UsersState());
+      UsersDeleteUsersEvent event, emit
+  ) {
+    final newState = UsersLoadedState(
+        usersContainer: const UsersListContainer.initial(),
+        searchUsersContainer: const UsersListContainer.initial(),
+        searchQuery: "",
+        onlineUsersDictionary: {},
+        isAuthenticated: false,
+        clientEventsDictionary: {}
+    );
+    emit(newState);
   }
 
   void onUsersUpdateOnlineStatusEvent(

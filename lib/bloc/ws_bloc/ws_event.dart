@@ -109,3 +109,4 @@ class WsEventCloseConnection extends WsBlocEvent{}
 class WsEventReconnect extends WsBlocEvent{}
 
 class WsEventGetUpdatesOnResume extends WsBlocEvent{}
+

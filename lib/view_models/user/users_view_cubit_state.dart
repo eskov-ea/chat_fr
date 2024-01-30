@@ -60,6 +60,8 @@ class UsersViewCubitLoadedState extends UsersViewCubitState {
 
 class UsersViewCubitLoadingState extends UsersViewCubitState{}
 
+class UsersViewCubitLogoutState extends UsersViewCubitState{}
+
 class UsersViewCubitErrorState extends UsersViewCubitState{
   final AppErrorExceptionType errorType;
 

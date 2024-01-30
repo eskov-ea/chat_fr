@@ -1,7 +1,10 @@
+import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
+import 'package:chat/bloc/error_handler_bloc/error_handler_events.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/services/popup_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ClientErrorHandler {
 
@@ -14,7 +17,7 @@ class ClientErrorHandler {
         case AppErrorExceptionType.network:
           PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.error, message: "Соединение прервано. Произошла сетевая ошибка, причиной могут быть плохое интернет-соединение, плохое качество соединения.. Попробуйте еще раз.");
         case AppErrorExceptionType.auth:
-          return;
+          BlocProvider.of<ErrorHandlerBloc>(context).add(ErrorHandlerAccessDeniedEvent(error: AppErrorException(AppErrorExceptionType.auth)));
         case AppErrorExceptionType.other:
           PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.error, message: "Произошла ошибка. Попробуйте еще раз.");
         case AppErrorExceptionType.sessionExpired:

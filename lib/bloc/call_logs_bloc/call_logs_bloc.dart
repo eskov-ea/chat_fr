@@ -52,6 +52,8 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
           state.logsDictionary[event.call.id] = true;
           emit(CallsLoadedLogState(callLog: newLogState, logsDictionary: state.logsDictionary));
         }
+      } else if (event is DeleteCallsOnLogoutEvent) {
+        emit(CallsLogLogoutState());
       }
     });
   }

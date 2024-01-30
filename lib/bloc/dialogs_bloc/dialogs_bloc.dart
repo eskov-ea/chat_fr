@@ -86,8 +86,8 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         onDialogUserExitChatEvent(event, emit);
       } else if (event is RefreshDialogsEvent) {
         onRefreshDialogsEvent(event, emit);
-      } else if (event is DeleteAllDialogsEvent) {
-        onDeleteAllDialogsEvent(event, emit);
+      } else if (event is DeleteDialogsOnLogoutEvent) {
+        onDeleteDialogsOnLogoutEvent(event, emit);
       } else if (event is DialogDeletedChatEvent) {
         onDialogDeletedChatEvent(event, emit);
       }
@@ -99,8 +99,9 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       ) async {
     try {
       List<DialogData> dialogs = await dialogRepository.getDialogs();
+      print("LOAD DIALOGS::    $dialogs");
       if (dialogs.isNotEmpty) sortDialogsByLastMessage(dialogs);
-      final newState = state.copyWith(dialogs: dialogs);
+      final newState = state.copyWith(dialogs: dialogs, isAuthenticated: true, isErrorHappened: false);
       emit(newState);
     } catch(err) {
       if (err is AppErrorException && err.type == AppErrorExceptionType.auth) {
@@ -192,11 +193,11 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     add(DialogsLoadEvent());
   }
 
-  void onDeleteAllDialogsEvent(
-      DeleteAllDialogsEvent event,
+  void onDeleteDialogsOnLogoutEvent(
+      DeleteDialogsOnLogoutEvent event,
       Emitter<DialogsState> emit
       ){
-    final newState = state.copyWith(dialogs: [], isErrorHappened:  false, searchQuery: "");
+    final newState = state.copyWith(dialogs: [], isErrorHappened:  false, searchQuery: "", isAuthenticated: false);
     emit(newState);
   }
 

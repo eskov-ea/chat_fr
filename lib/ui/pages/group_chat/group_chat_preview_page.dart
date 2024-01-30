@@ -4,6 +4,7 @@ import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/services/popup_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../models/contact_model.dart';
 import '../../../models/dialog_model.dart';
 import '../../../services/dialogs/dialogs_api_provider.dart';

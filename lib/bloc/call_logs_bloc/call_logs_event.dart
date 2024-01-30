@@ -28,4 +28,6 @@ class UpdateCallLogsEvent extends CallLogsEvent {
   });
 }
 
+class DeleteCallsOnLogoutEvent extends CallLogsEvent {}
+
 

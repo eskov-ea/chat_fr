@@ -1,8 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
+import 'package:chat/bloc/call_logs_bloc/call_logs_event.dart';
+import 'package:chat/bloc/profile_bloc/profile_bloc.dart';
+import 'package:chat/bloc/profile_bloc/profile_events.dart';
+import 'package:chat/bloc/user_bloc/user_bloc.dart';
+import 'package:chat/bloc/user_bloc/user_event.dart';
+import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
+import 'package:chat/bloc/ws_bloc/ws_event.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/services/user_profile/user_profile_api_provider.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
+import 'package:chat/view_models/user/users_view_cubit.dart';
+import 'package:chat/view_models/websocket/websocket_view_cubit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -77,8 +87,13 @@ import 'messages/messages_repository.dart';
   }
 
   void logoutHelper(BuildContext context) {
+    BlocProvider.of<DialogsViewCubit>(context).deleteAllDialogs();
+    BlocProvider.of<ChatsBuilderBloc>(context).add(DeleteAllChatsEvent());
+    BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLogoutEvent());
+    BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(WsEventCloseConnection());
+    BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersDeleteUsersEvent());
+    BlocProvider.of<CallLogsBloc>(context).add(DeleteCallsOnLogoutEvent());
     BlocProvider.of<AuthViewCubit>(context).logout(context);
-    Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.auth);
   }
 
   Duration getTZ() {

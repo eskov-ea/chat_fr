@@ -7,6 +7,7 @@ class ErrorHandlerBloc extends Bloc<ErrorHandlerEvent, ErrorHandlerState> {
 
   ErrorHandlerBloc(): super( ErrorHandlerInitialState()){
     on<ErrorHandlerEvent>((event, emit) async {
+      print("ErrorHandlerEvent  $event");
       if (event is ErrorHandlerWithErrorEvent) {
         onErrorEventEvent(event, emit);
       } else if (event is ErrorHandlerAccessDeniedEvent) {

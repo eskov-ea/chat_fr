@@ -8,6 +8,7 @@ abstract class CallLogsBlocState{
 }
 
 class CallLogInitialState extends CallLogsBlocState{}
+
 class CallLogErrorState extends CallLogsBlocState{
   final AppErrorExceptionType? errorType;
 
@@ -48,3 +49,5 @@ class CallsLoadedLogState extends CallLogsBlocState{
   }
 
 }
+
+class CallsLogLogoutState extends CallLogsBlocState {}

@@ -45,6 +45,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
     required this.secureStorage
   }) : super(initialState) {
     on<WsBlocEvent>((event, emit) async {
+      print("websocket event  $event");
       if (event is InitializeSocketEvent) {
         await onInitializeSocketEvent(event, emit);
       } else if (event is ConnectingSocketEvent) {

@@ -58,4 +58,4 @@ class RefreshDialogsEvent extends DialogsEvent{}
 
 class DialogsLoadFailureEvent extends DialogsEvent{}
 
-class DeleteAllDialogsEvent extends DialogsEvent{}
+class DeleteDialogsOnLogoutEvent extends DialogsEvent{}

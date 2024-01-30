@@ -28,18 +28,23 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
 
   void _onState(UsersState state) {
     if (state is UsersLoadedState){
-      final users = state.users;
-      final Map<String, UserContact> usersDictionary = {};
-      users.forEach((user) {
-        usersDictionary["${user.id}"] = user;
-      });
-      emit(UsersViewCubitLoadedState(
-        users: users,
-        searchQuery: '',
-        usersDictionary: usersDictionary,
-        onlineUsersDictionary: state.onlineUsersDictionary,
-        clientEvent: state.clientEventsDictionary
-      ));
+      //TODO: refactor
+      if (state.isAuthenticated) {
+        final users = state.users;
+        final Map<String, UserContact> usersDictionary = {};
+        users.forEach((user) {
+          usersDictionary["${user.id}"] = user;
+        });
+        emit(UsersViewCubitLoadedState(
+            users: users,
+            searchQuery: '',
+            usersDictionary: usersDictionary,
+            onlineUsersDictionary: state.onlineUsersDictionary,
+            clientEvent: state.clientEventsDictionary
+        ));
+      } else {
+        emit(UsersViewCubitLogoutState());
+      }
     } else if (state is UsersErrorState) {
       emit(UsersViewCubitErrorState(errorType: state.errorType));
     }

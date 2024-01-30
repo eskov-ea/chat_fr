@@ -211,21 +211,6 @@ class _NewMessagePageState extends State<NewMessagePage> {
                           ),
                         ]
                       )),
-                /**
-                 * Show selected users to be added to a group chat
-                 */
-                // if (selectedMode)
-                //   Container(
-                //     height: 100,
-                //     width: MediaQuery.of(context).size.width,
-                //     child: ListView.builder(
-                //       scrollDirection: Axis.horizontal,
-                //       itemCount: selected.length,
-                //       itemBuilder: (context, index) {
-                //         return Text(selected[index]);
-                //       }
-                //     ),
-                //   ),
                 Expanded(
                   child: _UsersList(_bloc),
                 ),
@@ -251,7 +236,8 @@ class _NewMessagePageState extends State<NewMessagePage> {
                             padding: EdgeInsets.only(left: 10),
                             width: 40,
                             child: Checkbox(
-                              activeColor: Colors.blue,
+                              checkColor: Colors.white,
+                              activeColor: Color(0xFF5F8CFF),
                               value: selected.contains(bloc.usersBloc.state.users[index].id),
                               onChanged: (_) {
                                 _setSelected(bloc.usersBloc.state.users[index].id);

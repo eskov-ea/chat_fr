@@ -5,19 +5,21 @@ import 'package:http/http.dart';
 
 
 AppErrorException? handleHttpResponse(Response response) {
-  if (response.statusCode == 401) {
+  if (response.statusCode == 401 || response.statusCode == 400) {
     Logger.getInstance().sendErrorTrace(stackTrace: StackTrace.fromString("Status code: [ ${response.statusCode} ]; response: [ ${response.body} ]"), uri: "${response.request?.method}; ${response.request?.url}; ${response.request?.headers}");
     return AppErrorException(AppErrorExceptionType.auth, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}");
   } else if (response.statusCode != 200) {
     Logger.getInstance().sendErrorTrace(stackTrace: StackTrace.fromString("Status code: [ ${response.statusCode} ]; response: [ ${response.body} ]"), uri: "${response.request?.method}; ${response.request?.url}; ${response.request?.headers}");
     return AppErrorException(AppErrorExceptionType.access, message: "\n\rStatus Code: [ ${response.statusCode} ], \n\rResponse: ${response.body}");
-  }  else {
+  } else {
     var validationError;
     try {
       final e = jsonDecode(response.body)["meta"]["errors"];
       validationError = e;
     } catch (_) {    }
     if (validationError != null) {
+      if (validationError["avatar"] != null) return null;
+
       return AppErrorException(AppErrorExceptionType.requestError, message: jsonDecode(response.body)["meta"]["errors"].toString());
     }
     return null;

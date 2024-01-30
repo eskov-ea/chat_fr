@@ -1,5 +1,6 @@
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
+import 'package:chat/ui/widgets/unauthenticated_widget.dart';
 import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -32,6 +33,9 @@ class _ContactsPageState extends State<ContactsPage> {
         builder: (context, state) {
           if ( state is UsersViewCubitLoadingState) {
             return const Center(child: CircularProgressIndicator());
+          }
+          if (state is UsersViewCubitLogoutState) {
+            return UnauthenticatedWidget();
           }
           if (state is UsersViewCubitLoadedState) {
             return Column(

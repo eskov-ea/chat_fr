@@ -140,6 +140,8 @@ class MainActivity : FlutterActivity() {
                 if (username != null && password != null && domain != null && stunDomain != null && stunPort != null && host != null && cert != null) {
                     linphoneCore.login(username, password, domain, stunDomain, stunPort, host, displayName, cert)
                 }
+            } else if (call.method.equals("SIP_LOGOUT")) {
+                linphoneCore.logout()
             } else if (call.method.equals("OUTGOING_CALL")) {
                 val number = call.argument<String?>("number")
                 Log.w("OUTGOING", "Start event  $number")
