@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_event.dart';
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/bloc/profile_bloc/profile_bloc.dart';
 import 'package:chat/bloc/profile_bloc/profile_events.dart';
 import 'package:chat/bloc/user_bloc/user_bloc.dart';
@@ -177,9 +179,11 @@ import 'messages/messages_repository.dart';
         return file;
       }
   } catch(err, stackTrace) {
-      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error type: [ ${err.runtimeType} ]");
+      if (err is! AppErrorException) {
+        Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error type: [ ${err.runtimeType} ]");
+      }
       return null;
-    }
+  }
 }
 
   Future<File?> isLocalFileExist({required String fileName}) async {
