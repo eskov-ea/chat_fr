@@ -449,7 +449,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 _screenFactory.makeMessagesPage(),
                 _screenFactory.makeCallsPage(),
                 _screenFactory.makeContactsPage(),
-                _screenFactory.makeProfilePage(isUpdateAvailable, currentVersion),
+                // _screenFactory.makeProfilePage(isUpdateAvailable, currentVersion),
+                _screenFactory.makePassScreen(),
               ],
             ),
           )
