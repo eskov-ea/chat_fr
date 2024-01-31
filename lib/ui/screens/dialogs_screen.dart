@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:chat/bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import 'package:chat/bloc/chats_builder_bloc/chats_builder_event.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
@@ -163,16 +164,13 @@ class _MessagesPageState extends State<MessagesPage> {
         builder: (context, state) {
           return AnimatedSwitcher(
             switchOutCurve: const Threshold(0),
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                return SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0.1, 0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: child,
-                );
-              },
-            duration: const Duration(milliseconds: 200),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+            duration: Duration(milliseconds: Platform.isIOS ? 100 : 200),
             child: _mapStateToWidget(context, state)
           );
         }),

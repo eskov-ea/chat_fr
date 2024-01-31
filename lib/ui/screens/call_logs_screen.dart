@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/call_model.dart';
@@ -156,15 +157,12 @@ class _CallsPageState extends State<CallsPage> {
                 return AnimatedSwitcher(
                     switchOutCurve: const Threshold(0),
                     transitionBuilder: (Widget child, Animation<double> animation) {
-                      return SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(0.1, 0),
-                          end: Offset.zero,
-                        ).animate(animation),
+                      return FadeTransition(
+                        opacity: animation,
                         child: child,
                       );
                     },
-                    duration: const Duration(milliseconds: 200),
+                    duration: Duration(milliseconds: Platform.isIOS ? 100 : 200),
                     child: _mapStateToWidget(context, state)
                 );
               }
