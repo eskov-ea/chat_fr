@@ -96,7 +96,7 @@ import 'messages/messages_repository.dart';
     BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersDeleteUsersEvent());
     BlocProvider.of<CallLogsBloc>(context).add(DeleteCallsOnLogoutEvent());
 
-    final sipChannel = const MethodChannel("com.application.chat/sip");
+    const sipChannel = MethodChannel("com.application.chat/sip");
     sipChannel.invokeMethod('SIP_LOGOUT');
 
     BlocProvider.of<AuthViewCubit>(context).logout(context);

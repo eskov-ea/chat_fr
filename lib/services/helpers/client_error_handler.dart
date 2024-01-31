@@ -61,38 +61,58 @@ class ClientErrorHandler {
     }
 
     return Container(
+      color: const Color(0xFFFFFFFF),
       alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 15),
-      height: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(6)),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Transform.translate(
-            offset: Offset(0, -100),
-            child: Container(
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(6)),
-              ),
-              child: Image.asset(imagePath, height: 200),
+      child: Container(
+        key: UniqueKey(),
+        padding: const EdgeInsets.symmetric(horizontal: 15),
+        margin: const EdgeInsets.symmetric(horizontal: 15),
+        height: 380,
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(6)),
+          color: Color(0xFBEFEFEF),
+          boxShadow: [
+            BoxShadow(
+                color: Color(0x336FADFF),
+                spreadRadius: 5,
+                blurRadius: 10,
+                offset: Offset(10, 20)
             ),
-          ),
-          Transform.translate(
-            offset: Offset(0, -50),
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 10),
+            BoxShadow(
+                color: Color(0xFB989898),
+                spreadRadius: 1,
+                blurRadius: 3,
+                offset: Offset(3, 3)
+            ),
+            BoxShadow(
+                color: Color(0xFBBDB9B9),
+                spreadRadius: 3,
+                blurRadius: 20,
+                offset: Offset(5, 10)
+            )
+          ]
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(height: 30),
+            Container(
               decoration: const BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(6)),
-                color: Color(0xE6FFFFFF)
               ),
-              child: Text(message, textAlign: TextAlign.justify, style: TextStyle(fontSize: 16))
-            )
-          ),
-          Transform.translate(
-            offset: Offset(0, 80),
-            child: Material(
+              child: Image.asset(imagePath, height: 100),
+            ),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                decoration: const BoxDecoration(
+                  // borderRadius: BorderRadius.all(Radius.circular(6)),
+                  // color: Color(0xE6FFFFFF)
+                ),
+                child: Text(message, textAlign: TextAlign.justify, style: TextStyle(fontSize: 16))
+              ),
+            ),
+            Material(
               color: Colors.transparent,
               child: Ink(
                 width: 250,
@@ -114,8 +134,9 @@ class ClientErrorHandler {
                 ),
               ),
             ),
-          )
-        ],
+            SizedBox(height: 30),
+          ],
+        ),
       ),
     );
   }

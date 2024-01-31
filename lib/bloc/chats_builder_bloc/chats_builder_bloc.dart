@@ -241,7 +241,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       RefreshChatsBuilderEvent event,
       Emitter<ChatsBuilderState> emit
     ) {
-    final newState = state.copyWith(updatedChats: [], updatedCounter: 0);
+    final newState = state.copyWith(updatedChats: [], updatedCounter: 0, isError: false);
     emit(newState);
   }
 

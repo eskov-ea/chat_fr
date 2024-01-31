@@ -1,8 +1,7 @@
-import 'package:chat/models/message_model.dart';
 import 'package:equatable/equatable.dart';
-
 import '../../models/chat_builder_model.dart';
 import '../error_handler_bloc/error_types.dart';
+
 
 
 class ChatsBuilderState extends Equatable {
@@ -47,8 +46,8 @@ class ChatsBuilderState extends Equatable {
     bool? isLoadingMessages
   }) {
     return ChatsBuilderState(
-      chats: updatedChats ?? this.chats,
-      messagesDictionary: updatedMessagesDictionary ?? this.messagesDictionary,
+      chats: updatedChats ?? chats,
+      messagesDictionary: updatedMessagesDictionary ?? messagesDictionary,
       error: error ?? this.error,
       isError: isError ?? this.isError,
       isLoadingMessages: isLoadingMessages ?? this.isLoadingMessages

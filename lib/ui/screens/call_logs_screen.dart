@@ -35,6 +35,7 @@ class _CallsPageState extends State<CallsPage> {
   late final StreamSubscription _usersSubscription;
   String? userId;
   late UsersViewCubitState _usersState;
+  final _controller = ScrollController();
 
   @override
   void initState() {
@@ -63,6 +64,80 @@ class _CallsPageState extends State<CallsPage> {
     }
   }
 
+  Widget _mapStateToWidget(BuildContext context, CallLogsBlocState state) {
+    if (state is CallsLoadedLogState) {
+      if (_usersState is UsersViewCubitLoadedState) {
+        if (state.callLog.isEmpty) {
+          return const Center(
+            child: Text("Нет истории звонков"),
+          );
+        } else {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                  padding: EdgeInsets.symmetric(
+                      vertical: 16, horizontal: 16),
+                  child: Text(
+                    "Журнал звонков",
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700),
+                  )
+              ),
+              Divider(
+                color: Colors.grey[600],
+                thickness: 0.4,
+                height: 8,
+              ),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _onRefresh,
+                  child: Scrollbar(
+                    controller: _controller,
+                    thumbVisibility: false,
+                    thickness: 5,
+                    trackVisibility: false,
+                    radius: const Radius.circular(7),
+                    scrollbarOrientation: ScrollbarOrientation.right,
+                    child: ListView.builder(
+                        itemCount: state.callLog.length,
+                        itemBuilder: (context, index) {
+                          return getCallInfo(
+                              _usersState.usersDictionary,
+                              state.callLog[index],
+                              index
+                          );
+                        }),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+      } else if (_usersState is UsersViewCubitErrorState) {
+        return _errorWidget("Произошла техническая ошибка при загрузке журнала звонков. Попробуйте еще раз.");
+      } else if (_usersState is UsersViewCubitLoadingState) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      } else {
+        return _errorWidget("Произошла ошибка при загрузке журнала звонков. Попробуйте еще раз.");
+      }
+    } else if (state is CallLogInitialState) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    } else if (state is CallLogErrorState) {
+      return ClientErrorHandler.makeErrorInfoWidget(state.errorType!, _onRefresh);
+    }  else if (state is CallsLogLogoutState) {
+      return UnauthenticatedWidget();
+    } else {
+      return ClientErrorHandler.makeErrorInfoWidget(AppErrorExceptionType.other, _onRefresh);
+    }
+  }
+
   @override
   void dispose() {
     _usersSubscription.cancel();
@@ -77,71 +152,22 @@ class _CallsPageState extends State<CallsPage> {
           ? const Center(child: Text("Недоступно в веб-версии"),)
           : BlocBuilder<CallLogsBloc, CallLogsBlocState>(
               builder: (context, state) {
-                print("Calls state  $state");
-                if (state is CallsLoadedLogState) {
-                  if (_usersState is UsersViewCubitLoadedState) {
-                    if (state.callLog.isEmpty) {
-                      return const Center(
-                        child: Text("Нет истории звонков"),
+                print("rendering:::  $state");
+                return AnimatedSwitcher(
+                    switchOutCurve: const Threshold(0),
+                    transitionBuilder: (Widget child, Animation<double> animation) {
+                      return SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0.1, 0),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
                       );
-                   } else {
-                      return Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.symmetric(
-                            vertical: 16, horizontal: 16),
-                            child: Text(
-                              "Журнал звонков",
-                              style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700),
-                            )
-                          ),
-                          Divider(
-                            color: Colors.grey[600],
-                            thickness: 0.4,
-                            height: 8,
-                          ),
-                          Expanded(
-                            child: RefreshIndicator(
-                              onRefresh: _onRefresh,
-                              child: ListView.builder(
-                                itemCount: state.callLog.length,
-                                itemBuilder: (context, index) {
-                                return getCallInfo(
-                                  _usersState.usersDictionary,
-                                  state.callLog[index],
-                                  index
-                                );
-                              }),
-                            ),
-                          ),
-                        ],
-                      );
-                      }
-                  } else if (_usersState is UsersViewCubitErrorState) {
-                    return _errorWidget("Произошла техническая ошибка при загрузке журнала звонков. Попробуйте еще раз.");
-                  } else if (_usersState is UsersViewCubitLoadingState) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else {
-                    return _errorWidget("Произошла ошибка при загрузке журнала звонков. Попробуйте еще раз.");
-                  }
-                } else if (state is CallLogInitialState) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
-                } else if (state is CallLogErrorState) {
-                  return ClientErrorHandler.makeErrorInfoWidget(state.errorType!, _onRefresh);
-                }  else if (state is CallsLogLogoutState) {
-                  return UnauthenticatedWidget();
-                } else {
-                  return ClientErrorHandler.makeErrorInfoWidget(AppErrorExceptionType.other, _onRefresh);
-                }
-            }
+                    },
+                    duration: const Duration(milliseconds: 200),
+                    child: _mapStateToWidget(context, state)
+                );
+              }
           )
     );
   }

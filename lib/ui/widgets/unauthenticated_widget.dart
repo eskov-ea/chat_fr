@@ -7,6 +7,7 @@ class UnauthenticatedWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
+      key: UniqueKey(),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 15),
         margin: const EdgeInsets.symmetric(horizontal: 15),
@@ -37,13 +38,15 @@ class UnauthenticatedWidget extends StatelessWidget {
         ),
         child: Column(
           children: [
-            SizedBox(height: 50),
+            SizedBox(height: 10),
+            Image.asset('assets/icons/key.png', height: 50,),
+            SizedBox(height: 30),
             Expanded(
               child: Text('Вы не авторизованы. Необходимо авторизоваться в приложении. \r\nЛогин - корпоративная почта, привязанная к ЕRP. Пароль - пароль от ERP.',
                 style: TextStyle(fontSize: 15), textAlign: TextAlign.justify,
               )
             ),
-            SizedBox(height: 50),
+            SizedBox(height: 20),
             Material(
               color: Colors.transparent,
               child: Ink(
@@ -67,7 +70,7 @@ class UnauthenticatedWidget extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 50),
+            SizedBox(height: 40),
           ],
         ),
       ),

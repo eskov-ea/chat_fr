@@ -7,6 +7,7 @@ class DialogsSkeletonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: UniqueKey(),
       child: ListView.builder(
         itemCount: 7,
         padding: const EdgeInsets.all(0),
