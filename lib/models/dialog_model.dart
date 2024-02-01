@@ -1,5 +1,6 @@
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/contact_model.dart';
+import 'package:chat/services/helpers/dates.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';

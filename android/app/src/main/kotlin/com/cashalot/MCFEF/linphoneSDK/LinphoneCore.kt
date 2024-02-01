@@ -1,20 +1,20 @@
 package com.cashalot.MCFEF.linphoneSDK
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
+import android.os.PowerManager
+import android.os.PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK
 import android.widget.Toast
-import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.ContextCompat.getSystemService
 import com.cashalot.MCFEF.MainActivity
+import com.cashalot.MCFEF.StorageManager
 import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver
 import com.cashalot.MCFEF.calls_manager.Data
 import com.cashalot.MCFEF.makeCallDataPayload
 import com.cashalot.MCFEF.makePlatformEventPayload
 import io.flutter.Log
 import org.linphone.core.*
-import com.cashalot.MCFEF.StorageManager
-import com.cashalot.MCFEF.calls_manager.CallsNotificationManager
-import com.cashalot.MCFEF.calls_manager.IncomingCallActivity
+import java.util.Date
+
 
 class LinphoneCore constructor(var core: Core, var context: Context) {
 
@@ -30,9 +30,15 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
     )
     val sm = StorageManager(context)
     var contacts: String? = null
-//    val mediaPlayerService: SipConnectingSoundPlayerService = SipConnectingSoundPlayerService(context)
+    var pm: PowerManager
+    var wakeLock: PowerManager.WakeLock
 
     init {
+        pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        wakeLock = pm.newWakeLock(
+            0x00000020,
+            "com.cashalot.MCFEF.linphoneSDK:VOIP_CALL_LOCK_SCREEN_TAG"
+        )
         contacts = sm.readData()
     }
 
@@ -173,6 +179,27 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         return map[id] ?: id
     }
 
+    private fun activateWakeLockListener() {
+        try {
+            if (!wakeLock.isHeld){
+                wakeLock.acquire()
+            }
+            Log.e("Wakelock on:", "activated")
+        } catch (error: Exception) {
+            Log.e("Wakelock on:", error.toString())
+        }
+    }
+    private fun deactivateWakeLockListener() {
+        try {
+            if (wakeLock.isHeld) {
+                wakeLock.release()
+            }
+            Log.e("Wakelock off:", "deactivated")
+        } catch (error: Exception) {
+            Log.e("Wakelock off:", error.toString())
+        }
+    }
+
     private val coreListener = object: CoreListenerStub() {
         override fun onAccountRegistrationStateChanged(core: Core, account: Account, state: RegistrationState?, message: String) {
 
@@ -239,7 +266,8 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
                 }
                 Call.State.Connected -> {
-                    Log.w("ACTIVE_CALL", "Connected   ${call.remoteAddress.username}")
+                    activateWakeLockListener()
+                    Log.w("ACTIVE_CALL", "Connected   ${call.remoteAddress.username} ${call.callLog.startDate}")
                     val caller = if(call.remoteAddress.displayName != null) {
                         call.remoteAddress.displayName!!
                     } else {
@@ -317,7 +345,10 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     MainActivity.callServiceEventSink?.success(args)
                 }
                 Call.State.OutgoingInit -> {
+                    activateWakeLockListener()
                     Log.w("OUTGOING_CALL", "${call.remoteAddress.username}")
+                    Log.v("Start call:", "${call.callLog.startDate}")
+                    Log.v("Current day:", "${Date()}")
 
                     val caller = if(call.remoteAddress.displayName != null) {
                         call.remoteAddress.displayName!!
@@ -412,6 +443,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
                 }
                 Call.State.Error -> {
+                    deactivateWakeLockListener()
                     val caller = if(call.remoteAddress.displayName != null) {
                         call.remoteAddress.displayName!!
                     } else {
@@ -452,6 +484,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
                 }
                 Call.State.Released -> {
+                    deactivateWakeLockListener()
                     Log.w("ACTIVE_CALL", "Released   ${call.remoteAddress.username}")
                     val caller = if(call.remoteAddress.displayName != null) {
                         call.remoteAddress.displayName!!
