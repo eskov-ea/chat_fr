@@ -99,7 +99,7 @@ class AuthRepository {
 
   Future<bool> checkAuthStatus() async {
     try {
-      final token = _tokenAccessGuard();
+      final token = await _tokenAccessGuard();
       final response = await http.get(
         Uri.parse('https://erp.mcfef.com/api/profile'),
         headers: <String, String>{
