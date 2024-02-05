@@ -84,6 +84,10 @@ class AuthRepository {
       token = await DataProvider().getToken();
     }
     if (token == null) {
+      await Future.delayed(const Duration(milliseconds: 50));
+      token = await DataProvider().getToken();
+    }
+    if (token == null) {
       final os = Platform.operatingSystem;
       final version = Platform.operatingSystemVersion;
       final user = await DataProvider().getUserId();
