@@ -18,7 +18,6 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.DocumentsContract
 import android.util.Base64
-import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
@@ -39,6 +38,9 @@ class MainActivity : FlutterActivity() {
     private val METHOD_CHANNEL_NAME = "com.application.chat/method"
     private val METHOD_CHANNEL_WRITE_FILES_PERMISSON = "com.application.chat/permission_method_channel"
     private val METHOD_CHANNEL_SIP = "com.application.chat/sip"
+    private val METHOD_CHANNEL_AUDIO_DEVICES = "com.application.chat/audio_devices"
+    private val CALL_SERVICE_EVENT_CHANNEL = "event.channel/call_service"
+    private val AUDIO_DEVICE_EVENT_CHANNEL = "event.channel/audio_device_channel"
     val CREATE_FILE = 0
     var arrayBytesToWrite: String? = null
     lateinit var linphoneCore : LinphoneCore
@@ -57,9 +59,9 @@ class MainActivity : FlutterActivity() {
 
         var eventSink: EventChannel.EventSink? = null
         var callServiceEventSink: EventChannel.EventSink? = null
+        var audioDeviceEventSink: EventChannel.EventSink? = null
         var deviceToken: String? = null
     }
-    private val callServiceEventChannel = "event.channel/call_service"
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
 
@@ -151,10 +153,6 @@ class MainActivity : FlutterActivity() {
             } else if (call.method.equals("ACCEPT_CALL")) {
                 Log.w("ACCEPT_CALL", "DESTROY_SIP event")
                 linphoneCore.core.currentCall?.accept()
-            } else if (call.method.equals("TOGGLE_MUTE")) {
-                result.success(linphoneCore.toggleMute())
-            } else if (call.method.equals("TOGGLE_SPEAKER")) {
-                result.success(linphoneCore.toggleSpeaker())
             } else if (call.method.equals(("CHECK_FOR_RUNNING_CALL"))) {
                 if (linphoneCore.core.currentCall != null) {
                     result.success(true)
@@ -167,20 +165,53 @@ class MainActivity : FlutterActivity() {
             }
         }
 
-        EventChannel(flutterEngine.dartExecutor.binaryMessenger, callServiceEventChannel)
-                .setStreamHandler(
-                        object : EventChannel.StreamHandler {
-                            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                                Log.w("callServiceEventChannel", "listen")
-                                callServiceEventSink = events
-                            }
-
-                            override fun onCancel(arguments: Any?) {
-                                Log.w("callServiceEventChannel", "dispose")
-                                callServiceEventSink = null
-                            }
-                        }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_AUDIO_DEVICES).setMethodCallHandler {
+                call, result ->
+            Log.w("AUDIO_DEVICES", call.method)
+            if (call.method.equals("GET_DEVICE_LIST")) {
+                Log.w("AUDIO_DEVICES", call.method)
+                linphoneCore.getAudioDeviceList()
+            } else if (call.method.equals("TOGGLE_SPEAKER")) {
+                result.success(
+                    mapOf("event" to "", "data" to linphoneCore.toggleSpeaker())
                 )
+            } else if (call.method.equals("GET_CURRENT_AUDIO_DEVICE")) {
+                linphoneCore.getCurrentAudioDevice();
+            } else if (call.method.equals("SET_AUDIO_DEVICE")) {
+                val deviceId = call.argument<Int?>("device_id")
+                if (deviceId != null) linphoneCore.setAudioDevice(deviceId)
+            } else if (call.method.equals("TOGGLE_MUTE")) {
+                result.success(linphoneCore.toggleMute())
+            }
+        }
+
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, CALL_SERVICE_EVENT_CHANNEL)
+            .setStreamHandler(
+                object : EventChannel.StreamHandler {
+                    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                        callServiceEventSink = events
+                    }
+
+                    override fun onCancel(arguments: Any?) {
+                        callServiceEventSink = null
+                    }
+                }
+        )
+
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, AUDIO_DEVICE_EVENT_CHANNEL)
+            .setStreamHandler(
+                object : EventChannel.StreamHandler {
+                    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                        Log.w("audioDeviceEventSink", "listen")
+                        audioDeviceEventSink = events
+                    }
+
+                    override fun onCancel(arguments: Any?) {
+                        Log.w("audioDeviceEventSink", "dispose")
+                        audioDeviceEventSink = null
+                    }
+                }
+            )
 
         super.configureFlutterEngine(flutterEngine)
 
@@ -278,7 +309,7 @@ class MainActivity : FlutterActivity() {
 }
 
 
-fun makePlatformEventPayload(event: String, callerId: String?, callData: Map<String, Any?>?): Map<String, Any?> {
+fun makePlatformEventPayload(event: String, callerId: String? = null, callData: Map<String, Any?>? = null): Map<String, Any?> {
     return mapOf(
             "event" to event,
             "callerId" to callerId,

@@ -184,7 +184,6 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
             if (!wakeLock.isHeld){
                 wakeLock.acquire()
             }
-            Log.e("Wakelock on:", "activated")
         } catch (error: Exception) {
             Log.e("Wakelock on:", error.toString())
         }
@@ -194,7 +193,6 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
             if (wakeLock.isHeld) {
                 wakeLock.release()
             }
-            Log.e("Wakelock off:", "deactivated")
         } catch (error: Exception) {
             Log.e("Wakelock off:", error.toString())
         }
@@ -266,6 +264,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
                 }
                 Call.State.Connected -> {
+                    getAudioDeviceList()
                     activateWakeLockListener()
                     Log.w("ACTIVE_CALL", "Connected   ${call.remoteAddress.username} ${call.callLog.startDate}")
                     val caller = if(call.remoteAddress.displayName != null) {
@@ -345,16 +344,10 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     MainActivity.callServiceEventSink?.success(args)
                 }
                 Call.State.OutgoingInit -> {
+                    getAudioDeviceList()
                     activateWakeLockListener()
                     Log.w("OUTGOING_CALL", "${call.remoteAddress.username}")
-                    Log.v("Start call:", "${call.callLog.startDate}")
-                    Log.v("Current day:", "${Date()}")
 
-                    val caller = if(call.remoteAddress.displayName != null) {
-                        call.remoteAddress.displayName!!
-                    } else {
-                        call.remoteAddress.username.toString()
-                    }
                     val callStatus: String = when (call.callLog.status.name) {
                         "Success" -> "ANSWERED"
                         "Aborted" -> "DECLINED"
@@ -378,6 +371,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     Log.w("OUTGOING_CALL", "OutgoingProgress")
                 }
                 Call.State.OutgoingRinging -> {
+                    getAudioDeviceList()
                     Log.w("OUTGOING_CALL", "OutgoingRinging")
                     val callStatus: String = when (call.callLog.status.name) {
                         "Success" -> "ANSWERED"
@@ -563,14 +557,61 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
 
     fun toggleMute(): Boolean {
-        return false;
-//        return if (core.isMicEnabled) {
-//            core.isMicEnabled = false
-//            false
-//        } else {
-//            core.isMicEnabled = true
-//            true
-//        }
+        return if (core.micEnabled()) {
+            core.enableMic(false)
+            false
+        } else {
+            core.enableMic(true)
+            true
+        }
+    }
+
+    fun getCurrentAudioDevice() {
+        try {
+            var deviceId: Int? = null
+            while (deviceId == null) {
+                deviceId = core.currentCall?.outputAudioDevice?.type?.toInt()
+                if (deviceId == null) {
+                    Thread.sleep(1_000)
+                }
+            }
+
+            MainActivity.audioDeviceEventSink?.success(
+                mapOf("event" to "CURRENT_DEVICE_ID", "data" to deviceId)
+            )
+
+            Log.w("GET_CURRENT_AUDIO_DEVICE res", deviceId.toString())
+        } catch (error: Exception) {
+            MainActivity.audioDeviceEventSink?.success(
+                mapOf("event" to "CURRENT_DEVICE_ID", "data" to 2)
+            )
+        }
+    }
+
+    fun setAudioDevice(deviceId: Int) {
+        for (audioDevice in core.audioDevices) {
+            if (audioDevice.type.toInt() == deviceId) {
+                core.currentCall?.outputAudioDevice = audioDevice
+            }
+        }
+        getCurrentAudioDevice()
+    }
+
+    fun getAudioDeviceList() {
+        try {
+            var deviceList = listOf<Int>()
+            for (audioDevice in core.audioDevices) {
+                deviceList = deviceList.plus(audioDevice.type.toInt())
+            }
+
+            MainActivity.audioDeviceEventSink?.success(
+                mapOf("event" to "DEVICE_LIST", "data" to deviceList)
+            )
+
+        } catch (err: Exception) {
+            Log.w("__AudioDevice error", err.toString())
+
+        }
     }
 
     fun toggleSpeaker(): Boolean {
@@ -583,17 +624,18 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 //                Log.w("toggleSpeaker", "AudioDevice.Type.Microphone")
 
                 core.currentCall?.outputAudioDevice = audioDevice
-                return false
+//                return false
             } else if (!speakerEnabled && audioDevice.type == AudioDevice.Type.Speaker) {
                 Log.w("toggleSpeaker", "AudioDevice.Type.Speaker")
 
                 core.currentCall?.outputAudioDevice = audioDevice
-                return true
+//                return true
             }
 //        else if (audioDevice.type == AudioDevice.Type.Bluetooth) {
 //            core.currentCall?.outputAudioDevice = audioDevice
 //        }
         }
+        getCurrentAudioDevice()
         return false
     }
 

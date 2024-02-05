@@ -28,7 +28,7 @@ class UserProfileProvider {
             UserProfileData.fromJson(jsonDecode(response.body)["data"]);
         return profile;
     } on SocketException catch(err, stackTrace) {
-      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional information: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/profile ]");
       throw AppErrorException(AppErrorExceptionType.network);
     } on http.ClientException catch (err, stackTrace) {

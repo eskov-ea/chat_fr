@@ -34,7 +34,6 @@ class AuthRepository {
           }
         ),
       );
-      print("response.body  -->  ${response.body}  ${response.statusCode}");
       final error = handleHttpResponse(response);
       if (error != null) throw error;
       final AuthToken authToken = AuthToken.fromJson(json.decode(response.body));
@@ -48,12 +47,12 @@ class AuthRepository {
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/auth ]");
       throw AppErrorException(AppErrorExceptionType.network);
     } on http.ClientException catch (err, stackTrace) {
-      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: "$err, url was: https://erp.mcfef.com/api/auth");
       throw AppErrorException(AppErrorExceptionType.network);
     } on AppErrorException {
       rethrow;
     } catch (err, stackTrace) {
-      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error while authenticating");
       throw AppErrorException(AppErrorExceptionType.other);
     }
   }
@@ -94,13 +93,13 @@ class AuthRepository {
       "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/auth ]");
       throw AppErrorException(AppErrorExceptionType.network);
     } on http.ClientException catch (err, stackTrace) {
-      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: "CHECK AUTH $err");
       throw AppErrorException(AppErrorExceptionType.network);
     } on AppErrorException {
       rethrow;
     } catch (err, stackTrace) {
       print("checkAuthStatus   $err");
-      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "CHECK AUTH");
       throw AppErrorException(AppErrorExceptionType.other);
     }
   }

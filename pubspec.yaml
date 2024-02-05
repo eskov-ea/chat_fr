@@ -68,4 +68,5 @@ flutter:
    - assets/images/
    - assets/sounds/
    - assets/icons/
+   - assets/call_controls/
 
