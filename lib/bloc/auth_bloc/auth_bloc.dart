@@ -62,7 +62,6 @@ class AuthBloc
             auth == true ? const Authenticated() : Unauthenticated();
         emit(newState);
     } catch (err, stackTrace) {
-        await _dataProvider.deleteToken();
         _logger.sendErrorTrace(stackTrace: stackTrace, additionalInfo: stackTrace.toString(), uri: 'https://erp.mcfef.com/api/profile');
         emit(Unauthenticated());
       }
