@@ -70,7 +70,9 @@ class _AudioOutputDeviceWidgetState extends State<AudioOutputDeviceWidget> {
 
   void _onAudioDeviceStateChange(dynamic event) {
     final e = _parseAudioDeviceChannelEvent(event);
+    print("AUDIO_DEVICE_EVENT  $event");
     if (e["event"] == "DEVICE_LIST") {
+      print("setAvailableAudioDeviceOptions   $e");
       final List<int> devices = [];
       final Map<int, List<String>> ad = {};
       e["data"].forEach((d) {
@@ -85,12 +87,12 @@ class _AudioOutputDeviceWidgetState extends State<AudioOutputDeviceWidget> {
       availableAudioOutputsDevices = devices;
       setState(() {});
     } else if (e["event"] == "CURRENT_DEVICE_ID") {
-      final deviceId = e["data"];
-      print("CURRENT_DEVICE, $deviceId");
-      widget.setCurrentDeviceId(deviceId);
+      final deviceId = int.parse(e["data"]);
+      print("CURRENT_DEVICE bbb, $deviceId");
       setState(() {
         currentAudioDevice = deviceId;
       });
+      widget.setCurrentDeviceId(deviceId);
     }
   }
 
@@ -196,6 +198,7 @@ class _AudioOutputDeviceWidgetState extends State<AudioOutputDeviceWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print("BUILD WIDGET  ${currentAudioDevice}");
     return Container(
       width: 80,
       child: Stack(

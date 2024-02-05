@@ -4,15 +4,19 @@ import UserNotifications
 import PushKit
 
 @UIApplicationMain
-@objc class AppDelegate: FlutterAppDelegate, FlutterStreamHandler {
+@objc class AppDelegate: FlutterAppDelegate {
     private let deviceTokenMethodChannel = "com.application.chat/method"
     private let sipMethodChannel = "com.application.chat/sip"
+    private let audioDeviceMethodChannelName = "com.application.chat/audio_devices"
     private let writeFilesMethodChannel = "com.application.chat/permission_method_channel"
     var callServiceEventChannelName = "event.channel/call_service"
+    let audioDeviceEventChannelName = "event.channel/audio_device_channel"
     var deviceIdResultCallback: FlutterResult? = nil
     var sipResultCallback: FlutterResult? = nil
+    var audioDeviceResultCallback: FlutterResult? = nil
     private var eventSink: FlutterEventSink?
-    let linphoneSDK = LinphoneSDK(sink: nil)
+    private var audioDeviceSink: FlutterEventSink?
+    let linphoneSDK = LinphoneSDK(sink: nil, audioSink: nil)
     
     
     override func application(
@@ -26,11 +30,17 @@ import PushKit
         let controller = window?.rootViewController as! FlutterViewController
         let deviceIdChannel = FlutterMethodChannel(name: deviceTokenMethodChannel, binaryMessenger: controller.binaryMessenger)
         let sipChannel = FlutterMethodChannel(name: sipMethodChannel, binaryMessenger: controller.binaryMessenger)
+        let audioDeviceMethodChannel = FlutterMethodChannel(name: audioDeviceMethodChannelName, binaryMessenger: controller.binaryMessenger)
         let writeFilesChannel = FlutterMethodChannel(name: writeFilesMethodChannel, binaryMessenger: controller.binaryMessenger)
         
         let callServiceEventChannel = FlutterEventChannel(name: callServiceEventChannelName,
                                                           binaryMessenger: controller.binaryMessenger)
-        callServiceEventChannel.setStreamHandler(self)
+        let audioDeviceEventChannel = FlutterEventChannel(name: audioDeviceEventChannelName,
+                                                          binaryMessenger: controller.binaryMessenger)
+        
+        callServiceEventChannel.setStreamHandler(SwiftStreamHandlerSip(linphoneSDK: self.linphoneSDK))
+        audioDeviceEventChannel.setStreamHandler(SwiftStreamHandlerAudioDevice(linphoneSDK: self.linphoneSDK))
+        
         deviceIdChannel.setMethodCallHandler({
             [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
             self?.deviceIdResultCallback = result
@@ -124,11 +134,36 @@ import PushKit
                 self?.linphoneSDK.declineCall()
             case "TOGGLE_MUTE":
                 self?.sipResultCallback?(self?.linphoneSDK.muteMicrophone())
-            case "TOGGLE_SPEAKER":
-                self?.sipResultCallback?(self?.linphoneSDK.toggleSpeaker())
             case "CHECK_FOR_RUNNING_CALL":
                 let result = self?.linphoneSDK.checkForRunningCall()
                 self?.sipResultCallback?(result)
+            default:
+                result(FlutterMethodNotImplemented)
+                return
+            }
+        })
+        
+        audioDeviceMethodChannel.setMethodCallHandler({
+            [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
+            self?.audioDeviceResultCallback = result
+            print("audioDeviceMethodChannel \(call.method)");
+            switch call.method{
+            case "GET_DEVICE_LIST":
+                self?.linphoneSDK.getAudioDeviceList()
+            case "TOGGLE_MUTE":
+                self?.audioDeviceResultCallback?(self?.linphoneSDK.muteMicrophone())
+            case "TOGGLE_SPEAKER":
+                self?.audioDeviceResultCallback?(self?.linphoneSDK.toggleSpeaker())
+            case "GET_CURRENT_AUDIO_DEVICE":
+                self?.linphoneSDK.getCurrentAudioDevice()
+                print("")
+            case "SET_AUDIO_DEVICE":
+//                let args = call.arguments as? Dictionary<String, Any>
+//                let deviceId = args!["device_id"] as? String
+//                if (deviceId != nil) {
+//                    self?.linphoneSDK.setAudioDevice(deviceId)
+//                }
+                print("")
             default:
                 result(FlutterMethodNotImplemented)
                 return
@@ -139,17 +174,19 @@ import PushKit
         GeneratedPluginRegistrant.register(with: self)
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
-    public func onListen(withArguments arguments: Any?,
-                         eventSink: @escaping FlutterEventSink) -> FlutterError? {
-        self.eventSink = eventSink
-        self.linphoneSDK.eventSink = eventSink
-        return nil
-    }
-    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        eventSink = nil
-        self.linphoneSDK.eventSink = eventSink
-        return nil
-    }
+    
+    
+//    public func onListen(withArguments arguments: Any?,
+//                         eventSink: @escaping FlutterEventSink) -> FlutterError? {
+//        self.eventSink = eventSink
+//        self.linphoneSDK.eventSink = eventSink
+//        return nil
+//    }
+//    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+//        eventSink = nil
+//        self.linphoneSDK.eventSink = eventSink
+//        return nil
+//    }
     
     func registerForPushNotifications( ) {
         UNUserNotificationCenter.current()
@@ -194,6 +231,44 @@ import PushKit
         didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
         print("Failed to register: \(error)")
+    }
+}
+
+class SwiftStreamHandlerSip: NSObject, FlutterStreamHandler {
+    
+    var linphoneSDK: LinphoneSDK
+    
+    init(linphoneSDK: LinphoneSDK) {
+        self.linphoneSDK = linphoneSDK
+    }
+    
+    public func onListen(withArguments arguments: Any?, eventSink: @escaping FlutterEventSink) -> FlutterError? {
+            self.linphoneSDK.eventSink = eventSink
+            return nil
+    }
+
+    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        self.linphoneSDK.eventSink = nil
+        return nil
+    }
+}
+
+class SwiftStreamHandlerAudioDevice: NSObject, FlutterStreamHandler {
+    
+    var linphoneSDK: LinphoneSDK
+    
+    init(linphoneSDK: LinphoneSDK) {
+        self.linphoneSDK = linphoneSDK
+    }
+    
+    public func onListen(withArguments arguments: Any?, eventSink: @escaping FlutterEventSink) -> FlutterError? {
+        self.linphoneSDK.audioDeviceSink = eventSink
+        return nil
+    }
+
+    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        self.linphoneSDK.audioDeviceSink = nil
+        return nil
     }
 }
 

@@ -57,20 +57,10 @@ class AuthBloc
       Emitter<AuthState> emit,
     ) async {
       try {
-        final String? token = await _dataProvider.getToken();
-        if (token == null) {
-          final os = Platform.operatingSystem;
-          final version = Platform.operatingSystemVersion;
-          final user = await _dataProvider.getUserId();
-
-          await Logger().sendDebugMessage(message: "Device token not found. USER ID: [ $user ], OS: [ $os ], VERSION: [ $version ]", operation: "Reading token");
-          emit(Unauthenticated());
-        } else {
-          final bool auth = await authRepo.checkAuthStatus(token);
-          final newState =
-              auth == true ? const Authenticated() : Unauthenticated();
-          emit(newState);
-      }
+        final bool auth = await authRepo.checkAuthStatus();
+        final newState =
+            auth == true ? const Authenticated() : Unauthenticated();
+        emit(newState);
     } catch (err, stackTrace) {
         await _dataProvider.deleteToken();
         _logger.sendErrorTrace(stackTrace: stackTrace, additionalInfo: stackTrace.toString(), uri: 'https://erp.mcfef.com/api/profile');

@@ -14,6 +14,7 @@ class LinphoneSDK : ObservableObject
         @Published var coreVersion: String = Core.getVersion
         
         var eventSink: FlutterEventSink?
+        var audioDeviceSink: FlutterEventSink?
         
         var mAccount: Account?
         var mCoreDelegate : CoreDelegate!
@@ -45,10 +46,11 @@ class LinphoneSDK : ObservableObject
 
 
     
-    init(sink: FlutterEventSink?)
+    init(sink: FlutterEventSink?, audioSink: FlutterEventSink?)
     {
 //        LoggingService.Instance.logLevel = LogLevel.Debug
         eventSink = sink
+        audioDeviceSink = audioSink
         sm = StorageManager()
         let factory = Factory.Instance
         let configDir = factory.getConfigDir(context: nil)
@@ -77,7 +79,7 @@ class LinphoneSDK : ObservableObject
                         
                         self.incomingCallName = self.getCallerName()
                         self.isCallIncoming = true
-                        let payload = makeEventPayload(event: "INCOMING", callerId: call.remoteAddress?.username, callData: nil)
+                        let payload = makeCallEventPayload(event: "INCOMING", callerId: call.remoteAddress?.username, callData: nil)
                         self.eventSink?(payload)
                         self.mProviderDelegate.incomingCall()
                     } else {
@@ -91,12 +93,12 @@ class LinphoneSDK : ObservableObject
                 } else if (state == .Connected) { // When a call
                     self.isCallRunning = true
                     let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
-                    let payload = makeEventPayload(event: "CONNECTED", callerId: call.remoteAddress?.username, callData: callData)
+                    let payload = makeCallEventPayload(event: "CONNECTED", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                 } else if ( state == .Released ) {
                     let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId   )
                         print("CALL_STATUS  \(callData)")
-                    let payload = makeEventPayload(event: "RELEASED", callerId: call.remoteAddress?.username, callData: callData)
+                    let payload = makeCallEventPayload(event: "RELEASED", callerId: call.remoteAddress?.username, callData: callData)
                     print("CALL_ENDED IOS  \(callData)")
                     self.eventSink?(payload)
                     if (self.isCallRunning || self.isCallIncoming) {
@@ -105,16 +107,16 @@ class LinphoneSDK : ObservableObject
                     self.remoteAddress = "Nobody yet"
                 } else if (state == .End) {
                     let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
-                    let payload = makeEventPayload(event: "ENDED", callerId: call.remoteAddress?.username, callData: callData)
+                    let payload = makeCallEventPayload(event: "ENDED", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                 } else if (state == .Error) {
                     let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
-                    let payload = makeEventPayload(event: "ERROR", callerId: call.remoteAddress?.username, callData: callData)
+                    let payload = makeCallEventPayload(event: "ERROR", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                     self.mProviderDelegate.stopCall()
                 }  else if (state == .OutgoingInit) {
                     let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
-                    let payload = makeEventPayload(event: "OUTGOING", callerId: call.remoteAddress?.username, callData: callData)
+                    let payload = makeCallEventPayload(event: "OUTGOING", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                 } else if (state == .OutgoingProgress) {
                     print("Call.State  ->  \(state)")
@@ -122,11 +124,11 @@ class LinphoneSDK : ObservableObject
                 } else if (state == .OutgoingRinging) {
                     self.isCallRunning = true
                     let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
-                    let payload = makeEventPayload(event: "OUTGOING_RINGING", callerId: call.remoteAddress?.username, callData: callData)
+                    let payload = makeCallEventPayload(event: "OUTGOING_RINGING", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                 } else if (state == .StreamsRunning) {
                     let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
-                    let payload = makeEventPayload(event: "STREAM_RUNNING", callerId: call.remoteAddress?.username, callData: callData)
+                    let payload = makeCallEventPayload(event: "STREAM_RUNNING", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                     // This state indicates the call is active.
                     // You may reach this state multiple times, for example after a pause/resume
@@ -147,7 +149,7 @@ class LinphoneSDK : ObservableObject
                 } else if (state == .UpdatedByRemote) {
                     // When the remote requests a call update
                 } else if (state == .End) {
-                    let payload = makeEventPayload(event: "ENDED", callerId: nil, callData: nil)
+                    let payload = makeCallEventPayload(event: "ENDED", callerId: nil, callData: nil)
                     self.eventSink?(payload)
                 }
 
@@ -160,11 +162,11 @@ class LinphoneSDK : ObservableObject
                 NSLog("New registration state is \(state) for user id \( String(describing: account.params?.identityAddress?.asString()))\n")
                 if (state == .Ok) {
                     self.loggedIn = true
-                    let payload = makeEventPayload(event: "REGISTRATION_SUCCESS", callerId: nil, callData: nil)
+                    let payload = makeCallEventPayload(event: "REGISTRATION_SUCCESS", callerId: nil, callData: nil)
                     self.eventSink?(payload)
                 } else if (state == .Cleared) {
                     self.loggedIn = false
-                    let payload = makeEventPayload(event: "REGISTRATION_FAILED", callerId: nil, callData: nil)
+                    let payload = makeCallEventPayload(event: "REGISTRATION_FAILED", callerId: nil, callData: nil)
                     self.eventSink?(payload)
                 }
         })
@@ -188,7 +190,7 @@ class LinphoneSDK : ObservableObject
     
     func checkForRunningCall() -> Bool {
         if (self.isCallRunning) {
-            let payload = makeEventPayload(event: "CONNECTED", callerId: mCore!.currentCall?.remoteAddress?.username, callData: nil)
+            let payload = makeCallEventPayload(event: "CONNECTED", callerId: mCore!.currentCall?.remoteAddress?.username, callData: nil)
             self.eventSink?(payload)
             return true
         }
@@ -344,43 +346,54 @@ class LinphoneSDK : ObservableObject
         }
         
     func muteMicrophone() -> Bool {
-            // The following toggles the microphone, disabling completely / enabling the sound capture
-            // from the device microphone
             mCore.micEnabled = !mCore.micEnabled
             isMicrophoneEnabled = !isMicrophoneEnabled
             
             return isMicrophoneEnabled
         }
         
+    func getAudioDeviceList() {
+        do {
+            var deviceList = [Int]()
+            for audioDevice in mCore.extendedAudioDevices {
+                deviceList.append(audioDevice.type.rawValue)
+            }
+            let eventPayload = makeAudioDeviceEventPayload(event: "DEVICE_LIST", data: deviceList.description)
+            self.audioDeviceSink?(eventPayload)
+        } catch {
+            print("Error happened while get device list:  \(error)")
+        }
+    }
+    
+    func getCurrentAudioDevice() {
+        do {
+            var deviceId: Int? = nil
+            repeat {
+                sleep(1)
+                deviceId = mCore.currentCall?.outputAudioDevice?.type.rawValue
+            } while deviceId == nil
+            
+            let payload = makeAudioDeviceEventPayload(event: "CURRENT_DEVICE_ID", data: String(deviceId!))
+            print("getCurrentAudioDevice  \(payload)")
+            self.audioDeviceSink?(payload)
+        } catch {
+            print("Error while get current audio device \(error)")
+        }
+    }
+    
     func toggleSpeaker() -> Bool {
-            // Get the currently used audio device
             let currentAudioDevice = mCore.currentCall?.outputAudioDevice
             let speakerEnabled = currentAudioDevice?.type == AudioDeviceType.Speaker
             
-            let test = currentAudioDevice?.deviceName
-            print("toggleSpeaker   \(speakerEnabled)")
-            print("toggleSpeaker  \(test)")
-            // We can get a list of all available audio devices using
-            // Note that on tablets for example, there may be no Earpiece device
             for audioDevice in mCore.audioDevices {
-                
-                // For IOS, the Speaker is an exception, Linphone cannot differentiate Input and Output.
-                // This means that the default output device, the earpiece, is paired with the default phone microphone.
-                // Setting the output audio device to the microphone will redirect the sound to the earpiece.
+
                 if (speakerEnabled && audioDevice.type == AudioDeviceType.Microphone) {
                     mCore.currentCall?.outputAudioDevice = audioDevice
-                    isSpeakerEnabled = false
-                    return false
                 } else if (!speakerEnabled && audioDevice.type == AudioDeviceType.Speaker) {
                     mCore.currentCall?.outputAudioDevice = audioDevice
-                    isSpeakerEnabled = true
-                    return true
                 }
-                /* If we wanted to route the audio to a bluetooth headset
-                else if (audioDevice.type == AudioDevice.Type.Bluetooth) {
-                core.currentCall?.outputAudioDevice = audioDevice
-                }*/
             }
+        getCurrentAudioDevice()
             return false
         }
     
@@ -405,9 +418,9 @@ class LinphoneSDK : ObservableObject
     }
 }
 
-func makeEventPayload(event: String, callerId: String?, callData: CallData?) -> String? {
+func makeCallEventPayload(event: String, callerId: String?, callData: CallData?) -> String? {
     do {
-        let eventPayload = EventPayload(event: event, callerId: callerId, callData: callData)
+        let eventPayload = CallEventPayload(event: event, callerId: callerId, callData: callData)
         let jsonEventPayload = try JSONEncoder().encode(eventPayload)
         let jsonEventPayloadString = String(data: jsonEventPayload, encoding: .utf8)!
         return jsonEventPayloadString
@@ -417,7 +430,30 @@ func makeEventPayload(event: String, callerId: String?, callData: CallData?) -> 
     }
 }
 
-struct EventPayload: Codable {
+func makeAudioDeviceEventPayload(event: String, data: String?) -> String? {
+    do {
+        let eventPayload = AudioDeviceEventPayload(event: event, data: data)
+        let jsonEventPayload = try JSONEncoder().encode(eventPayload)
+        let jsonEventPayloadString = String(data: jsonEventPayload, encoding: .utf8)!
+        return jsonEventPayloadString
+    } catch {
+        print(error)
+        return nil
+    }
+}
+
+struct AudioDeviceEventPayload: Codable {
+    
+    let event: String
+    let data: String?
+    
+    init(event: String, data: String?) {
+        self.event = event
+        self.data = data
+    }
+}
+
+struct CallEventPayload: Codable {
     
     let event: String
     let callerId: String?

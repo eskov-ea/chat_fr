@@ -76,8 +76,26 @@ class AuthRepository {
     }
   }
 
-  Future<bool> checkAuthStatus(String? token) async {
+  ///TODO: refactor this non-production solution caused iOS platform specific behavior
+  Future<String?> _tokenAccessGuard() async {
+    String? token = await DataProvider().getToken();
+    if (token == null) {
+      await Future.delayed(const Duration(milliseconds: 150));
+      token = await DataProvider().getToken();
+    }
+    if (token == null) {
+      final os = Platform.operatingSystem;
+      final version = Platform.operatingSystemVersion;
+      final user = await DataProvider().getUserId();
+
+      await Logger().sendDebugMessage(message: "Device token not found. USER ID: [ $user ], OS: [ $os ], VERSION: [ $version ]", operation: "Reading token");
+    }
+    return token;
+  }
+
+  Future<bool> checkAuthStatus() async {
     try {
+      final token = _tokenAccessGuard();
       final response = await http.get(
         Uri.parse('https://erp.mcfef.com/api/profile'),
         headers: <String, String>{

@@ -13,6 +13,7 @@ abstract class _Keys {
 }
 IOSOptions _getIOSOptions() => const IOSOptions(
   accountName: "mcfef_chat_app_storage_service",
+  accessibility: KeychainAccessibility.first_unlock
 );
 AndroidOptions _getAndroidOptions() => const AndroidOptions(
     encryptedSharedPreferences: true
