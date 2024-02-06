@@ -16,9 +16,9 @@ if (flutterVersionCode == null) {
     flutterVersionCode = '1'
 }
 
-def flutterVersionName = '1.0.25'
+def flutterVersionName = '1.0.26'
 if (flutterVersionName == null) {
-    flutterVersionName = '1.0.25'
+    flutterVersionName = '1.0.26'
 }
 
 apply plugin: 'com.android.application'

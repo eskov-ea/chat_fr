@@ -1,5 +1,5 @@
 import 'package:chat/ui/screens/call_logs_screen.dart';
-import 'package:chat/ui/screens/pass_screen.dart';
+import 'package:chat/ui/widgets/pass_widget.dart';
 import 'package:chat/ui/screens/users_screen.dart';
 import 'package:chat/ui/screens/dialogs_screen.dart';
 import 'package:chat/ui/screens/chat_screen.dart';
@@ -122,10 +122,6 @@ class ScreenFactory {
 
   Widget makeResetPasswordScreen() {
     return ResetPasswordScreen();
-  }
-
-  Widget makePassScreen() {
-    return const PassScreen();
   }
 
 }

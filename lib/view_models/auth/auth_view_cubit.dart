@@ -18,7 +18,7 @@ class AuthViewCubit extends Cubit<AuthViewCubitState> {
   }) : super(initialState) {
     _onState(authBloc.state);
     authBlocSubscription = authBloc.stream.listen(_onState);
-    authBloc.add(AuthCheckStatusEvent());
+    // authBloc.add(AuthCheckStatusEvent());
   }
 
   bool _isValid(String login, String password) =>

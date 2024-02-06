@@ -5,6 +5,7 @@ import 'package:chat/bloc/profile_bloc/profile_events.dart';
 import 'package:chat/bloc/profile_bloc/profile_state.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/theme.dart';
+import 'package:chat/ui/widgets/pass_widget.dart';
 import 'package:chat/ui/widgets/unauthenticated_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -108,7 +109,7 @@ class ProfilePage extends StatelessWidget {
                         Platform.isAndroid
                           ? OutlinedButton(
                               onPressed: () async {
-                                isUpdateAvailable ? downLoadNewAppVersion(state.user?.appSettings?.downloadUrlAndroid) : (){};
+                                isUpdateAvailable ? downLoadNewAppVersion(state.user?.appSettings?.downloadUrlAndroid, context) : (){};
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: isUpdateAvailable ? LightColors.profilePageButton : Colors.white10,
@@ -164,56 +165,15 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
-
-  // Future<void> _openLogfileOptionsModal(BuildContext context) async {
-  //   return showDialog<void>(
-  //     context: context,
-  //     barrierDismissible: true,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         title: const Text('Лог-файл'),
-  //         content: const SingleChildScrollView(
-  //           child: ListBody(
-  //             children: <Widget>[
-  //               Text('Лог файл содержит записи об ошибках приложения на '
-  //                   'устройстве. Со временем, когда ошибки происходят, файл может увеличиваться в размере, что отнимает полезную память устройства. '
-  //                   'В таком случае файл можно отправить разработчикам и затем он будет очищен.'),
-  //             ],
-  //           ),
-  //         ),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             child: const Text('Назад'),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //           TextButton(
-  //             child: const Text('Crash test'),
-  //             onPressed: () async {
-  //               final result = await Logger.getInstance().sendUnhandledErrorsFromLog();
-  //               if (result) {
-  //                 customToastMessage(message: "Лог файл был успешно отправлен и очищен", context: context);
-  //               } else {
-  //                 customToastMessage(message: "Произошла ошибка при очистке\ отправке лог-файла. Попробуйте еще раз", context: context);
-  //               }
-  //               Navigator.of(context).pop();
-  //             },
-  //           )
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 }
 
-void downLoadNewAppVersion(String? url) async {
+void downLoadNewAppVersion(String? url, BuildContext context) async {
   print("download new version");
   if(url == null) return;
   final uri = Uri.parse(url);
   if (await canLaunchUrl(uri)){
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   } else {
-    // can't launch url
+    customToastMessage(context: context, message: "Не удалось обработать ссылку");
   }
 }

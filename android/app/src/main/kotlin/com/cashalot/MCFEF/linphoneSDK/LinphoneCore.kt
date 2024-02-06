@@ -2,9 +2,7 @@ package com.cashalot.MCFEF.linphoneSDK
 
 import android.content.Context
 import android.os.PowerManager
-import android.os.PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK
 import android.widget.Toast
-import androidx.core.content.ContextCompat.getSystemService
 import com.cashalot.MCFEF.MainActivity
 import com.cashalot.MCFEF.StorageManager
 import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver
@@ -13,7 +11,6 @@ import com.cashalot.MCFEF.makeCallDataPayload
 import com.cashalot.MCFEF.makePlatformEventPayload
 import io.flutter.Log
 import org.linphone.core.*
-import java.util.Date
 
 
 class LinphoneCore constructor(var core: Core, var context: Context) {
@@ -265,6 +262,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                 }
                 Call.State.Connected -> {
                     getAudioDeviceList()
+                    checkForHeadphoneDevicesAvailable(call)
                     activateWakeLockListener()
                     Log.w("ACTIVE_CALL", "Connected   ${call.remoteAddress.username} ${call.callLog.startDate}")
                     val caller = if(call.remoteAddress.displayName != null) {
@@ -372,6 +370,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                 }
                 Call.State.OutgoingRinging -> {
                     getAudioDeviceList()
+                    checkForHeadphoneDevicesAvailable(call)
                     Log.w("OUTGOING_CALL", "OutgoingRinging")
                     val callStatus: String = when (call.callLog.status.name) {
                         "Success" -> "ANSWERED"
@@ -529,6 +528,12 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
             }
         }
 
+
+        override  fun onAudioDevicesListUpdated(core: Core) {
+            getAudioDeviceList()
+            checkForHeadphoneDevicesAvailable(core.currentCall)
+        }
+
     }
 
     fun outgoingCall(remoteSipUri: String, context: Context) {
@@ -555,6 +560,45 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         call.terminate()
     }
 
+    fun checkForHeadphoneDevicesAvailable(call: Call?) {
+        if (call == null) {
+            return
+        }
+        var currentDevice: AudioDevice? = call.outputAudioDevice
+
+        if (currentDevice?.type?.toInt() == 10 || currentDevice?.type?.toInt() == 9 ||
+            currentDevice?.type?.toInt() == 5 || currentDevice?.type?.toInt() == 4 ) {
+            Log.w("CHECK_HEADPHONE_AUDIO_DEVICE device already set", currentDevice.type.toInt().toString())
+            return
+        }
+        for (audioDevice in core.audioDevices) {
+            Log.w("CHECK_HEADPHONE_AUDIO_DEVICE loop", "${audioDevice.type.toInt().toString()} : ${audioDevice.type.toInt() == 10}")
+            if (audioDevice.type.toInt() == 10) {
+                currentDevice = audioDevice
+                break
+            } else if (audioDevice.type.toInt() == 9) {
+                currentDevice = audioDevice
+                break
+            } else if (audioDevice.type.toInt() == 4) {
+                currentDevice = audioDevice
+                break
+            } else if (audioDevice.type.toInt() == 5) {
+                currentDevice = audioDevice
+                break
+            }
+        }
+
+        if (currentDevice != null) {
+            core.currentCall?.outputAudioDevice = currentDevice
+
+            MainActivity.audioDeviceEventSink?.success(
+                mapOf("event" to "CURRENT_DEVICE_ID", "data" to currentDevice.type.toInt().toString())
+            )
+
+            Log.w("CHECK_HEADPHONE_AUDIO_DEVICE result", currentDevice.type.toInt().toString())
+        }
+    }
+
 
     fun toggleMute(): Boolean {
         return if (core.micEnabled()) {
@@ -577,13 +621,13 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
             }
 
             MainActivity.audioDeviceEventSink?.success(
-                mapOf("event" to "CURRENT_DEVICE_ID", "data" to deviceId)
+                mapOf("event" to "CURRENT_DEVICE_ID", "data" to deviceId.toString())
             )
 
             Log.w("GET_CURRENT_AUDIO_DEVICE res", deviceId.toString())
         } catch (error: Exception) {
             MainActivity.audioDeviceEventSink?.success(
-                mapOf("event" to "CURRENT_DEVICE_ID", "data" to 2)
+                mapOf("event" to "CURRENT_DEVICE_ID", "data" to "2")
             )
         }
     }
@@ -621,19 +665,10 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
         for (audioDevice in core.audioDevices) {
             if (speakerEnabled && audioDevice.type == AudioDevice.Type.Earpiece) {
-//                Log.w("toggleSpeaker", "AudioDevice.Type.Microphone")
-
                 core.currentCall?.outputAudioDevice = audioDevice
-//                return false
             } else if (!speakerEnabled && audioDevice.type == AudioDevice.Type.Speaker) {
-                Log.w("toggleSpeaker", "AudioDevice.Type.Speaker")
-
                 core.currentCall?.outputAudioDevice = audioDevice
-//                return true
             }
-//        else if (audioDevice.type == AudioDevice.Type.Bluetooth) {
-//            core.currentCall?.outputAudioDevice = audioDevice
-//        }
         }
         getCurrentAudioDevice()
         return false

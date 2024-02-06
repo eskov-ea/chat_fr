@@ -56,6 +56,7 @@ class AuthBloc
       AuthCheckStatusEvent event,
       Emitter<AuthState> emit,
     ) async {
+      print("onAuthCheckStatusEvent:::");
       try {
         final bool auth = await authRepo.checkAuthStatus();
         final newState =

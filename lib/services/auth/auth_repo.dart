@@ -92,7 +92,7 @@ class AuthRepository {
       final version = Platform.operatingSystemVersion;
       final user = await DataProvider().getUserId();
 
-      await Logger().sendDebugMessage(message: "Device token not found. USER ID: [ $user ], OS: [ $os ], VERSION: [ $version ]", operation: "Reading token");
+      Logger().sendDebugMessage(message: "Device token not found. USER ID: [ $user ], OS: [ $os ], VERSION: [ $version ]", operation: "Reading token");
     }
     return token;
   }

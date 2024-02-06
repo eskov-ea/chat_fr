@@ -15,7 +15,11 @@
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <uses-permission android:name="android.permission.NFC" />
+    <uses-feature android:name="android.hardware.nfc" android:required="false" />
+    <uses-feature android:name="android.hardware.nfc.hce" android:required="false" />
+
     <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
@@ -169,5 +173,25 @@
                <action android:name="com.cashalot.MCFEF.calls_manager.ACTION_CALL_TIMEOUT" />
            </intent-filter>
        </receiver>
+
+<!--       <service-->
+<!--           android:name="io.flutter.plugins.nfc_emulator.NfcEmulatorService"-->
+<!--           android:exported="true"-->
+<!--           android:permission="android.permission.BIND_NFC_SERVICE">-->
+
+<!--           &lt;!&ndash; Intent filter indicating that we support card emulation. &ndash;&gt;-->
+<!--           <intent-filter>-->
+<!--               <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE" />-->
+<!--               <category android:name="android.intent.category.DEFAULT" />-->
+<!--           </intent-filter>-->
+<!--           &lt;!&ndash;-->
+<!--                   Required XML configuration file, listing the AIDs that we are emulating cards-->
+<!--                   for. This defines what protocols our card emulation service supports.-->
+<!--           &ndash;&gt;-->
+<!--           <meta-data-->
+<!--               android:name="android.nfc.cardemulation.host_apdu_service"-->
+<!--               android:resource="@xml/aid_list" />-->
+<!--       </service>-->
+
    </application>
 </manifest>
