@@ -92,6 +92,8 @@ class LinphoneSDK : ObservableObject
                     self.remoteAddress = call.remoteAddress!.asStringUriOnly()
                 } else if (state == .Connected) { // When a call
                     self.isCallRunning = true
+                    self.getAudioDeviceList()
+                    self.getCurrentAudioDevice()
                     let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
                     let payload = makeCallEventPayload(event: "CONNECTED", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
@@ -120,6 +122,8 @@ class LinphoneSDK : ObservableObject
                     self.eventSink?(payload)
                 } else if (state == .OutgoingProgress) {
                     print("Call.State  ->  \(state)")
+                    self.getAudioDeviceList()
+                    self.getCurrentAudioDevice()
                     // Right after outgoing init
                 } else if (state == .OutgoingRinging) {
                     self.isCallRunning = true
@@ -155,9 +159,10 @@ class LinphoneSDK : ObservableObject
 
             }, onAudioDeviceChanged: { (core: Core, device: AudioDevice) in
                 // This callback will be triggered when a successful audio device has been changed
+                print("onAudioDeviceChanged  \(device.type.rawValue)")
+                self.getCurrentAudioDevice()
             }, onAudioDevicesListUpdated: { (core: Core) in
-                // This callback will be triggered when the available devices list has changed,
-                // for example after a bluetooth headset has been connected/disconnected.
+                self.getAudioDeviceList()
             }, onAccountRegistrationStateChanged: { (core: Core, account: Account, state: RegistrationState, message: String) in
                 NSLog("New registration state is \(state) for user id \( String(describing: account.params?.identityAddress?.asString()))\n")
                 if (state == .Ok) {
@@ -282,7 +287,9 @@ class LinphoneSDK : ObservableObject
         func declineCall() {
             do {
                 try mCore?.currentCall?.terminate()
-            } catch { print(error) }
+            } catch {
+                print("Decline call error: \(error)")
+            }
         }
         
         func unregister()
@@ -313,7 +320,11 @@ class LinphoneSDK : ObservableObject
                         if let call = coreCall {
                             try call.terminate()
                         }
-            } catch { NSLog(error.localizedDescription) }
+            } catch {
+                print("Terminate call error: \(error)")
+                NSLog(error.localizedDescription)
+                
+            }
 
         }
     
@@ -342,34 +353,55 @@ class LinphoneSDK : ObservableObject
                 // and answer using this object to make changes to the call configuration
                 // (see OutgoingCall tutorial)
                 try mCore.currentCall?.accept()
-            } catch { NSLog(error.localizedDescription) }
+            } catch {
+                print("Accept call error: \(error)")
+                NSLog(error.localizedDescription)
+            }
         }
         
     func muteMicrophone() -> Bool {
             mCore.micEnabled = !mCore.micEnabled
             isMicrophoneEnabled = !isMicrophoneEnabled
             
+        print("muteMicrophone  \(mCore.micEnabled)")
             return isMicrophoneEnabled
         }
         
     func getAudioDeviceList() {
         do {
             var deviceList = [Int]()
-            for audioDevice in mCore.extendedAudioDevices {
+            for audioDevice in mCore.audioDevices {
                 deviceList.append(audioDevice.type.rawValue)
+                if (audioDevice.type.rawValue == 0) {
+                    print("0 audio device: \(audioDevice.deviceName), \(audioDevice.driverName), \(audioDevice.id), \(audioDevice.type)")
+                }
             }
             let eventPayload = makeAudioDeviceEventPayload(event: "DEVICE_LIST", data: deviceList.description)
+            print("Audio device list:  \(deviceList)")
             self.audioDeviceSink?(eventPayload)
         } catch {
             print("Error happened while get device list:  \(error)")
         }
     }
     
+    func setAudioDevice(id: Int) {
+        for audioDevice in mCore.audioDevices {
+            if (audioDevice.type.rawValue == id) {
+                mCore.currentCall?.outputAudioDevice = audioDevice
+            }
+        }
+        print("We set ad: \(id)")
+        
+        self.getAudioDeviceList()
+        self.getCurrentAudioDevice()
+    }
+    
     func getCurrentAudioDevice() {
         do {
             var deviceId: Int? = nil
+            if (mCore.currentCall == nil) {return}
             repeat {
-                sleep(1)
+                sleep(UInt32(0.1))
                 deviceId = mCore.currentCall?.outputAudioDevice?.type.rawValue
             } while deviceId == nil
             

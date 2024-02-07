@@ -158,12 +158,12 @@ import PushKit
                 self?.linphoneSDK.getCurrentAudioDevice()
                 print("")
             case "SET_AUDIO_DEVICE":
-//                let args = call.arguments as? Dictionary<String, Any>
-//                let deviceId = args!["device_id"] as? String
-//                if (deviceId != nil) {
-//                    self?.linphoneSDK.setAudioDevice(deviceId)
-//                }
-                print("")
+                let args = call.arguments as? Dictionary<String, Any>
+                let deviceId = args!["device_id"] as? Int
+                print("Set devicce \(deviceId)")
+                if (deviceId != nil) {
+                    self?.linphoneSDK.setAudioDevice(id: deviceId!)
+                }
             default:
                 result(FlutterMethodNotImplemented)
                 return

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -10,9 +11,22 @@ import 'package:flutter/services.dart';
 ///     6:Telephony, 7:AuxLine, 8:GenericUsb, 9:Headset, 10:Headphones
 
 
-const Map<int, List<String>> deviceTypeToDescriptionMap = {
+const Map<int, List<String>> deviceTypeToDescriptionMapAndroid = {
   0: ["Неизвестно", "assets/call_controls/unknown.png"],
   1: ["Микрофон", "assets/call_controls/microphone.png"],
+  2: ["Телефон", "assets/call_controls/phone.png"],
+  3: ["Динамик", "assets/call_controls/speaker_icon_white.png"],
+  4: ["Гарнитура", "assets/call_controls/earbuds.png"],
+  5: ["Гарнитура", "assets/call_controls/earbuds.png"],
+  6: ["Телефон", "assets/call_controls/phone.png"],
+  7: ["Внешний", "assets/call_controls/audio-jack.png"],
+  8: ["Внешний", "assets/call_controls/audio-jack.png"],
+  9: ["Гарнитура", "assets/call_controls/earbuds.png"],
+  10: ["Гарнитура", "assets/call_controls/earbuds.png"]
+};
+const Map<int, List<String>> deviceTypeToDescriptionMapIOS = {
+  0: ["Неизвестно", "assets/call_controls/unknown.png"],
+  1: ["Телефон", "assets/call_controls/phone.png"],
   2: ["Телефон", "assets/call_controls/phone.png"],
   3: ["Динамик", "assets/call_controls/speaker_icon_white.png"],
   4: ["Гарнитура", "assets/call_controls/earbuds.png"],
@@ -53,7 +67,7 @@ class _AudioOutputDeviceWidgetState extends State<AudioOutputDeviceWidget> {
   bool isMute = false;
   bool isSpeaker = false;
   late List<Widget> audioDeviceOutputsWidgets;
-  int currentAudioDevice = 2;
+  int currentAudioDevice = Platform.isAndroid ? 2 : Platform.isIOS ? 1 : 0;
 
   Map<String, dynamic> _parseAudioDeviceChannelEvent(data) {
     var json;
@@ -72,20 +86,38 @@ class _AudioOutputDeviceWidgetState extends State<AudioOutputDeviceWidget> {
     final e = _parseAudioDeviceChannelEvent(event);
     print("AUDIO_DEVICE_EVENT  $event");
     if (e["event"] == "DEVICE_LIST") {
-      print("setAvailableAudioDeviceOptions   $e");
-      final List<int> devices = [];
-      final Map<int, List<String>> ad = {};
-      e["data"].forEach((d) {
-        d as int;
-        if (d != 1) {
-          devices.add(d);
-          ad.addAll({d: [deviceTypeToDescriptionMap[d]![0], deviceTypeToDescriptionMap[d]![1]]});
-        }
-      });
-      print("setAvailableAudioDeviceOptions ad  $ad");
-      widget.setAvailableAudioDeviceOptions(ad);
-      availableAudioOutputsDevices = devices;
-      setState(() {});
+      if (Platform.isIOS) {
+        print("setAvailableAudioDeviceOptions   $e");
+        final List<int> devices = [];
+        final Map<int, List<String>> ad = {};
+        jsonDecode(e["data"]).forEach((d) {
+          d as int;
+          if (d != 0) {
+            devices.add(d);
+            ad.addAll({d: [deviceTypeToDescriptionMapIOS[d]![0], deviceTypeToDescriptionMapIOS[d]![1]]});
+          }
+        });
+        print("setAvailableAudioDeviceOptions ad  $ad");
+        widget.setAvailableAudioDeviceOptions(ad);
+        availableAudioOutputsDevices = devices;
+        setState(() {});
+      }
+      if (Platform.isAndroid) {
+        print("setAvailableAudioDeviceOptions   $e");
+        final List<int> devices = [];
+        final Map<int, List<String>> ad = {};
+        e["data"].forEach((d) {
+          d as int;
+          if (d != 1) {
+            devices.add(d);
+            ad.addAll({d: [deviceTypeToDescriptionMapAndroid[d]![0], deviceTypeToDescriptionMapAndroid[d]![1]]});
+          }
+        });
+        print("setAvailableAudioDeviceOptions ad  $ad");
+        widget.setAvailableAudioDeviceOptions(ad);
+        availableAudioOutputsDevices = devices;
+        setState(() {});
+      }
     } else if (e["event"] == "CURRENT_DEVICE_ID") {
       final deviceId = int.parse(e["data"]);
       print("CURRENT_DEVICE bbb, $deviceId");
@@ -158,15 +190,20 @@ class _AudioOutputDeviceWidgetState extends State<AudioOutputDeviceWidget> {
               child: Padding(
                 padding: const EdgeInsets.all(25),
                 child: Image.asset(
-                  deviceTypeToDescriptionMap[currentAudioDevice]?[1] ?? 'assets/call_controls/phone.png',
+                  Platform.isAndroid
+                      ? (deviceTypeToDescriptionMapAndroid[currentAudioDevice]?[1] ?? 'assets/call_controls/phone.png')
+                      : (deviceTypeToDescriptionMapIOS[currentAudioDevice]?[1] ?? 'assets/call_controls/phone.png'),
                   fit: BoxFit.fill,
                 ),
               ),
             ),
             const SizedBox(height: 5),
-            const SizedBox(
+            SizedBox(
               width: 80,
-              child: Text("Телефон",
+              child: Text(
+                  Platform.isAndroid
+                      ? (deviceTypeToDescriptionMapAndroid[currentAudioDevice]?[0] ?? 'Телефон')
+                      : (deviceTypeToDescriptionMapIOS[currentAudioDevice]?[0] ?? 'Телефон'),
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.white, fontSize: 14)),
             ),
