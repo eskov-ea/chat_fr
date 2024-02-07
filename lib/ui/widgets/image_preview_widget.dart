@@ -63,18 +63,25 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
     setState(() {
       isDownloading = true;
     });
-
-    final rawFile = await loadFileAndSaveLocally(
-        attachmentId: widget.file?.attachmentId, fileName: widget.file!.name);
-    if (rawFile != null) {
+    try {
+      final rawFile = await loadFileAndSaveLocally(
+          attachmentId: widget.file?.attachmentId,
+          fileName: widget.file!.name);
+      if (rawFile != null) {
+        setState(() {
+          imageFile = rawFile;
+          isDownloading = false;
+        });
+      } else {
+        setState(() {
+          isDownloading = false;
+        });
+      }
+    } catch (err) {
       setState(() {
-        imageFile = rawFile;
         isDownloading = false;
       });
-    } else {
-      setState(() {
-        isDownloading = false;
-      });
+      customToastMessage(context: context, message: "Произошла ошибка при загрузке данных");
     }
   }
 
@@ -154,17 +161,20 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
                     : Radius.circular(widget.borderRadius),
               ),
             ),
-            child: getImagePreview(
-                file: widget.file,
-                localFileAttachment: imageFile,
-                isDownloading: isDownloading,
-                downloadImageFunction: _startDownloadingImage,
-                context: context,
-                fileBytesRepresentation: fileBytesRepresentation,
-                saveImageFunction: _safeImageToDevice,
-                messageTime: widget.messageTime,
-                status: widget.status,
-                isMe: widget.isMe),
+            child: ClipRRect(
+              borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+              child: getImagePreview(
+                  file: widget.file,
+                  localFileAttachment: imageFile,
+                  isDownloading: isDownloading,
+                  downloadImageFunction: _startDownloadingImage,
+                  context: context,
+                  fileBytesRepresentation: fileBytesRepresentation,
+                  saveImageFunction: _safeImageToDevice,
+                  messageTime: widget.messageTime,
+                  status: widget.status,
+                  isMe: widget.isMe),
+            ),
           )
         ],
       ),
@@ -199,26 +209,26 @@ Widget? getImagePreview({
           children: [
             kIsWeb
                 ? Image.memory(
-              fileBytesRepresentation!,
-              width: 186,
-              height: 202,
-              fit: BoxFit.cover,
-            )
+                    fileBytesRepresentation!,
+                    width: 186,
+                    height: 202,
+                    fit: BoxFit.cover,
+                  )
                 : Image.file(
-                localFileAttachment!,
-                width: 186,
-                height: 232,
-                fit: BoxFit.cover
-            ),
+                      localFileAttachment!,
+                      width: 186,
+                      height: 232,
+                      fit: BoxFit.cover
+                  ),
             Positioned(
               right: 0,
               bottom: 0,
               child: Container(
                 width: 250,
                 height: 30,
-                padding: EdgeInsets.all(5),
+                padding: const EdgeInsets.all(5),
                 alignment: Alignment.bottomRight,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     stops: [0.4, 1],
                     begin: Alignment.topCenter,
@@ -251,21 +261,21 @@ Widget? getImagePreview({
         children: [
           file.preview != ""
               ? Image.memory(base64Decode(file.preview!),
-                  height: 202, width: 186, fit: BoxFit.cover)
+                  height: 232, width: 186, fit: BoxFit.cover)
               : Image.asset("assets/blured_img_icon.jpg",
-                  height: 202, width: 186, fit: BoxFit.cover),
+                  height: 232, width: 186, fit: BoxFit.cover),
           isDownloading
               ? Container(
                   width: 65,
                   height: 65,
-                  decoration: BoxDecoration(
-                    color: const Color.fromRGBO(255, 255, 255, 0.4),
+                  decoration: const BoxDecoration(
+                    color: Color.fromRGBO(255, 255, 255, 0.4),
                     borderRadius: BorderRadius.all(Radius.circular(50)),
                   ),
-                  child: CircularProgressIndicator(),
+                  child: const CircularProgressIndicator(),
                 )
               : Material(
-                  borderRadius: BorderRadius.all(Radius.circular(50)),
+                  borderRadius: const BorderRadius.all(Radius.circular(50)),
                   borderOnForeground: false,
                   color: const Color.fromRGBO(255, 255, 255, 0.4),
                   child: InkWell(
@@ -273,13 +283,13 @@ Widget? getImagePreview({
                         downloadImageFunction();
                       },
                       splashColor: const Color.fromRGBO(200, 200, 200, 0.7),
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
-                      child: Padding(
+                      borderRadius: const BorderRadius.all(Radius.circular(50)),
+                      child: const Padding(
                         padding: EdgeInsets.all(8),
                         child: Icon(
                           Icons.download_rounded,
                           size: 55,
-                          color: const Color.fromRGBO(0, 0, 0, 0.2),
+                          color: Color.fromRGBO(0, 0, 0, 0.2),
                         ),
                       )),
                 ),
@@ -289,9 +299,9 @@ Widget? getImagePreview({
             child: Container(
                 width: 250,
                 height: 30,
-                padding: EdgeInsets.all(5),
+                padding: const EdgeInsets.all(5),
                 alignment: Alignment.bottomRight,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                     gradient: LinearGradient(
                   stops: [0.4, 1],
                   begin: Alignment.topCenter,
@@ -306,9 +316,9 @@ Widget? getImagePreview({
                   children: [
                     Text(
                       messageTime,
-                      style: TextStyle(color: AppColors.backgroundLight),
+                      style: const TextStyle(color: AppColors.backgroundLight),
                     ),
-                    isMe ? status : SizedBox.shrink()
+                    isMe ? status : const SizedBox.shrink()
                   ],
                 )),
           ),
@@ -328,14 +338,14 @@ Widget? getImagePreview({
               ? Container(
                   width: 65,
                   height: 65,
-                  decoration: BoxDecoration(
-                    color: const Color.fromRGBO(255, 255, 255, 0.4),
+                  decoration: const BoxDecoration(
+                    color: Color.fromRGBO(255, 255, 255, 0.4),
                     borderRadius: BorderRadius.all(Radius.circular(50)),
                   ),
-                  child: CircularProgressIndicator(),
+                  child: const CircularProgressIndicator(),
                 )
               : Material(
-                  borderRadius: BorderRadius.all(Radius.circular(50)),
+                  borderRadius: const BorderRadius.all(Radius.circular(50)),
                   borderOnForeground: false,
                   color: const Color.fromRGBO(255, 255, 255, 0.4),
                   child: InkWell(
@@ -343,13 +353,13 @@ Widget? getImagePreview({
                         downloadImageFunction();
                       },
                       splashColor: const Color.fromRGBO(200, 200, 200, 0.7),
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
-                      child: Padding(
+                      borderRadius: const BorderRadius.all(Radius.circular(50)),
+                      child: const Padding(
                         padding: EdgeInsets.all(8),
                         child: Icon(
                           Icons.download_rounded,
                           size: 55,
-                          color: const Color.fromRGBO(0, 0, 0, 0.2),
+                          color: Color.fromRGBO(0, 0, 0, 0.2),
                         ),
                       )),
                 ),

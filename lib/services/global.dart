@@ -156,8 +156,9 @@ import 'messages/messages_repository.dart';
     } else {
       final fileData = await MessagesRepository().loadAttachmentData(
           attachmentId: attachmentId.toString());
-      if (fileData == null)
+      if (fileData == null) {
         return null; //TODO: implement this method with desired workflow
+      }
       final bytes = base64Decode(fileData.content!);
       await file.writeAsBytes(bytes);
       return file;

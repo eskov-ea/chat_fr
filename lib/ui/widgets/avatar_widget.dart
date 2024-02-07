@@ -26,8 +26,8 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
 
   @override
   void initState() {
-    fetchUserAvatar();
     super.initState();
+    fetchUserAvatar();
   }
 
   void fetchUserAvatar() async {
