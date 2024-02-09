@@ -55,7 +55,6 @@ sendMessageUnix({
         content: base64FileString
       );
 // 4. If no error - update last dialog message
-    throw SocketException("TEST");
     final message = MessageData.fromJson(jsonDecode(response)["data"]);
     bloc.add(
       ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: dialogId, localMessageId: localMessage.messageId)
