@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:chat/services/logger/logger_service.dart';
+import 'package:chat/storage/data_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -134,15 +135,24 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 
   decodeBase64File() async {
-    final rawFile = await loadFileAndSaveLocally(attachmentId: widget.attachmentId, fileName: widget.fileName);
-    if (rawFile != null) {
-      file = rawFile;
-      await audioPlayer.setSourceDeviceFile(file!.path);
-      final d = await audioPlayer.getDuration();
+    try {
+      final rawFile = await loadFileAndSaveLocally(
+          attachmentId: widget.attachmentId, fileName: widget.fileName);
+      if (rawFile != null) {
+        file = rawFile;
+        await audioPlayer.setSourceDeviceFile(file!.path);
+        final d = await audioPlayer.getDuration();
+        setState(() {
+          duration = d!;
+          _dataIsLoaded = true;
+        });
+      }
+    } catch (err, stackTrace) {
       setState(() {
-        duration = d!;
-        _dataIsLoaded = true;
+        isError = true;
       });
+      final userId = await DataProvider().getUserId();
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: " [ USER ID: $userId ] \r\nError initializing audio widget / audio data");
     }
   }
 
@@ -156,7 +166,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     //TODO: fix it. It is temporary solution to have audio messaging feature.
-    return audioWidget();
+    return audioWidgetWithData();
   }
 
   Widget _slider(duration, durationCallback) {
@@ -173,7 +183,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     );
   }
 
-  Widget audioWidget() {
+  Widget audioWidgetWithData() {
     if(isError) {
       return Container(
         child: Row(
