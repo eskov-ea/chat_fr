@@ -174,7 +174,6 @@ import 'messages/messages_repository.dart';
       final File file = File('$path/avatar.$userId.jpg');
 
       if (await file.exists()) {
-        log("fetchUserAvatar: file exists");
         return file;
       } else {
         final UserProfileProvider userProfileProvider = UserProfileProvider();
@@ -182,14 +181,9 @@ import 'messages/messages_repository.dart';
         if (data == null) return null;
         final bytes = base64Decode(data);
         await file.writeAsBytes(bytes);
-        log("fetchUserAvatar: file loaded");
         return file;
       }
   } catch(err, stackTrace) {
-      log("fetchUserAvatar error: $stackTrace");
-      if (err is! AppErrorException) {
-        Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error type: [ ${err.runtimeType} ]");
-      }
       return null;
   }
 }

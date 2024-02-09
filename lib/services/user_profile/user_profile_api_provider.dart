@@ -56,11 +56,11 @@ class UserProfileProvider {
       if (error != null) throw error;
       return jsonDecode(response.body)["data"];
     } on SocketException catch(err, stackTrace) {
-      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
-          "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/user/avatar/$userId ]");
+      // Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+      //     "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/user/avatar/$userId ]");
       throw AppErrorException(AppErrorExceptionType.network);
     } on http.ClientException catch (err, stackTrace) {
-      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
+      // Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
       throw AppErrorException(AppErrorExceptionType.network);
     } on AppErrorException {
       rethrow;

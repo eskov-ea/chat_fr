@@ -78,7 +78,15 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     });
     player.setSubscriptionDuration(Duration(milliseconds: 100));
     print(_mPlayerSubscription);
-    await decodeBase64File();
+    try {
+      await decodeBase64File();
+    }  catch (err, stackTrace) {
+      setState(() {
+        isError = true;
+      });
+      final userId = await DataProvider().getUserId();
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: " [ USER ID: $userId ] \r\nError initializing audio widget / audio data");
+    }
   }
 
   void play() async {
@@ -135,24 +143,16 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 
   decodeBase64File() async {
-    try {
-      final rawFile = await loadFileAndSaveLocally(
-          attachmentId: widget.attachmentId, fileName: widget.fileName);
-      if (rawFile != null) {
-        file = rawFile;
-        await audioPlayer.setSourceDeviceFile(file!.path);
-        final d = await audioPlayer.getDuration();
-        setState(() {
-          duration = d!;
-          _dataIsLoaded = true;
-        });
-      }
-    } catch (err, stackTrace) {
+    final rawFile = await loadFileAndSaveLocally(
+        attachmentId: widget.attachmentId, fileName: widget.fileName);
+    if (rawFile != null) {
+      file = rawFile;
+      await audioPlayer.setSourceDeviceFile(file!.path);
+      final d = await audioPlayer.getDuration();
       setState(() {
-        isError = true;
+        duration = d!;
+        _dataIsLoaded = true;
       });
-      final userId = await DataProvider().getUserId();
-      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: " [ USER ID: $userId ] \r\nError initializing audio widget / audio data");
     }
   }
 

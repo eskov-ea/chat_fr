@@ -43,7 +43,7 @@ class _UserAvatarWidgetState extends State<UserAvatarWidget> {
         });
       }
     } catch (err, stackTrace) {
-      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: AppErrorExceptionType.render.toString());
+
     }
   }
 
