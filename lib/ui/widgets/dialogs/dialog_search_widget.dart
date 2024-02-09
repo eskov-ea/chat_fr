@@ -68,14 +68,19 @@ class _DialogSearchState extends State<DialogSearch> {
                       borderRadius: BorderRadius.all(Radius.circular(10.0)),
                       borderSide: BorderSide(color: AppColors.backgroundLight)
                   ),
-                  suffixIcon: IconButton(
-                    padding: EdgeInsets.zero,
-                    icon: const Icon(Icons.clear),
-                    onPressed: (){
-                      widget.controller.clear();
-                      _searchFocus.unfocus();
+                  suffixIcon: Material(
+                    color: Colors.transparent,
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      splashRadius: 17,
+                      splashColor: Colors.white70,
+                      icon: const Icon(Icons.clear),
+                      onPressed: (){
+                        widget.controller.clear();
+                        _searchFocus.unfocus();
 
-                    },
+                      },
+                    ),
                   )
               ),
             ),
