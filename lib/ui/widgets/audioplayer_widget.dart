@@ -80,7 +80,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     print(_mPlayerSubscription);
     try {
       await decodeBase64File();
-    }  catch (err, stackTrace) {
+    } catch (err, stackTrace) {
       setState(() {
         isError = true;
       });
