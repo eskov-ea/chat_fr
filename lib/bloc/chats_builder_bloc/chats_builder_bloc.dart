@@ -23,7 +23,6 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
   final ErrorHandlerBloc errorHandlerBloc;
   final DataProvider dataProvider;
   late final StreamSubscription newMessageSubscription;
-  final Logger _logger = Logger();
 
   ChatsBuilderBloc({
     required this.webSocketBloc,

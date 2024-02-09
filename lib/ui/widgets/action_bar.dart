@@ -318,8 +318,14 @@ class ActionBarState extends State<ActionBar> {
                             _sendMessage(context, widget.parentMessage);
                             widget.cancelReplyMessage();
                           } else {
-                            await createDialogAndSendMessage(context, widget.rootWidget);
-                            _sendMessage(context, widget.parentMessage);
+                            try {
+                              await createDialogAndSendMessage(
+                                  context, widget.rootWidget);
+                              _sendMessage(context, widget.parentMessage);
+                            } catch (err, stackTrace) {
+                              ClientErrorHandler.informErrorHappened(context, "Произошла ошибка при создании диалога и отправке сообщения. Попробуйте еще раз. ");
+                              _logger.sendErrorTrace(stackTrace: stackTrace);
+                            }
                             widget.cancelReplyMessage();
                           }
                           setState(() {
@@ -405,27 +411,23 @@ class ActionBarState extends State<ActionBar> {
     setState(() {
       isSendButtonDisabled = true;
     });
-    try {
-      final newDialog = await DialogsProvider().createDialog(chatType: 1, users: [widget.partnerId], chatName: "p2p", chatDescription: null, isPublic: false);
-      setState(() {
-        widget.dialogId = newDialog.dialogId;
-      });
-      final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);
-      final initLength = chatsBuilderBloc.state.chats.length;
-      whenFinishAddingDialog(Stream<ChatsBuilderState> source) async {
-        chatsBuilderBloc.add(ChatsBuilderLoadMessagesEvent(dialogId: widget.dialogId!));
-        await for (var value in source) {
-          if (value.chats.length > initLength) {
-            return;
-          }
+    final newDialog = await DialogsProvider().createDialog(chatType: 1, users: [widget.partnerId], chatName: "p2p", chatDescription: null, isPublic: false);
+    setState(() {
+      widget.dialogId = newDialog.dialogId;
+    });
+    final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);
+    final initLength = chatsBuilderBloc.state.chats.length;
+    whenFinishAddingDialog(Stream<ChatsBuilderState> source) async {
+      chatsBuilderBloc.add(ChatsBuilderLoadMessagesEvent(dialogId: widget.dialogId!));
+      await for (var value in source) {
+        if (value.chats.length > initLength) {
+          return;
         }
       }
-      await whenFinishAddingDialog(chatsBuilderBloc.stream);
-      if (newDialog!= null) {
-        widget.setDialogData(widget.rootWidget, newDialog);
-      }
-    } catch(err, stackTrace) {
-      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+    }
+    await whenFinishAddingDialog(chatsBuilderBloc.stream);
+    if (newDialog != null) {
+      widget.setDialogData(widget.rootWidget, newDialog);
     }
     setState(() {
       isSendButtonDisabled = false;

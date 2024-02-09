@@ -204,6 +204,19 @@ import 'messages/messages_repository.dart';
     return null;
   }
 
+  String getChatItemName(DialogData data, int? userId) {
+    if (data.chatType.p2p == 1) {
+      for (var i = 0; i < data.usersList.length; i++)  {
+        if (data.usersList[i].id != userId) {
+          return "${data.usersList[i].lastname} ${data.usersList[i].firstname}";
+        }
+      }
+    } else {
+      return data.name;
+    }
+    return "Dialog";
+  }
+
   webPlatformSaveFile({required bytes, required filename}) async {
 
     if(kIsWeb) {
@@ -259,7 +272,7 @@ import 'messages/messages_repository.dart';
     print('findDialog    $userId, $partnerId');
     // TODO: Another way to find a dialog is to send request to create a dialog.
     // If dialog exists it would return this dialog or create a new one and return it.
-    final Iterator<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs?.iterator;
+    final Iterator<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogsContainer?.dialogs.iterator;
     if (dialogs == null) return null;
 
     while(dialogs.moveNext()) {

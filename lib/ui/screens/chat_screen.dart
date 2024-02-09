@@ -98,6 +98,7 @@ class _ChatScreenState extends State<ChatScreen> {
    super.initState();
   }
   void _sendTypingEvent() async {
+    if (widget.dialogData?.dialogId == null) return;
     while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
       await Future.delayed(const Duration(seconds: 3));
     }
@@ -106,6 +107,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _sendFinishTypingEvent() async {
+    if (widget.dialogData?.dialogId == null) return;
     while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
       await Future.delayed(const Duration(seconds: 3));
     }
@@ -683,13 +685,17 @@ ChatsData? findChat(List<ChatsData> chats, int dialogId) {
 }
 
 UserContact? findPartnerUserProfile(UsersViewCubit usersCubit, int partnerId) {
+  UserContact? user;
   if (usersCubit.state is UsersViewCubitLoadedState) {
     final state =  usersCubit.state as UsersViewCubitLoadedState;
-    final user = state.users.firstWhere((element) => element.id == partnerId);
-    print(user);
-    return user;
+    for (final u in state.users) {
+      if (u.id == partnerId) {
+        user = u;
+        return user;
+      }
+    }
   }
-  return null;
+  return user;
 }
 
 

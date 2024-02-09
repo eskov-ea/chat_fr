@@ -9,7 +9,9 @@ import 'package:chat/storage/data_storage.dart';
 import 'package:chat/theme.dart';
 import 'package:chat/ui/widgets/dialog_avatar_widget.dart';
 import 'package:chat/ui/widgets/dialogs/dialog_item.dart';
+import 'package:chat/ui/widgets/dialogs/dialog_search_widget.dart';
 import 'package:chat/ui/widgets/dialogs/dialogs_skeleton.dart';
+import 'package:chat/ui/widgets/search_widget.dart';
 import 'package:chat/ui/widgets/unauthenticated_widget.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit_state.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
@@ -42,6 +44,7 @@ class _MessagesPageState extends State<MessagesPage> {
   int? userId;
   int  counter = 0;
   final _controller = ScrollController();
+  final TextEditingController searchController = TextEditingController();
 
 
   @override
@@ -61,6 +64,11 @@ class _MessagesPageState extends State<MessagesPage> {
   Future<int?> _readUserId() async {
     final userIdFromStorage = await DataProvider().getUserId();
     return userIdFromStorage == null ? null : int.parse(userIdFromStorage);
+  }
+
+  void clearSearch() {
+    searchController.text = "";
+    BlocProvider.of<DialogsViewCubit>(context).search(searchController.text);
   }
 
   bool isMemberOnline(int id) {
@@ -86,72 +94,88 @@ class _MessagesPageState extends State<MessagesPage> {
       if (!state.isAuthenticated) {
         return UnauthenticatedWidget();
       }
-      if (state.dialogs.isEmpty) {
+      if (state.dialogs.isEmpty && state.isFirstInitialized) {
         return Center(
             key: UniqueKey(),
             child: Text("Нет диалогов")
         );
       } else{
-        return RefreshIndicator(
-          key: UniqueKey(),
-          onRefresh: () async {
-            refreshAllData();
-          },
-          child: Scrollbar(
-            controller: _controller,
-            thumbVisibility: false,
-            thickness: 5,
-            trackVisibility: false,
-            radius: const Radius.circular(7),
-            scrollbarOrientation: ScrollbarOrientation.right,
-            child: CustomScrollView(
-              // controller: _controller,
-              slivers: [
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                        (context, index) =>
-                    !_isDialogActive(state.dialogs[index], userId!) ||
-                        state.dialogs[index].chatType.typeId == 3 && !(state.dialogs[index].messageCount > 0)
-                        ? SizedBox.shrink()
-                        : Container(
-                      padding: const EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 0),
-                      child: Align(
-                        child: DialogItem(
-                          userId: userId,
-                          checkOnline: isMemberOnline,
-                          onlineMembers: onlineMembers,
-                          dialogData: DialogData(
-                              userData: state.dialogs[index].userData,
-                              dialogId: state.dialogs[index].dialogId,
-                              usersList: state.dialogs[index].usersList,
-                              chatType: state.dialogs[index].chatType,
-                              lastMessage: state.dialogs[index].lastMessage,
-                              name: state.dialogs[index].name,
-                              description: state.dialogs[index].description,
-                              chatUsers: state.dialogs[index].chatUsers,
-                              messageCount: state.dialogs[index].messageCount,
-                              picture: state.dialogs[index].picture,
-                              createdAt: state.dialogs[index].createdAt
+        return Column(
+          children: [
+            DialogSearch(controller: searchController),
+            const Divider(height: 1, thickness: 1, color: Colors.black12),
+            Expanded(
+              child: RefreshIndicator(
+                key: UniqueKey(),
+                onRefresh: () async {
+                  refreshAllData();
+                },
+                child: Scrollbar(
+                  controller: _controller,
+                  thumbVisibility: false,
+                  thickness: 5,
+                  trackVisibility: false,
+                  radius: const Radius.circular(7),
+                  scrollbarOrientation: ScrollbarOrientation.right,
+                  child: CustomScrollView(
+                    // controller: _controller,
+                    slivers: [
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                              (context, index) =>
+                          !_isDialogActive(state.dialogs[index], userId!) ||
+                              state.dialogs[index].chatType.typeId == 3 && !(state.dialogs[index].messageCount > 0)
+                              ? SizedBox.shrink()
+                              : Container(
+                            padding: const EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 0),
+                            child: Align(
+                              child: DialogItem(
+                                clearSearch: clearSearch,
+                                userId: userId,
+                                checkOnline: isMemberOnline,
+                                onlineMembers: onlineMembers,
+                                dialogData: DialogData(
+                                    userData: state.dialogs[index].userData,
+                                    dialogId: state.dialogs[index].dialogId,
+                                    usersList: state.dialogs[index].usersList,
+                                    chatType: state.dialogs[index].chatType,
+                                    lastMessage: state.dialogs[index].lastMessage,
+                                    name: state.dialogs[index].name,
+                                    description: state.dialogs[index].description,
+                                    chatUsers: state.dialogs[index].chatUsers,
+                                    messageCount: state.dialogs[index].messageCount,
+                                    picture: state.dialogs[index].picture,
+                                    createdAt: state.dialogs[index].createdAt
+                                ),
+                              ),
+                            ),
                           ),
+                          childCount: state.dialogs.length,
                         ),
-                      ),
-                    ),
-                    childCount: state.dialogs.length,
+                      )
+                    ],
                   ),
-                )
-              ],
+                ),
+              ),
             ),
-          ),
+          ]
         );
       }
     } else {
       return Container(
         key: UniqueKey(),
-        child: const Shimmer(
-            child: ShimmerLoading(
-                child: DialogsSkeletonWidget()
+        child: Column(
+          children: [
+            DialogSearch(controller: searchController),
+            const Expanded(
+              child: Shimmer(
+                  child: ShimmerLoading(
+                      child: DialogsSkeletonWidget()
+                  )
+              )
             )
-        ),
+          ],
+        ) ,
       );
     }
   }

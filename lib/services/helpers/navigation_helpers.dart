@@ -1,3 +1,6 @@
+import 'package:chat/models/contact_model.dart';
+import 'package:chat/services/logger/logger_service.dart';
+import 'package:chat/services/popup_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../ui/navigation/main_navigation.dart';
@@ -29,16 +32,17 @@ void openChatScreen({
 
 void openUserProfileInfoPage({
   required BuildContext context,
-  required user,
+  required UserContact? user,
   required partnerId
 }) {
-  Navigator.of(context).pushNamed(
-    MainNavigationRouteNames.userProfileInfoPage,
-    arguments: UserProfileArguments(
-      user: user,
-      partnerId: partnerId
-    )
-  );
+  if (user == null) {
+    PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.error, message: "Ошибка! Не удалось загрузить данные пользователя");
+    Logger.getInstance().sendDebugMessage(message: "Error openning partner profile info. The data was: partnerId: $partnerId, user: $user", operation: "openUserProfileInfoPage");
+  } else {
+    Navigator.of(context).pushNamed(
+        MainNavigationRouteNames.userProfileInfoPage,
+        arguments: UserProfileArguments(user: user, partnerId: partnerId));
+  }
 }
 
 void openGroupChatInfoPage({

@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
+import 'package:chat/bloc/dialogs_bloc/dialogs_list_container.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_state.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_events.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/dialog_model.dart';
+import 'package:chat/services/global.dart';
+import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/message_model.dart';
 import '../../services/dialogs/dialogs_repository.dart';
@@ -30,7 +33,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
           print("DialogsEvent   ${streamState}");
           if (streamState is WsStateReceiveNewMessage){
             final copyState = state.from();
-            final List<DialogData> newDialogs = [ ...copyState.dialogs!];
+            final List<DialogData> newDialogs = [...copyState.dialogsContainer!.dialogs];
             for (var dialog in newDialogs) {
               if(dialog.dialogId == streamState.message.dialogId) {
                 if (dialog.lastMessage != null) {
@@ -49,18 +52,18 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
                 }
               }
             }
-            final newState = state.copyWith(dialogs: newDialogs);
+            final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
             emit(newState);
           } else if (streamState is WsStateUpdateStatus){
             final copyState = state.from();
-            final List<DialogData> newDialogs = [...copyState.dialogs ?? <DialogData>[]];
+            final List<DialogData> newDialogs = [...copyState.dialogsContainer?.dialogs ?? <DialogData>[]];
 
             for (var dialog in newDialogs) {
               if (dialog.dialogId == streamState.statuses.last.dialogId) {
                 dialog.lastMessage.statuses.addAll(streamState.statuses);
               }
             }
-            final newState = state.copyWith(dialogs: newDialogs);
+            final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
             emit(newState);
           } else if (streamState is WsStateNewDialogCreated) {
             add(ReceiveNewDialogEvent(dialog: streamState.dialog));
@@ -73,7 +76,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
           }
         });
     on<DialogsEvent>((event, emit) async {
-      print("DialogsEvent   ${event}  ${state.dialogs}");
+      print("DialogsEvent   ${event}  ${state.dialogsContainer}");
       if (event is DialogsLoadEvent) {
         await onDialogsLoadEvent(event, emit);
       } else if (event is ReceiveNewDialogEvent) {
@@ -90,6 +93,8 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         onDeleteDialogsOnLogoutEvent(event, emit);
       } else if (event is DialogDeletedChatEvent) {
         onDialogDeletedChatEvent(event, emit);
+      } else if (event is DialogsSearchDialogEvent) {
+        await onDialogsSearchEvent(event, emit);
       }
     });
   }
@@ -99,20 +104,41 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       ) async {
     try {
       List<DialogData> dialogs = await dialogRepository.getDialogs();
-      print("LOAD DIALOGS::    $dialogs");
       if (dialogs.isNotEmpty) sortDialogsByLastMessage(dialogs);
-      final newState = state.copyWith(dialogs: dialogs, isAuthenticated: true, isErrorHappened: false);
+      final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: dialogs), isAuthenticated: true, isErrorHappened: false, isFirstInitialized: true);
       emit(newState);
     } catch(err, stack) {
-      print("LOAD D ERROR  $err \r\n$stack");
       if (err is AppErrorException && err.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
         await Future.delayed(const Duration(milliseconds: 300));
         err as AppErrorException;
-        final errorState = state.copyWith(dialogs: [], searchQuery: "", isErrorHappened: true, errorType: err.type);
+        final errorState = state.copyWith(dialogsContainer: const DialogsListContainer.initial(), searchQuery: "", isErrorHappened: true, errorType: err.type);
         emit(errorState);
       }
+    }
+  }
+
+  Future<void> onDialogsSearchEvent(
+      DialogsSearchDialogEvent event, Emitter<DialogsState> emit
+      ) async {
+    try {
+      print("Dialogs search ${event.searchQuery}");
+      if (event.searchQuery != "") {
+        final query = event.searchQuery.toLowerCase();
+        final userId = await DataProvider().getUserId();
+        final filteredDialogs =
+            filterDialogsBySearchQuery(state.dialogsContainer!.dialogs, query, int.parse(userId!));
+        final container = state.searchedContainer!.copyWith(dialogs: filteredDialogs);
+        emit(state.copyWith(searchedDialogs: container, searchQuery: event.searchQuery));
+      } else {
+        final container = state.dialogsContainer!;
+        final newContainer = container.copyWith(dialogs: container.dialogs);
+        emit(state.copyWith(dialogsContainer: newContainer, searchQuery: event.searchQuery));
+      }
+    } catch (err, stackTrace) {
+      print("Search dialog error $err \r\n $stackTrace");
+      emit(state.copyWith(errorType: AppErrorExceptionType.other, isErrorHappened: true));
     }
   }
 
@@ -120,26 +146,25 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       ReceiveNewDialogEvent event,
       Emitter<DialogsState> emit
   ) {
-    for (var dialog in state.dialogs!) {
+    for (var dialog in state.dialogsContainer!.dialogs) {
       if (dialog.dialogId == event.dialog.dialogId) {
         return;
       }
     }
-    final newDialogs = [ event.dialog, ...state.dialogs!];
-    final newState = state.copyWith(dialogs: newDialogs);
-    print(newState.dialogs?.length);
+    final newDialogs = [ event.dialog, ...state.dialogsContainer!.dialogs];
+    final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
     emit(newState);
   }
 
   void onDialogUserJoinChatEvent(DialogUserJoinChatEvent event, emit) {
     try {
       final copyState = state.from();
-      final newDialogs = [ ...copyState.dialogs!];
+      final newDialogs = [ ...copyState.dialogsContainer!.dialogs];
       for (var dialog in newDialogs) {
         if(dialog.dialogId == event.dialogId) {
           dialog.usersList.add(event.user.user);
           dialog.chatUsers.add(event.user);
-          final newState = state.copyWith(dialogs: newDialogs);
+          final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
           emit(newState);
           return;
         }
@@ -152,7 +177,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
 
   void onDialogUserExitChatEvent(DialogUserExitChatEvent event, emit) {
     final copyState = state.from();
-    final newDialogs = [ ...copyState.dialogs!];
+    final newDialogs = [ ...copyState.dialogsContainer!.dialogs];
     for (var dialog in newDialogs) {
       if(dialog.dialogId == event.dialogId) {
         for (var user in dialog.chatUsers) {
@@ -164,7 +189,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         break;
       }
     }
-    final newState = state.copyWith(dialogs: newDialogs);
+    final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
     emit(newState);
   }
 
@@ -173,7 +198,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       Emitter<DialogsState> emit
       ) {
     final copyState = state.from();
-    final newDialogs = [ ...copyState.dialogs!];
+    final newDialogs = [ ...copyState.dialogsContainer!.dialogs];
     for (var dialog in newDialogs) {
       if (dialog.dialogId == event.message.dialogId) {
         dialog.lastMessage.message = event.message.message;
@@ -184,7 +209,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
 
       }
     }
-    final newState = state.copyWith(dialogs: newDialogs);
+    final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
     emit(newState);
   }
 
@@ -199,7 +224,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       DeleteDialogsOnLogoutEvent event,
       Emitter<DialogsState> emit
       ){
-    final newState = state.copyWith(dialogs: [], isErrorHappened:  false, searchQuery: "", isAuthenticated: false);
+    final newState = state.copyWith(dialogsContainer: const DialogsListContainer.initial(), isErrorHappened:  false, searchQuery: "", isAuthenticated: false);
     emit(newState);
   }
 
@@ -208,13 +233,24 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       Emitter<DialogsState> emit
       ){
     final copyState = state.from();
-    final newDialogs = [ ...copyState.dialogs!];
+    final newDialogs = [ ...copyState.dialogsContainer!.dialogs];
     newDialogs.removeWhere((dialog) => dialog.dialogId == event.dialog.dialogId);
-    emit(state.copyWith(dialogs: newDialogs));
+    emit(state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs)));
   }
 
 
 
+}
+
+
+List<DialogData> filterDialogsBySearchQuery(List<DialogData> dialogs, String searchQuery, int userId) {
+  List<DialogData> filtered = [];
+  final regex = RegExp(searchQuery, caseSensitive: false, multiLine: false);
+  for (final dialog in dialogs) {
+    final name = getChatItemName(dialog, userId);
+    if (regex.hasMatch(name)) filtered.add(dialog);
+  }
+  return filtered;
 }
 
 Map<String, dynamic> makeJsonMessage(MessageData message) {
@@ -252,5 +288,4 @@ sortDialogsByLastMessage(List<DialogData> dialogs){
 
     return bTime!.millisecondsSinceEpoch.compareTo(aTime!.millisecondsSinceEpoch);
   });
-  return dialogs;
 }

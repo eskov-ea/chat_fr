@@ -14,7 +14,6 @@ class AuthBloc
     extends Bloc<AuthEvent, AuthState> {
     final AuthRepository authRepo;
     final _dataProvider = DataProvider();
-    final Logger _logger = Logger();
 
     AuthBloc({
        required this.authRepo
@@ -63,7 +62,7 @@ class AuthBloc
             auth == true ? const Authenticated() : Unauthenticated();
         emit(newState);
     } catch (err, stackTrace) {
-        _logger.sendErrorTrace(stackTrace: stackTrace, additionalInfo: stackTrace.toString(), uri: 'https://erp.mcfef.com/api/profile');
+        Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: stackTrace.toString(), uri: 'https://erp.mcfef.com/api/profile');
         emit(Unauthenticated());
       }
     }

@@ -1,59 +1,73 @@
+import 'package:chat/bloc/dialogs_bloc/dialogs_list_container.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/dialog_model.dart';
 import '../../services/helpers/equality_helper.dart';
 
 class DialogsState {
-  final List<DialogData>? dialogs;
+  final DialogsListContainer dialogsContainer;
+  final DialogsListContainer searchedContainer;
   final String searchQuery;
   final bool isErrorHappened;
   final bool isAuthenticated;
+  final bool isFirstInitialized;
   final AppErrorExceptionType? errorType;
 
   bool get isSearchMode => searchQuery.isNotEmpty;
+  List<DialogData> get dialogs =>
+      isSearchMode ? searchedContainer.dialogs : dialogsContainer.dialogs;
 
-  const DialogsState.initial()
-      : dialogs = null,
-        searchQuery = "",
-        isErrorHappened = false,
-        isAuthenticated = true,
-        errorType = null;
+  const DialogsState.initial():
+    dialogsContainer = const DialogsListContainer.initial(),
+    searchedContainer = const DialogsListContainer.initial(),
+    searchQuery = "",
+    isErrorHappened = false,
+    isAuthenticated = true,
+    isFirstInitialized = false,
+    errorType = null;
 
   DialogsState({
-    required this.dialogs,
+    required this.dialogsContainer,
+    required this.searchedContainer,
     required this.searchQuery,
     required this.isErrorHappened,
     required this.errorType,
-    required this.isAuthenticated
+    required this.isAuthenticated,
+    required this.isFirstInitialized
   });
 
   @override
   bool operator ==(Object other) =>
           other is DialogsState &&
               runtimeType == other.runtimeType &&
-              dialogs == other.dialogs &&
+              dialogsContainer == other.dialogsContainer &&
               searchQuery == other.searchQuery &&
               errorType == other.errorType &&
               isAuthenticated == other.isAuthenticated &&
+              isFirstInitialized == other.isFirstInitialized &&
               isErrorHappened == other.isErrorHappened;
 
   @override
   int get hashCode =>
-      dialogs.hashCode ^
+      dialogsContainer.hashCode ^
       searchQuery.hashCode ^
       errorType.hashCode ^
       isAuthenticated.hashCode ^
+      isFirstInitialized.hashCode ^
       isErrorHappened.hashCode;
 
   DialogsState copyWith({
-    List<DialogData>? dialogs,
+    DialogsListContainer? dialogsContainer,
+    DialogsListContainer? searchedDialogs,
     String? searchQuery,
     bool? isErrorHappened,
     bool? isAuthenticated,
+    bool? isFirstInitialized,
     AppErrorExceptionType? errorType
   }) {
     return DialogsState(
-      dialogs:
-      dialogs ?? this.dialogs,
+      dialogsContainer: dialogsContainer ?? this.dialogsContainer,
+      searchedContainer: searchedDialogs ?? this.searchedContainer,
+      isFirstInitialized: isFirstInitialized ?? this.isFirstInitialized,
       searchQuery: searchQuery ?? this.searchQuery,
       isErrorHappened: isErrorHappened ?? this.isErrorHappened,
       errorType: errorType ?? this.errorType,
@@ -62,11 +76,12 @@ class DialogsState {
   }
 
   DialogsState from() {
-    List<DialogData>? dialogs = [];
-    if (this.dialogs == null) {
-      dialogs = null;
+    DialogsListContainer dialogsContainer;
+    if (this.dialogsContainer.dialogs.isEmpty) {
+      dialogsContainer = const DialogsListContainer.initial();
     } else {
-      for (var dialog in this.dialogs!) {
+      List<DialogData> dialogs =[];
+      for (var dialog in this.dialogsContainer.dialogs) {
         final d = DialogData(
           dialogId: dialog.dialogId,
           chatType: dialog.chatType,
@@ -82,13 +97,16 @@ class DialogsState {
         );
         dialogs.add(d);
       }
+      dialogsContainer = DialogsListContainer(dialogs: dialogs);
     }
     return DialogsState(
-      dialogs: dialogs,
+      dialogsContainer: dialogsContainer,
+      searchedContainer: searchedContainer,
       searchQuery: searchQuery,
       isErrorHappened: isErrorHappened,
       errorType: errorType,
-      isAuthenticated: isAuthenticated
+      isAuthenticated: isAuthenticated,
+      isFirstInitialized: isFirstInitialized
     );
   }
 }

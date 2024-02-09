@@ -13,6 +13,7 @@ class DialogsProvider {
   final _secureStorage = DataProvider();
 
   Future<List<DialogData>> getDialogs() async {
+    // throw AppErrorException(AppErrorExceptionType.other);
     try {
       final String? token = await _secureStorage.getToken();
       final response = await http.get(

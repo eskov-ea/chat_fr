@@ -10,7 +10,6 @@ import 'call_logs_state.dart';
 class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
   final CallLogService _callLogService = CallLogService();
   final ErrorHandlerBloc errorHandlerBloc;
-  final Logger _logger = Logger();
 
   CallLogsBloc({
     required CallLogsBlocState initialState,

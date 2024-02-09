@@ -55,4 +55,9 @@ class UserContact {
       );
     }
   }
+
+  @override
+  String toString() {
+    return "Instance of UserContact: id: $id, name: $lastname $firstname";
+  }
 }

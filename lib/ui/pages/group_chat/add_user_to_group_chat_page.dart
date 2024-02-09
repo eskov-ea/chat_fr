@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +28,7 @@ class _AddingUserToGroupChatPageState extends State<AddingUserToGroupChatPage> {
 
   List<UserContact> selected = [];
   List<UserContact> users = [];
+  late final StreamSubscription userListSubscription;
   //TODO: higt this functionality up to bloc
   final DialogsProvider _dialogsProvider = DialogsProvider();
   addUsersToDialog() async {
@@ -37,13 +40,13 @@ class _AddingUserToGroupChatPageState extends State<AddingUserToGroupChatPage> {
 
   @override
   void initState() {
+    super.initState();
     users = widget.usersViewCubit.state.users;
-    widget.usersViewCubit.stream.listen((event) {
+    userListSubscription = widget.usersViewCubit.stream.listen((event) {
       setState(() {
         users = event.users;
       });
     });
-    super.initState();
   }
 
   void _setSelected(UserContact user) {
@@ -54,6 +57,12 @@ class _AddingUserToGroupChatPageState extends State<AddingUserToGroupChatPage> {
         selected.remove(user);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    userListSubscription.cancel();
+    super.dispose();
   }
 
   @override

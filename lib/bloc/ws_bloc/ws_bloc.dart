@@ -19,9 +19,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
   final DialogRepository dialogsRepository;
   final MessagesProvider _messagesProvider = MessagesProvider();
   List<StreamSubscription> eventSubscriptions = [];
-  // List<Channel?> channels = [];
   Map<String, Channel> channels = {};
-  // Map<String, StreamSubscription> eventSubscriptions = {};
   StreamSubscription? generalEventSubscription;
   SynchronousStreamController? socketConnectionEventSubscription;
   PusherChannelsClient? socket;
@@ -96,128 +94,130 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
     try {
       final List<DialogData>? dialogs = await dialogsRepository.getDialogs();
 
-    socket = PusherChannelsClient.websocket(
-        options: options,
-        connectionErrorHandler: (error, trace, refresh) {
-          print("SocketError:  ${error}");
-          add(WsEventDisconnect());
-          refresh();
-        },
-        minimumReconnectDelayDuration: const Duration(
-          seconds: 1,
-        ),
-        defaultActivityDuration: const Duration(
-          seconds: 5,
-        ),
-        activityDurationOverride: const Duration(
-          seconds: 5,
-        ),
-        waitForPongDuration: const Duration(
-          seconds: 5,
-        ),
-    );
+      socket = PusherChannelsClient.websocket(
+          options: options,
+          connectionErrorHandler: (error, trace, refresh) {
+            print("SocketError:  ${error}");
+            add(WsEventDisconnect());
+            refresh();
+          },
+          minimumReconnectDelayDuration: const Duration(
+            seconds: 1,
+          ),
+          defaultActivityDuration: const Duration(
+            seconds: 5,
+          ),
+          activityDurationOverride: const Duration(
+            seconds: 5,
+          ),
+          waitForPongDuration: const Duration(
+            seconds: 5,
+          ),
+      );
 
 
-    socket!.onConnectionEstablished.listen((event) async {
-      print("socket onInitializeSocketEvent connection established");
-      for (var subscription in eventSubscriptions) {
-        await subscription.cancel();
-      }
-      await generalEventSubscription?.cancel();
-
-      while (socket == null) {
-        print("Socket null::::");
-        Future.delayed(const Duration(milliseconds: 300));
-      }
-      final Channel channel = clientSubscribeToChannel(
-          authToken: token, client: socket, channelName: 'private-chatinfo');
-      channels[channel.name] = channel;
-      generalEventSubscription = channel.bind('update').listen((event) {
-        final DialogData newDialog = DialogData.fromJson(jsonDecode(event.data)["chat"]);
-        print("CHATINFO   ->  $newDialog");
-        for (var user in newDialog.usersList) {
-          if (user.id == userId) {
-            add(WsEventNewDialogCreated(dialog: newDialog));
-            return;
-          }
+      socket!.onConnectionEstablished.listen((event) async {
+        print("socket onInitializeSocketEvent connection established");
+        for (var subscription in eventSubscriptions) {
+          await subscription.cancel();
         }
-      });
-      channel.subscribeIfNotUnsubscribed();
+        await generalEventSubscription?.cancel();
 
-      final Channel userInfoChannel = clientSubscribeToChannel(
-          authToken: token,
-          client: socket,
-          channelName: 'private-userinfo.$rawUserId');
-      channels[userInfoChannel.name] = userInfoChannel;
-      generalEventSubscription = userInfoChannel.bind('update').listen((event) {
-        print("USERINFOCHANNEL  ${event.channelName}   ${jsonDecode(event.data)}");
-        final data = jsonDecode(event.data);
-        if (data["chat_join"] != null) {
-          final DialogData newDialog = DialogData.fromJson(data["chat_join"]);
+        while (socket == null) {
+          print("Socket null::::");
+          Future.delayed(const Duration(milliseconds: 300));
+        }
+        final Channel channel = clientSubscribeToChannel(
+            authToken: token, client: socket, channelName: 'private-chatinfo');
+        channels[channel.name] = channel;
+        generalEventSubscription = channel.bind('update').listen((event) {
+          final DialogData newDialog = DialogData.fromJson(jsonDecode(event.data)["chat"]);
+          print("CHATINFO   ->  $newDialog");
           for (var user in newDialog.usersList) {
             if (user.id == userId) {
               add(WsEventNewDialogCreated(dialog: newDialog));
               return;
             }
           }
-        } else if(data["chat_exit"] != null) {
-          final DialogData newDialog = DialogData.fromJson(data["chat_exit"]);
-          print("UNSUBSCRIBE CHAT   -->   private-chat.${newDialog.dialogId}");
-          add(WsEventDialogDeleted(dialog: newDialog, channelName: "private-chat.${newDialog.dialogId}"));
-          return;
+        });
+        channel.subscribeIfNotUnsubscribed();
+
+        final Channel userInfoChannel = clientSubscribeToChannel(
+            authToken: token,
+            client: socket,
+            channelName: 'private-userinfo.$rawUserId');
+        channels[userInfoChannel.name] = userInfoChannel;
+        generalEventSubscription = userInfoChannel.bind('update').listen((event) {
+          print("USERINFOCHANNEL  ${event.channelName}   ${jsonDecode(event.data)}");
+          final data = jsonDecode(event.data);
+          if (data["chat_join"] != null) {
+            final DialogData newDialog = DialogData.fromJson(data["chat_join"]);
+            for (var user in newDialog.usersList) {
+              if (user.id == userId) {
+                add(WsEventNewDialogCreated(dialog: newDialog));
+                return;
+              }
+            }
+          } else if(data["chat_exit"] != null) {
+            final DialogData newDialog = DialogData.fromJson(data["chat_exit"]);
+            print("UNSUBSCRIBE CHAT   -->   private-chat.${newDialog.dialogId}");
+            add(WsEventDialogDeleted(dialog: newDialog, channelName: "private-chat.${newDialog.dialogId}"));
+            return;
+          }
+        });
+        userInfoChannel.subscribeIfNotUnsubscribed();
+
+        presenceChannel = clientSubscribeToPresenceChannel(
+          client: socket,
+          channelName: 'presence-onlineinfo',
+          authToken: token
+        );
+        presenceChannel!.subscribeIfNotUnsubscribed();
+
+        socket?.eventStream.listen(_onSocketEvent);
+
+
+        if (dialogs != null) {
+          for (var dialog in dialogs) {
+            final Channel dialogChannel = clientSubscribeToChannel(
+                authToken: token,
+                client: socket,
+                channelName: 'private-chat.${dialog.dialogId}');
+            channels[dialogChannel.name] = dialogChannel;
+            StreamSubscription dialogEventSubscription =
+              dialogChannel.bind('update').listen((event) {
+                print("DialogChannel event:  $event");
+                final data = jsonDecode(event.data);
+                if (data["message"] != null) {
+                  final newMessage = MessageData.fromJson(data["message"]);
+                  print("NEW MESSAGE   ${event.channelName}    ->  $newMessage");
+                  Future.delayed(Duration(seconds: 1)).then((v) {
+                    add(WsEventReceiveNewMessage(message: newMessage));
+                  });
+                } else if (data["message_status"] != null) {
+                  final newStatuses =
+                      MessageStatuses.fromJson([data["message_status"]]);
+                  print("UPDATE STATUSES    -> ${newStatuses.last.statusId}");
+                  add(WsEventUpdateStatus(statuses: newStatuses));
+                } else if (data["join"] != null) {
+                  print("EVENTJOIN  ${data["join"]}");
+                  final user = ChatUser.fromJson(data["join"]);
+                  add(WsUserJoinChatEvent(user: user, dialogId: dialog.dialogId));
+                } else if (data["exit"] != null) {
+                  final user = ChatUser.fromJson(data["exit"]);
+                  add(WsUserExitChatEvent(user: user, dialogId: dialog.dialogId));
+                }
+              });
+            dialogChannel.subscribeIfNotUnsubscribed();
+            eventSubscriptions.add(dialogEventSubscription);
+          }
         }
       });
-      userInfoChannel.subscribeIfNotUnsubscribed();
-
-      presenceChannel = clientSubscribeToPresenceChannel(
-        client: socket,
-        channelName: 'presence-onlineinfo',
-        authToken: token
-      );
-      presenceChannel!.subscribeIfNotUnsubscribed();
-
-      socket?.eventStream.listen(_onSocketEvent);
-
-
-      if (dialogs != null) {
-        for (var dialog in dialogs) {
-          final Channel dialogChannel = clientSubscribeToChannel(
-              authToken: token,
-              client: socket,
-              channelName: 'private-chat.${dialog.dialogId}');
-          channels[dialogChannel.name] = dialogChannel;
-          StreamSubscription dialogEventSubscription =
-            dialogChannel.bind('update').listen((event) {
-              print("DialogChannel event:  $event");
-              final data = jsonDecode(event.data);
-              if (data["message"] != null) {
-                final newMessage = MessageData.fromJson(data["message"]);
-                print("NEW MESSAGE   ${event.channelName}    ->  $newMessage");
-                Future.delayed(Duration(seconds: 1)).then((v) {
-                  add(WsEventReceiveNewMessage(message: newMessage));
-                });
-              } else if (data["message_status"] != null) {
-                final newStatuses =
-                    MessageStatuses.fromJson([data["message_status"]]);
-                print("UPDATE STATUSES    -> ${newStatuses.last.statusId}");
-                add(WsEventUpdateStatus(statuses: newStatuses));
-              } else if (data["join"] != null) {
-                print("EVENTJOIN  ${data["join"]}");
-                final user = ChatUser.fromJson(data["join"]);
-                add(WsUserJoinChatEvent(user: user, dialogId: dialog.dialogId));
-              } else if (data["exit"] != null) {
-                final user = ChatUser.fromJson(data["exit"]);
-                add(WsUserExitChatEvent(user: user, dialogId: dialog.dialogId));
-              }
-            });
-          dialogChannel.subscribeIfNotUnsubscribed();
-          eventSubscriptions.add(dialogEventSubscription);
-        }
-      }
-    });
-      socket!.connect();
-      emit(Connected());
-    } catch (_) {
+      await socket!.connect();
+      emit(const Connected());
+    } catch (err, stackTrace) {
+      print("SOCKET CONNECTING:  $err \r\n$stackTrace");
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
       emit(Unconnected());
     }
   }
@@ -369,43 +369,47 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
   }
 
   onWsEventGetUpdatesOnResume(event, emit) async {
-    print("onWsEventGetUpdatesOnResume");
+    try {
+      final Map<String, dynamic>? newUpdates =
+      await _messagesProvider.getNewUpdatesOnResume();
+      print("newUpdates   $newUpdates     dialogsCollection     ${newUpdates?["chats"]}");
+      if (newUpdates == null) return;
+      final List<dynamic>? dialogsCollection = newUpdates["chats"];
+      final List<dynamic>? messagesCollection = newUpdates["chat_messages"];
+      final List<dynamic>? statusesCollection =
+      newUpdates["chat_message_status_users"];
 
-    final Map<String, dynamic>? newUpdates =
-        await _messagesProvider.getNewUpdatesOnResume();
-    print(
-        "newUpdates   $newUpdates     dialogsCollection     ${newUpdates?["chats"]}");
-    if (newUpdates == null) return;
-    final List<dynamic>? dialogsCollection = newUpdates["chats"];
-    final List<dynamic>? messagesCollection = newUpdates["chat_messages"];
-    final List<dynamic>? statusesCollection =
-        newUpdates["chat_message_status_users"];
-
-    if (dialogsCollection!.isNotEmpty) {
-      final List<DialogData> newDialogs = dialogsCollection
-          .map((dialog) => DialogData.fromJson(dialog))
-          .toList();
-      print("UPDATED_INFO DIALOGS    $newDialogs");
-      for (var dialog in newDialogs) {
-        //TODO: remove socket from event parameter
-        add(WsEventNewDialogCreated(dialog: dialog));
+      if (dialogsCollection!.isNotEmpty) {
+        final List<DialogData> newDialogs = dialogsCollection
+            .map((dialog) => DialogData.fromJson(dialog))
+            .toList();
+        print("UPDATED_INFO DIALOGS    $newDialogs");
+        for (var dialog in newDialogs) {
+          //TODO: remove socket from event parameter
+          add(WsEventNewDialogCreated(dialog: dialog));
+        }
       }
-    }
-    if (messagesCollection!.isNotEmpty) {
-      final List<MessageData> newMessages = messagesCollection
-          .map((message) => MessageData.fromJson(message))
-          .toList();
-      print("UPDATED_INFO MESSAGES    $newMessages");
+      if (messagesCollection!.isNotEmpty) {
+        final List<MessageData> newMessages = messagesCollection
+            .map((message) => MessageData.fromJson(message))
+            .toList();
+        print("UPDATED_INFO MESSAGES    $newMessages");
 
-      for (var message in newMessages) {
-        add(WsEventReceiveNewMessage(message: message));
+        for (var message in newMessages) {
+          add(WsEventReceiveNewMessage(message: message));
+        }
       }
-    }
-    if (statusesCollection!.isNotEmpty) {
-      final List<MessageStatuses> newStatuses =
-          MessageStatuses.fromJson(statusesCollection).toList();
-      print("UPDATED_INFO STATUSES    $newStatuses");
-      add(WsEventUpdateStatus(statuses: newStatuses));
+      if (statusesCollection!.isNotEmpty) {
+        final List<MessageStatuses> newStatuses =
+        MessageStatuses.fromJson(statusesCollection).toList();
+        print("UPDATED_INFO STATUSES    $newStatuses");
+        add(WsEventUpdateStatus(statuses: newStatuses));
+      }
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: err.runtimeType.toString(), additionalInfo: "USER ID: $userId, onWsEventGetUpdatesOnResume");
+      err as AppErrorException;
+
+      if (err.type == AppErrorExceptionType.auth) add(WsEventCloseConnection());
     }
   }
 }

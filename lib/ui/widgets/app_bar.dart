@@ -7,27 +7,37 @@ import '../../theme.dart';
 
 
 PreferredSizeWidget CustomAppBar(context)  {
+
+  const textStyle = TextStyle(color: LightColors.mainText, fontSize: 20, fontWeight: FontWeight.w500);
     return AppBar(
       iconTheme: Theme.of(context).iconTheme,
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: Colors.white,
       elevation: 0,
+
       title: BlocBuilder<WebsocketViewCubit, WebsocketViewCubitState>(
         builder: (context, state) {
           if (state == WebsocketViewCubitState.connected) {
             return const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Text('MCFEF',
-                style: TextStyle(color: LightColors.mainText, fontSize: 22, fontWeight: FontWeight.w700),
+                style: textStyle,
               )
             );
+          } else if (state == WebsocketViewCubitState.unconnected) {
+            return const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Text('Не подключен',
+                  style: textStyle,
+                )
+            );
           } else {
-            return Row(
-              children: const [
+            return const Row(
+              children: [
                 Text(
                   'Подключение...',
-                  style: TextStyle(color: LightColors.mainText, fontSize: 22, fontWeight: FontWeight.w700),
+                  style: textStyle,
                 ),
-                SizedBox(width: 20,),
+                SizedBox(width: 20),
                 SizedBox(
                   width: 20,
                   height: 20,
@@ -59,7 +69,8 @@ class _OptionsIcon extends StatelessWidget {
 
     var _bloc = BlocProvider.of<UsersViewCubit>(context);
     return IconButton(
-      icon: const Icon(Icons.launch, color: AppColors.secondary, size: 30,),
+      padding: EdgeInsets.zero,
+      icon: const Icon(Icons.launch, color: AppColors.secondary, size: 25),
       onPressed: () {
         showModalBottomSheet(
           isScrollControlled: true,

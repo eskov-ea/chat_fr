@@ -6,10 +6,12 @@ import 'package:chat/bloc/chats_builder_bloc/chats_builder_event.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_state.dart';
+import 'package:chat/models/app_notification_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/user_profile_model.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/storage/data_storage.dart';
+import 'package:chat/ui/widgets/app_notification_widget.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -76,6 +78,32 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   late final CallConnectingAudioPlayer callPlayer;
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
   String? currentVersion;
+
+  AppNotificationModel? notification;
+  bool isNotificationActive = false;
+  void updateNotification(AppNotificationModel n) async {
+    if (isNotificationActive) {
+      await cancelNotification();
+    }
+    setState(() {
+      notification = n;
+      isNotificationActive = true;
+    });
+    Future.delayed(const Duration(milliseconds: 1500)).then((_) {
+      cancelNotification();
+      Future.delayed(const Duration(milliseconds: 300)).then((_) {
+        isNotificationActive = false;
+      });
+    });
+  }
+  Future<void> cancelNotification () async {
+    setState(() {
+      notification = null;
+    });
+    Future.delayed(const Duration(milliseconds: 500)).then((_) {
+      isNotificationActive = false;
+    });
+  }
 
   Future<bool> isCallRunning () async {
     return await sipChannel.invokeMethod('CHECK_FOR_RUNNING_CALL');
@@ -294,6 +322,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    // Future.delayed(Duration(milliseconds: 2500)).then((value) {
+    //   updateNotification(AppNotificationModel(key: GlobalKey(),fromName: "fromName", message: "message", type: AppNotificationType.message, callback: (){}));
+    // });
+    // Future.delayed(Duration(milliseconds: 3000)).then((value) {
+    //   updateNotification(AppNotificationModel(key: GlobalKey(), fromName: "fromName", message: "message", type: AppNotificationType.message, callback: (){}));
+    // });
     _dataProvider.getUserId().then((v) {
       userId = v;
     });
@@ -357,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           if (_isPushSent == false && !isCallBeenAnswered && isOutgoingCall) {
             int? dialogId;
             String caller = '';
-            final List<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogs;
+            final List<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogsContainer?.dialogs;
             if (dialogs != null && dialogs.isNotEmpty) {
               caller = state.callData.toCaller.substring(1, state.callData.toCaller.length);
               for (var dialog in dialogs) {
@@ -431,29 +465,40 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: Stack(
+        alignment: Alignment.topCenter,
         children: [
-          isIncomingCall && Platform.isAndroid
-            ? ActiveCallStatusWidget(message: "Входящий вызов", screenCallback: _openCallScreen,)
-            : SizedBox.shrink(),
-          isOutgoingCall
-              ? ActiveCallStatusWidget(message: "Исходящий вызов", screenCallback: _openCallScreen,)
-              : SizedBox.shrink(),
-          isActiveCall
-            ? RunningCallStatusWidget(screenCallback: _openCallScreen)
-            : SizedBox.shrink(),
-          Expanded(
-            child: IndexedStack(
-              index: _selectedTab,
-              children: [
-                _screenFactory.makeMessagesPage(),
-                _screenFactory.makeCallsPage(),
-                _screenFactory.makeContactsPage(),
-                _screenFactory.makeProfilePage(isUpdateAvailable, currentVersion),
-                // _screenFactory.makePassScreen(),
-              ],
-            ),
-          )
+          Column(
+            children: [
+              isIncomingCall && Platform.isAndroid
+                  ? ActiveCallStatusWidget(message: "Входящий вызов", screenCallback: _openCallScreen,)
+                  : SizedBox.shrink(),
+              isOutgoingCall
+                  ? ActiveCallStatusWidget(message: "Исходящий вызов", screenCallback: _openCallScreen,)
+                  : SizedBox.shrink(),
+              isActiveCall
+                  ? RunningCallStatusWidget(screenCallback: _openCallScreen)
+                  : SizedBox.shrink(),
+              Expanded(
+                child: IndexedStack(
+                  index: _selectedTab,
+                  children: [
+                    _screenFactory.makeMessagesPage(),
+                    _screenFactory.makeCallsPage(),
+                    _screenFactory.makeContactsPage(),
+                    _screenFactory.makeProfilePage(isUpdateAvailable, currentVersion),
+                    // _screenFactory.makePassScreen(),
+                  ],
+                ),
+              )
+            ],
+          ),
+          // AnimatedPositioned(
+          //   top: notification == null ? -200 : 0,
+          //   duration: const Duration(milliseconds: 300),
+          //   // curve: Curves.fastOutSlowIn,
+          //   child: AppNotificationWidget(key: notification?.key ,notificationData: notification, callback: cancelNotification),
+          // )
         ],
       ),
 

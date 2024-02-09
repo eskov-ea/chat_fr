@@ -10,10 +10,10 @@ abstract class DialogsEvent extends Equatable{
 
 class DialogsLoadEvent extends DialogsEvent {}
 
-class DialogsLoadEventSearchDialog extends DialogsEvent {
-  final String query;
+class DialogsSearchDialogEvent extends DialogsEvent {
+  final String searchQuery;
 
-  DialogsLoadEventSearchDialog(this.query);
+  DialogsSearchDialogEvent(this.searchQuery);
 }
 
 class ReceiveNewDialogEvent extends DialogsEvent{
@@ -32,6 +32,12 @@ class UpdateDialogLastMessageEvent extends DialogsEvent{
   final MessageData message;
 
   UpdateDialogLastMessageEvent({required this.message});
+}
+
+class DialogsSearchEvent extends DialogsEvent{
+  final String searchQuery;
+
+  DialogsSearchEvent({required this.searchQuery});
 }
 
 class DialogUserJoinChatEvent extends DialogsEvent{

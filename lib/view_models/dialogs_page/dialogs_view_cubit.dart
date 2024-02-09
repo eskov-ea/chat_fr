@@ -20,13 +20,10 @@ class DialogsViewCubit extends Cubit<DialogsViewCubitState> {
   }
 
   void _onState(DialogsState state) {
-    final dialogs = state.dialogs;
     final isError = state.isErrorHappened;
-    if (dialogs != null) {
-      final newState = DialogsLoadedViewCubitState(dialogs: dialogs, searchQuery: "", isError: isError,
-          errorType: state.errorType, isAuthenticated: state.isAuthenticated);
-      emit(newState);
-    }
+    final newState = DialogsLoadedViewCubitState(dialogs: state.dialogs, searchQuery: "", isError: isError,
+        errorType: state.errorType, isAuthenticated: state.isAuthenticated, isFirstInitialized: state.isFirstInitialized);
+    emit(newState);
   }
 
   void loadDialogs() {
@@ -51,6 +48,10 @@ class DialogsViewCubit extends Cubit<DialogsViewCubitState> {
 
   void getPublicDialogs() {
 
+  }
+
+  void search(String searchQuery) {
+    dialogsBloc.add(DialogsSearchDialogEvent(searchQuery));
   }
 
   void joinDialog(user, dialogId) {

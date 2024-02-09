@@ -128,6 +128,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   
   @override
   void initState() {
+    super.initState();
     _onCallStateChanged(BlocProvider.of<CallsBloc>(context).state);
     callDuration = timer.lastValue;
     _streamSubscription = timer.stream().listen((time) {
@@ -136,7 +137,6 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
       });
     });
     _callServiceBlocSubscription = BlocProvider.of<CallsBloc>(context).stream.listen(_onCallStateChanged);
-    super.initState();
   }
 
   @override
