@@ -62,12 +62,14 @@ class ChatsBuilderAddMessageEvent extends ChatsBuilderEvent {
 }
 
 class ChatsBuilderUpdateMessageWithErrorEvent extends ChatsBuilderEvent {
-  final MessageData message;
+  final int messageId;
   final int dialog;
+  final bool isHandling;
 
   ChatsBuilderUpdateMessageWithErrorEvent({
-    required this.message,
+    required this.messageId,
     required this.dialog,
+    this.isHandling = false
   });
 }
 

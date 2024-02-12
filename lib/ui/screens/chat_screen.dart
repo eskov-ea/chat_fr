@@ -98,21 +98,24 @@ class _ChatScreenState extends State<ChatScreen> {
    super.initState();
   }
   void _sendTypingEvent() async {
-    if (widget.dialogData?.dialogId == null) return;
-    while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
-      await Future.delayed(const Duration(seconds: 3));
+    if (widget.dialogData?.dialogId != null) {
+      while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
+        await Future.delayed(const Duration(seconds: 3));
+      }
+      BlocProvider.of<WsBloc>(context).presenceChannel!.trigger(eventName: "client-user-event",
+          data: {"dialogId" : widget.dialogData?.dialogId, "event" : "typing", "fromUser" : widget.userId, "toUser": widget.partnerId});
     }
-    BlocProvider.of<WsBloc>(context).presenceChannel!.trigger(eventName: "client-user-event",
-        data: {"dialogId" : widget.dialogData?.dialogId, "event" : "typing", "fromUser" : widget.userId, "toUser": widget.partnerId});
+
   }
 
   void _sendFinishTypingEvent() async {
-    if (widget.dialogData?.dialogId == null) return;
-    while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
-      await Future.delayed(const Duration(seconds: 3));
+    if (widget.dialogData?.dialogId != null) {
+      while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
+        await Future.delayed(const Duration(seconds: 3));
+      }
+      BlocProvider.of<WsBloc>(context).presenceChannel!.trigger(eventName: "client-user-event",
+          data: {"dialogId" : widget.dialogData?.dialogId, "event" : "finish_typing", "fromUser" : widget.userId, "toUser": widget.partnerId});
     }
-    BlocProvider.of<WsBloc>(context).presenceChannel!.trigger(eventName: "client-user-event",
-        data: {"dialogId" : widget.dialogData?.dialogId, "event" : "finish_typing", "fromUser" : widget.userId, "toUser": widget.partnerId});
   }
 
 
@@ -543,6 +546,7 @@ class _MessageListState extends State<_MessageList> {
                                   : null,
                               repliedMsgId: currentState.messages[index].parentMessage?.parentMessageId,
                               dialogId: widget.dialogData.dialogId,
+                              isErrorHandling: currentState.messages[index].isHandling,
                             )
                           ],
                         );

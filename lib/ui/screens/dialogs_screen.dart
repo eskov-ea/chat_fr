@@ -92,12 +92,22 @@ class _MessagesPageState extends State<MessagesPage> {
         return ClientErrorHandler.makeErrorInfoWidget(state.errorType!, refreshAllData);
       }
       if (!state.isAuthenticated) {
-        return UnauthenticatedWidget();
+        return const UnauthenticatedWidget();
       }
       if (state.dialogs.isEmpty && state.isFirstInitialized) {
         return Center(
             key: UniqueKey(),
-            child: Text("Нет диалогов")
+            child: Column(
+              children: [
+                DialogSearch(controller: searchController),
+                const Divider(height: 1, thickness: 1, color: Colors.black12),
+                const Expanded(
+                  child: Center(
+                    child: Text("Нет диалогов")
+                  )
+                )
+              ]
+            )
         );
       } else{
         return Column(
@@ -125,7 +135,7 @@ class _MessagesPageState extends State<MessagesPage> {
                               (context, index) =>
                           !_isDialogActive(state.dialogs[index], userId!) ||
                               state.dialogs[index].chatType.typeId == 3 && !(state.dialogs[index].messageCount > 0)
-                              ? SizedBox.shrink()
+                              ? const SizedBox.shrink()
                               : Container(
                             padding: const EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 0),
                             child: Align(
@@ -202,16 +212,16 @@ class _MessagesPageState extends State<MessagesPage> {
   }
 }
 
-void dismissSlidableItem(BuildContext context, int index, SlidableActionEnum action) {
-  switch (action) {
-    case SlidableActionEnum.pin:
-      Utils.showSnackBar(context, 'Chat has been pined');
-      break;
-    case SlidableActionEnum.delete:
-      Utils.showSnackBar(context, 'Chat has been deleted');
-      break;
-  }
-}
+// void dismissSlidableItem(BuildContext context, int index, SlidableActionEnum action) {
+//   switch (action) {
+//     case SlidableActionEnum.pin:
+//       Utils.showSnackBar(context, 'Chat has been pined');
+//       break;
+//     case SlidableActionEnum.delete:
+//       Utils.showSnackBar(context, 'Chat has been deleted');
+//       break;
+//   }
+// }
 
 bool isMessageReadByMe (List<MessageStatuses>? statuses, int userId) {
   if (statuses == null) return true;

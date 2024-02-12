@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:chat/models/message_model.dart';
+import 'package:chat/services/helpers/file_types_helper.dart';
 import 'package:chat/ui/widgets/image_preview_widget.dart';
 import 'package:chat/ui/widgets/pdf_viewer_widget.dart';
 import 'package:flutter/foundation.dart';
@@ -43,6 +44,7 @@ class MessageWidget extends StatefulWidget {
     required this.repliedMsgSenderName,
     required this.repliedMsgId,
     required this.isError,
+    required this.isErrorHandling,
     required this.dialogId,
     Key? key
   }) : super(key: key);
@@ -69,6 +71,7 @@ class MessageWidget extends StatefulWidget {
   final String? repliedMsgSenderName;
   final int? repliedMsgId;
   final bool isError;
+  final bool isErrorHandling;
 
   @override
   State<MessageWidget> createState() => _MessageWidgetState();
@@ -123,6 +126,7 @@ class _MessageWidgetState extends State<MessageWidget>  with SingleTickerProvide
       fileAttachment: localFileAttachment,
       dialogId: widget.dialogId,
       repliedMsgId: widget.repliedMsgId,
+      isErrorHandling: widget.isErrorHandling
     );
   }
 }
@@ -151,6 +155,7 @@ class _MessageTile extends StatelessWidget {
     required this.repliedMsgId,
     required this.fileAttachment,
     required this.isError,
+    required this.isErrorHandling,
     required this.dialogId,
   }) : super(key: key);
 
@@ -174,6 +179,7 @@ class _MessageTile extends StatelessWidget {
   final ParentMessage? parentMessage;
   final File? fileAttachment;
   final bool isError;
+  final bool isErrorHandling;
   final int dialogId;
   final int? repliedMsgId;
 
@@ -213,6 +219,7 @@ class _MessageTile extends StatelessWidget {
     required String iconPath,
     required callback
   }) {
+    print("fileIconWidget:::  ${messageId}");
     return Column(
       children: [
         Container(
@@ -329,7 +336,8 @@ class _MessageTile extends StatelessWidget {
                       crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                       children: [
                         //TODO: refactor 3 widgets with one function/widget to avoid unnecessary code
-                        file != null && file!.filetype == "jpg" || file != null && file!.filetype == "jpeg" || file != null && file!.filetype == "png"
+                        /// Image widget
+                        file != null && GraphicTypes.contains(file!.filetype)
                           ? Container(
                             height: (p2p != 1 && !isMe) ? 270 : 240,
                             width: 186,
@@ -347,7 +355,7 @@ class _MessageTile extends StatelessWidget {
                               ),
                           )
                           : const SizedBox.shrink(),
-                        file != null && file!.filetype == "mp4"
+                        file != null && AudioTypes.contains(file!.filetype)
                           ? Container(
                             height: 80,
                             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8 ),
@@ -385,7 +393,7 @@ class _MessageTile extends StatelessWidget {
                             ),
                           )
                           : const SizedBox.shrink(),
-                            file != null && file!.filetype != "mp4" && file!.filetype != "jpeg" && file!.filetype != "jpg" && file!.filetype != "png"
+                        file != null && DocumentTypes.contains(file!.filetype)
                           ? fileIconWidget(
                               context: context,
                               iconPath: "assets/file_icon_2.png",
@@ -420,7 +428,6 @@ class _MessageTile extends StatelessWidget {
                                   if (parentMessage != null) RepliedMessageBody(_borderRadius, parentMessage!, repliedMsgSenderName),
 
                                   if (p2p != 1 && !isMe) _authorNameWidgetGroupChat(senderName, _borderRadius),
-                                  // if (replyedText != null) _ReplyedMessageWidget(replyedText: replyedText!, borderRadius: _borderRadius,),
                                   Padding(
                                     padding: const EdgeInsets.only(
                                         right: 12.0, left: 15, top: 7, bottom: 13),
@@ -481,67 +488,7 @@ class _MessageTile extends StatelessWidget {
                 const SizedBox(height: 5.0,)
               ],
             ),
-            isError
-            ? GestureDetector(
-              onTap: (){
-
-                showModalBottomSheet(
-                    isDismissible: true,
-                    isScrollControlled: false,
-                    backgroundColor: Colors.transparent,
-                    context: context,
-                    builder: (BuildContext context) => Container(
-                      padding: EdgeInsets.all(8),
-                      height: 200,
-                      color: Colors.white,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            "Произошла ошибка при отправке сообщения",
-                            style: TextStyle(fontSize: 18),
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(
-                            height: 30,
-                          ),
-                          GestureDetector(
-                            onTap: (){
-                              resendErroredMessage(
-                                messageId: messageId, dialogId: dialogId, context: context, userId: userId,
-                                messageText: message, parentMessage: parentMessage, repliedMessageId: repliedMsgId);
-                              },
-                            child: Container(
-                              child: Text("Отправить снова",
-                                style: TextStyle(fontSize: 18),
-                              ),
-                            )
-                          ),
-                          SizedBox(height: 20,),
-                          GestureDetector(
-                              onTap: (){
-                                _deleteErroredMessage(messageId, dialogId, context);
-                                Navigator.of(context).pop();
-                              },
-                              child: Container(
-                                child: Text("Удалить сообщение",
-                                  style: TextStyle(fontSize: 18, color: Colors.red),
-                                ),
-                              )
-                          ),
-                        ],
-                      ),
-                    )
-                );
-              },
-              child: Container(
-                  alignment: Alignment.center,
-                  // padding: EdgeInsets.only(bottom: 25),
-                  child: Icon(Icons.error, size: 35, color: Colors.red,),
-              ),
-            )
-            : SizedBox.shrink()
+            _messageErrorPartial(context)
           ],
         ),
       ),
@@ -549,56 +496,83 @@ class _MessageTile extends StatelessWidget {
   }
 
   void _deleteErroredMessage(int messageId, int dialogId, BuildContext context) {
-    print("_deleteErroredMessage  -->  $messageId");
     BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderDeleteLocalMessageEvent(dialogId: dialogId, messageId: messageId));
   }
-}
 
-class _ReplyedMessageWidget extends StatelessWidget {
-  const _ReplyedMessageWidget({
-    required this.replyedText,
-    required this.borderRadius,
-    Key? key
-  }) : super(key: key);
-
-  final String replyedText;
-  final double borderRadius;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-        decoration: BoxDecoration(
-          color: Color(0xff666666),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(borderRadius),
-            topRight: Radius.circular(borderRadius)
-          ),
-        ),
-      padding: const EdgeInsets.symmetric(
-          horizontal: 15, vertical: 8),
-      child: Row(
-        children: [
-          Container(
-            width: 3,
-            height: 30,
-            color: Colors.blueAccent,
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Andrey'),
-                const SizedBox(height: 5,),
-                Text(replyedText, maxLines: 1,)
-              ],
-            ),
+  Widget _messageErrorPartial(BuildContext context) {
+    Widget mIcon = isErrorHandling
+        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(
+            strokeWidth: 3.0, color: Colors.green)
           )
-        ],
-      ),
-    );
+        : const Icon(Icons.error, size: 30, color: Colors.red);
+    if ( isError ) {
+      return GestureDetector(
+        onTap: (){
+          showModalBottomSheet(
+              isDismissible: true,
+              isScrollControlled: false,
+              backgroundColor: Colors.transparent,
+              context: context,
+              builder: (BuildContext context) => Container(
+                padding: EdgeInsets.all(8),
+                height: 200,
+                color: Colors.white,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text(
+                      "Произошла ошибка при отправке сообщения",
+                      style: TextStyle(fontSize: 18),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    GestureDetector(
+                        onTap: (){
+                          Navigator.of(context).pop();
+                          resendErrorMessage(
+                              messageId: messageId, dialogId: dialogId, bloc: BlocProvider.of<ChatsBuilderBloc>(context), userId: userId,
+                              messageText: message, parentMessage: parentMessage, repliedMessageId: repliedMsgId,
+                              file: file );
+                        },
+                        child: const SizedBox(
+                          child: Text("Отправить снова",
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        )
+                    ),
+                    const SizedBox(height: 20,),
+                    GestureDetector(
+                        onTap: (){
+                          _deleteErroredMessage(messageId, dialogId, context);
+                          Navigator.of(context).pop();
+                        },
+                        child: const SizedBox(
+                          child: Text("Удалить сообщение",
+                            style: TextStyle(fontSize: 18, color: Colors.red),
+                          ),
+                        )
+                    ),
+                  ],
+                ),
+              )
+          );
+        },
+        child: Container(
+          alignment: Alignment.center,
+          width: 40,
+          padding: const EdgeInsets.only(left: 8),
+          child: mIcon
+        ),
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 }
+
 
 Widget _authorNameWidgetGroupChat(String? senderName, _borderRadius) {
   return Container(
@@ -608,7 +582,7 @@ Widget _authorNameWidgetGroupChat(String? senderName, _borderRadius) {
         borderRadius:  BorderRadius.only(
           topLeft: Radius.circular(_borderRadius),
           topRight:  Radius.circular(_borderRadius),
-          bottomRight: Radius.circular(0.0),
+          bottomRight: const Radius.circular(0.0),
           bottomLeft: const Radius.circular(0.0),
         ),
       ),

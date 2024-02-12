@@ -205,6 +205,8 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         if (event.message.file != null) {
           message.file!.attachmentId = event.message.file!.attachmentId;
         }
+        message.isError = false;
+        message.isHandling = false;
         message.status.addAll(event.message.status);
         messagesDictionary.remove("${event.localMessageId}");
         messagesDictionary["${event.message.messageId}"] = true;
@@ -220,8 +222,9 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     for (var chat in chats) {
       if (chat.chatId == event.dialog) {
         for (var message in chat.messages) {
-          if (message.messageId == event.message.messageId) {
+          if (message.messageId == event.messageId) {
             message.isError = true;
+            message.isHandling = event.isHandling;
             break;
           }
         }

@@ -29,6 +29,7 @@ class CallsBloc
         add(ConnectionFailedCallEvent());
       } else if (callEvent.event == "CONNECTED") {
         final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
+        print("Connected calldata:  $callData");
         add(ConnectedCallEvent(callData: callData));
       } else if (callEvent.event == "STREAM_RUNNING") {
         final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);

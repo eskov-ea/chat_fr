@@ -21,7 +21,8 @@ class MessageData extends Equatable{
     required this.file,
     required this.parentMessageId,
     required this.isError,
-    required this.parentMessage
+    required this.parentMessage,
+    this.isHandling = false,
   });
   int messageId;
   int? parentMessageId;
@@ -35,6 +36,7 @@ class MessageData extends Equatable{
   final MessageAttachmentsData? file;
   List<MessageStatuses> status;
   bool isError;
+  bool isHandling;
 
   static MessageData fromJson(json) => MessageData(
     messageId: json["id"],
@@ -53,6 +55,7 @@ class MessageData extends Equatable{
             ? null
             : ParentMessage.fromJson(json["parent"]),
     isError: json["isError"] ?? false,
+    isHandling: json["isHandling"] ?? false
   );
 
   Map<String, dynamic> toJson() => {
@@ -65,7 +68,7 @@ class MessageData extends Equatable{
   };
 
   @override
-  List<Object?> get props => [messageId, senderId, status, isError];
+  List<Object?> get props => [messageId, senderId, status, isError, isHandling];
 }
 
 class MessageStatuses extends Equatable {
