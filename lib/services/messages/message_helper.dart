@@ -31,4 +31,16 @@ class MessageHelper {
       return messagesProvider.sendTextMessage(dialogId: dialogId, messageText: messageText, parentMessageId: parentMessageId);
     }
   }
+
+  Future<String> sendForwardMessage({
+    required String? messageText,
+    required String? filename,
+    required int dialogId,
+    required String? filetype,
+    required String? content,
+    required String? preview
+  }) {
+    return messagesProvider.forwardMessage(dialogId: dialogId, messageText: messageText, filetype: filetype, filename: filename, content: content, preview: preview);
+
+  }
 }

@@ -46,7 +46,6 @@ sendMessageUnix({
     bloc.add(
       ChatsBuilderAddMessageEvent(message: localMessage, dialogId: dialogId));
 // 3. Send message
-    await Future.delayed(Duration(seconds: 2));
       final response = await MessagesRepository().sendMessage(
         dialogId: dialogId,
         messageText: messageText,
@@ -80,25 +79,37 @@ sendForwardMessage({
   required int userId
 }) async {
 
+  String? filename;
+  String? filetype;
+  String? base64FileString;
   MessageData? localMessage;
+  if (attachment != null) {
+    filename = attachment.name.split('.').first;
+    filetype = attachment.name.split('.').last;
+    final file = await loadFileAndSaveLocally(fileName: attachment.name, attachmentId: attachment.attachmentId);
+    if (file != null) {
+      final bytes = file.readAsBytesSync();
+      base64FileString = base64Encode(bytes);
+    }
+  }
   try {
 // 1. Create local message
     localMessage = createLocalMessage(replyedMessageId: null, dialogId: dialogId, userId: userId,
-        messageText: messageText, parentMessage: null, filename: attachment?.name, filetype: attachment?.filetype, content: attachment?.content);
+        messageText: messageText, parentMessage: null, filename: filename, filetype: attachment?.filetype, content: base64FileString);
 // 2. Add local message to tray
     bloc.add(
         ChatsBuilderAddMessageEvent(message: localMessage, dialogId: dialogId));
 // 3. Send message
-    await Future.delayed(const Duration(seconds: 2));
-    final response = await MessagesRepository().sendMessage(
+    final response = await MessagesRepository().forwardMessage(
         dialogId: dialogId,
         messageText: messageText,
-        parentMessageId: null,
-        filetype: attachment?.filetype,
-        bytes: null,
-        filename: attachment?.name,
-        content: attachment?.content
+        filetype: filetype,
+        filename: filename,
+        preview: attachment?.preview,
+        content: base64FileString
     );
+    print("FORWARD:: forwardMessage 3 ${response}");
+
 // 4. If no error - update last dialog message
     final message = MessageData.fromJson(jsonDecode(response)["data"]);
     bloc.add(

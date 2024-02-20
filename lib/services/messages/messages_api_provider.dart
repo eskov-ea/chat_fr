@@ -289,7 +289,6 @@ class MessagesProvider {
           }
         }
       });
-      log("RESENDING:: ${postData}");
       final response = await http.post(
           Uri.parse('https://erp.mcfef.com/api/chat/message/add/$dialogId'),
           headers: <String, String>{
@@ -297,7 +296,55 @@ class MessagesProvider {
             'Authorization': 'Bearer $token'
           },
           body: postData);
-      log("RESENDING:: ${response.body}");
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
+      return response.body;
+    } on SocketException catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+          "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/message/add/$dialogId ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on http.ClientException catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on AppErrorException {
+      rethrow;
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      throw AppErrorException(AppErrorExceptionType.other);
+    }
+  }
+
+  Future<String> forwardMessage({
+    required String? filename,
+    required int dialogId,
+    required String? messageText,
+    required String? filetype,
+    required String? preview,
+    required String? content
+  }) async {
+    try {
+      String? preview;
+      final String? token = await _secureStorage.getToken();
+
+      final postData = jsonEncode(<String, Object>{
+        'data': {
+          'message': '$messageText',
+          'parent_id': null,
+          'file': {
+            'name': '$filename.$filetype',
+            'preview': preview ?? '',
+            'content': content
+          }
+        }
+      });
+      final response = await http.post(
+          Uri.parse('https://erp.mcfef.com/api/chat/message/add/$dialogId'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': 'Bearer $token'
+          },
+          body: postData);
+      log("FORWARD:: ${response.body}");
       final error = handleHttpResponse(response);
       if (error != null) throw error;
       return response.body;

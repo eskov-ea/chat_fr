@@ -46,12 +46,15 @@ target 'Runner' do
   basic_pods
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  
+  pod 'Firebase/Analytics'
 end
 
 target 'NotificationServiceAppExtention' do
     use_frameworks!
     basic_pods
   end
+
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|

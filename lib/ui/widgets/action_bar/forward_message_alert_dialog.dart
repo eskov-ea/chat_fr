@@ -75,7 +75,6 @@ class _ForwardMessageAlertDialogState extends State<ForwardMessageAlertDialog>{
   }
 
   Future<void> forwardMessages() async {
-    print("FORWARD::: ${widget.forwardingText}, ${widget.forwardingTextAuthor}, ${widget.forwardingFile}");
     if (widget.forwardingText == null || widget.forwardingTextAuthor == null) {
       widget.close();
       return PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.error, message: 'Ошибка. при попытке переслать сообщение потерялся пересылаемый текст или автор сообщения. попробуйте еще раз и сообщите о возникшей проблеме разработчикам.');

@@ -1,4 +1,7 @@
 
+import 'dart:developer';
+import 'dart:ffi';
+
 final UserContact chatBot = UserContact(
     id: 5,
     firstname: "MCFEF Чат-бот",
