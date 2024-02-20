@@ -72,3 +72,7 @@ abstract class AppTheme {
         iconTheme: const IconThemeData(color: AppColors.iconLight),
       );
 }
+
+abstract class MessageStyle {
+  static const borderRadius = 10.0;
+}

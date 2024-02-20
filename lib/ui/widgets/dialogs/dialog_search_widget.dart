@@ -3,28 +3,30 @@ import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class DialogSearch extends StatefulWidget {
-  const DialogSearch({
+class CustomSearchWidget extends StatefulWidget {
+  final Function(String) searchCallback;
+  final TextEditingController controller;
+  final EdgeInsets margin;
+
+  const CustomSearchWidget({
     required this.controller,
+    required this.searchCallback,
+    this.margin = const EdgeInsets.only(top: 10, right: 15, left: 15, bottom: 20),
     super.key});
 
-  final TextEditingController controller;
-
   @override
-  State<DialogSearch> createState() => _DialogSearchState();
+  State<CustomSearchWidget> createState() => _CustomSearchWidgetState();
 }
 
-class _DialogSearchState extends State<DialogSearch> {
+class _CustomSearchWidgetState extends State<CustomSearchWidget> {
   final FocusNode _searchFocus = FocusNode();
-
 
   @override
   Widget build(BuildContext context) {
-    final cubit = BlocProvider.of<DialogsViewCubit>(context);
     return Container(
       height: 35,
       padding: const EdgeInsets.only(left: 15),
-      margin: const EdgeInsets.only(top: 10, right: 15, left: 15, bottom: 20),
+      margin: widget.margin,
       decoration: BoxDecoration(
         color: AppColors.backgroundLight,
         borderRadius: BorderRadius.all(Radius.circular(10.0)),
@@ -41,9 +43,7 @@ class _DialogSearchState extends State<DialogSearch> {
               focusNode: _searchFocus,
               textAlignVertical: TextAlignVertical.center,
               style: const TextStyle(fontSize: 18),
-              onChanged: (string){
-                cubit.search(string);
-              },
+              onChanged: widget.searchCallback,
               onTapOutside: (event) {
                 if (_searchFocus.hasFocus) {
                   _searchFocus.unfocus();
@@ -77,6 +77,7 @@ class _DialogSearchState extends State<DialogSearch> {
                       icon: const Icon(Icons.clear),
                       onPressed: (){
                         widget.controller.clear();
+                        widget.searchCallback('');
                         _searchFocus.unfocus();
 
                       },

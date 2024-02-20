@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/storage/data_storage.dart';
+import 'package:chat/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -14,12 +15,14 @@ class AudioPlayerWidget extends StatefulWidget {
     required this.attachmentId,
     required this.fileName,
     required this.isMe,
+    required this.messageTime,
     Key? key,
   }) : super(key: key);
 
   final int attachmentId;
   final String fileName;
   final bool isMe;
+  final String messageTime;
 
   @override
   State<AudioPlayerWidget> createState() => _AudioPlayerWidgetState();
@@ -115,20 +118,13 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 
   Future<void> reset() async {
-    // await player.stopPlayer();
     await player.seekToPlayer(const Duration(milliseconds: 0));
     setState(() {
       isPlaying = false;
       position = Duration.zero;
     });
-    // return widget.player.seek(const Duration(milliseconds: 0));
   }
 
-  // void playerStateListener(PlayerState state) async {
-  //   if (state.processingState == ProcessingState.completed) {
-  //     await reset();
-  //   }
-  // }
 
   Future<void> setSubscriptionDuration(double d) async {
     print('FuturesetSubscriptionDuration   $d');
@@ -137,9 +133,6 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       position = Duration(seconds: d.toInt());
     });
     await player.seekToPlayer(position);
-    // await player.setSubscriptionDuration(
-    //   Duration(milliseconds: d.floor()),
-    // );
   }
 
   decodeBase64File() async {
@@ -167,20 +160,6 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   Widget build(BuildContext context) {
     //TODO: fix it. It is temporary solution to have audio messaging feature.
     return audioWidgetWithData();
-  }
-
-  Widget _slider(duration, durationCallback) {
-    print("SLIDER   $duration, $durationCallback");
-    return SizedBox(
-      width: 100,
-      child: Slider(
-        value: duration,
-        min: 0.0,
-        max: 10.0,
-        onChanged: durationCallback,
-        divisions: 1
-      ),
-    );
   }
 
   Widget audioWidgetWithData() {
@@ -220,36 +199,38 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         ),
       );
     } else {
-      return Container(
-        child: Row(
-          mainAxisAlignment: widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            _playerIsInited && _dataIsLoaded
-                ? _controlButtons()
-                : const SizedBox(
-                width: 15,
-                height: 15,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                )
-            ),
-            SizedBox(
-              width: 150,
-              child: Slider(
-                value: position.inSeconds.toDouble(),
-                min: 0,
-                max: duration.inSeconds.toDouble(),
-                onChanged: setSubscriptionDuration,
-                // divisions: 100
+      return SizedBox(
+          height: 50,
+          width: 220,
+          child: Row(
+            mainAxisAlignment: widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              _playerIsInited && _dataIsLoaded
+                  ? _controlButtons()
+                  : const SizedBox(
+                  width: 15,
+                  height: 15,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  )
               ),
-            ),
-            Text(
-              getAudioMessageDuration(duration.inSeconds),
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-            )
-          ],
-        )
+              SizedBox(
+                width: 150,
+                child: Slider(
+                  value: position.inSeconds.toDouble(),
+                  min: 0,
+                  max: duration.inSeconds.toDouble(),
+                  onChanged: setSubscriptionDuration,
+                  // divisions: 100
+                ),
+              ),
+              Text(
+                getAudioMessageDuration(duration.inSeconds),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              )
+            ],
+          )
       );
     }
   }

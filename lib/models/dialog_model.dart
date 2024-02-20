@@ -1,6 +1,7 @@
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/services/helpers/dates.dart';
+import 'package:chat/services/helpers/message_forwarding_util.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
@@ -76,6 +77,11 @@ class DialogData {
   @override
   int get hashCode => runtimeType.hashCode ^ chatUsers.length.hashCode ^ chatUsers.hashCode ^ dialogId.hashCode;
 
+  @override
+  String toString() {
+    return "Instance of 'DialogData: $dialogId $name'";
+  }
+
 }
 
 class DialogType {
@@ -139,7 +145,7 @@ class LastMessageData {
           )
         : LastMessageData(
             messageId: json["id"],
-            message: json["message"],
+            message: replaceForwardSymbol(json["message"]),
             senderId: json["user_id"],
             time: DateTime.tryParse(json["created_at"]),
             statuses: MessageStatuses.fromJson(json["statuses"]),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:chat/services/helpers/message_forwarding_util.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -71,6 +72,49 @@ sendMessageUnix({
   bloc.add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId));
 }
 
+sendForwardMessage({
+  required ChatsBuilderBloc bloc,
+  required String? messageText,
+  required MessageAttachmentsData? attachment,
+  required int dialogId,
+  required int userId
+}) async {
+
+  MessageData? localMessage;
+  try {
+// 1. Create local message
+    localMessage = createLocalMessage(replyedMessageId: null, dialogId: dialogId, userId: userId,
+        messageText: messageText, parentMessage: null, filename: attachment?.name, filetype: attachment?.filetype, content: attachment?.content);
+// 2. Add local message to tray
+    bloc.add(
+        ChatsBuilderAddMessageEvent(message: localMessage, dialogId: dialogId));
+// 3. Send message
+    await Future.delayed(const Duration(seconds: 2));
+    final response = await MessagesRepository().sendMessage(
+        dialogId: dialogId,
+        messageText: messageText,
+        parentMessageId: null,
+        filetype: attachment?.filetype,
+        bytes: null,
+        filename: attachment?.name,
+        content: attachment?.content
+    );
+// 4. If no error - update last dialog message
+    final message = MessageData.fromJson(jsonDecode(response)["data"]);
+    bloc.add(
+        ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: dialogId, localMessageId: localMessage.messageId)
+    );
+  } catch (err, stackTrace) {
+// 5. Handle error - update last message with error
+    Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Failed send a message");
+    if (localMessage != null) {
+      bloc.add(ChatsBuilderUpdateMessageWithErrorEvent(messageId: localMessage.messageId, dialog: dialogId));
+    }
+  }
+// 6. Update message statuses
+  bloc.add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId));
+}
+
 MessageData createLocalMessage({
   required replyedMessageId,
   required parentMessage,
@@ -101,7 +145,7 @@ MessageData createLocalMessage({
     parentMessage: parentMessage,
     senderId: userId,
     dialogId: dialogId,
-    message: messageText,
+    message: replaceForwardSymbol(messageText),
     messageDate: parseTime.getDate(DateTime.now()),
     messageTime: parseTime.getTime(DateTime.now()),
     rawDate: DateTime.now(),
@@ -116,6 +160,7 @@ MessageData createLocalMessage({
           dialogId: dialogId!,
           createdAt: DateTime.now().toString())
     ],
+    forwarderFromUser: getForwardedMessageStatus(messageText),
   );
 }
 

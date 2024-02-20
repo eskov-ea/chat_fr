@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:chat/ui/widgets/message/group_chat_sender_name_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_saver/gallery_saver.dart';
@@ -19,7 +20,6 @@ class ImagePreviewWidget extends StatefulWidget {
       required this.borderRadius,
       required this.file,
       required this.localFileAttachment,
-      required this.authorNameWidgetGroupChat,
       required this.messageTime,
       required this.status,
       Key? key})
@@ -32,7 +32,6 @@ class ImagePreviewWidget extends StatefulWidget {
   final double borderRadius;
   final MessageAttachmentsData? file;
   final File? localFileAttachment;
-  final Function authorNameWidgetGroupChat;
   final Widget status;
 
   @override
@@ -124,6 +123,8 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: (widget.p2p != 1 && !widget.isMe) ? 270 : 240,
+      width: 186,
       decoration: BoxDecoration(
           color: widget.isMe
               ? AppColors.myMessageBackground
@@ -138,45 +139,37 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
                 ? const Radius.circular(0.0)
                 : Radius.circular(widget.borderRadius),
           )),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          if (widget.p2p != 1 && !widget.isMe)
-            widget.authorNameWidgetGroupChat(
-                widget.senderName, widget.borderRadius),
-          Container(
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: widget.isMe
-                  ? AppColors.myMessageBackground
-                  : Theme.of(context).cardColor,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(widget.borderRadius),
-                topRight: Radius.circular(widget.borderRadius),
-                bottomRight: widget.isMe
-                    ? const Radius.circular(0.0)
-                    : Radius.circular(widget.borderRadius),
-                bottomLeft: !widget.isMe
-                    ? const Radius.circular(0.0)
-                    : Radius.circular(widget.borderRadius),
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-              child: getImagePreview(
-                  file: widget.file,
-                  localFileAttachment: imageFile,
-                  isDownloading: isDownloading,
-                  downloadImageFunction: _startDownloadingImage,
-                  context: context,
-                  fileBytesRepresentation: fileBytesRepresentation,
-                  saveImageFunction: _safeImageToDevice,
-                  messageTime: widget.messageTime,
-                  status: widget.status,
-                  isMe: widget.isMe),
-            ),
-          )
-        ],
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: widget.isMe
+              ? AppColors.myMessageBackground
+              : Theme.of(context).cardColor,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(widget.borderRadius),
+            topRight: Radius.circular(widget.borderRadius),
+            bottomRight: widget.isMe
+                ? const Radius.circular(0.0)
+                : Radius.circular(widget.borderRadius),
+            bottomLeft: !widget.isMe
+                ? const Radius.circular(0.0)
+                : Radius.circular(widget.borderRadius),
+          ),
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+          child: getImagePreview(
+              file: widget.file,
+              localFileAttachment: imageFile,
+              isDownloading: isDownloading,
+              downloadImageFunction: _startDownloadingImage,
+              context: context,
+              fileBytesRepresentation: fileBytesRepresentation,
+              saveImageFunction: _safeImageToDevice,
+              messageTime: widget.messageTime,
+              status: widget.status,
+              isMe: widget.isMe),
+        ),
       ),
     );
   }

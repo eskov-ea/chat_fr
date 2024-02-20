@@ -274,8 +274,8 @@ class MessagesProvider {
       String? preview;
       final String? token = await _secureStorage.getToken();
 
-      if (GraphicTypes.contains(filetype)) {
-        preview = resizeImage(bytes!);
+      if (GraphicTypes.contains(filetype) && bytes != null) {
+        preview = resizeImage(bytes);
       }
 
       final postData = jsonEncode(<String, Object>{

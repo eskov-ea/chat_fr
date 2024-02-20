@@ -53,7 +53,7 @@ class DialogItem extends StatelessWidget {
     if (dialogData.chatType.name == "Приват" || dialogData.chatType.name == "Приват безопасный") {
       return UserAvatarWidget(userId: partners.first.id, objKey: key);
     } else {
-      return DialogAvatar(base64String: dialogData.picture,);
+      return DialogAvatar(base64String: dialogData.picture);
     }
   }
 

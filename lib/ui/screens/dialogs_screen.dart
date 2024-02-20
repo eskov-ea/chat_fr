@@ -80,6 +80,10 @@ class _MessagesPageState extends State<MessagesPage> {
     BlocProvider.of<ChatsBuilderBloc>(context).add(RefreshChatsBuilderEvent());
   }
 
+  void searchDialog(String val) {
+    BlocProvider.of<DialogsViewCubit>(context).search(val);
+  }
+
   @override
   void dispose() {
     presenceOnlineInfoChannelSubscription.cancel();
@@ -99,7 +103,7 @@ class _MessagesPageState extends State<MessagesPage> {
             key: UniqueKey(),
             child: Column(
               children: [
-                DialogSearch(controller: searchController),
+                CustomSearchWidget(controller: searchController, searchCallback: searchDialog),
                 const Divider(height: 1, thickness: 1, color: Colors.black12),
                 const Expanded(
                   child: Center(
@@ -112,7 +116,7 @@ class _MessagesPageState extends State<MessagesPage> {
       } else{
         return Column(
           children: [
-            DialogSearch(controller: searchController),
+            CustomSearchWidget(controller: searchController, searchCallback: searchDialog),
             const Divider(height: 1, thickness: 1, color: Colors.black12),
             Expanded(
               child: RefreshIndicator(
@@ -176,7 +180,7 @@ class _MessagesPageState extends State<MessagesPage> {
         key: UniqueKey(),
         child: Column(
           children: [
-            DialogSearch(controller: searchController),
+            CustomSearchWidget(controller: searchController, searchCallback: searchDialog),
             const Expanded(
               child: Shimmer(
                   child: ShimmerLoading(

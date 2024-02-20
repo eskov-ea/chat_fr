@@ -17,7 +17,6 @@ String dateFormater(DateTime rawDate) {
   if (hoursSinceMessageWritten < 0.035) {
     return "Только что";
   } else {
-    print("Since mess  $hoursSinceMessageWritten, since last midd $hoursSinceLastMidnight");
     ///check if message was written in this day range
     if (hoursSinceMessageWritten <= hoursSinceLastMidnight) {
       return DateFormat.Hm().format(rawDate.add(getTZ()));
