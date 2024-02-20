@@ -83,27 +83,27 @@ class _ForwardMessageAlertDialogState extends State<ForwardMessageAlertDialog>{
     PopupManager.showLoadingPopup(context);
     await Future.delayed(const Duration(milliseconds: 200));
 
-    // for (final address in selectedAddresses) {
-    //   int? dialogId;
-    //   if (address.dialogId != null) {
-    //     dialogId = address.dialogId!;
-    //   } else if (address.userId != null) {
-    //     dialogId = findDialog(context, widget.userId, address.userId!)?.dialogId;
-    //   }
-    //
-    //   if (dialogId == null) {
-    //     Navigator.of(context).pop();
-    //     return PopupManager.showInfoPopup(context, dismissible: false, type: PopupType.error, message: 'Произошла ошибка при отправке сообщения, попробуйте еще раз');
-    //   }
-    //
-    //   sendForwardMessage(
-    //       bloc: BlocProvider.of<ChatsBuilderBloc>(context),
-    //       messageText: forwardMessage(widget.forwardingText!, widget.forwardingTextAuthor!),
-    //       attachment: widget.forwardingFile,
-    //       dialogId: dialogId,
-    //       userId: widget.userId
-    //   );
-    // }
+    for (final address in selectedAddresses) {
+      int? dialogId;
+      if (address.dialogId != null) {
+        dialogId = address.dialogId!;
+      } else if (address.userId != null) {
+        dialogId = findDialog(context, widget.userId, address.userId!)?.dialogId;
+      }
+
+      if (dialogId == null) {
+        Navigator.of(context).pop();
+        return PopupManager.showInfoPopup(context, dismissible: false, type: PopupType.error, message: 'Произошла ошибка при отправке сообщения, попробуйте еще раз');
+      }
+
+      sendForwardMessage(
+          bloc: BlocProvider.of<ChatsBuilderBloc>(context),
+          messageText: forwardMessage(widget.forwardingText!, widget.forwardingTextAuthor!),
+          attachment: widget.forwardingFile,
+          dialogId: dialogId,
+          userId: widget.userId
+      );
+    }
 
     close();
     Navigator.of(context).pop();
