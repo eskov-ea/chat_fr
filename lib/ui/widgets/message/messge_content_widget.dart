@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:chat/models/message_model.dart';
 import 'package:chat/theme.dart';
+import 'package:chat/ui/screens/chat_screen.dart';
 import 'package:chat/ui/widgets/audioplayer_widget.dart';
 import 'package:chat/ui/widgets/image_preview_widget.dart';
 import 'package:chat/ui/widgets/message/forward_message_prefix_widget.dart';
@@ -19,7 +20,7 @@ import '../../../services/helpers/file_types_helper.dart';
 class MessageContentWidget extends StatelessWidget {
   final bool isMe;
   final MessageAttachmentsData? file;
-  final Function(int) setSelected;
+  final Function(SelectedMessage) setSelected;
   final int messageId;
   final int p2p;
   final int status;
@@ -55,7 +56,7 @@ class MessageContentWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        setSelected(messageId);
+        setSelected(SelectedMessage(id: messageId, message: message, author: senderName, file: file));
       },
       child: Align(
         alignment: isMe ? Alignment.topRight : Alignment.topLeft,
@@ -106,7 +107,7 @@ class MessageContentWidget extends StatelessWidget {
               MessageAttachmentIconPreview(
                 iconPath: "assets/file_icon_2.png",
                 width: 64,
-                file: file,
+                file: file!,
                 isMe: isMe,
                 messageTime: messageTime,
                 status: status,

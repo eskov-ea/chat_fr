@@ -269,6 +269,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
       ChatsBuilderDeleteMessagesEvent event,
       Emitter<ChatsBuilderState> emit
       ) {
+    print("delete result ${event.messagesId}");
     final messagesToDelete = [];
     final newState = [...state.chats];
     final dialog = newState.firstWhere((d) => d.chatId == event.dialogId);

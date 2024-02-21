@@ -45,7 +45,7 @@ class _MessagesPageState extends State<MessagesPage> {
   int  counter = 0;
   final _controller = ScrollController();
   final TextEditingController searchController = TextEditingController();
-
+  final FocusNode focusNode = FocusNode();
 
   @override
   void initState() {
@@ -106,7 +106,7 @@ class _MessagesPageState extends State<MessagesPage> {
             key: UniqueKey(),
             child: Column(
               children: [
-                CustomSearchWidget(controller: searchController, searchCallback: searchDialog),
+                CustomSearchWidget(controller: searchController, searchCallback: searchDialog, focusNode: focusNode),
                 const Divider(height: 1, thickness: 1, color: Colors.black12),
                 const Expanded(
                   child: Center(
@@ -119,7 +119,7 @@ class _MessagesPageState extends State<MessagesPage> {
       } else{
         return Column(
           children: [
-            CustomSearchWidget(controller: searchController, searchCallback: searchDialog),
+            CustomSearchWidget(controller: searchController, searchCallback: searchDialog, focusNode: focusNode),
             const Divider(height: 1, thickness: 1, color: Colors.black12),
             Expanded(
               child: RefreshIndicator(
@@ -188,7 +188,7 @@ class _MessagesPageState extends State<MessagesPage> {
       key: UniqueKey(),
       child: Column(
         children: [
-          CustomSearchWidget(controller: searchController, searchCallback: searchDialog),
+          CustomSearchWidget(controller: searchController, searchCallback: searchDialog, focusNode: focusNode),
           const Expanded(
               child: Shimmer(
                   child: ShimmerLoading(

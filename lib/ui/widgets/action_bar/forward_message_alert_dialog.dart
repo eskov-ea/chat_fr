@@ -6,6 +6,7 @@ import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/message_forwarding_util.dart';
 import 'package:chat/services/helpers/message_sender_helper.dart';
 import 'package:chat/services/popup_manager.dart';
+import 'package:chat/ui/screens/chat_screen.dart';
 import 'package:chat/ui/widgets/avatar_widget.dart';
 import 'package:chat/ui/widgets/dialog_avatar_widget.dart';
 import 'package:chat/ui/widgets/dialogs/dialog_search_widget.dart';
@@ -26,22 +27,22 @@ class ForwardAddress {
 }
 
 
+
 class ForwardMessageAlertDialog extends StatefulWidget {
   final int userId;
   final AnimationController animationController;
   final Animation animation;
   final Function close;
-  final String? forwardingText;
-  final String? forwardingTextAuthor;
-  final MessageAttachmentsData? forwardingFile;
+  final List<SelectedMessage>? forwardingMessages;
+  final Function() closeSelectedOptionsMenu;
+
   const ForwardMessageAlertDialog({
     required this.userId,
     required this.animationController,
     required this.animation,
     required this.close,
-    required this.forwardingText,
-    required this.forwardingTextAuthor,
-    required this.forwardingFile,
+    required this.forwardingMessages,
+    required this.closeSelectedOptionsMenu,
     super.key
   });
 
@@ -55,11 +56,15 @@ class _ForwardMessageAlertDialogState extends State<ForwardMessageAlertDialog>{
   final _textController = TextEditingController();
   bool isInitialized = false;
   List<ForwardAddress> forwardDestination = [];
+  List<ForwardAddress> filteredDestination = [];
   /// мы сначала выдаем диалоги, далее юзеров. Тк у нас диалог с юзером называется именем юзера, то он совпадет с именем юзера в результате юзеров.
   /// Например диалог: Иванов Иван и юзер Иванов Иван. Чтобы избежать этого, мы заносим имена в справочник и если имя там уже есть - такоц контакт не добавляем.
   final Map<String, int> existsDialogs = {};
   List<ForwardAddress> selectedAddresses = [];
+  final FocusNode focusNode = FocusNode();
 
+
+  
   void close() {
     setState(() {
       selectedAddresses = [];
@@ -75,37 +80,61 @@ class _ForwardMessageAlertDialogState extends State<ForwardMessageAlertDialog>{
   }
 
   Future<void> forwardMessages() async {
-    if (widget.forwardingText == null || widget.forwardingTextAuthor == null) {
+
+    PopupManager.showLoadingPopup(context);
+
+    if (widget.forwardingMessages == null) {
       widget.close();
       return PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.error, message: 'Ошибка. при попытке переслать сообщение потерялся пересылаемый текст или автор сообщения. попробуйте еще раз и сообщите о возникшей проблеме разработчикам.');
     }
-    PopupManager.showLoadingPopup(context);
     await Future.delayed(const Duration(milliseconds: 200));
 
-    for (final address in selectedAddresses) {
-      int? dialogId;
-      if (address.dialogId != null) {
-        dialogId = address.dialogId!;
-      } else if (address.userId != null) {
-        dialogId = findDialog(context, widget.userId, address.userId!)?.dialogId;
+    for (final message in widget.forwardingMessages!) {
+
+      for (final address in selectedAddresses) {
+        int? dialogId;
+        if (address.dialogId != null) {
+          dialogId = address.dialogId!;
+        } else if (address.userId != null) {
+          dialogId = findDialog(context, widget.userId, address.userId!)?.dialogId;
+        }
+
+        if (dialogId == null) {
+          Navigator.of(context).pop();
+          return PopupManager.showInfoPopup(context, dismissible: false, type: PopupType.error, message: 'Произошла ошибка при отправке сообщения, попробуйте еще раз');
+        }
+
+        sendForwardMessage(
+            bloc: BlocProvider.of<ChatsBuilderBloc>(context),
+            messageText: forwardMessage(message.message, message.author),
+            attachment: message.file,
+            dialogId: dialogId,
+            userId: widget.userId
+        );
       }
 
-      if (dialogId == null) {
-        Navigator.of(context).pop();
-        return PopupManager.showInfoPopup(context, dismissible: false, type: PopupType.error, message: 'Произошла ошибка при отправке сообщения, попробуйте еще раз');
-      }
-
-      sendForwardMessage(
-          bloc: BlocProvider.of<ChatsBuilderBloc>(context),
-          messageText: forwardMessage(widget.forwardingText!, widget.forwardingTextAuthor!),
-          attachment: widget.forwardingFile,
-          dialogId: dialogId,
-          userId: widget.userId
-      );
     }
 
+    widget.closeSelectedOptionsMenu();
     close();
     Navigator.of(context).pop();
+  }
+
+  void onSearch(String? val) {
+    if (val == "" || val == null) {
+      setState(() {
+        filteredDestination = forwardDestination;
+      });
+    } else {
+      filteredDestination = [];
+      final regex = RegExp(val, caseSensitive: false, multiLine: false);
+      for (var address in forwardDestination) {
+        if (regex.hasMatch(address.name)) {
+          filteredDestination.add(address);
+        }
+      }
+      setState(() {});
+    }
   }
 
 
@@ -135,6 +164,7 @@ class _ForwardMessageAlertDialogState extends State<ForwardMessageAlertDialog>{
       }
       forwardDestination.addAll(dialogs);
     }
+    onSearch(null);
     setState(() {
       isInitialized = true;
     });
@@ -161,10 +191,11 @@ class _ForwardMessageAlertDialogState extends State<ForwardMessageAlertDialog>{
           child: AnimatedBuilder(
             animation: widget.animation,
             builder: (context, child) {
+              final bottom = MediaQuery.of(Scaffold.of(context).context).viewInsets.bottom;
               return Transform.translate(
                 offset: Offset(0, (MediaQuery.of(context).size.height - 150) * (1 - widget.animationController.value)),
                 child: Container(
-                  height: MediaQuery.of(context).size.height - 150,
+                  height: MediaQuery.of(context).size.height - 150 - bottom,
                   width: MediaQuery.of(context).size.width,
                   padding: const EdgeInsets.only(left: 15, right: 15, top: 20),
                   decoration: const BoxDecoration(
@@ -179,7 +210,8 @@ class _ForwardMessageAlertDialogState extends State<ForwardMessageAlertDialog>{
                       _controlButtonsRow(),
                       CustomSearchWidget(
                         controller: _textController,
-                        searchCallback: (String) {},
+                        searchCallback: onSearch,
+                        focusNode: focusNode,
                         margin: const EdgeInsets.only(top: 10, right: 0, left: 0, bottom: 20),
                       ),
                       Expanded(
@@ -191,42 +223,52 @@ class _ForwardMessageAlertDialogState extends State<ForwardMessageAlertDialog>{
                                 child: const Divider(
                                     height: 5, color: Colors.black54, thickness: 1)
                             ),
-                            itemCount: forwardDestination.length,
+                            itemCount: filteredDestination.length,
                             itemBuilder: (context, index) {
-                              return Container(
-                                  height: 50,
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: (MediaQuery.of(context).size.width - 30) * 0.20,
-                                        child: forwardDestination[index].userId != null ? UserAvatarWidget(userId: forwardDestination[index].userId, size: 20) : const DialogAvatar(base64String: null, radius: 20),
-                                      ),
-                                      Container(
-                                        width: (MediaQuery.of(context).size.width - 30) * 0.65,
-                                        child: Text(forwardDestination[index].name,
-                                          style: TextStyle(fontSize: 16),
+                              return GestureDetector(
+                                onTap: () {
+                                  if (selectedAddresses.contains(filteredDestination[index])) {
+                                    selectedAddresses.remove(filteredDestination[index]);
+                                  } else {
+                                    selectedAddresses.add(filteredDestination[index]);
+                                  }
+                                  setState(() {});
+                                },
+                                child: Container(
+                                    height: 50,
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: (MediaQuery.of(context).size.width - 30) * 0.20,
+                                          child: filteredDestination[index].userId != null ? UserAvatarWidget(userId: filteredDestination[index].userId, size: 20) : const DialogAvatar(base64String: null, radius: 20),
                                         ),
-                                      ),
-                                      Container(
-                                        width: (MediaQuery.of(context).size.width - 30) * 0.15,
-                                        child: Checkbox(
-                                          value: selectedAddresses.contains(forwardDestination[index]),
-                                          onChanged: (bool? value) {
-                                            if (value == true) {
-                                              selectedAddresses.add(forwardDestination[index]);
-                                            } else {
-                                              selectedAddresses.remove(forwardDestination[index]);
-                                            }
-                                            setState(() {});
-                                          },
-                                          shape: CircleBorder(
-                                              side: BorderSide(color: Colors.black54, width: 1)
+                                        Container(
+                                          width: (MediaQuery.of(context).size.width - 30) * 0.65,
+                                          child: Text(filteredDestination[index].name,
+                                            style: TextStyle(fontSize: 16),
                                           ),
-                                          checkColor: Colors.white,
                                         ),
-                                      ),
-                                    ],
-                                  )
+                                        Container(
+                                          width: (MediaQuery.of(context).size.width - 30) * 0.15,
+                                          child: Checkbox(
+                                            value: selectedAddresses.contains(filteredDestination[index]),
+                                            onChanged: (bool? value) {
+                                              if (value == true) {
+                                                selectedAddresses.add(filteredDestination[index]);
+                                              } else {
+                                                selectedAddresses.remove(filteredDestination[index]);
+                                              }
+                                              setState(() {});
+                                            },
+                                            shape: CircleBorder(
+                                                side: BorderSide(color: Colors.black54, width: 1)
+                                            ),
+                                            checkColor: Colors.white,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                ),
                               );
                             }
                         ),

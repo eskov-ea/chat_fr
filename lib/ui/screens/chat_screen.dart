@@ -7,6 +7,7 @@ import 'package:chat/theme.dart';
 import 'package:chat/ui/widgets/action_bar/forward_message_alert_dialog.dart';
 import 'package:chat/ui/widgets/message/mesasges_list.dart';
 import 'package:chat/ui/widgets/message/reply_message_bar_widget.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -68,16 +69,24 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateMixin {
+class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   bool isOnline = false;
   bool isTyping = false;
-  late AnimationController _animationController;
-  late Animation animation;
+  late AnimationController _forwardMenuAnimationController;
+  late Animation _forwardMenuAnimation;
+  late AnimationController _selectedMessagesOptionsMenuAnimationController;
+  late Animation _selectedMessagesOptionsMenuAnimation;
   late final StreamSubscription usersViewCubitStateSubscription;
-  String? forwardingText;
-  String? forwardingTextAuthor;
-  MessageAttachmentsData? forwardingFile;
+  List<SelectedMessage>? forwardingMessages;
+  final focusNode = FocusNode();
+  String? replyMessage;
+  bool isRecording = false;
+  String? senderReplyName;
+  int? replyedMessageId;
+  ParentMessage? replyedParentMsg;
+  bool isSelectedMode = false;
+  List<SelectedMessage> selected = [];
 
 
   @override
@@ -100,33 +109,38 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
       }
     });
 
-    _animationController = AnimationController(
+    _forwardMenuAnimationController = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 400)
+    )..addListener(() {
+      setState(() {});
+    });
+    _selectedMessagesOptionsMenuAnimationController = AnimationController(
         vsync: this,
         duration: const Duration(milliseconds: 400)
     )..addListener(() {
       setState(() {});
     });
 
-    animation = Tween<double>(begin: 0, end: 1).animate(
-        CurvedAnimation(parent: _animationController, curve: Curves.fastOutSlowIn)
+    _forwardMenuAnimation = Tween<double>(begin: 0, end: 1).animate(
+        CurvedAnimation(parent: _forwardMenuAnimationController, curve: Curves.fastOutSlowIn)
+    );
+    _selectedMessagesOptionsMenuAnimation = Tween<double>(begin: 0, end: 1).animate(
+        CurvedAnimation(parent: _forwardMenuAnimationController, curve: Curves.fastOutSlowIn)
     );
 
    super.initState();
   }
 
   void closeForwardMenu() {
-    forwardingText = null;
-    forwardingTextAuthor = null;
-    forwardingFile = null;
+    forwardingMessages = null;
     setState(() {});
-    _animationController.reverse();
+    _forwardMenuAnimationController.reverse();
   }
-  void openForwardMenu(String text, String author, MessageAttachmentsData? file) {
-    forwardingText = text;
-    forwardingTextAuthor = author;
-    forwardingFile = file;
+  void openForwardMenu(List<SelectedMessage> messages) {
+    forwardingMessages = messages;
     setState(() {});
-    _animationController.forward();
+    _forwardMenuAnimationController.forward();
   }
 
   void _sendTypingEvent() async {
@@ -149,17 +163,6 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
           data: {"dialogId" : widget.dialogData?.dialogId, "event" : "finish_typing", "fromUser" : widget.userId, "toUser": widget.partnerId});
     }
   }
-
-
-
-  final focusNode = FocusNode();
-  String? replyMessage;
-  bool isRecording = false;
-  String? senderReplyName;
-  int? replyedMessageId;
-  ParentMessage? replyedParentMsg;
-  bool isSelectedMode = false;
-  List<int> selected = [];
 
 
   void setReplyMessage(String message, int senderId, int messageId, String senderName) {
@@ -186,40 +189,73 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
   }
 
   void setSelectedMode(bool value){
-    setState(() {
-      isSelectedMode = value;
-      if (!value) selected = [];
-    });
+    isSelectedMode = value;
+    setState(() {});
+    if (value == true) {
+      _selectedMessagesOptionsMenuAnimationController.forward();
+    } else {
+      _selectedMessagesOptionsMenuAnimationController.reverse();
+    }
   }
 
   void deleteMessages() async {
     try {
-      final bool response =
-          await MessagesProvider().deleteMessage(messageId: selected);
+      isSelectedMode = false;
+      setState(() {});
+      List<int> ids = [];
+      for (final message in selected) {
+        ids.add(message.id);
+      }
+      final bool response = await MessagesProvider().deleteMessage(messageId: ids);
       if (response) {
         BlocProvider.of<ChatsBuilderBloc>(context).add(
             ChatsBuilderDeleteMessagesEvent(
-                messagesId: selected, dialogId: widget.dialogData!.dialogId));
+                messagesId: ids, dialogId: widget.dialogData!.dialogId));
       } else {
         customToastMessage(context: context, message: 'Не получилось удалить сообщения. Попробуйте еще раз');
       }
+      closeSelectedOptionsMenu();
     } catch (err) {
+      closeSelectedOptionsMenu();
       customToastMessage(context: context, message: 'Не получилось удалить сообщения. Попробуйте еще раз');
     }
   }
 
-  void setSelected(id) {
-    setState(() {
-      if (isSelectedMode) {
-        if (!selected.contains(id)) {
-          selected.add(id);
+  void deleteMessage(int id) async {
+    print("Trying delete message $selected");
+    try {
+      final bool response = await MessagesProvider().deleteMessage(messageId: [id]);
+      if (response) {
+        BlocProvider.of<ChatsBuilderBloc>(context).add(
+            ChatsBuilderDeleteMessagesEvent(
+                messagesId: [id], dialogId: widget.dialogData!.dialogId));
+      } else {
+        customToastMessage(context: context, message: 'Не получилось удалить сообщения. Попробуйте еще раз');
+      }
+    } catch (err) {
+      customToastMessage(context: context, message: 'Ошибка. Не получилось удалить сообщения. Попробуйте еще раз');
+    }
+  }
+
+  void setSelected(SelectedMessage message) {
+    if (isSelectedMode) {
+      setState(() {
+        if (!selected.any((m) => m.id == message.id)) {
+          selected.add(message);
         } else {
-          selected.remove(id);
+          selected.remove(message);
         }
         if (selected.isEmpty) setSelectedMode(false);
-      }
-      print(selected);
+      });
+    }
+  }
+
+  void closeSelectedOptionsMenu() {
+    setState(() {
+      selected = [];
+      isSelectedMode = false;
     });
+    _selectedMessagesOptionsMenuAnimationController.reverse();
   }
 
   Widget getDialogName(DialogData? dialog, String username) {
@@ -254,7 +290,7 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
   @override
   void dispose() {
     focusNode.dispose();
-    _animationController.dispose();
+    _forwardMenuAnimationController.dispose();
     usersViewCubitStateSubscription.cancel();
     super.dispose();
   }
@@ -343,7 +379,8 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
                               isSelectedMode: isSelectedMode,
                               selected: selected,
                               setSelected: setSelected,
-                              openForwardMenu: openForwardMenu
+                              openForwardMenu: openForwardMenu,
+                              deleteMessage: deleteMessage
                           )
                               : const Center(child: Text('Нет сообщений'),)
                       ),
@@ -360,17 +397,17 @@ class _ChatScreenState extends State<ChatScreen> with SingleTickerProviderStateM
                 ),
                 if (replyMessage != null) ReplyMessageBar(replyMessage: replyMessage!, cancelReplyMessage: cancelReplyMessage, senderName: senderReplyName!),
                 isUserAllowedToWrite(widget.dialogData, widget.userId)
-                    ? ActionBar(userId: widget.userId, partnerId: widget.partnerId, dialogId: widget.dialogData?.dialogId,
+                ? ActionBar(userId: widget.userId, partnerId: widget.partnerId, dialogId: widget.dialogData?.dialogId,
                     setDialogData: setDialogData, rootWidget: widget, username: widget.username,
                     focusNode: focusNode, setRecording: setRecording, isRecording: isRecording, dialogData: widget.dialogData,
                     dialogCubit: widget.dialogCubit, cancelReplyMessage: cancelReplyMessage, parentMessage: replyedParentMsg, isSelectedMode: isSelectedMode,
-                    selected: selected, deleteMessages: deleteMessages
-                )
-                    : ReadOnlyChannelMode(context),
+                    selected: selected, deleteMessages: deleteMessages, animation: _selectedMessagesOptionsMenuAnimation, animationController: _selectedMessagesOptionsMenuAnimationController,
+                    openForwardMessageMenu: openForwardMenu)
+                : ReadOnlyChannelMode(context),
               ],
             ),
-            ForwardMessageAlertDialog(userId: widget.userId, animationController: _animationController, animation: animation, close: closeForwardMenu,
-              forwardingText: forwardingText, forwardingTextAuthor: forwardingTextAuthor, forwardingFile: forwardingFile,
+            ForwardMessageAlertDialog(userId: widget.userId, animationController: _forwardMenuAnimationController, animation: _forwardMenuAnimation, close: closeForwardMenu,
+              forwardingMessages: forwardingMessages, closeSelectedOptionsMenu: closeSelectedOptionsMenu,
             )
           ]
         )
@@ -441,3 +478,19 @@ class ChatPageArguments {
 }
 
 
+class SelectedMessage extends Equatable {
+  final int id;
+  final String message;
+  final String author;
+  final MessageAttachmentsData? file;
+
+  const SelectedMessage({required this.id, required this.message, required this.author, required this.file});
+
+  @override
+  String toString() {
+    return "Instance of SelectedMessage[ $id, $message, $author, $file ]";
+  }
+
+  @override
+  List<Object?> get props => [id];
+}

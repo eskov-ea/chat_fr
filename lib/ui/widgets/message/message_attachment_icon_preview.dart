@@ -11,7 +11,7 @@ class MessageAttachmentIconPreview extends StatelessWidget {
   final bool isMe;
   final String messageTime;
   final int status;
-  final MessageAttachmentsData? file;
+  final MessageAttachmentsData file;
   const MessageAttachmentIconPreview({
     required this.width,
     required this.iconPath,
@@ -30,9 +30,9 @@ class MessageAttachmentIconPreview extends StatelessWidget {
       Navigator.of(context).pushNamed(
           MainNavigationRouteNames.filePreviewPage,
           arguments: AttachmentViewPageArguments(
-              fileName: file!.name,
-              fileExt: file!.filetype,
-              attachmentId: file!.attachmentId,
+              fileName: file.name,
+              fileExt: file.filetype,
+              attachmentId: file.attachmentId,
               isMe: isMe,
               messageTime: messageTime
           )
@@ -57,6 +57,16 @@ class MessageAttachmentIconPreview extends StatelessWidget {
             onTap: fileAttachmentMessCallback,
             child: Image.asset(iconPath, width: width, height: width),
           ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 15),
+          child: Text(file.name,
+            style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+            maxLines: 1,
+            softWrap: true,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.left,
+          )
         )
       ],
     );

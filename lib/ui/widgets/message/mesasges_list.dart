@@ -12,6 +12,8 @@ import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/services/messages/messages_repository.dart';
+import 'package:chat/ui/screens/chat_screen.dart';
+import 'package:chat/ui/widgets/action_bar/forward_message_alert_dialog.dart';
 import 'package:chat/ui/widgets/message/message_widget.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +34,7 @@ class MessagesListStatefullWidget extends StatefulWidget {
     required this.selected,
     required this.setSelected,
     required this.openForwardMenu,
+    required this.deleteMessage,
   }) : super(key: key);
 
   final int userId;
@@ -42,9 +45,10 @@ class MessagesListStatefullWidget extends StatefulWidget {
   final UsersViewCubit usersCubit;
   final bool isSelectedMode;
   final Function setSelectedMode;
-  final List<int> selected;
-  final Function(int) setSelected;
-  final Function(String, String, MessageAttachmentsData?) openForwardMenu;
+  final List<SelectedMessage> selected;
+  final Function(SelectedMessage) setSelected;
+  final Function(List<SelectedMessage>) openForwardMenu;
+  final Function(int) deleteMessage;
 
   @override
   State<MessagesListStatefullWidget> createState() => _MessagesListStatefullWidgetState();
@@ -200,7 +204,8 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
                     setSelectedMode: widget.setSelectedMode,
                     selected: widget.selected,
                     setSelected: widget.setSelected,
-                    openForwardMenu: widget.openForwardMenu
+                    openForwardMenu: widget.openForwardMenu,
+                    deleteMessage: widget.deleteMessage
                 )
               ],
             );
@@ -222,12 +227,13 @@ class MessagesListWidget extends StatelessWidget {
   final FocusNode focusNode;
   final String partnerName;
   final Function(String, int, int, String)  setReplyMessage;
+  final Function(int)  deleteMessage;
   final bool isSelectedMode;
   final List<UserContact> users;
   final Function setSelectedMode;
-  final Function(String, String, MessageAttachmentsData?) openForwardMenu;
-  final List<int> selected;
-  final Function(int) setSelected;
+  final Function(List<SelectedMessage>) openForwardMenu;
+  final List<SelectedMessage> selected;
+  final Function(SelectedMessage) setSelected;
   const MessagesListWidget({
     required this.messages,
     required this.scrollController,
@@ -242,6 +248,7 @@ class MessagesListWidget extends StatelessWidget {
     required this.setSelected,
     required this.users,
     required this.openForwardMenu,
+    required this.deleteMessage,
     super.key
   });
 
@@ -324,6 +331,7 @@ class MessagesListWidget extends StatelessWidget {
                   repliedMsgId: messages[index].parentMessage?.parentMessageId,
                   dialogId: dialogData.dialogId,
                   isErrorHandling: messages[index].isHandling,
+                  deleteMessage: deleteMessage
                 )
               ],
             );

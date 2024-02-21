@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/services/helpers/file_types_helper.dart';
 import 'package:chat/services/popup_manager.dart';
+import 'package:chat/ui/screens/chat_screen.dart';
+import 'package:chat/ui/widgets/action_bar/forward_message_alert_dialog.dart';
 import 'package:chat/ui/widgets/image_preview_widget.dart';
 import 'package:chat/ui/widgets/message/message_error_widget.dart';
 import 'package:chat/ui/widgets/message/message_status_widget.dart';
@@ -53,6 +55,7 @@ class MessageWidget extends StatefulWidget {
     required this.isErrorHandling,
     required this.dialogId,
     required this.openForwardMenu,
+    required this.deleteMessage,
     Key? key
   }) : super(key: key);
 
@@ -63,8 +66,9 @@ class MessageWidget extends StatefulWidget {
   final List selected;
   final bool selectedMode;
   final Function setSelectedMode;
-  final Function(String, String, MessageAttachmentsData?) openForwardMenu;
-  final Function(int) setSelected;
+  final Function(List<SelectedMessage>) openForwardMenu;
+  final Function(int) deleteMessage;
+  final Function(SelectedMessage) setSelected;
   final String message;
   final int messageId;
   final String? forwardFrom;
@@ -137,7 +141,8 @@ class _MessageWidgetState extends State<MessageWidget>  with SingleTickerProvide
       dialogId: widget.dialogId,
       repliedMsgId: widget.repliedMsgId,
       isErrorHandling: widget.isErrorHandling,
-      openForwardMenu: widget.openForwardMenu
+      openForwardMenu: widget.openForwardMenu,
+      deleteMessage: widget.deleteMessage
     );
   }
 }
@@ -170,6 +175,7 @@ class _MessageTile extends StatelessWidget {
     required this.isErrorHandling,
     required this.dialogId,
     required this.openForwardMenu,
+    required this.deleteMessage,
   }) : super(key: key);
 
   final int index;
@@ -180,9 +186,10 @@ class _MessageTile extends StatelessWidget {
   final String messageTime;
   final String senderName;
   final String? repliedMsgSenderName;
-  final Function(int) setSelected;
+  final Function(SelectedMessage) setSelected;
   final Function setSelectedMode;
-  final Function(String, String, MessageAttachmentsData?) openForwardMenu;
+  final Function(List<SelectedMessage>) openForwardMenu;
+  final Function(int) deleteMessage;
   final List selected;
   final bool selectedMode;
   final int userId;
@@ -300,9 +307,9 @@ class _MessageTile extends StatelessWidget {
             if (selectedMode)
               Checkbox(
                 activeColor: Colors.transparent,
-                value: selected.contains(messageId),
+                value: selected.any((m) => m.id == messageId),
                 onChanged: (_) {
-                  setSelected(messageId);
+                  setSelected(SelectedMessage(id: messageId, message: message, author: senderName, file: file));
                 },
               ),
             Flexible(
@@ -332,7 +339,7 @@ class _MessageTile extends StatelessWidget {
                               ),
                               onPressed: () {
                                 openForwardMenu(
-                                  message, senderName, file
+                                  [SelectedMessage(id: messageId, message: message, author: senderName, file: file)]
                                 );
                               },
                               trailingIcon: const Icon(Icons.forward)),
@@ -340,7 +347,7 @@ class _MessageTile extends StatelessWidget {
                               title: const Text('Удалить',
                                   style: TextStyle(color: Colors.red)),
                               onPressed: () {
-                                // _detDeletedStatus();
+                                deleteMessage(messageId);
                               },
                               trailingIcon:
                               const Icon(Icons.delete, color: Colors.red)),
@@ -351,7 +358,7 @@ class _MessageTile extends StatelessWidget {
                               ),
                               onPressed: () {
                                 setSelectedMode(true);
-                                setSelected(messageId);
+                                setSelected(SelectedMessage(id: messageId, message: message, author: senderName, file: file));
                               },
                               trailingIcon: const Icon(Icons.control_point)),
                         ],

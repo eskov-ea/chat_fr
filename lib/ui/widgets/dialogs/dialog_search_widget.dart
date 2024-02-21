@@ -6,11 +6,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class CustomSearchWidget extends StatefulWidget {
   final Function(String) searchCallback;
   final TextEditingController controller;
+  final FocusNode focusNode;
   final EdgeInsets margin;
 
   const CustomSearchWidget({
     required this.controller,
     required this.searchCallback,
+    required this.focusNode,
     this.margin = const EdgeInsets.only(top: 10, right: 15, left: 15, bottom: 20),
     super.key});
 
@@ -19,7 +21,6 @@ class CustomSearchWidget extends StatefulWidget {
 }
 
 class _CustomSearchWidgetState extends State<CustomSearchWidget> {
-  final FocusNode _searchFocus = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +41,13 @@ class _CustomSearchWidgetState extends State<CustomSearchWidget> {
           Expanded(
             child: TextField(
               controller: widget.controller,
-              focusNode: _searchFocus,
+              focusNode: widget.focusNode,
               textAlignVertical: TextAlignVertical.center,
               style: const TextStyle(fontSize: 18),
               onChanged: widget.searchCallback,
               onTapOutside: (event) {
-                if (_searchFocus.hasFocus) {
-                  _searchFocus.unfocus();
+                if (widget.focusNode.hasFocus) {
+                  widget.focusNode.unfocus();
                 }
               },
               decoration: InputDecoration(
@@ -78,8 +79,7 @@ class _CustomSearchWidgetState extends State<CustomSearchWidget> {
                       onPressed: (){
                         widget.controller.clear();
                         widget.searchCallback('');
-                        _searchFocus.unfocus();
-
+                        widget.focusNode.unfocus();
                       },
                     ),
                   )
