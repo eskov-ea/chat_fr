@@ -53,7 +53,7 @@ class DialogItem extends StatelessWidget {
     if (dialogData.chatType.name == "Приват" || dialogData.chatType.name == "Приват безопасный") {
       return UserAvatarWidget(userId: partners.first.id, objKey: key);
     } else {
-      return DialogAvatar(base64String: dialogData.picture,);
+      return DialogAvatar(base64String: dialogData.picture);
     }
   }
 
@@ -106,7 +106,7 @@ class DialogItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    padding: const EdgeInsets.only(top: 8.0, bottom: 0.0),
                     child: RichText(
                       text: TextSpan(
                           text: partnerName,
@@ -119,9 +119,9 @@ class DialogItem extends StatelessWidget {
                               color: AppColors.textDark
                           ),
                           children: [
-                            WidgetSpan(child: SizedBox(width: 5,),),
+                            const WidgetSpan(child: SizedBox(width: 5),),
                             if (dialogData.chatType.p2p == 1 && onlineMembers[partners.first.id] != null)
-                              WidgetSpan(
+                              const WidgetSpan(
                                 child: Icon(Icons.circle, color: Colors.green, size: 15,),
                               )
                           ]
@@ -132,23 +132,12 @@ class DialogItem extends StatelessWidget {
                     ),
                   ),
                   SizedBox(
-                      height: 20,
+                      height: 35,
                       child: Row(
                         children: [
                           const SizedBox(width: 5,),
                           Expanded(
-                            child: Text(
-                              dialogData.lastMessage.message == ""
-                                  ? "Файл"
-                                  : dialogData.lastMessage.message,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontSize: 14,
-                                  color: LightColors.secondaryText,
-                                  fontWeight: FontWeight.w600
-                              ),
-                            ),
+                            child: lastMessageContent(),
                           )
                         ],
                       )
@@ -203,5 +192,33 @@ class DialogItem extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget lastMessageContent() {
+    if (dialogData.lastMessage.message != "") {
+      return Text(
+        dialogData.lastMessage.message,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+            fontSize: 14,
+            color: LightColors.secondaryText,
+            fontWeight: FontWeight.w600
+        ),
+      );
+    } else {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Image.asset("assets/icons/file.png", width: 21, height: 28, alignment: Alignment.bottomLeft,),
+          const SizedBox(width: 5),
+          const Text("Вложение", style: TextStyle(
+            fontSize: 14,
+            color: LightColors.secondaryText,
+            fontWeight: FontWeight.w600)
+          )
+        ]
+      );
+    }
   }
 }

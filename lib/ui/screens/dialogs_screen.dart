@@ -45,7 +45,7 @@ class _MessagesPageState extends State<MessagesPage> {
   int  counter = 0;
   final _controller = ScrollController();
   final TextEditingController searchController = TextEditingController();
-
+  final FocusNode focusNode = FocusNode();
 
   @override
   void initState() {
@@ -80,6 +80,10 @@ class _MessagesPageState extends State<MessagesPage> {
     BlocProvider.of<ChatsBuilderBloc>(context).add(RefreshChatsBuilderEvent());
   }
 
+  void searchDialog(String val) {
+    BlocProvider.of<DialogsViewCubit>(context).search(val);
+  }
+
   @override
   void dispose() {
     presenceOnlineInfoChannelSubscription.cancel();
@@ -88,21 +92,34 @@ class _MessagesPageState extends State<MessagesPage> {
 
   Widget _mapStateToWidget(BuildContext context, DialogsViewCubitState state) {
     if (state is DialogsLoadedViewCubitState && userId != null) {
+      if (!state.isFirstInitialized || state.isLoading) {
+        return DialogsShimmer();
+      }
       if (state.isError) {
         return ClientErrorHandler.makeErrorInfoWidget(state.errorType!, refreshAllData);
       }
       if (!state.isAuthenticated) {
-        return UnauthenticatedWidget();
+        return const UnauthenticatedWidget();
       }
-      if (state.dialogs.isEmpty && state.isFirstInitialized) {
+      if (state.dialogs.isEmpty) {
         return Center(
             key: UniqueKey(),
-            child: Text("Нет диалогов")
+            child: Column(
+              children: [
+                CustomSearchWidget(controller: searchController, searchCallback: searchDialog, focusNode: focusNode),
+                const Divider(height: 1, thickness: 1, color: Colors.black12),
+                const Expanded(
+                  child: Center(
+                    child: Text("Нет диалогов")
+                  )
+                )
+              ]
+            )
         );
       } else{
         return Column(
           children: [
-            DialogSearch(controller: searchController),
+            CustomSearchWidget(controller: searchController, searchCallback: searchDialog, focusNode: focusNode),
             const Divider(height: 1, thickness: 1, color: Colors.black12),
             Expanded(
               child: RefreshIndicator(
@@ -125,7 +142,7 @@ class _MessagesPageState extends State<MessagesPage> {
                               (context, index) =>
                           !_isDialogActive(state.dialogs[index], userId!) ||
                               state.dialogs[index].chatType.typeId == 3 && !(state.dialogs[index].messageCount > 0)
-                              ? SizedBox.shrink()
+                              ? const SizedBox.shrink()
                               : Container(
                             padding: const EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 0),
                             child: Align(
@@ -162,22 +179,26 @@ class _MessagesPageState extends State<MessagesPage> {
         );
       }
     } else {
-      return Container(
-        key: UniqueKey(),
-        child: Column(
-          children: [
-            DialogSearch(controller: searchController),
-            const Expanded(
+      return DialogsShimmer();
+    }
+  }
+
+  Widget DialogsShimmer() {
+    return Container(
+      key: UniqueKey(),
+      child: Column(
+        children: [
+          CustomSearchWidget(controller: searchController, searchCallback: searchDialog, focusNode: focusNode),
+          const Expanded(
               child: Shimmer(
                   child: ShimmerLoading(
                       child: DialogsSkeletonWidget()
                   )
               )
-            )
-          ],
-        ) ,
-      );
-    }
+          )
+        ],
+      ) ,
+    );
   }
 
   @override
@@ -202,16 +223,16 @@ class _MessagesPageState extends State<MessagesPage> {
   }
 }
 
-void dismissSlidableItem(BuildContext context, int index, SlidableActionEnum action) {
-  switch (action) {
-    case SlidableActionEnum.pin:
-      Utils.showSnackBar(context, 'Chat has been pined');
-      break;
-    case SlidableActionEnum.delete:
-      Utils.showSnackBar(context, 'Chat has been deleted');
-      break;
-  }
-}
+// void dismissSlidableItem(BuildContext context, int index, SlidableActionEnum action) {
+//   switch (action) {
+//     case SlidableActionEnum.pin:
+//       Utils.showSnackBar(context, 'Chat has been pined');
+//       break;
+//     case SlidableActionEnum.delete:
+//       Utils.showSnackBar(context, 'Chat has been deleted');
+//       break;
+//   }
+// }
 
 bool isMessageReadByMe (List<MessageStatuses>? statuses, int userId) {
   if (statuses == null) return true;

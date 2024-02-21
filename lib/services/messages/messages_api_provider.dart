@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:chat/services/helpers/file_types_helper.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../bloc/error_handler_bloc/error_types.dart';
@@ -14,6 +16,9 @@ import 'dart:convert' as convert;
 import '../helpers/http_error_handler.dart';
 import '../logger/logger_service.dart';
 import './icon_base64.dart';
+
+
+
 
 class MessagesProvider {
   final _secureStorage = DataProvider();
@@ -266,8 +271,12 @@ class MessagesProvider {
     required String? content
   }) async {
     try {
+      String? preview;
       final String? token = await _secureStorage.getToken();
-      final preview = resizeImage(bytes!);
+
+      if (GraphicTypes.contains(filetype) && bytes != null) {
+        preview = resizeImage(bytes);
+      }
 
       final postData = jsonEncode(<String, Object>{
         'data': {
@@ -275,7 +284,7 @@ class MessagesProvider {
           'parent_id': parentMessageId,
           'file': {
             'name': '$filename.$filetype',
-            'preview': preview ?? base64icon,
+            'preview': preview ?? '',
             'content': content
           }
         }
@@ -287,6 +296,55 @@ class MessagesProvider {
             'Authorization': 'Bearer $token'
           },
           body: postData);
+      final error = handleHttpResponse(response);
+      if (error != null) throw error;
+      return response.body;
+    } on SocketException catch(err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
+          "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/message/add/$dialogId ]");
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on http.ClientException catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
+      throw AppErrorException(AppErrorExceptionType.network);
+    } on AppErrorException {
+      rethrow;
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      throw AppErrorException(AppErrorExceptionType.other);
+    }
+  }
+
+  Future<String> forwardMessage({
+    required String? filename,
+    required int dialogId,
+    required String? messageText,
+    required String? filetype,
+    required String? preview,
+    required String? content
+  }) async {
+    try {
+      String? preview;
+      final String? token = await _secureStorage.getToken();
+
+      final postData = jsonEncode(<String, Object>{
+        'data': {
+          'message': '$messageText',
+          'parent_id': null,
+          'file': {
+            'name': '$filename.$filetype',
+            'preview': preview ?? '',
+            'content': content
+          }
+        }
+      });
+      final response = await http.post(
+          Uri.parse('https://erp.mcfef.com/api/chat/message/add/$dialogId'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Authorization': 'Bearer $token'
+          },
+          body: postData);
+      log("FORWARD:: ${response.body}");
       final error = handleHttpResponse(response);
       if (error != null) throw error;
       return response.body;

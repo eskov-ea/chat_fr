@@ -13,7 +13,6 @@ class DialogsProvider {
   final _secureStorage = DataProvider();
 
   Future<List<DialogData>> getDialogs() async {
-    // throw AppErrorException(AppErrorExceptionType.other);
     try {
       final String? token = await _secureStorage.getToken();
       final response = await http.get(
@@ -42,6 +41,7 @@ class DialogsProvider {
     } on AppErrorException {
       rethrow;
     } catch (err, stackTrace) {
+      log("GetDialogs:: $err \r\n $stackTrace");
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
       throw AppErrorException(AppErrorExceptionType.other);
     }

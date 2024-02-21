@@ -1,18 +1,20 @@
+import 'dart:developer';
+
+import 'package:chat/services/helpers/message_forwarding_util.dart';
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import '../services/global.dart';
 
 final DateFormat _timeFormatter = DateFormat.Hm();
-// final DateFormat _dateFormatter = DateFormat.yMMMd();
 final DateFormat _dateFormatter = DateFormat.yMd();
-
 
 class MessageData extends Equatable{
   MessageData({
     required this.messageId,
     required this.senderId,
     required this.dialogId,
+    required this.forwarderFromUser,
     required this.message,
     required this.messageDate,
     required this.messageTime,
@@ -21,7 +23,8 @@ class MessageData extends Equatable{
     required this.file,
     required this.parentMessageId,
     required this.isError,
-    required this.parentMessage
+    required this.parentMessage,
+    this.isHandling = false,
   });
   int messageId;
   int? parentMessageId;
@@ -31,17 +34,19 @@ class MessageData extends Equatable{
   final String message;
   final String messageDate;
   final String messageTime;
+  final String? forwarderFromUser;
   final DateTime rawDate;
   final MessageAttachmentsData? file;
   List<MessageStatuses> status;
   bool isError;
+  bool isHandling;
 
   static MessageData fromJson(json) => MessageData(
     messageId: json["id"],
     parentMessageId: json["parent_id"] != null ? json["parent_id"].toInt() : null,
     senderId: json["user_id"],
     dialogId: json["chat_id"],
-    message: json["message"],
+    message: replaceForwardSymbol(json["message"]),
     messageDate: getDate(DateTime.tryParse(json["created_at"])?.add(getTZ())),
     messageTime: getTime(DateTime.tryParse(json["created_at"])?.add(getTZ())),
     status: MessageStatuses.fromJson(json["statuses"]),
@@ -53,6 +58,8 @@ class MessageData extends Equatable{
             ? null
             : ParentMessage.fromJson(json["parent"]),
     isError: json["isError"] ?? false,
+    isHandling: json["isHandling"] ?? false,
+    forwarderFromUser: getForwardedMessageStatus(json["message"])
   );
 
   Map<String, dynamic> toJson() => {
@@ -65,7 +72,7 @@ class MessageData extends Equatable{
   };
 
   @override
-  List<Object?> get props => [messageId, senderId, status, isError];
+  List<Object?> get props => [messageId, senderId, file, status, isError, isHandling];
 }
 
 class MessageStatuses extends Equatable {

@@ -47,6 +47,11 @@ class CallModel {
   );
 
   @override
+  String toString() {
+    return "Instance of CallModel: $date, from: $fromCaller to $toCaller, status: $callStatus";
+  }
+
+  @override
   bool operator ==(Object other) =>
       identical(this, other) ||
         other is CallModel &&

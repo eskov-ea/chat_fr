@@ -11,6 +11,7 @@ class DialogsState {
   final bool isAuthenticated;
   final bool isFirstInitialized;
   final AppErrorExceptionType? errorType;
+  final bool isLoading;
 
   bool get isSearchMode => searchQuery.isNotEmpty;
   List<DialogData> get dialogs =>
@@ -23,6 +24,7 @@ class DialogsState {
     isErrorHappened = false,
     isAuthenticated = true,
     isFirstInitialized = false,
+    isLoading = true,
     errorType = null;
 
   DialogsState({
@@ -32,7 +34,8 @@ class DialogsState {
     required this.isErrorHappened,
     required this.errorType,
     required this.isAuthenticated,
-    required this.isFirstInitialized
+    required this.isFirstInitialized,
+    required this.isLoading
   });
 
   @override
@@ -44,6 +47,7 @@ class DialogsState {
               errorType == other.errorType &&
               isAuthenticated == other.isAuthenticated &&
               isFirstInitialized == other.isFirstInitialized &&
+              isLoading == other.isLoading &&
               isErrorHappened == other.isErrorHappened;
 
   @override
@@ -53,6 +57,7 @@ class DialogsState {
       errorType.hashCode ^
       isAuthenticated.hashCode ^
       isFirstInitialized.hashCode ^
+      isLoading.hashCode ^
       isErrorHappened.hashCode;
 
   DialogsState copyWith({
@@ -62,6 +67,7 @@ class DialogsState {
     bool? isErrorHappened,
     bool? isAuthenticated,
     bool? isFirstInitialized,
+    bool? isLoading,
     AppErrorExceptionType? errorType
   }) {
     return DialogsState(
@@ -71,7 +77,8 @@ class DialogsState {
       searchQuery: searchQuery ?? this.searchQuery,
       isErrorHappened: isErrorHappened ?? this.isErrorHappened,
       errorType: errorType ?? this.errorType,
-      isAuthenticated: isAuthenticated ?? this.isAuthenticated
+      isAuthenticated: isAuthenticated ?? this.isAuthenticated,
+      isLoading: isLoading ?? this.isLoading
     );
   }
 
@@ -106,7 +113,13 @@ class DialogsState {
       isErrorHappened: isErrorHappened,
       errorType: errorType,
       isAuthenticated: isAuthenticated,
-      isFirstInitialized: isFirstInitialized
+      isFirstInitialized: isFirstInitialized,
+      isLoading: isLoading
     );
+  }
+
+  @override
+  String toString() {
+    return "Instance of 'DialogsState[$isFirstInitialized $isLoading $isAuthenticated $isErrorHappened $errorType $isSearchMode dialogs length: ${dialogs.length} ] '";
   }
 }

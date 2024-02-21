@@ -217,7 +217,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
       emit(const Connected());
     } catch (err, stackTrace) {
       print("SOCKET CONNECTING:  $err \r\n$stackTrace");
-      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "SOCKET CONNECTING ERROR");
       emit(Unconnected());
     }
   }

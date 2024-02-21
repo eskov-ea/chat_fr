@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:chat/services/helpers/message_forwarding_util.dart';
+import 'package:chat/services/logger/logger_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
@@ -36,7 +38,6 @@ sendMessageUnix({
     filename = file.path.split('/').last.split('.').first;
     filetype = file.path.split('.').last;
     base64FileString = base64Encode(bytes);
-    print("saving file is  ${file.path}  $filename  /  $filetype");
   }
 // 1. Create local message
     localMessage = createLocalMessage(replyedMessageId: parentMessage?.parentMessageId, dialogId: dialogId, userId: userId,
@@ -59,11 +60,66 @@ sendMessageUnix({
     bloc.add(
       ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: dialogId, localMessageId: localMessage.messageId)
     );
-  } catch (err) {
+  } catch (err, stackTrace) {
 // 5. Handle error - update last message with error
+    Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Failed send a message");
     if (localMessage != null) {
-      print("ChatsBuilderUpdateMessageWithErrorEvent");
-      bloc.add(ChatsBuilderUpdateMessageWithErrorEvent(message: localMessage, dialog: dialogId));
+      bloc.add(ChatsBuilderUpdateMessageWithErrorEvent(messageId: localMessage.messageId, dialog: dialogId));
+    }
+  }
+// 6. Update message statuses
+  bloc.add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId));
+}
+
+sendForwardMessage({
+  required ChatsBuilderBloc bloc,
+  required String? messageText,
+  required MessageAttachmentsData? attachment,
+  required int dialogId,
+  required int userId
+}) async {
+
+  String? filename;
+  String? filetype;
+  String? base64FileString;
+  MessageData? localMessage;
+  if (attachment != null) {
+    filename = attachment.name.split('.').first;
+    filetype = attachment.name.split('.').last;
+    final file = await loadFileAndSaveLocally(fileName: attachment.name, attachmentId: attachment.attachmentId);
+    if (file != null) {
+      final bytes = file.readAsBytesSync();
+      base64FileString = base64Encode(bytes);
+    }
+  }
+  try {
+// 1. Create local message
+    localMessage = createLocalMessage(replyedMessageId: null, dialogId: dialogId, userId: userId,
+        messageText: messageText, parentMessage: null, filename: filename, filetype: attachment?.filetype, content: base64FileString);
+// 2. Add local message to tray
+    bloc.add(
+        ChatsBuilderAddMessageEvent(message: localMessage, dialogId: dialogId));
+// 3. Send message
+    final response = await MessagesRepository().forwardMessage(
+        dialogId: dialogId,
+        messageText: messageText,
+        filetype: filetype,
+        filename: filename,
+        preview: attachment?.preview,
+        content: base64FileString
+    );
+    print("FORWARD:: forwardMessage 3 ${response}");
+
+// 4. If no error - update last dialog message
+    final message = MessageData.fromJson(jsonDecode(response)["data"]);
+    bloc.add(
+        ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: dialogId, localMessageId: localMessage.messageId)
+    );
+  } catch (err, stackTrace) {
+// 5. Handle error - update last message with error
+    Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Failed send a message");
+    if (localMessage != null) {
+      bloc.add(ChatsBuilderUpdateMessageWithErrorEvent(messageId: localMessage.messageId, dialog: dialogId));
     }
   }
 // 6. Update message statuses
@@ -100,7 +156,7 @@ MessageData createLocalMessage({
     parentMessage: parentMessage,
     senderId: userId,
     dialogId: dialogId,
-    message: messageText,
+    message: replaceForwardSymbol(messageText),
     messageDate: parseTime.getDate(DateTime.now()),
     messageTime: parseTime.getTime(DateTime.now()),
     rawDate: DateTime.now(),
@@ -115,8 +171,67 @@ MessageData createLocalMessage({
           dialogId: dialogId!,
           createdAt: DateTime.now().toString())
     ],
+    forwarderFromUser: getForwardedMessageStatus(messageText),
   );
 }
+
+
+createDialog({
+  required ChatsBuilderBloc chatsBuilderBloc,
+  required int partnerId
+}) async {
+    final newDialog = await DialogsProvider().createDialog(chatType: 1, users: [partnerId], chatName: "p2p", chatDescription: null, isPublic: false);
+    if (newDialog != null) {
+      final initLength = chatsBuilderBloc.state.chats.length;
+      whenFinishAddingDialog(Stream<ChatsBuilderState> source) async {
+        chatsBuilderBloc.add(ChatsBuilderLoadMessagesEvent(dialogId: newDialog.dialogId));
+        await for (var value in source) {
+          if (value.chats.length > initLength) {
+            return;
+          }
+        }
+      }
+      await whenFinishAddingDialog(chatsBuilderBloc.stream);
+      return newDialog.dialogId;
+    }
+}
+
+void resendErrorMessage({
+  required int messageId,
+  required int dialogId,
+  required int userId,
+  required ChatsBuilderBloc bloc,
+  required MessageAttachmentsData? file,
+  required String messageText,
+  required ParentMessage? parentMessage,
+  required int? repliedMessageId
+}) async {
+  bloc.add(ChatsBuilderUpdateMessageWithErrorEvent(messageId: messageId, dialog: dialogId, isHandling: true));
+  try {
+    await Future.delayed(Duration(seconds: 2));
+    final sentMessage = await MessagesRepository().sendMessage(
+        dialogId: dialogId,
+        messageText: messageText,
+        parentMessageId: repliedMessageId,
+        filetype: file?.filetype,
+        bytes: file?.content != null ? base64Decode(file!.content!) : null,
+        filename: file?.name,
+        content: file?.content
+    );
+    final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
+    bloc.add(
+        ChatsBuilderUpdateLocalMessageEvent(
+            message: message,
+            dialogId: dialogId,
+            localMessageId: messageId));
+  } catch (err, stackTrace) {
+    Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Failed send a message");
+    bloc.add(
+        ChatsBuilderUpdateMessageWithErrorEvent(messageId: messageId, dialog: dialogId)
+    );
+  }
+}
+
 
 
 // messageSenderSendMissCallMessage({
@@ -150,79 +265,3 @@ MessageData createLocalMessage({
 //     BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
 // }
 //
-createDialog({
-  required ChatsBuilderBloc chatsBuilderBloc,
-  required int partnerId
-}) async {
-    final newDialog = await DialogsProvider().createDialog(chatType: 1, users: [partnerId], chatName: "p2p", chatDescription: null, isPublic: false);
-    print("SENDING_PUSH   ${newDialog?.dialogId}");
-    if (newDialog != null) {
-      final initLength = chatsBuilderBloc.state.chats.length;
-      whenFinishAddingDialog(Stream<ChatsBuilderState> source) async {
-        chatsBuilderBloc.add(ChatsBuilderLoadMessagesEvent(dialogId: newDialog.dialogId));
-        await for (var value in source) {
-          if (value.chats.length > initLength) {
-            return;
-          }
-        }
-      }
-      await whenFinishAddingDialog(chatsBuilderBloc.stream);
-      return newDialog.dialogId;
-    }
-}
-
-void resendErroredMessage({
-  required int messageId,
-  required int dialogId,
-  required int userId,
-  required BuildContext context,
-  required String messageText,
-  required ParentMessage? parentMessage,
-  required int? repliedMessageId
-}) async {
-  final localMessage = createLocalMessage(
-      dialogId: dialogId,
-      messageText: messageText,
-      parentMessage: parentMessage,
-      replyedMessageId: repliedMessageId,
-      userId: userId, filename: null, filetype: null, content: null
-  );
-  BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderDeleteLocalMessageEvent(dialogId: dialogId, messageId: messageId));
-  Navigator.of(context).pop();
-  try {
-    BlocProvider.of<ChatsBuilderBloc>(context).add(
-        ChatsBuilderAddMessageEvent(message: localMessage, dialogId: dialogId));
-    // TODO: if response status code is 200 else ..
-    final sentMessage = await MessagesRepository().sendMessage(
-        dialogId: dialogId,
-        messageText: messageText,
-        parentMessageId: repliedMessageId,
-        filetype: null,
-        bytes: null,
-        filename: null,
-        content: null
-    );
-    print("sentMessage response  $sentMessage");
-    if (sentMessage == null) {
-      customToastMessage(context: context, message: "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");
-      return;
-    }
-    final message = MessageData.fromJson(jsonDecode(sentMessage)["data"]);
-    BlocProvider.of<ChatsBuilderBloc>(context).add(
-        ChatsBuilderUpdateLocalMessageEvent(
-            message: message,
-            dialogId: dialogId,
-            localMessageId: localMessage.messageId));
-    BlocProvider.of<DialogsViewCubit>(context)
-        .updateLastDialogMessage(localMessage);
-    print("RESULT IS  $sentMessage ${BlocProvider.of<ChatsBuilderBloc>(context)}");
-  } catch (err) {
-    print("ERRRRRRRRROR  $err ");
-    BlocProvider.of<ChatsBuilderBloc>(context).add(
-        ChatsBuilderUpdateMessageWithErrorEvent(message: localMessage, dialog: dialogId)
-    );
-  }
-}
-
-
-

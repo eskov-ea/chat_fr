@@ -81,10 +81,14 @@ class AttachmentViewPageArguments{
   final String fileName;
   final String fileExt;
   final int attachmentId;
+  final String messageTime;
+  final bool isMe;
 
   const AttachmentViewPageArguments({
     required this.fileName,
     required this.fileExt,
+    required this.messageTime,
+    required this.isMe,
     required this.attachmentId
   });
 }

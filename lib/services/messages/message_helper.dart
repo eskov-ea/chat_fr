@@ -1,11 +1,11 @@
 import 'dart:typed_data';
 
+import 'package:chat/services/helpers/file_types_helper.dart';
+
 import 'messages_api_provider.dart';
 
 
-const List<String> GraphicTypes = ["png", "jpeg", "jpg", "pdf"];
-const List<String> AudioTypes = ["mp3", "mp4"];
-const List<String> DocumentTypes = [];
+
 
 
 class MessageHelper {
@@ -20,10 +20,7 @@ class MessageHelper {
     required String? filetype,
     required String? content
   }) {
-    if (GraphicTypes.contains(filetype)) {
-      /** send message with attached image file */
-      return messagesProvider.sendMessageWithFileBase64(dialogId: dialogId, messageText: messageText, filetype: filetype, parentMessageId: parentMessageId, filename: filename, bytes: bytes, content: content);
-    } else if (AudioTypes.contains(filetype)) {
+    if (AudioTypes.contains(filetype)) {
       /** send audio message  */
       return messagesProvider.sendAudioMessage(dialogId: dialogId, filetype: filetype, parentMessageId: parentMessageId, filename: filename, messageText: messageText, content: content);
     } else if (filetype != null && content != null) {
@@ -33,5 +30,17 @@ class MessageHelper {
       /** by default we send plain text message */
       return messagesProvider.sendTextMessage(dialogId: dialogId, messageText: messageText, parentMessageId: parentMessageId);
     }
+  }
+
+  Future<String> sendForwardMessage({
+    required String? messageText,
+    required String? filename,
+    required int dialogId,
+    required String? filetype,
+    required String? content,
+    required String? preview
+  }) {
+    return messagesProvider.forwardMessage(dialogId: dialogId, messageText: messageText, filetype: filetype, filename: filename, content: content, preview: preview);
+
   }
 }

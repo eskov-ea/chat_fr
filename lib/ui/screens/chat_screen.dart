@@ -1,19 +1,19 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
-import 'package:chat/helpers.dart';
-import 'package:chat/models/chat_builder_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/theme.dart';
+import 'package:chat/ui/widgets/action_bar/forward_message_alert_dialog.dart';
+import 'package:chat/ui/widgets/message/mesasges_list.dart';
+import 'package:chat/ui/widgets/message/reply_message_bar_widget.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../bloc/ws_bloc/ws_state.dart';
-import '../../../services/messages/messages_repository.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
-import '../../bloc/chats_builder_bloc/chats_builder_state.dart';
 import '../../models/contact_model.dart';
 import '../../models/message_model.dart';
 import '../../services/global.dart';
@@ -21,9 +21,8 @@ import '../../services/helpers/navigation_helpers.dart';
 import '../../services/messages/messages_api_provider.dart';
 import '../../view_models/user/users_view_cubit.dart';
 import '../../view_models/user/users_view_cubit_state.dart';
-import '../widgets/action_bar.dart';
+import '../widgets/action_bar/action_bar.dart';
 import '../widgets/chat_screen_call_button.dart';
-import '../widgets/message_widget.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 
 
@@ -70,11 +69,25 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   bool isOnline = false;
   bool isTyping = false;
+  late AnimationController _forwardMenuAnimationController;
+  late Animation _forwardMenuAnimation;
+  late AnimationController _selectedMessagesOptionsMenuAnimationController;
+  late Animation _selectedMessagesOptionsMenuAnimation;
   late final StreamSubscription usersViewCubitStateSubscription;
+  List<SelectedMessage>? forwardingMessages;
+  final focusNode = FocusNode();
+  String? replyMessage;
+  bool isRecording = false;
+  String? senderReplyName;
+  int? replyedMessageId;
+  ParentMessage? replyedParentMsg;
+  bool isSelectedMode = false;
+  List<SelectedMessage> selected = [];
+
 
   @override
   void initState() {
@@ -95,46 +108,73 @@ class _ChatScreenState extends State<ChatScreen> {
         _sendFinishTypingEvent();
       }
     });
+
+    _forwardMenuAnimationController = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 400)
+    )..addListener(() {
+      setState(() {});
+    });
+    _selectedMessagesOptionsMenuAnimationController = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 400)
+    )..addListener(() {
+      setState(() {});
+    });
+
+    _forwardMenuAnimation = Tween<double>(begin: 0, end: 1).animate(
+        CurvedAnimation(parent: _forwardMenuAnimationController, curve: Curves.fastOutSlowIn)
+    );
+    _selectedMessagesOptionsMenuAnimation = Tween<double>(begin: 0, end: 1).animate(
+        CurvedAnimation(parent: _forwardMenuAnimationController, curve: Curves.fastOutSlowIn)
+    );
+
    super.initState();
   }
+
+  void closeForwardMenu() {
+    forwardingMessages = null;
+    setState(() {});
+    _forwardMenuAnimationController.reverse();
+  }
+  void openForwardMenu(List<SelectedMessage> messages) {
+    forwardingMessages = messages;
+    setState(() {});
+    _forwardMenuAnimationController.forward();
+  }
+
   void _sendTypingEvent() async {
-    if (widget.dialogData?.dialogId == null) return;
-    while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
-      await Future.delayed(const Duration(seconds: 3));
+    if (widget.dialogData?.dialogId != null) {
+      while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
+        await Future.delayed(const Duration(seconds: 3));
+      }
+      BlocProvider.of<WsBloc>(context).presenceChannel!.trigger(eventName: "client-user-event",
+          data: {"dialogId" : widget.dialogData?.dialogId, "event" : "typing", "fromUser" : widget.userId, "toUser": widget.partnerId});
     }
-    BlocProvider.of<WsBloc>(context).presenceChannel!.trigger(eventName: "client-user-event",
-        data: {"dialogId" : widget.dialogData?.dialogId, "event" : "typing", "fromUser" : widget.userId, "toUser": widget.partnerId});
+
   }
 
   void _sendFinishTypingEvent() async {
-    if (widget.dialogData?.dialogId == null) return;
-    while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
-      await Future.delayed(const Duration(seconds: 3));
+    if (widget.dialogData?.dialogId != null) {
+      while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
+        await Future.delayed(const Duration(seconds: 3));
+      }
+      BlocProvider.of<WsBloc>(context).presenceChannel!.trigger(eventName: "client-user-event",
+          data: {"dialogId" : widget.dialogData?.dialogId, "event" : "finish_typing", "fromUser" : widget.userId, "toUser": widget.partnerId});
     }
-    BlocProvider.of<WsBloc>(context).presenceChannel!.trigger(eventName: "client-user-event",
-        data: {"dialogId" : widget.dialogData?.dialogId, "event" : "finish_typing", "fromUser" : widget.userId, "toUser": widget.partnerId});
   }
 
 
-
-  final focusNode = FocusNode();
-  String? replyMessage;
-  bool isRecording = false;
-  String? senderReplyName;
-  int? replyedMessageId;
-  ParentMessage? replyedParentMsg;
-  bool isSelectedMode = false;
-  List<int> selected = [];
-
-  Function? setReplyMessage(message, senderId, messageId) {
+  void setReplyMessage(String message, int senderId, int messageId, String senderName) {
     setState(() {
       replyMessage = message;
       replyedMessageId = messageId;
-      senderReplyName = getSenderName(widget.usersCubit.state.users, senderId);
+      senderReplyName = senderName;
       replyedParentMsg = ParentMessage.toJson(parentMessageText: message, parentMessageId: messageId, senderId: senderId);
     });
   }
-  Function? cancelReplyMessage() {
+
+  void cancelReplyMessage() {
     setState(() {
       replyMessage = null;
       senderReplyName = null;
@@ -149,40 +189,73 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void setSelectedMode(bool value){
-    setState(() {
-      isSelectedMode = value;
-      if (!value) selected = [];
-    });
+    isSelectedMode = value;
+    setState(() {});
+    if (value == true) {
+      _selectedMessagesOptionsMenuAnimationController.forward();
+    } else {
+      _selectedMessagesOptionsMenuAnimationController.reverse();
+    }
   }
 
   void deleteMessages() async {
     try {
-      final bool response =
-          await MessagesProvider().deleteMessage(messageId: selected);
+      isSelectedMode = false;
+      setState(() {});
+      List<int> ids = [];
+      for (final message in selected) {
+        ids.add(message.id);
+      }
+      final bool response = await MessagesProvider().deleteMessage(messageId: ids);
       if (response) {
         BlocProvider.of<ChatsBuilderBloc>(context).add(
             ChatsBuilderDeleteMessagesEvent(
-                messagesId: selected, dialogId: widget.dialogData!.dialogId));
+                messagesId: ids, dialogId: widget.dialogData!.dialogId));
       } else {
         customToastMessage(context: context, message: 'Не получилось удалить сообщения. Попробуйте еще раз');
       }
+      closeSelectedOptionsMenu();
     } catch (err) {
+      closeSelectedOptionsMenu();
       customToastMessage(context: context, message: 'Не получилось удалить сообщения. Попробуйте еще раз');
     }
   }
 
-  void setSelected(id) {
-    setState(() {
-      if (isSelectedMode) {
-        if (!selected.contains(id)) {
-          selected.add(id);
+  void deleteMessage(int id) async {
+    print("Trying delete message $selected");
+    try {
+      final bool response = await MessagesProvider().deleteMessage(messageId: [id]);
+      if (response) {
+        BlocProvider.of<ChatsBuilderBloc>(context).add(
+            ChatsBuilderDeleteMessagesEvent(
+                messagesId: [id], dialogId: widget.dialogData!.dialogId));
+      } else {
+        customToastMessage(context: context, message: 'Не получилось удалить сообщения. Попробуйте еще раз');
+      }
+    } catch (err) {
+      customToastMessage(context: context, message: 'Ошибка. Не получилось удалить сообщения. Попробуйте еще раз');
+    }
+  }
+
+  void setSelected(SelectedMessage message) {
+    if (isSelectedMode) {
+      setState(() {
+        if (!selected.any((m) => m.id == message.id)) {
+          selected.add(message);
         } else {
-          selected.remove(id);
+          selected.remove(message);
         }
         if (selected.isEmpty) setSelectedMode(false);
-      }
-      print(selected);
+      });
+    }
+  }
+
+  void closeSelectedOptionsMenu() {
+    setState(() {
+      selected = [];
+      isSelectedMode = false;
     });
+    _selectedMessagesOptionsMenuAnimationController.reverse();
   }
 
   Widget getDialogName(DialogData? dialog, String username) {
@@ -217,6 +290,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void dispose() {
     focusNode.dispose();
+    _forwardMenuAnimationController.dispose();
     usersViewCubitStateSubscription.cancel();
     super.dispose();
   }
@@ -275,16 +349,18 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ],
       ),
-      body: Container(
-        height: double.infinity,
-        width: double.infinity,
+    body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
         color: AppColors.backgroundLight,
-        child: Column(
-                children: [
-                  Expanded(
-                    child: Stack(
-                      children: [
-                        Container(
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                Expanded(
+                  child: Stack(
+                    children: [
+                      Container(
                           decoration: const BoxDecoration(
                             image: DecorationImage(
                               image: AssetImage("assets/images/chat_background.jpg"),
@@ -292,354 +368,54 @@ class _ChatScreenState extends State<ChatScreen> {
                             ),
                           ),
                           child: widget.dialogData?.dialogId != null
-                              ? _MessageList(
-                            userId: widget.userId,
-                            dialogData: widget.dialogData!,
-                            focusNode: focusNode,
-                            setReplyMessage: setReplyMessage,
-                            usersCubit: widget.usersCubit,
-                            partnerName: widget.username,
-                            setSelectedMode: setSelectedMode,
-                            isSelectedMode: isSelectedMode,
-                            selected: selected,
-                            setSelected: setSelected
+                              ? MessagesListStatefullWidget(
+                              userId: widget.userId,
+                              dialogData: widget.dialogData!,
+                              focusNode: focusNode,
+                              setReplyMessage: setReplyMessage,
+                              usersCubit: widget.usersCubit,
+                              partnerName: widget.username,
+                              setSelectedMode: setSelectedMode,
+                              isSelectedMode: isSelectedMode,
+                              selected: selected,
+                              setSelected: setSelected,
+                              openForwardMenu: openForwardMenu,
+                              deleteMessage: deleteMessage
                           )
                               : const Center(child: Text('Нет сообщений'),)
-                        ),
-                        if (isRecording == true ) Positioned.fill(
-                            child: BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
-                              child: Container(
-                                color: Colors.black12,
-                              ),
-                            )
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (replyMessage != null) _ReplyMessageBar(replyMessage: replyMessage!, cancelReplyMessage: cancelReplyMessage, senderName: senderReplyName!,),
-                  isUserAllowedToWrite(widget.dialogData, widget.userId)
-                    ? ActionBar(userId: widget.userId, partnerId: widget.partnerId, dialogId: widget.dialogData?.dialogId,
-                        setDialogData: setDialogData, rootWidget: widget, username: widget.username,
-                        focusNode: focusNode, setRecording: setRecording, isRecording: isRecording, dialogData: widget.dialogData,
-                        dialogCubit: widget.dialogCubit, cancelReplyMessage: cancelReplyMessage, parentMessage: replyedParentMsg, isSelectedMode: isSelectedMode,
-                        selected: selected, deleteMessages: deleteMessages
-                      )
-                    : ReadOnlyChannelMode(context)
-                ],
-              ),
-      ),
-    );
-  }
-}
-
-
-class _MessageList extends StatefulWidget {
-  const _MessageList({
-    Key? key,
-    required this.userId,
-    required this.dialogData,
-    required this.focusNode,
-    required this.setReplyMessage,
-    required this.usersCubit,
-    required this.partnerName,
-    required this.isSelectedMode,
-    required this.setSelectedMode,
-    required this.selected,
-    required this.setSelected,
-  }) : super(key: key);
-
-  final int userId;
-  final DialogData dialogData;
-  final FocusNode focusNode;
-  final String partnerName;
-  final  setReplyMessage;
-  final UsersViewCubit usersCubit;
-  final bool isSelectedMode;
-  final Function setSelectedMode;
-  final List<int> selected;
-  final Function(int) setSelected;
-
-  @override
-  State<_MessageList> createState() => _MessageListState();
-}
-
-class _MessageListState extends State<_MessageList> {
-
-  final messagesRepository = MessagesRepository();
-  final ScrollController _scrollController = ScrollController();
-  bool _shouldAutoscroll = true;
-  int pageNumber = 1;
-  bool isLoadingMessages = false;
-  bool isConnectionThrottling = false;
-  late final StreamSubscription _newMessagesSubscription;
-
-  @override
-  void dispose() {
-    _scrollController.removeListener(() { setupScrollListener; });
-    _newMessagesSubscription.cancel();
-    super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // In development if we hot restart the app the yielded state in stream are not reachable
-    _newMessagesSubscription = BlocProvider.of<WsBloc>(context).stream.listen(_onNewMessageReceived);
-    BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogData.dialogId));
-    setupScrollListener(
-      scrollController: _scrollController,
-      onAtTop: () {
-        print("Loaded messages:   onAtTop    $pageNumber");
-        loadNextMessages();
-      }
-    );
-  }
-
-  void loadNextMessages() {
-    if (!BlocProvider.of<ChatsBuilderBloc>(context).state.isError) {
-      BlocProvider.of<ChatsBuilderBloc>(context).add(
-          ChatsBuilderLoadMessagesEvent(
-              dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
-      pageNumber++;
-    }
-  }
-
-  void resetMessagesAndReload() {
-    setState(() {
-      pageNumber = 1;
-      isLoadingMessages = true;
-    });
-
-  }
-
-  void setupScrollListener(
-      {required ScrollController scrollController,
-        Function? onAtTop}) {
-    scrollController.addListener(() {
-      if (scrollController.position.atEdge) {
-        // Reach the top of the list
-        if (scrollController.position.pixels != 0) {
-          onAtTop?.call();
-        }
-      }
-    });
-  }
-
-  void _onNewMessageReceived(WsBlocState state) {
-    if (state is WsStateReceiveNewMessage) {
-      if (state.message.dialogId == widget.dialogData.dialogId) {
-        BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogData.dialogId));
-      }
-    }
-  }
-
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<ChatsBuilderBloc, ChatsBuilderState>(
-          builder: (context, state) {
-            if (state is ChatsBuilderState) {
-              print("Finding chats:   ${state.chats}");
-              final ChatsData? currentState = findChat(state.chats, widget.dialogData.dialogId);
-              if (state.isError) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Text("Произошла ошибка при загрузке сообщений"),
-                    SizedBox(height: 10, width: MediaQuery.of(context).size.width),
-                    ElevatedButton(
-                      onPressed: () {
-                        BlocProvider.of<ChatsBuilderBloc>(context).add(
-                            ChatsBuilderLoadMessagesEvent(
-                                dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
-                        pageNumber++;
-                      },
-                      child: Text("Обновить"),
-                    )
-                  ],
-                );
-              }
-              if (currentState == null) {
-                loadNextMessages();
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const CircularProgressIndicator(),
-                      // Transform.translate(
-                      //   offset: isConnectionThrottling ? const Offset(0, 50) : const Offset(0, -150),
-                      //   child: const Text("Данные загружаются подозрительно долго, возможно причина в Интернет-подключении",
-                      //     textAlign: TextAlign.center,
-                      //     style: TextStyle(fontSize: 16),
-                      //   ),
-                      // ),
-                      // Transform.translate(
-                      //   offset: isConnectionThrottling ? const Offset(0, 80) : const Offset(0, -180),
-                      //   child: ElevatedButton(
-                      //     onPressed: () { loadNextMessages(); },
-                      //     child: const Text("Обновить"),
-                      //   ),
-                      // )
+                      ),
+                      if (isRecording == true ) Positioned.fill(
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+                            child: Container(
+                              color: Colors.black12,
+                            ),
+                          )
+                      ),
                     ],
                   ),
-                );
-              }
-              if ( currentState.messages.isEmpty) return const Center(child: Text('Нет сообщений'),);
-              return Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      itemCount: currentState.messages.length,
-                      reverse: true,
-                      itemBuilder: (context, index) {
-                        return Column(
-                          children: [
-                            if (index == currentState.messages.length -1 || (index < currentState.messages.length -1 &&
-                                currentState.messages[index].messageDate != currentState.messages[index+1].messageDate))
-                              Container(
-                                decoration: const BoxDecoration(
-                                  color: Colors.white54,
-                                  borderRadius:  BorderRadius.all(Radius.circular(10)),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  child: Text(
-                                    currentState.messages[index].messageDate,
-                                  ),
-                                ),
-                              ),
-                            if (index == currentState.messages.length -1 || (index < currentState.messages.length -1 &&
-                                currentState.messages[index].messageDate != currentState.messages[index+1].messageDate))
-                              SizedBox(
-                                height: 8,
-                              ),
-                            MessageWidget(
-                              key: ValueKey<int>(currentState.messages[index].messageId),
-                              index: index,
-                              senderId: currentState.messages[index].senderId,
-                              userId: widget.userId,
-                              selected: widget.selected,
-                              selectedMode: widget.isSelectedMode,
-                              setSelectedMode: widget.setSelectedMode,
-                              setSelected: widget.setSelected,
-                              messageId: currentState.messages[index].messageId,
-                              message: currentState.messages[index].message,
-                              messageDate: currentState.messages[index].messageDate,
-                              messageTime: currentState.messages[index].messageTime,
-                              focusNode: widget.focusNode,
-                              setReplyMessage: widget.setReplyMessage,
-                              status: Helpers.checkPartnerReadMessage(currentState.messages[index].status, widget.userId),
-                              file: currentState.messages[index].file,
-                              p2p: widget.dialogData.chatType.p2p,
-                              senderName: getSenderName(widget.usersCubit.state.users, currentState.messages[index].senderId),
-                              parentMessage: currentState.messages[index].parentMessage,
-                              isError: currentState.messages[index].isError,
-                              repliedMsgSenderName: currentState.messages[index].parentMessage != null
-                                  ? getSenderName(widget.usersCubit.state.users, currentState.messages[index].parentMessage?.senderId)
-                                  : null,
-                              repliedMsgId: currentState.messages[index].parentMessage?.parentMessageId,
-                              dialogId: widget.dialogData.dialogId,
-                            )
-                          ],
-                        );
-                      }),
-                  ),
-
-                  // state.isLoadingMessages
-                  // ?  Row(
-                  //     mainAxisAlignment: MainAxisAlignment.center,
-                  //     children: [
-                  //       CircularProgressIndicator(),
-                  //       SizedBox(width: 30,),
-                  //       ElevatedButton(
-                  //         onPressed: (){},
-                  //         child: Text("Обновить")
-                  //       )
-                  //     ],
-                  // )
-                  // :   const SizedBox.shrink()
-                ]
-              );
-            // );
-          } else {
-              return const Center(child: Text('Загрузка...'),);
-            }
-          },
-    );
-  }
-}
-
-class _ReplyMessageBar extends StatelessWidget {
-  const _ReplyMessageBar({
-    required this.replyMessage,
-    required this.senderName,
-    required this.cancelReplyMessage,
-    Key? key
-  }) : super(key: key);
-
-  final String replyMessage;
-  final String senderName;
-  final cancelReplyMessage;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xff343434),
-        borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(8.0),
-            topRight: Radius.circular(8.0)
-        ),
-      ),
-      child: Row(
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 10, right: 25),
-            child: Icon(Icons.subdirectory_arrow_left),
-          ),
-          Container(
-            color: Colors.blueAccent,
-            width: 3,
-            height: 30,
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8 ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(senderName,
-                    style: TextStyle(
-                        color: Color(0xFFC07602)
-                    ),
-                  ),
-                  const SizedBox(height: 5,),
-                  Text(
-                    replyMessage,
-                    maxLines: 1,
-                    style: TextStyle(
-                      color: Colors.white70
-                    ),
-                  ),
-                ]
-              ),
+                ),
+                if (replyMessage != null) ReplyMessageBar(replyMessage: replyMessage!, cancelReplyMessage: cancelReplyMessage, senderName: senderReplyName!),
+                isUserAllowedToWrite(widget.dialogData, widget.userId)
+                ? ActionBar(userId: widget.userId, partnerId: widget.partnerId, dialogId: widget.dialogData?.dialogId,
+                    setDialogData: setDialogData, rootWidget: widget, username: widget.username,
+                    focusNode: focusNode, setRecording: setRecording, isRecording: isRecording, dialogData: widget.dialogData,
+                    dialogCubit: widget.dialogCubit, cancelReplyMessage: cancelReplyMessage, parentMessage: replyedParentMsg, isSelectedMode: isSelectedMode,
+                    selected: selected, deleteMessages: deleteMessages, animation: _selectedMessagesOptionsMenuAnimation, animationController: _selectedMessagesOptionsMenuAnimationController,
+                    openForwardMessageMenu: openForwardMenu)
+                : ReadOnlyChannelMode(context),
+              ],
             ),
-          ),
-          IconButton(
-            onPressed: (){
-              cancelReplyMessage();
-            },
-            icon: const Icon(Icons.close)
-          )
-        ],
+            ForwardMessageAlertDialog(userId: widget.userId, animationController: _forwardMenuAnimationController, animation: _forwardMenuAnimation, close: closeForwardMenu,
+              forwardingMessages: forwardingMessages, closeSelectedOptionsMenu: closeSelectedOptionsMenu,
+            )
+          ]
+        )
       ),
     );
   }
 }
+
 
 Widget ReadOnlyChannelMode(BuildContext context) {
   return Container(
@@ -674,16 +450,6 @@ bool isUserAllowedToWrite(DialogData? dialogData, int userId) {
   }
 }
 
-ChatsData? findChat(List<ChatsData> chats, int dialogId) {
-  final it = chats.iterator;
-  while(it.moveNext()) {
-    if (it.current.chatId == dialogId) {
-      return it.current;
-    }
-  }
-  return null;
-}
-
 UserContact? findPartnerUserProfile(UsersViewCubit usersCubit, int partnerId) {
   UserContact? user;
   if (usersCubit.state is UsersViewCubitLoadedState) {
@@ -711,13 +477,20 @@ class ChatPageArguments {
     required this.dialogData, required this.username, required this.dialogCubit, required this.usersCubit});
 }
 
-String? getSenderName(usersCubit, senderId){
-  if (senderId == 5) return "MCFEF Бот";
-  String name = "Вы";
-  usersCubit.forEach((user) {
-    if (user.id == senderId) {
-      name = "${user.lastname} ${user.firstname}";
-    }
-  });
-  return name;
+
+class SelectedMessage extends Equatable {
+  final int id;
+  final String message;
+  final String author;
+  final MessageAttachmentsData? file;
+
+  const SelectedMessage({required this.id, required this.message, required this.author, required this.file});
+
+  @override
+  String toString() {
+    return "Instance of SelectedMessage[ $id, $message, $author, $file ]";
+  }
+
+  @override
+  List<Object?> get props => [id];
 }

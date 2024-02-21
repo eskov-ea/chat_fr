@@ -147,7 +147,7 @@ import 'messages/messages_repository.dart';
     );
   }
 
-  loadFileAndSaveLocally({required String fileName, required attachmentId}) async {
+  Future<File?> loadFileAndSaveLocally({required String fileName, required attachmentId}) async {
     final Directory documentDirectory = await getApplicationDocumentsDirectory();
     final String path = documentDirectory.path;
     final File file = File('$path/$fileName');
