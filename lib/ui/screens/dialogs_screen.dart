@@ -92,13 +92,16 @@ class _MessagesPageState extends State<MessagesPage> {
 
   Widget _mapStateToWidget(BuildContext context, DialogsViewCubitState state) {
     if (state is DialogsLoadedViewCubitState && userId != null) {
+      if (!state.isFirstInitialized || state.isLoading) {
+        return DialogsShimmer();
+      }
       if (state.isError) {
         return ClientErrorHandler.makeErrorInfoWidget(state.errorType!, refreshAllData);
       }
       if (!state.isAuthenticated) {
         return const UnauthenticatedWidget();
       }
-      if (state.dialogs.isEmpty && state.isFirstInitialized) {
+      if (state.dialogs.isEmpty) {
         return Center(
             key: UniqueKey(),
             child: Column(
@@ -176,22 +179,26 @@ class _MessagesPageState extends State<MessagesPage> {
         );
       }
     } else {
-      return Container(
-        key: UniqueKey(),
-        child: Column(
-          children: [
-            CustomSearchWidget(controller: searchController, searchCallback: searchDialog),
-            const Expanded(
+      return DialogsShimmer();
+    }
+  }
+
+  Widget DialogsShimmer() {
+    return Container(
+      key: UniqueKey(),
+      child: Column(
+        children: [
+          CustomSearchWidget(controller: searchController, searchCallback: searchDialog),
+          const Expanded(
               child: Shimmer(
                   child: ShimmerLoading(
                       child: DialogsSkeletonWidget()
                   )
               )
-            )
-          ],
-        ) ,
-      );
-    }
+          )
+        ],
+      ) ,
+    );
   }
 
   @override

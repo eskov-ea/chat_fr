@@ -12,6 +12,7 @@ class DialogsLoadedViewCubitState extends DialogsViewCubitState {
   final bool isAuthenticated;
   final bool isFirstInitialized;
   final AppErrorExceptionType? errorType;
+  final bool isLoading;
 
   DialogsLoadedViewCubitState({
     required this.dialogs,
@@ -19,7 +20,8 @@ class DialogsLoadedViewCubitState extends DialogsViewCubitState {
     required this.isError,
     required this.isAuthenticated,
     required this.isFirstInitialized,
-    required this.errorType
+    required this.errorType,
+    required this.isLoading
   });
 
   @override
@@ -27,22 +29,24 @@ class DialogsLoadedViewCubitState extends DialogsViewCubitState {
       identical(this, other) ||
           other is DialogsLoadedViewCubitState &&
               runtimeType == other.runtimeType &&
-              true == false &&
+              isLoading == other.isLoading &&
               compareDialogDataLists(dialogs, other.dialogs) &&
               searchQuery == other.searchQuery &&
               errorType == other.errorType &&
               isAuthenticated == other.isAuthenticated &&
               isFirstInitialized == other.isFirstInitialized &&
+              true == false &&
               isError == other.isError;
 
   @override
-  int get hashCode => dialogs.hashCode ^ dialogs.length.hashCode ^ searchQuery.hashCode ^ isError.hashCode ^ isFirstInitialized.hashCode ^ isAuthenticated.hashCode ^ errorType.hashCode;
+  int get hashCode => dialogs.hashCode ^ dialogs.length.hashCode ^ isLoading.hashCode ^ searchQuery.hashCode ^ isError.hashCode ^ isFirstInitialized.hashCode ^ isAuthenticated.hashCode ^ errorType.hashCode;
 
   DialogsLoadedViewCubitState copyWith({
     List<DialogData>? dialogs,
     String? searchQuery,
     bool? isError,
     bool? isAuthenticated,
+    bool? isLoading,
     bool? isFirstInitialized,
     AppErrorExceptionType? errorType
   }) {
@@ -52,6 +56,7 @@ class DialogsLoadedViewCubitState extends DialogsViewCubitState {
       isError: isError ?? this.isError,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       isFirstInitialized: isFirstInitialized ?? this.isFirstInitialized,
+      isLoading: isLoading ?? this.isLoading,
       errorType: errorType ?? this.errorType
     );
   }

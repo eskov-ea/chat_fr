@@ -54,14 +54,12 @@ class DialogData {
           messageCount: json["message_count"],
           picture: json["picture"],
           createdAt: DateTime.tryParse(json["created_at"]),
-          chatUsers: json["chat_users"] != null
-              ? json["chat_users"]
-                  .map<ChatUser>((chatUser) => ChatUser.fromJson(chatUser))
-                  .toList()
-              : null);
-    } catch (err) {
-      print(err);
-      throw AppErrorException(AppErrorExceptionType.parsing);
+          chatUsers: json["chat_users"]
+            .map<ChatUser>((chatUser) => ChatUser.fromJson(chatUser))
+            .toList()
+          );
+    } catch (err, stack) {
+      throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
     }
   }
 
@@ -114,8 +112,8 @@ class DialogType {
           picture: json["picture"],
           name: json["name"],
           description: json["description"]);
-    } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.parsing);
+    } catch (err, stack) {
+      throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
     }
   }
 }
@@ -191,8 +189,8 @@ class DialogPartnerData {
           senderName: json["fullname"],
           imageUrl: json["imageUrl"] ??
               "https://sushistar73.ru/assets/img/noavatar.png");
-    } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.parsing);
+    } catch (err, stack) {
+      throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
     }
   }
 }
@@ -257,9 +255,8 @@ class DialogMessageData {
               ? json["attachments"][0]["filetype"]
               : null);
     }
-    catch (err) {
-      throw AppErrorException(AppErrorExceptionType.parsing);
-      return DialogMessageData.emptyData();
+    catch (err, stack) {
+      throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
     }
   }
 }
@@ -273,8 +270,8 @@ class SenderMessageData {
       return SenderMessageData(
         id: json["_id"] ?? '',
       );
-    } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.parsing);
+    } catch (err, stack) {
+      throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
     }
   }
 }
@@ -302,9 +299,11 @@ class ChatUser {
           userId: json["user_id"],
           chatUserRole: json["chat_user_role_id"],
           active: json["active"],
-          user: UserContact.fromJson(json["user"]));
-    } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.parsing);
+          user: json["user"] != null ?UserContact.fromJson(json["user"])
+            : UserContact(id: json["user_id"], firstname: 'удален', lastname: 'Пользователь', middlename: '', company: '', position: '', phone: '', dept: '', email: '', avatar: null)
+      );
+    } catch (err, stack) {
+      throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
     }
   }
 
@@ -327,8 +326,8 @@ class DialogId {
   static DialogId fromJson(json) {
     try {
       return DialogId(dialogId: json["dialogId"] ?? json["_id"]);
-    } catch (err) {
-      throw AppErrorException(AppErrorExceptionType.parsing);
+    } catch (err, stack) {
+      throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
     }
   }
 }

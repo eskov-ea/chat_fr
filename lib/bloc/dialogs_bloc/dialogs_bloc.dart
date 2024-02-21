@@ -103,17 +103,17 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       DialogsLoadEvent event, Emitter<DialogsState> emit
       ) async {
     try {
+      emit(state.copyWith(isLoading: true));
       List<DialogData> dialogs = await dialogRepository.getDialogs();
       if (dialogs.isNotEmpty) sortDialogsByLastMessage(dialogs);
-      final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: dialogs), isAuthenticated: true, isErrorHappened: false, isFirstInitialized: true);
+      final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: dialogs), isLoading: false, isAuthenticated: true, isErrorHappened: false, isFirstInitialized: true);
       emit(newState);
     } catch(err, stack) {
       if (err is AppErrorException && err.type == AppErrorExceptionType.auth) {
         errorHandlerBloc.add(ErrorHandlerAccessDeniedEvent(error: err));
       } else {
-        await Future.delayed(const Duration(milliseconds: 300));
         err as AppErrorException;
-        final errorState = state.copyWith(dialogsContainer: const DialogsListContainer.initial(), searchQuery: "", isErrorHappened: true, errorType: err.type);
+        final errorState = state.copyWith(dialogsContainer: const DialogsListContainer.initial(), isLoading: false, searchQuery: "", isErrorHappened: true, errorType: err.type, isFirstInitialized: true);
         emit(errorState);
       }
     }
@@ -181,7 +181,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     for (var dialog in newDialogs) {
       if(dialog.dialogId == event.dialogId) {
         for (var user in dialog.chatUsers) {
-          if (user.user.id == event.user.user.id) {
+          if (user.userId == event.user.userId) {
             dialog.chatUsers.remove(user);
             break;
           }

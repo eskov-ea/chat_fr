@@ -33,58 +33,35 @@ class TextBodyWidget extends StatelessWidget {
     if (message.isNotEmpty && message.trim() != "") {
       return Container(
         constraints: BoxConstraints(
-            maxWidth: MediaQuery
-                .of(context)
-                .size
-                .width * 0.9,
+            maxWidth: MediaQuery.of(context).size.width * 0.9,
             minWidth: 100
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
               horizontal: 0, vertical: 0),
           child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
 
-                if (parentMessage != null) RepliedMessageBodyWidget(
-                  senderName: repliedMsgSenderName!,
-                  parentMessage: parentMessage!,
-                ),
+              if (parentMessage != null) RepliedMessageBodyWidget(
+                senderName: repliedMsgSenderName!,
+                parentMessage: parentMessage!,
+              ),
 
-                // if (p2p != 1 && !isMe) authorNameWidgetGroupChat(senderName),
-                Container(
-                  alignment: Alignment.topLeft,
-                    padding: const EdgeInsets.only(
-                        right: 12.0, left: 15, top: 7, bottom: 13),
-                    child: SelectableLinkify(
-                      onOpen: (link) => _launchUrl(Uri.tryParse(link.url)),
-                      text: message,
-                      style: const TextStyle(
-                          color: Colors.black, fontSize: 16),
-                      textAlign: TextAlign.start,
-                      linkStyle: const TextStyle(
-                          color: Colors.blueAccent, fontSize: 16),
-                    )
-                ),
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.end,
-                //   children: [
-                //     Padding(
-                //       padding: EdgeInsets.only(right: 10, bottom: 5),
-                //       child: Text(
-                //         messageTime,
-                //         style: const TextStyle(
-                //           color: AppColors.textFaded,
-                //           fontSize: 12,
-                //           fontWeight: FontWeight.bold,
-                //         ),
-                //       ),
-                //     ),
-                //     if (isMe) const SizedBox(width: 1),
-                //     if (isMe) StatusWidget(status),
-                //   ],
-                // ),
-              ]
+              // if (p2p != 1 && !isMe) authorNameWidgetGroupChat(senderName),
+              Container(
+                alignment: Alignment.topLeft,
+                  padding: const EdgeInsets.only(
+                    right: 12.0, left: 15, top: 7, bottom: 0),
+                  child: SelectableLinkify(
+                    onOpen: (link) => _launchUrl(Uri.tryParse(link.url)),
+                    text: message,
+                    style: const TextStyle(color: Colors.black, fontSize: 16),
+                    textAlign: TextAlign.start,
+                    linkStyle: const TextStyle(color: Colors.blueAccent, fontSize: 16),
+                  )
+              ),
+            ]
           ),
         ),
       );

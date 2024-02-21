@@ -72,7 +72,7 @@ class MessageData extends Equatable{
   };
 
   @override
-  List<Object?> get props => [messageId, senderId, status, isError, isHandling];
+  List<Object?> get props => [messageId, senderId, file, status, isError, isHandling];
 }
 
 class MessageStatuses extends Equatable {

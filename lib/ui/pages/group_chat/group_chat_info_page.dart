@@ -105,7 +105,7 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
     setState(() {
       stateUsers.remove(user);
     });
-    _dialogsProvider.exitDialog(user.user.id, widget.dialogData.dialogId);
+    _dialogsProvider.exitDialog(user.userId, widget.dialogData.dialogId);
   }
 
 
@@ -186,7 +186,7 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              UserAvatarWidget(userId: stateUsers[index].user.id, size: 20),
+                              UserAvatarWidget(userId: stateUsers[index].userId, size: 20),
                               // CircleAvatar(
                               //   radius: 20,
                               //   backgroundColor: Colors.grey,
@@ -210,7 +210,7 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                                         : BorderSide(width: 1, color: Colors.black26)
                                     )
                                   ),
-                                  child: Text("${stateUsers[index].user.lastname} ${stateUsers[index].user.firstname}",
+                                  child: Text("${stateUsers[index].user?.lastname ?? 'Удален'} ${stateUsers[index].user?.firstname ?? 'Удален'}",
                                     style: TextStyle(fontSize: 20),
                                   ),
                                 ),
@@ -235,7 +235,7 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                                                   mainAxisAlignment: MainAxisAlignment.end,
                                                   crossAxisAlignment: CrossAxisAlignment.end,
                                                   children: [
-                                                    Text('Удалить ${stateUsers[index].user.lastname} ${stateUsers[index].user.firstname} из списка участников?',
+                                                    Text('Удалить ${stateUsers[index].user?.lastname ?? 'Удален'} ${stateUsers[index].user?.firstname  ?? 'Удален'} из списка участников?',
                                                       style: TextStyle(fontSize: 18, color: Colors.black),
                                                     ),
                                                     SizedBox(
