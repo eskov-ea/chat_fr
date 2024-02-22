@@ -23,6 +23,7 @@ import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:chat/view_models/websocket/websocket_view_cubit.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
@@ -60,24 +61,32 @@ class MyHttpOverrides extends HttpOverrides {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  if (!kIsWeb) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
   HttpOverrides.global = MyHttpOverrides();
   FlutterError.onError = (errorDetails) async {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    if (!kIsWeb) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
 
-    final userId = await DataProvider().getUserId();
-    FirebaseCrashlytics.instance.recordError(
-      errorDetails.exception,
-      errorDetails.stack,
-      information: ["[ USER ID ]: $userId"]
-    );
+      final userId = await DataProvider().getUserId();
+      FirebaseCrashlytics.instance.recordError(
+          errorDetails.exception,
+          errorDetails.stack,
+          information: ["[ USER ID ]: $userId"]
+      );
+    }
 
   };
   PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
+    if (!kIsWeb) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    }
+    return false;
   };
   runApp(const MyApp());
 }

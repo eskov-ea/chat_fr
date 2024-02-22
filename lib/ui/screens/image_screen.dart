@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:chat/ui/widgets/web_container_wrapper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ class ImageScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
+          backgroundColor: Colors.black,
           appBar: AppBar(
             iconTheme: Theme.of(context).iconTheme,
             backgroundColor: Colors.black,
@@ -35,8 +37,8 @@ class ImageScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.of(context).pop();
                 },
-                child: Row(
-                  children: const [
+                child: const Row(
+                  children: [
                     Icon( CupertinoIcons.back,),
                     Text('Назад', style: TextStyle(fontSize: 20),),
                   ],
@@ -44,13 +46,8 @@ class ImageScreen extends StatelessWidget {
               ),
             ),
           ),
-          body: (localFileAttachment == null && !kIsWeb) || (fileBytesRepresentation == null && kIsWeb)
-            ? const Center(
-              child: Text('Ошибка'),
-            )
-            : Container(
+          body: WebContainerWrapper(
               color: Colors.black,
-              padding: const EdgeInsets.all(0),
               child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.max,
@@ -71,7 +68,7 @@ class ImageScreen extends StatelessWidget {
                           context: context,
                           builder: (context) => ImageOptionsDialogWidget(
                             context: context,
-                            imageSaver: (){saveImageFunction();},
+                            imageSaver: saveImageFunction
                           ),
                         );
                       }

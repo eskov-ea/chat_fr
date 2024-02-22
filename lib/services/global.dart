@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+// import 'dart:html' as html;
 import 'dart:io';
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_event.dart';
@@ -31,6 +32,7 @@ import 'messages/messages_repository.dart';
 
   AudioPlayer _player = AudioPlayer();
   Duration? TZ;
+  const MAX_WIDTH = 700.0;
 
   class SipConfig {
     static String? sipDomain = null;
@@ -147,6 +149,7 @@ import 'messages/messages_repository.dart';
     );
   }
 
+  ///TODO: refactor to use bytes?
   Future<File?> loadFileAndSaveLocally({required String fileName, required attachmentId}) async {
     final Directory documentDirectory = await getApplicationDocumentsDirectory();
     final String path = documentDirectory.path;
@@ -163,6 +166,15 @@ import 'messages/messages_repository.dart';
       await file.writeAsBytes(bytes);
       return file;
     }
+  }
+
+  Future<String?> loadFileOnWebPlatform({required String fileName, required attachmentId}) async {
+    final fileData = await MessagesRepository().loadAttachmentData(
+        attachmentId: attachmentId.toString());
+    if (fileData == null && fileData?.content == null) {
+      return null;
+    }
+    return fileData!.content!;
   }
 
   Future<File?> loadAndSaveLocallyUserAvatar({required int? userId}) async {
@@ -213,25 +225,27 @@ import 'messages/messages_repository.dart';
 
   webPlatformSaveFile({required bytes, required filename}) async {
 
-    if(kIsWeb) {
-      // final blob = html.Blob([bytes]);
-      // final url = html.Url.createObjectUrlFromBlob(blob);
-      // final anchor = html.document.createElement('a') as html.AnchorElement
-      //   ..href = url
-      //   ..style.display = 'none'
-      //   ..download = '$filename';
-      // html.document.body?.children.add(anchor);
-      //
-      // anchor.click();
-      //
-      // html.document.body?.children.remove(anchor);
-      // html.Url.revokeObjectUrl(url);
-    } else {
-      throw Exception("Should be called on web only");
-    }
+    // if(kIsWeb) {
+    //   final blob = html.Blob([bytes]);
+    //   final url = html.Url.createObjectUrlFromBlob(blob);
+    //   final anchor = html.document.createElement('a') as html.AnchorElement
+    //     ..href = url
+    //     ..style.display = 'none'
+    //     ..download = '$filename';
+    //   html.document.body?.children.add(anchor);
+    //
+    //   anchor.click();
+    //
+    //   html.document.body?.children.remove(anchor);
+    //   html.Url.revokeObjectUrl(url);
+    // } else {
+    //   throw Exception("Should be called on web only");
+    // }
   }
 
-
+  double getWidthMaxWidthGuard(BuildContext context) {
+    return MediaQuery.of(context).size.width > MAX_WIDTH ? MAX_WIDTH : MediaQuery.of(context).size.width;
+  }
 
   getMonthRussianName(int month){
     switch(month){

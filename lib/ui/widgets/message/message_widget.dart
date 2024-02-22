@@ -6,7 +6,7 @@ import 'package:chat/services/helpers/file_types_helper.dart';
 import 'package:chat/services/popup_manager.dart';
 import 'package:chat/ui/screens/chat_screen.dart';
 import 'package:chat/ui/widgets/action_bar/forward_message_alert_dialog.dart';
-import 'package:chat/ui/widgets/image_preview_widget.dart';
+import 'package:chat/ui/widgets/message/image_preview_widget.dart';
 import 'package:chat/ui/widgets/message/message_error_widget.dart';
 import 'package:chat/ui/widgets/message/message_status_widget.dart';
 import 'package:chat/ui/widgets/message/messge_content_widget.dart';
@@ -26,7 +26,7 @@ import '../../../services/global.dart';
 import '../../../services/helpers/message_sender_helper.dart';
 import '../../../theme.dart';
 import '../../navigation/main_navigation.dart';
-import '../audioplayer_widget.dart';
+import 'audioplayer_widget.dart';
 
 class MessageWidget extends StatefulWidget {
   const MessageWidget({

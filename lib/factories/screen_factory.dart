@@ -3,7 +3,7 @@ import 'package:chat/ui/widgets/pass_widget.dart';
 import 'package:chat/ui/screens/users_screen.dart';
 import 'package:chat/ui/screens/dialogs_screen.dart';
 import 'package:chat/ui/screens/chat_screen.dart';
-import 'package:chat/ui/widgets/audioplayer_widget.dart';
+import 'package:chat/ui/widgets/message/audioplayer_widget.dart';
 import 'package:chat/ui/widgets/pdf_viewer_widget.dart';
 import 'package:flutter/material.dart';
 import '../ui/pages/call_info_page.dart';

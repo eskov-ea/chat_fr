@@ -1,16 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:chat/ui/widgets/message/group_chat_sender_name_widget.dart';
+import 'package:chat/models/message_model.dart';
+import 'package:chat/services/global.dart';
+import 'package:chat/services/messages/messages_repository.dart';
+import 'package:chat/services/popup_manager.dart';
+import 'package:chat/theme.dart';
+import 'package:chat/ui/navigation/main_navigation.dart';
+import 'package:chat/ui/screens/image_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gallery_saver/gallery_saver.dart';
-import '../../models/message_model.dart';
-import '../../services/global.dart';
-import '../../services/messages/messages_repository.dart';
-import '../../theme.dart';
-import '../navigation/main_navigation.dart';
-import '../screens/image_screen.dart';
+
 
 class ImagePreviewWidget extends StatefulWidget {
   const ImagePreviewWidget(
@@ -190,13 +191,18 @@ Widget? getImagePreview({
   if (localFileAttachment != null || fileBytesRepresentation != null) {
     return GestureDetector(
         onTap: () {
-          Navigator.of(context).pushNamed(MainNavigationRouteNames.imageScreen,
-              arguments: ImageScreenArguments(
-                  fileName: file!.name,
-                  localFileAttachment: localFileAttachment,
-                  fileBytesRepresentation: fileBytesRepresentation,
-                  width: null,
-                  saveCallback: saveImageFunction));
+          if (localFileAttachment == null && !kIsWeb || fileBytesRepresentation == null && kIsWeb) {
+            PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.error, message: 'Произошла ошибка при обработке изображения. Попробуйте еще раз или перезагрузите приложение.');
+          } else {
+            Navigator.of(context).pushNamed(MainNavigationRouteNames.imageScreen,
+                arguments: ImageScreenArguments(
+                    fileName: file!.name,
+                    localFileAttachment: localFileAttachment,
+                    fileBytesRepresentation: fileBytesRepresentation,
+                    width: null,
+                    saveCallback: saveImageFunction)
+            );
+          }
         },
         child: Stack(
           children: [

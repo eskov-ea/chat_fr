@@ -203,205 +203,211 @@ class ActionBarState extends State<ActionBar> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        color: AppColors.backgroundLight,
-        child: Stack(
-          children: [
-            Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      right: BorderSide(
-                        width: 2,
-                        color: Theme.of(context).dividerColor,
-                      ),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 16.0, right: 3.0),
-                    child: GestureDetector(
-                      onTap: (){
-                        openCameraOptions(createDialogAndSendMessage);
-                      },
-                      child: widget.isRecording
-                          ? Text(
-                        getAudioMessageDuration(recordingDuration),
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                      )
-                          : const Icon(
-                        CupertinoIcons.paperclip, color: AppColors.secondary, size: 30,
-                      ),
+    return Container(
+      color: AppColors.backgroundLight,
+      child: Stack(
+        children: [
+          Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    right: BorderSide(
+                      width: 2,
+                      color: Theme.of(context).dividerColor,
                     ),
                   ),
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8.0, top: 10.0, bottom:  10.0),
-                    child: TextFormField(
-                      maxLines: 5,
-                      minLines: 1,
-                      textCapitalization: TextCapitalization.sentences,
-                      focusNode: widget.focusNode,
-                      controller: _messageController,
-                      onChanged: (value) {
-                        if (value.isNotEmpty) {
-                          setState(() {
-                            sendButton = true;
-                          });
-                        } else {
-                          setState(() {
-                            sendButton = false;
-                          });
-                        }
-                      },
-                      onTapOutside: (event) {
-                        if(widget.focusNode.hasFocus) {
-                          widget.focusNode.unfocus();
-                        }
-                      },
-                      style: const TextStyle(fontSize: 16, color: LightColors.mainText),
-                      decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                        filled: true,
-                        fillColor: Colors.white,
-                        enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Colors.black45,
-                                width: 1
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(20.0))
-                        ),
-                        hintText: 'Напишите сообщение...',
-                        focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Colors.black45,
-                                width: 1
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(20.0))
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    left: 12,
-                    right: 24.0,
-                  ),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 16.0, right: 3.0),
                   child: GestureDetector(
-                    onLongPressStart: (details){
-                      widget.setRecording(true);
-                      if (sendButton == false) _start(_mRecorder);
+                    onTap: (){
+                      openCameraOptions(createDialogAndSendMessage);
                     },
-                    onLongPressEnd: (details) async {
-                      try {
-                        final recordedAudioPath = await _stop(_mRecorder);
-                        widget.setRecording(false);
-                        final File record = File(recordedAudioPath!);
-                        final Directory documentDirectory = await getApplicationDocumentsDirectory();
-                        final String path = documentDirectory.path;
-                        final String filetype = _mPath.split('.').last;
-                        final int r = Random().nextInt(100000);
-                        final String uniq = DateTime.now().microsecondsSinceEpoch.toString();
-                        final String filename = "voice_m_$r$uniq.$filetype";
-                        final File file = File("$path/$filename");
-                        file.writeAsBytesSync(await record.readAsBytes());
-                        _sendAudioMessage(file, widget.userId, widget.dialogId);
-                      } catch (err, stackTrace) {
-                        ClientErrorHandler.informErrorHappened(context, "Произошла ошибка при отправке голосового файла. Попробуйте еще раз. ");
-                        _logger.sendErrorTrace(stackTrace: stackTrace);
-                      }
-                    },
-                    child: GlowingActionButton(
-                      color: isSendButtonDisabled ? Colors.grey : widget.isRecording ? Colors.red : AppColors.accent ,
-                      icon: !kIsWeb
-                          ? sendButton ? Icons.send_rounded : Icons.mic
-                          : sendButton ? Icons.send_rounded : Icons.send_rounded,
-                      onPressed: () async {
-                        if (isSendButtonDisabled || !sendButton || _messageController.text.trim() == "") return;
-                        if (widget.dialogId != null) {
-                          _sendMessage(context, widget.parentMessage);
-                          widget.cancelReplyMessage();
-                        } else {
-                          try {
-                            await createDialogAndSendMessage(
-                                context, widget.rootWidget);
-                            _sendMessage(context, widget.parentMessage);
-                          } catch (err, stackTrace) {
-                            ClientErrorHandler.informErrorHappened(context, "Произошла ошибка при создании диалога и отправке сообщения. Попробуйте еще раз. ");
-                            _logger.sendErrorTrace(stackTrace: stackTrace);
-                          }
-                          widget.cancelReplyMessage();
-                        }
+                    child: widget.isRecording
+                        ? Text(
+                      getAudioMessageDuration(recordingDuration),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    )
+                        : const Icon(
+                      CupertinoIcons.paperclip, color: AppColors.secondary, size: 30,
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0, top: 10.0, bottom:  10.0),
+                  child: TextFormField(
+                    maxLines: 5,
+                    minLines: 1,
+                    textCapitalization: TextCapitalization.sentences,
+                    focusNode: widget.focusNode,
+                    controller: _messageController,
+                    onChanged: (value) {
+                      if (value.isNotEmpty) {
+                        setState(() {
+                          sendButton = true;
+                        });
+                      } else {
                         setState(() {
                           sendButton = false;
                         });
-                      },
+                      }
+                    },
+                    onTapOutside: (event) {
+                      if(widget.focusNode.hasFocus) {
+                        widget.focusNode.unfocus();
+                      }
+                    },
+                    style: const TextStyle(fontSize: 16, color: LightColors.mainText),
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                      filled: true,
+                      fillColor: Colors.white,
+                      enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.black45,
+                              width: 1
+                          ),
+                          borderRadius: BorderRadius.all(Radius.circular(20.0))
+                      ),
+                      hintText: 'Напишите сообщение...',
+                      focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                              color: Colors.black45,
+                              width: 1
+                          ),
+                          borderRadius: BorderRadius.all(Radius.circular(20.0))
+                      ),
                     ),
                   ),
                 ),
-              ],
-            ),
-            AnimatedBuilder(
-              animation: widget.animation,
-              builder: (context, child) {
-                return Transform.translate(
-                  offset: Offset(0, 65 - 65 * widget.animationController.value),
-                  child: Container(
-                    width: MediaQuery.of(context).size.width,
-                    height: 65,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF3F3F3),
-                      border: Border(
-                        top: BorderSide(width: 1.0, color: Colors.black54),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 15,
-                          spreadRadius: 15
-                        )
-                      ]
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            widget.deleteMessages();
-                          },
-                          child: Container(
-                            alignment: Alignment.centerLeft,
-                            width: 100,
-                            child: const Text('Удалить',
-                              style: TextStyle(fontSize: 18, color: Colors.redAccent),
-                            ),
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            widget.openForwardMessageMenu(widget.selected);
-                          },
-                          child: Container(
-                            alignment: Alignment.centerRight,
-                            width: 100,
-                            child: const Text('Переслать',
-                              style: TextStyle(fontSize: 18, color: Colors.blueAccent),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: 12,
+                  right: 24.0,
+                ),
+                child: GestureDetector(
+                  onLongPressStart: (details){
+                    if (kIsWeb) {
+                        customToastMessage(context: context, message: 'Отправка голосового сообщения недосьупна в браузере!');
+                        return;
+                    }
+                      widget.setRecording(true);
+                    if (sendButton == false) _start(_mRecorder);
+                  },
+                  onLongPressEnd: (details) async {
+                    try {
+                      final recordedAudioPath = await _stop(_mRecorder);
+                      widget.setRecording(false);
+                      final File record = File(recordedAudioPath!);
+                      final Directory documentDirectory = await getApplicationDocumentsDirectory();
+                      final String path = documentDirectory.path;
+                      final String filetype = _mPath.split('.').last;
+                      final int r = Random().nextInt(100000);
+                      final String uniq = DateTime.now().microsecondsSinceEpoch.toString();
+                      final String filename = "voice_m_$r$uniq.$filetype";
+                      final File file = File("$path/$filename");
+                      file.writeAsBytesSync(await record.readAsBytes());
+                      _sendAudioMessage(file, widget.userId, widget.dialogId);
+                    } catch (err, stackTrace) {
+                      ClientErrorHandler.informErrorHappened(context, "Произошла ошибка при отправке голосового файла. Попробуйте еще раз. ");
+                      _logger.sendErrorTrace(stackTrace: stackTrace);
+                    }
+                  },
+                  child: GlowingActionButton(
+                    color: isSendButtonDisabled ? Colors.grey : widget.isRecording ? Colors.red : AppColors.accent ,
+                    icon: !kIsWeb
+                        ? sendButton ? Icons.send_rounded : Icons.mic
+                        : sendButton ? Icons.send_rounded : Icons.send_rounded,
+                    onPressed: () async {
+                        if (isSendButtonDisabled) {
+                            customToastMessage(context: context, message: 'Пожалуйста подождите, обрабатывается запрос на создание диалога');
+                            return;
+                        }
+                        if (_messageController.text.trim() == "" || !sendButton) return;
+                        if (widget.dialogId != null) {
+                        _sendMessage(context, widget.parentMessage);
+                        widget.cancelReplyMessage();
+                      } else {
+                        try {
+                          await createDialogAndSendMessage(
+                              context, widget.rootWidget);
+                          _sendMessage(context, widget.parentMessage);
+                        } catch (err, stackTrace) {
+                          ClientErrorHandler.informErrorHappened(context, "Произошла ошибка при создании диалога и отправке сообщения. Попробуйте еще раз. ");
+                          _logger.sendErrorTrace(stackTrace: stackTrace);
+                        }
+                        widget.cancelReplyMessage();
+                      }
+                      setState(() {
+                        sendButton = false;
+                      });
+                    },
                   ),
-                );
-              }
-            )
-          ],
-        )
-      ),
+                ),
+              ),
+            ],
+          ),
+          AnimatedBuilder(
+            animation: widget.animation,
+            builder: (context, child) {
+              return Transform.translate(
+                offset: Offset(0, 65 - 65 * widget.animationController.value),
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: 65,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF3F3F3),
+                    border: Border(
+                      top: BorderSide(width: 1.0, color: Colors.black54),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 15,
+                        spreadRadius: 15
+                      )
+                    ]
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          widget.deleteMessages();
+                        },
+                        child: Container(
+                          alignment: Alignment.centerLeft,
+                          width: 100,
+                          child: const Text('Удалить',
+                            style: TextStyle(fontSize: 18, color: Colors.redAccent),
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          widget.openForwardMessageMenu(widget.selected);
+                        },
+                        child: Container(
+                          alignment: Alignment.centerRight,
+                          width: 100,
+                          child: const Text('Переслать',
+                            style: TextStyle(fontSize: 18, color: Colors.blueAccent),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+          )
+        ],
+      )
     );
   }
 

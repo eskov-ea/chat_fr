@@ -62,7 +62,7 @@ class UserItem extends StatelessWidget {
                     ],
                   ),
                   Container(
-                    width: MediaQuery.of(context).size.width * 0.6,
+                    width: getWidthMaxWidthGuard(context) * 0.6,
                     child: Text(
                       "${user.company} | ${user.dept}",
                       overflow: TextOverflow.ellipsis,
@@ -72,7 +72,7 @@ class UserItem extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    width: MediaQuery.of(context).size.width * 0.6,
+                    width: getWidthMaxWidthGuard(context) * 0.6,
                     child: Text(
                       user.position,
                       overflow: TextOverflow.ellipsis,

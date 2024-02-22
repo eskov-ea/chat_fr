@@ -5,6 +5,7 @@ import 'package:chat/bloc/user_bloc/user_state.dart';
 import 'package:chat/bloc/user_bloc/users_list_container.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/services/logger/logger_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../models/contact_model.dart';
@@ -39,9 +40,10 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
       final String? token = await _secureStorage.getToken();
       List<UserContact> users = await usersRepository.getAllUsers(token);
       final usersMap = usersRepository.getSipContacts(users);
-      _methodChannel.invokeMethod("SAVE_SIP_CONTACTS", {
-        "data" : usersMap.toString()
-      });
+      if (!kIsWeb) {
+        _methodChannel
+            .invokeMethod("SAVE_SIP_CONTACTS", {"data": usersMap.toString()});
+      }
       users.sort((a, b) => a.lastname.compareTo(b.lastname));
       if (state.isSearchMode) {
         final query = state.searchQuery.toLowerCase();

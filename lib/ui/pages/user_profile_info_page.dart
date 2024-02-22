@@ -1,5 +1,6 @@
 import 'package:chat/services/global.dart';
 import 'package:chat/ui/widgets/user_profile_widget.dart';
+import 'package:chat/ui/widgets/web_container_wrapper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../models/contact_model.dart';
@@ -57,76 +58,15 @@ class UserProfileInfoPage extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: ListView(
-          children: [
-            UserProfileWidget(
-              user: user,
-            ),
-            // const SizedBox(height: 30,),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceAround,
-            //   children: [
-            //     Container(
-            //       padding: const EdgeInsets.all(10),
-            //       decoration: const BoxDecoration(
-            //         color: AppColors.backgroundLight,
-            //         borderRadius: BorderRadius.all(Radius.circular(12)),
-            //       ),
-            //       width: MediaQuery.of(context).size.width * 0.25,
-            //       child: Column(
-            //         children: [
-            //           IconButton(
-            //             onPressed: () {
-            //               callNumber(context, partnerId.toString());
-            //             },
-            //             icon: Icon(Icons.phone, color: AppColors.secondary,),
-            //           ),
-            //           Text("Аудио", style: TextStyle(color: AppColors.secondary),)
-            //         ],
-            //       ),
-            //     ),
-            //     Container(
-            //       padding: const EdgeInsets.all(10),
-            //       decoration: const BoxDecoration(
-            //         color: AppColors.backgroundLight,
-            //         borderRadius: BorderRadius.all(Radius.circular(12)),
-            //       ),
-            //       width: MediaQuery.of(context).size.width * 0.25,
-            //       child: Column(
-            //         children: [
-            //           IconButton(
-            //             onPressed: (){
-            //               customToastMessage(context, "Возможность видеозвонка еще не готова..");
-            //             },
-            //             icon: Icon(Icons.videocam_rounded, color: AppColors.secondary,)
-            //           ),
-            //           Text("Видео", style: TextStyle(color: AppColors.secondary),)
-            //         ],
-            //       ),
-            //     ),
-            //     Container(
-            //       padding: const EdgeInsets.all(10),
-            //       decoration: const BoxDecoration(
-            //         color: AppColors.backgroundLight,
-            //         borderRadius: BorderRadius.all(Radius.circular(12)),
-            //       ),
-            //       width: MediaQuery.of(context).size.width * 0.25,
-            //       child: Column(
-            //         children: [
-            //           IconButton(
-            //             onPressed: (){
-            //               customToastMessage(context, "Режим поиска пока не готов..");
-            //             },
-            //             icon: Icon(Icons.search, color: AppColors.secondary,)
-            //           ),
-            //           Text("Поиск", style: TextStyle(color: AppColors.secondary),)
-            //         ],
-            //       ),
-            //     )
-            //   ],
-            // ),
-            const SizedBox(height: 30,),
-          ],
+        child: WebContainerWrapper(
+          child: ListView(
+            children: [
+              UserProfileWidget(
+                user: user,
+              ),
+              const SizedBox(height: 30,),
+            ],
+          ),
         )
       ),
     );

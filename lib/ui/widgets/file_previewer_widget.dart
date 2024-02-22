@@ -42,6 +42,7 @@ class _FilePreviewerWidgetState extends State<FilePreviewerWidget> {
   }
 
   Future<bool> checkPermissionsToSaveFile() async {
+    if (kIsWeb) return true;
     try {
       return await filePermissionChannel.invokeMethod('CHECK_WRITE_FILES_PERMISSION', {});
     } catch (err) {

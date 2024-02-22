@@ -1,14 +1,16 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/theme.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_sound/public/flutter_sound_player.dart';
 import 'package:flutter_sound_platform_interface/flutter_sound_platform_interface.dart';
-import '../../services/global.dart';
+import '../../../services/global.dart';
 
 class AudioPlayerWidget extends StatefulWidget {
   const AudioPlayerWidget({
@@ -93,7 +95,6 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
   }
 
   void play() async {
-    print("PLAYAUDIO   ${file!.path}");
     if (position > Duration.zero) {
       await player.resumePlayer();
     } else {
@@ -139,8 +140,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     final rawFile = await loadFileAndSaveLocally(
         attachmentId: widget.attachmentId, fileName: widget.fileName);
     if (rawFile != null) {
-      file = rawFile;
-      await audioPlayer.setSourceDeviceFile(file!.path);
+      await audioPlayer.setSourceAsset(file!.path);
       final d = await audioPlayer.getDuration();
       setState(() {
         duration = d!;
