@@ -292,7 +292,7 @@ class ActionBarState extends State<ActionBar> {
                 child: GestureDetector(
                   onLongPressStart: (details){
                     if (kIsWeb) {
-                        customToastMessage(context: context, message: 'Отправка голосового сообщения недосьупна в браузере!');
+                        customToastMessage(context: context, message: 'Отправка голосового сообщения недоступна в браузере!');
                         return;
                     }
                       widget.setRecording(true);
@@ -354,57 +354,79 @@ class ActionBarState extends State<ActionBar> {
           AnimatedBuilder(
             animation: widget.animation,
             builder: (context, child) {
-              return Transform.translate(
-                offset: Offset(0, 65 - 65 * widget.animationController.value),
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 65,
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF3F3F3),
-                    border: Border(
-                      top: BorderSide(width: 1.0, color: Colors.black54),
+              return Positioned(
+                bottom: 0,
+                left: 0,
+                child: Transform.translate(
+                  offset: Offset(0,  65 - 65 * widget.animationController.value),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: 65,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF3F3F3),
+                      border: Border(
+                        top: BorderSide(width: 1.0, color: widget.animationController.value > 0 ? Colors.black54 : Colors.transparent),
+                      ),
+                      boxShadow: [
+                        if (widget.animationController.value > 0) const BoxShadow(
+                          color: Colors.black12,
+                          blurRadius: 15,
+                          spreadRadius: 15
+                        )
+                      ]
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 15,
-                        spreadRadius: 15
-                      )
-                    ]
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          widget.deleteMessages();
-                        },
-                        child: Container(
-                          alignment: Alignment.centerLeft,
-                          width: 100,
-                          child: const Text('Удалить',
-                            style: TextStyle(fontSize: 18, color: Colors.redAccent),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            widget.deleteMessages();
+                          },
+                          child: Container(
+                            alignment: Alignment.centerLeft,
+                            width: 100,
+                            child: const Text('Удалить',
+                              style: TextStyle(fontSize: 18, color: Colors.redAccent),
+                            ),
                           ),
                         ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          widget.openForwardMessageMenu(widget.selected);
-                        },
-                        child: Container(
-                          alignment: Alignment.centerRight,
-                          width: 100,
-                          child: const Text('Переслать',
-                            style: TextStyle(fontSize: 18, color: Colors.blueAccent),
+                        GestureDetector(
+                          onTap: () {
+                            widget.openForwardMessageMenu(widget.selected);
+                          },
+                          child: Container(
+                            alignment: Alignment.centerRight,
+                            width: 100,
+                            child: const Text('Переслать',
+                              style: TextStyle(fontSize: 18, color: Colors.blueAccent),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );
             }
+          ),
+          widget.animationController.value > 0 ? SizedBox.shrink() : Positioned(
+            bottom: 0,
+            left: 0,
+            child: Transform.translate(
+              offset: Offset(0,  widget.animationController.value > 0 ? 0 : 65),
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: 65,
+                color: AppColors.backgroundLight,
+                // decoration: const BoxDecoration(
+                //     color: Color(0xFFF3F3F3),
+                //     border: Border(
+                //       top: BorderSide(width: 1.0, color: Colors.black54),
+                //     ),
+                // )
+              ),
+            ),
           )
         ],
       )
