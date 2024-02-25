@@ -15,6 +15,7 @@ import 'package:chat/ui/widgets/search_widget.dart';
 import 'package:chat/ui/widgets/unauthenticated_widget.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit_state.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../models/dialog_model.dart';
@@ -215,7 +216,7 @@ class _MessagesPageState extends State<MessagesPage> {
                 child: child,
               );
             },
-            duration: Duration(milliseconds: Platform.isIOS ? 100 : 200),
+            duration: Duration(milliseconds: kIsWeb ? 150 : Platform.isIOS ? 100 : 200),
             child: _mapStateToWidget(context, state)
           );
         }),

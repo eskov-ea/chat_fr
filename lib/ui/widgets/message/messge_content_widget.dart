@@ -3,14 +3,15 @@ import 'dart:io';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/theme.dart';
 import 'package:chat/ui/screens/chat_screen.dart';
-import 'package:chat/ui/widgets/audioplayer_widget.dart';
-import 'package:chat/ui/widgets/image_preview_widget.dart';
+import 'package:chat/ui/widgets/message/audioplayer_widget.dart';
+import 'package:chat/ui/widgets/message/image_preview_widget.dart';
 import 'package:chat/ui/widgets/message/forward_message_prefix_widget.dart';
 import 'package:chat/ui/widgets/message/group_chat_sender_name_widget.dart';
 import 'package:chat/ui/widgets/message/message_attachment_icon_preview.dart';
 import 'package:chat/ui/widgets/message/message_status_widget.dart';
 import 'package:chat/ui/widgets/message/replied_message_body.dart';
 import 'package:chat/ui/widgets/message/text_body_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -92,7 +93,13 @@ class MessageContentWidget extends StatelessWidget {
               ),
 
               if (file != null && AudioTypes.contains(file!.filetype))
-                Container(
+                kIsWeb ? Container(
+                  height: 30,
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: const Text('Аудио сообщение не поддерживается в браузере',
+                    softWrap: true, style: TextStyle(fontSize: 12, height: 1),
+                  ),
+                ) : Container(
                   height: 80,
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8 ),
                   child: AudioPlayerWidget(
@@ -128,7 +135,7 @@ class MessageContentWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(right: 10, bottom: 8),
+                    padding: EdgeInsets.only(top: 5, right: 10, bottom: 8),
                     child: Text(
                       messageTime,
                       style: const TextStyle(

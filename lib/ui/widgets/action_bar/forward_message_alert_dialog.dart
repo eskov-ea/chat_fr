@@ -193,7 +193,7 @@ class _ForwardMessageAlertDialogState extends State<ForwardMessageAlertDialog>{
             builder: (context, child) {
               final bottom = MediaQuery.of(Scaffold.of(context).context).viewInsets.bottom;
               return Transform.translate(
-                offset: Offset(0, (MediaQuery.of(context).size.height - 150) * (1 - widget.animationController.value)),
+                offset: Offset(0, (MediaQuery.of(context).size.height) * (1 - widget.animationController.value)),
                 child: Container(
                   height: MediaQuery.of(context).size.height - 150 - bottom,
                   width: MediaQuery.of(context).size.width,
@@ -286,7 +286,7 @@ class _ForwardMessageAlertDialogState extends State<ForwardMessageAlertDialog>{
           child: Container(
             width: MediaQuery.of(context).size.width,
             padding: const EdgeInsets.only(bottom: 20),
-            decoration:  BoxDecoration(
+            decoration:  const BoxDecoration(
               color: Color(0xFFF3F3F3),
               border: Border(
                 top: BorderSide(width: 1.0, color: Colors.black54),

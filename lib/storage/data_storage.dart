@@ -25,9 +25,20 @@ class DataProvider {
     iOptions: _getIOSOptions()
   );
 
-  Future<String?> getToken() async => await _secureStorage.read(key: _Keys.token);
+  final _cache = <String, String?>{};
+
+  Future<String?> getToken() async {
+    if (_cache.containsKey(_Keys.token)) {
+      return _cache[_Keys.token];
+    } else {
+      final token = await _secureStorage.read(key: _Keys.token);
+      _cache[_Keys.token] = token;
+      return token;
+    }
+  }
 
   Future<void> setToken(String value) async {
+    _cache[_Keys.token] = value;
     await _secureStorage.write(key: _Keys.token, value: value);
     Logger.getInstance().sendDebugMessage(message: "Token was successfully saved to the device. Token: $value", operation: "Set token");
   }
@@ -40,12 +51,22 @@ class DataProvider {
 
 
   Future<void> deleteToken() async {
+    _cache.remove(_Keys.token);
     await _secureStorage.delete(key: _Keys.token);
   }
 
-  Future<String?> getUserId() async => await _secureStorage.read(key: _Keys.userId);
+  Future<String?> getUserId() async {
+    if (_cache.containsKey(_Keys.userId)) {
+      return _cache[_Keys.userId];
+    } else {
+      final userId = await _secureStorage.read(key: _Keys.userId);
+      _cache[_Keys.userId] = userId;
+      return userId;
+    }
+  }
 
   Future<void> setUserId(int value) async {
+    _cache[_Keys.userId] = value.toString();
     await _secureStorage.write(
       key: _Keys.userId,
       value: value.toString(),
@@ -53,6 +74,7 @@ class DataProvider {
   }
 
   Future<void> deleteUserId() async {
+    _cache.remove(_Keys.userId);
     await _secureStorage.delete(key: _Keys.userId);
   }
 

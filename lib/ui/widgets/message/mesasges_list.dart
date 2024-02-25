@@ -261,6 +261,7 @@ class MessagesListWidget extends StatelessWidget {
         name = "${user.lastname} ${user.firstname}";
       }
     });
+    print('Get sender name::  $senderId  -  $name');
     return name;
   }
 
@@ -327,7 +328,7 @@ class MessagesListWidget extends StatelessWidget {
                   senderName: senderName,
                   parentMessage: messages[index].parentMessage,
                   isError: messages[index].isError,
-                  repliedMsgSenderName: messages[index].parentMessage != null ? senderName : null,
+                  repliedMsgSenderName: messages[index].parentMessage != null ? getSenderName(users, messages[index].parentMessage!.senderId) : null,
                   repliedMsgId: messages[index].parentMessage?.parentMessageId,
                   dialogId: dialogData.dialogId,
                   isErrorHandling: messages[index].isHandling,

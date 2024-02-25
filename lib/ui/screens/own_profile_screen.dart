@@ -1,26 +1,14 @@
 import 'dart:io';
-import 'package:chat/bloc/chats_builder_bloc/chats_builder_event.dart';
 import 'package:chat/bloc/profile_bloc/profile_bloc.dart';
-import 'package:chat/bloc/profile_bloc/profile_events.dart';
 import 'package:chat/bloc/profile_bloc/profile_state.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/theme.dart';
-import 'package:chat/ui/widgets/pass_widget.dart';
 import 'package:chat/ui/widgets/unauthenticated_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
-import '../../bloc/user_bloc/user_event.dart';
-import '../../bloc/ws_bloc/ws_event.dart';
-import '../../services/auth/auth_repo.dart';
-import '../../services/logger/logger_service.dart';
-import '../../view_models/dialogs_page/dialogs_view_cubit.dart';
-import '../../view_models/user/users_view_cubit.dart';
-import '../../view_models/websocket/websocket_view_cubit.dart';
-import '../navigation/main_navigation.dart';
 import '../widgets/avatar_widget.dart';
 
 
@@ -39,14 +27,13 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("currentVersion:  $currentVersion");
     return Scaffold(
       body: SafeArea(
         child: Container(
           child: BlocBuilder<ProfileBloc, UserProfileState>(
             builder: (BuildContext context, state) {
               if (state is UserProfileErrorState) {
-                return Center(
+                return const Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -99,14 +86,14 @@ class ProfilePage extends StatelessWidget {
                             ],
                           ), context),
                         ),
-                        Container(
-                          padding: EdgeInsets.only(left: 10, bottom: 2),
+                        if (currentVersion != null) Container(
+                          padding: const EdgeInsets.only(left: 10, bottom: 2),
                           alignment: Alignment.centerLeft,
-                          child: Text("Текущая версия:  ${currentVersion ?? ""}",
-                            style: TextStyle(color: Colors.black54, fontStyle: FontStyle.italic),
+                          child: Text("Текущая версия:  $currentVersion",
+                            style: const TextStyle(color: Colors.black54, fontStyle: FontStyle.italic),
                           ),
                         ),
-                        Platform.isAndroid
+                        !kIsWeb && Platform.isAndroid
                           ? OutlinedButton(
                               onPressed: () async {
                                 isUpdateAvailable ? downLoadNewAppVersion(state.user?.appSettings?.downloadUrlAndroid, context) : (){};
@@ -144,7 +131,7 @@ class ProfilePage extends StatelessWidget {
                   ),
                 );
               } else if (state is UserProfileLoggedOutState) {
-                return Column(
+                return const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     SizedBox(height: 56),
@@ -152,11 +139,11 @@ class ProfilePage extends StatelessWidget {
                   ],
                 );
               } else {
-                return Column(children: [
-                  const Expanded(
-                      child: Center(
-                        child: CircularProgressIndicator(),
-                      )),
+                return const Column(children: [
+                  Expanded(
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    )),
                 ]);
               }
             },
@@ -168,7 +155,6 @@ class ProfilePage extends StatelessWidget {
 }
 
 void downLoadNewAppVersion(String? url, BuildContext context) async {
-  print("download new version");
   if(url == null) return;
   final uri = Uri.parse(url);
   if (await canLaunchUrl(uri)){

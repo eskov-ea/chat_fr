@@ -7,6 +7,7 @@ import 'package:chat/theme.dart';
 import 'package:chat/ui/widgets/action_bar/forward_message_alert_dialog.dart';
 import 'package:chat/ui/widgets/message/mesasges_list.dart';
 import 'package:chat/ui/widgets/message/reply_message_bar_widget.dart';
+import 'package:chat/ui/widgets/web_container_wrapper.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -304,7 +305,75 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     }
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: _appBar(),
+      body: WebContainerWrapper(
+          color: AppColors.backgroundLight,
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        Container(
+                            decoration: const BoxDecoration(
+                              image: DecorationImage(
+                                image: AssetImage("assets/images/chat_background.jpg"),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            child: widget.dialogData?.dialogId != null
+                                ? MessagesListStatefullWidget(
+                                userId: widget.userId,
+                                dialogData: widget.dialogData!,
+                                focusNode: focusNode,
+                                setReplyMessage: setReplyMessage,
+                                usersCubit: widget.usersCubit,
+                                partnerName: widget.username,
+                                setSelectedMode: setSelectedMode,
+                                isSelectedMode: isSelectedMode,
+                                selected: selected,
+                                setSelected: setSelected,
+                                openForwardMenu: openForwardMenu,
+                                deleteMessage: deleteMessage
+                            )
+                                : const Center(child: Text('Нет сообщений'),)
+                        ),
+                        if (isRecording == true ) Positioned.fill(
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+                              child: Container(
+                                color: Colors.black12,
+                              ),
+                            )
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (replyMessage != null) ReplyMessageBar(replyMessage: replyMessage!, cancelReplyMessage: cancelReplyMessage, senderName: senderReplyName!),
+                  isUserAllowedToWrite(widget.dialogData, widget.userId)
+                  ? ActionBar(userId: widget.userId, partnerId: widget.partnerId, dialogId: widget.dialogData?.dialogId,
+                      setDialogData: setDialogData, rootWidget: widget, username: widget.username,
+                      focusNode: focusNode, setRecording: setRecording, isRecording: isRecording, dialogData: widget.dialogData,
+                      dialogCubit: widget.dialogCubit, cancelReplyMessage: cancelReplyMessage, parentMessage: replyedParentMsg, isSelectedMode: isSelectedMode,
+                      selected: selected, deleteMessages: deleteMessages, animation: _selectedMessagesOptionsMenuAnimation, animationController: _selectedMessagesOptionsMenuAnimationController,
+                      openForwardMessageMenu: openForwardMenu)
+                  : ReadOnlyChannelMode(context),
+                ],
+              ),
+              ForwardMessageAlertDialog(userId: widget.userId, animationController: _forwardMenuAnimationController, animation: _forwardMenuAnimation, close: closeForwardMenu,
+                forwardingMessages: forwardingMessages, closeSelectedOptionsMenu: closeSelectedOptionsMenu,
+              )
+            ]
+          )
+        ),
+    );
+  }
+
+  PreferredSize _appBar() {
+    return PreferredSize(
+      preferredSize: Size(getWidthMaxWidthGuard(context), 56),
+      child: AppBar(
         iconTheme: Theme.of(context).iconTheme,
         centerTitle: false,
         backgroundColor: AppColors.backgroundLight,
@@ -344,73 +413,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             ),
           ),
           if (!isSelectedMode && !kIsWeb && ( widget.dialogData == null || widget.dialogData!.chatType.p2p == 1)) Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: CallButton(partnerId: widget.partnerId)
+              padding: const EdgeInsets.only(right: 20),
+              child: CallButton(partnerId: widget.partnerId)
           ),
         ],
-      ),
-    body: Container(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        color: AppColors.backgroundLight,
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                Expanded(
-                  child: Stack(
-                    children: [
-                      Container(
-                          decoration: const BoxDecoration(
-                            image: DecorationImage(
-                              image: AssetImage("assets/images/chat_background.jpg"),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          child: widget.dialogData?.dialogId != null
-                              ? MessagesListStatefullWidget(
-                              userId: widget.userId,
-                              dialogData: widget.dialogData!,
-                              focusNode: focusNode,
-                              setReplyMessage: setReplyMessage,
-                              usersCubit: widget.usersCubit,
-                              partnerName: widget.username,
-                              setSelectedMode: setSelectedMode,
-                              isSelectedMode: isSelectedMode,
-                              selected: selected,
-                              setSelected: setSelected,
-                              openForwardMenu: openForwardMenu,
-                              deleteMessage: deleteMessage
-                          )
-                              : const Center(child: Text('Нет сообщений'),)
-                      ),
-                      if (isRecording == true ) Positioned.fill(
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
-                            child: Container(
-                              color: Colors.black12,
-                            ),
-                          )
-                      ),
-                    ],
-                  ),
-                ),
-                if (replyMessage != null) ReplyMessageBar(replyMessage: replyMessage!, cancelReplyMessage: cancelReplyMessage, senderName: senderReplyName!),
-                isUserAllowedToWrite(widget.dialogData, widget.userId)
-                ? ActionBar(userId: widget.userId, partnerId: widget.partnerId, dialogId: widget.dialogData?.dialogId,
-                    setDialogData: setDialogData, rootWidget: widget, username: widget.username,
-                    focusNode: focusNode, setRecording: setRecording, isRecording: isRecording, dialogData: widget.dialogData,
-                    dialogCubit: widget.dialogCubit, cancelReplyMessage: cancelReplyMessage, parentMessage: replyedParentMsg, isSelectedMode: isSelectedMode,
-                    selected: selected, deleteMessages: deleteMessages, animation: _selectedMessagesOptionsMenuAnimation, animationController: _selectedMessagesOptionsMenuAnimationController,
-                    openForwardMessageMenu: openForwardMenu)
-                : ReadOnlyChannelMode(context),
-              ],
-            ),
-            ForwardMessageAlertDialog(userId: widget.userId, animationController: _forwardMenuAnimationController, animation: _forwardMenuAnimation, close: closeForwardMenu,
-              forwardingMessages: forwardingMessages, closeSelectedOptionsMenu: closeSelectedOptionsMenu,
-            )
-          ]
-        )
       ),
     );
   }

@@ -60,6 +60,7 @@ class _ContactsPageState extends State<ContactsPage> {
                             itemBuilder: (context, index) {
                               return state.users.isNotEmpty
                                 ? Container(
+                                    width: getWidthMaxWidthGuard(context),
                                     padding: const EdgeInsets.only(
                                       left: 14, right: 14, top: 0, bottom: 0),
                                     child: Align(

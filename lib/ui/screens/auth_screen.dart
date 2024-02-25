@@ -1,4 +1,5 @@
 import 'package:chat/services/global.dart';
+import 'package:chat/ui/widgets/web_container_wrapper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -86,26 +87,28 @@ class _AuthScreenState extends State<AuthScreen> {
         listener: _onAuthViewCubitStateChange,
         child:  Scaffold(
           body: SafeArea(
-            child: SingleChildScrollView(
-              child: CustomSizeContainer(GestureDetector(
-                onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                child: Column(
-                  children: [
-                    Center(
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 60),
-                          child: Image.asset(
-                            'assets/images/DV-rybak-logo-cropped.png',
-                            height: 150,
-                          ),
-                        )),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 30, right: 30, top: 30),
-                      child: LoginFormWidget(context, cubit),
-                    ),
-                  ],
-                ),
-              ), context),
+            child: WebContainerWrapper(
+              child: SingleChildScrollView(
+                child: CustomSizeContainer(GestureDetector(
+                  onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                  child: Column(
+                    children: [
+                      Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 60),
+                            child: Image.asset(
+                              'assets/images/DV-rybak-logo-cropped.png',
+                              height: 150,
+                            ),
+                          )),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 30, right: 30, top: 30),
+                        child: LoginFormWidget(context, cubit),
+                      ),
+                    ],
+                  ),
+                ), context),
+              ),
             ),
           ),
         )
@@ -113,95 +116,98 @@ class _AuthScreenState extends State<AuthScreen> {
     }
 
   Widget LoginFormWidget(context, cubit) {
-    return Form(
-      child: Column(children: [
-        if (cubit.state is AuthViewCubitErrorState)
-          Text(cubit.state.errorMessage,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 18, color: Colors.red),),
-        TextFormField(
-          controller: _loginTextFieldController,
-          focusNode: _loginFocus,
-          autofocus: true,
-          onFieldSubmitted: (_) {
-            _onNextFieldFocus(context, _loginFocus, _passwordFocus);
-          },
-          style: const TextStyle(fontSize: 20, color: LightColors.mainText, decoration: TextDecoration.none),
-          decoration: const InputDecoration(
-            disabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: LightColors.mainText, width: 2.5, )
-            ),
+    return SizedBox(
+      width: kIsWeb ? getWidthMaxWidthGuard(context) * 0.5 : MediaQuery.of(context).size.width,
+      child: Form(
+        child: Column(children: [
+          if (cubit.state is AuthViewCubitErrorState)
+            Text(cubit.state.errorMessage,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18, color: Colors.red),),
+          TextFormField(
+            controller: _loginTextFieldController,
+            focusNode: _loginFocus,
+            autofocus: true,
+            onFieldSubmitted: (_) {
+              _onNextFieldFocus(context, _loginFocus, _passwordFocus);
+            },
+            style: const TextStyle(fontSize: 20, color: LightColors.mainText, decoration: TextDecoration.none),
+            decoration: const InputDecoration(
+              disabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: LightColors.mainText, width: 2.5, )
+              ),
 
-            labelText: 'Логин',
-            labelStyle: TextStyle(fontSize: 22),
-            prefixIcon: Icon(Icons.person),
-            prefixIconColor: Colors.blue,
-            focusColor: Colors.blue,
-          ),
-        ),
-        const SizedBox(height: 20),
-        TextFormField(
-          controller: _passwordTextFieldController,
-          focusNode: _passwordFocus,
-          obscureText: _hidePassword,
-          style: const TextStyle(fontSize: 20, color: LightColors.mainText, decoration: TextDecoration.none),
-          decoration: InputDecoration(
-            labelText: 'Пароль',
-            labelStyle: const TextStyle(fontSize: 22),
-            prefixIcon: const Icon(Icons.lock),
-            suffixIcon: GestureDetector(
-              child:
-                  Icon(_hidePassword ? Icons.visibility : Icons.visibility_off),
-              onTap: () {
-                setState(() {
-                  _hidePassword = !_hidePassword;
-                });
-              },
+              labelText: 'Логин',
+              labelStyle: TextStyle(fontSize: 22),
+              prefixIcon: Icon(Icons.person),
+              prefixIconColor: Colors.blue,
+              focusColor: Colors.blue,
             ),
           ),
-        ),
-        const SizedBox(height: 40),
-        GestureDetector(
-          onTap: (){
-            Navigator.of(context).pushNamed(MainNavigationRouteNames.resetPasswordScreen);
-          },
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width,
-            child: const Text(
-              'Забыли пароль?',
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                color: Colors.blueAccent,
-                fontSize: 18
+          const SizedBox(height: 20),
+          TextFormField(
+            controller: _passwordTextFieldController,
+            focusNode: _passwordFocus,
+            obscureText: _hidePassword,
+            style: const TextStyle(fontSize: 20, color: LightColors.mainText, decoration: TextDecoration.none),
+            decoration: InputDecoration(
+              labelText: 'Пароль',
+              labelStyle: const TextStyle(fontSize: 22),
+              prefixIcon: const Icon(Icons.lock),
+              suffixIcon: GestureDetector(
+                child:
+                    Icon(_hidePassword ? Icons.visibility : Icons.visibility_off),
+                onTap: () {
+                  setState(() {
+                    _hidePassword = !_hidePassword;
+                  });
+                },
               ),
             ),
           ),
-        ),
-        const SizedBox(height: 20,),
-        ElevatedButton(
-          child: cubit.state is AuthViewCubitAuthProgressState
-            ? const SizedBox(
-              width: 15,
-              height: 15,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-            : const Text(
-              'Логин',
-              style: TextStyle(fontSize: 20),
+          const SizedBox(height: 40),
+          GestureDetector(
+            onTap: (){
+              Navigator.of(context).pushNamed(MainNavigationRouteNames.resetPasswordScreen);
+            },
+            child: SizedBox(
+              width: getWidthMaxWidthGuard(context),
+              child: const Text(
+                'Забыли пароль?',
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  color: Colors.blueAccent,
+                  fontSize: 18
+                ),
+              ),
+            ),
           ),
-          style: ElevatedButton.styleFrom(
-            primary: Colors.indigo,
-            minimumSize: const Size.fromHeight(45),
+          const SizedBox(height: 20,),
+          ElevatedButton(
+            child: cubit.state is AuthViewCubitAuthProgressState
+              ? const SizedBox(
+                width: 15,
+                height: 15,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+              : const Text(
+                'Логин',
+                style: TextStyle(fontSize: 20),
+            ),
+            style: ElevatedButton.styleFrom(
+              primary: Colors.indigo,
+              minimumSize: const Size.fromHeight(45),
+            ),
+            onPressed: () {
+              FocusManager.instance.primaryFocus?.unfocus();
+              _login(_loginTextFieldController.text.trim(),
+                _passwordTextFieldController.text.trim(), context,
+                os, deviceToken
+              );
+            },
           ),
-          onPressed: () {
-            FocusManager.instance.primaryFocus?.unfocus();
-            _login(_loginTextFieldController.text.trim(),
-              _passwordTextFieldController.text.trim(), context,
-              os, deviceToken
-            );
-          },
-        ),
-      ]),
+        ]),
+      ),
     );
   }
 }

@@ -12,6 +12,7 @@ import 'package:chat/models/user_profile_model.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/ui/widgets/app_notification_widget.dart';
+import 'package:chat/ui/widgets/web_container_wrapper.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -106,10 +107,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<bool> isCallRunning () async {
-    return await sipChannel.invokeMethod('CHECK_FOR_RUNNING_CALL');
+    if (!kIsWeb){
+      return await sipChannel.invokeMethod('CHECK_FOR_RUNNING_CALL');
+    } else {
+      return false;
+    }
   }
 
   Future<void> sipRegistration(UserProfileAsteriskSettings settings, String? displayName) async {
+    if (kIsWeb) return;
     SipConfig.sipDomain = settings.userDomain;
     SipConfig.sipPrefix = settings.sipPrefix;
     try {
@@ -182,6 +188,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void checkAppVersion(AppSettings settings) async {
+    if (kIsWeb) return;
     try {
       PackageInfo packageInfo = await PackageInfo.fromPlatform();
       setState(() {
@@ -285,6 +292,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _openCallScreen() {
+    if (kIsWeb) return;
     try {
       final CallState state = BlocProvider.of<CallsBloc>(context).state;
       if (Platform.isIOS && state is! IncomingCallState || !Platform.isIOS) {
@@ -335,7 +343,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       callPlayer = v;
     });
     initialLoadData();
-    if (Platform.isAndroid) {
+    if (!kIsWeb && Platform.isAndroid) {
       permissionMethodChannel.invokeMethod("CHECK_APP_PERMISSION");
     }
     WidgetsBinding.instance?.addObserver(this);
@@ -465,69 +473,76 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        alignment: Alignment.topCenter,
-        children: [
-          Column(
-            children: [
-              isIncomingCall && Platform.isAndroid
-                  ? ActiveCallStatusWidget(message: "Входящий вызов", screenCallback: _openCallScreen,)
-                  : SizedBox.shrink(),
-              isOutgoingCall
-                  ? ActiveCallStatusWidget(message: "Исходящий вызов", screenCallback: _openCallScreen,)
-                  : SizedBox.shrink(),
-              isActiveCall
-                  ? RunningCallStatusWidget(screenCallback: _openCallScreen)
-                  : SizedBox.shrink(),
-              Expanded(
-                child: IndexedStack(
-                  index: _selectedTab,
-                  children: [
-                    _screenFactory.makeMessagesPage(),
-                    _screenFactory.makeCallsPage(),
-                    _screenFactory.makeContactsPage(),
-                    _screenFactory.makeProfilePage(isUpdateAvailable, currentVersion),
-                    // _screenFactory.makePassScreen(),
-                  ],
-                ),
-              )
-            ],
-          ),
-          // AnimatedPositioned(
-          //   top: notification == null ? -200 : 0,
-          //   duration: const Duration(milliseconds: 300),
-          //   // curve: Curves.fastOutSlowIn,
-          //   child: AppNotificationWidget(key: notification?.key ,notificationData: notification, callback: cancelNotification),
-          // )
-        ],
+      body: WebContainerWrapper(
+        child: Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            Column(
+              children: [
+                !kIsWeb && isIncomingCall && Platform.isAndroid
+                    ? ActiveCallStatusWidget(message: "Входящий вызов", screenCallback: _openCallScreen,)
+                    : SizedBox.shrink(),
+                !kIsWeb && isOutgoingCall
+                    ? ActiveCallStatusWidget(message: "Исходящий вызов", screenCallback: _openCallScreen,)
+                    : SizedBox.shrink(),
+                !kIsWeb && isActiveCall
+                    ? RunningCallStatusWidget(screenCallback: _openCallScreen)
+                    : SizedBox.shrink(),
+                Expanded(
+                  child: IndexedStack(
+                    index: _selectedTab,
+                    children: [
+                      _screenFactory.makeMessagesPage(),
+                      _screenFactory.makeCallsPage(),
+                      _screenFactory.makeContactsPage(),
+                      _screenFactory.makeProfilePage(isUpdateAvailable, currentVersion),
+                      // _screenFactory.makePassScreen(),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
       ),
 
 
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedTab,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: AppColors.backgroundLight,
-        selectedItemColor: AppColors.secondary,
-        unselectedItemColor: null,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.bubble_left_bubble_right_fill),
-            label: 'Сообщения',
+      bottomNavigationBar: Row(
+        children: [
+          if (MediaQuery.of(context).size.width > 700) const Spacer(),
+          ConstrainedBox(
+            constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width > 700 ? 700 : MediaQuery.of(context).size.width
+            ),
+            child: BottomNavigationBar(
+              currentIndex: _selectedTab,
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: AppColors.backgroundLight,
+              selectedItemColor: AppColors.secondary,
+              unselectedItemColor: null,
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.bubble_left_bubble_right_fill),
+                  label: 'Сообщения',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.phone_fill),
+                  label: 'Звонки',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.person_2_fill),
+                  label: 'Участники',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.settings_solid),
+                  label: 'Профиль',
+                ),
+              ],
+              onTap: onSelectTab,
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.phone_fill),
-            label: 'Звонки',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.person_2_fill),
-            label: 'Участники',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.settings_solid),
-            label: 'Профиль',
-          ),
+          if (MediaQuery.of(context).size.width > 700) const Spacer(),
         ],
-        onTap: onSelectTab,
       ),
     );
   }
