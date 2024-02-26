@@ -5,8 +5,7 @@ final Map<String, String> tables = {
       'name varchar(255) DEFAULT NULL, '
       'description varchar(255) DEFAULT NULL, '
       'chat_type varchar(100) REFERENCES chat_type(name), '
-      'user INTEGER REFERENCES user(id), '
-      'chat_user INTEGER REFERENCES chat_user(id)'
+      'user_id INTEGER REFERENCES user(id), '
       'message INTEGER REFERENCES message(id), '
       'is_closed TINYINT(1) DEFAULT 0, '
       'is_public TINYINT(1) DEFAULT 0, '
@@ -24,6 +23,14 @@ final Map<String, String> tables = {
       'secure TINYINT(1) DEFAULT NULL, '
       'readonly TINYINT(1) DEFAULT NULL, '
       'picture text );',
+
+
+  'chat_user' :
+  'CREATE TABLE chat_user ('
+      'chat_id INTEGER, '
+      'chat_user_role_id TINYINT(1), '
+      'active BOOLEAN, '
+      'user_id INTEGER(255) REFERENCES user(id) );',
 
 
   'user' :
