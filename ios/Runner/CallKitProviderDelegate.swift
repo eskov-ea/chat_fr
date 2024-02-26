@@ -58,7 +58,7 @@ class CallKitProviderDelegate : NSObject
     {
         if (callkitContext.isOutgoingCallInited == true) {return}
         callkitContext.isOutgoingCallInited = true
-        self.outgoingCallUUID = UUID()
+        outgoingCallUUID = UUID()
         print("OUTGOING UUID  ->  \(String(describing: outgoingCallUUID))")
 //        let update = CXCallUpdate()
 //        update.remoteHandle = CXHandle(type:.generic, value: callkitContext.incomingCallName)
@@ -74,7 +74,9 @@ class CallKitProviderDelegate : NSObject
     
     func stopCall()
     {
-        var callId = UUID()
+        print("STOP CALL start  \(callkitContext.isCallRunning)")
+        if (!callkitContext.isCallRunning) {return}
+        var callId: UUID
         if (callkitContext.isCallIncoming) {
             callId = incomingCallUUID
         } else {

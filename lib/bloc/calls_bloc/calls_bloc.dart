@@ -36,6 +36,12 @@ class CallsBloc
         add(StreamRunningCallEvent(callData: callData));
       } else if (callEvent.event == "ENDED") {
         add(StreamStopCallEvent());
+        if (callEvent.callData!["call_id"] == null && callEvent.callData!["uniqueid"] == null) {
+          add(EndCallWithNoLogEvent());
+          return;
+        }
+        final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
+        add(EndedCallEvent(callData: callData));
       } else if (callEvent.event == "RELEASED") {
         print("CALL_RELEASED event:    ${callEvent.callData} ${callEvent.callData!["uniqueid"]} ${callEvent.callData!["call_id"]}");
         if (callEvent.callData!["call_id"] == null && callEvent.callData!["uniqueid"] == null) {

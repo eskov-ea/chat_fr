@@ -131,7 +131,8 @@ import PushKit
                 self?.linphoneSDK.mCore?.stop()
             case "DECLINE_CALL":
                 print("DECLINE_CALL")
-                self?.linphoneSDK.declineCall()
+                print("Service State: decline request")
+                self?.linphoneSDK.terminateCall()
             case "TOGGLE_MUTE":
                 self?.sipResultCallback?(self?.linphoneSDK.muteMicrophone())
             case "CHECK_FOR_RUNNING_CALL":

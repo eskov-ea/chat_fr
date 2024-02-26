@@ -66,6 +66,7 @@ class LinphoneSDK : ObservableObject
         print("push status \(mCore.isPushNotificationAvailable)")
         
         mCoreDelegate = CoreDelegateStub( onCallStateChanged: { (core: Core, call: Call, state: Call.State, message: String) in
+                print("Service State:  \(state)")
                 self.callMsg = message
                 if (state == .PushIncomingReceived){
                     // We're being called by someone (and app is in background)
@@ -103,22 +104,25 @@ class LinphoneSDK : ObservableObject
                     let payload = makeCallEventPayload(event: "RELEASED", callerId: call.remoteAddress?.username, callData: callData)
                     print("CALL_ENDED IOS  \(callData)")
                     self.eventSink?(payload)
-                    if (self.isCallRunning || self.isCallIncoming) {
-                        self.mProviderDelegate.stopCall()
-                    }
+                    self.mProviderDelegate.stopCall()
+                    self.isCallRunning = false
                     self.remoteAddress = "Nobody yet"
                 } else if (state == .End) {
                     let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
                     let payload = makeCallEventPayload(event: "ENDED", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
+                    self.mProviderDelegate.stopCall()
+                    self.isCallRunning = false
                 } else if (state == .Error) {
                     let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
                     let payload = makeCallEventPayload(event: "ERROR", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                     self.mProviderDelegate.stopCall()
+                    self.isCallRunning = false
                 }  else if (state == .OutgoingInit) {
                     let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
                     let payload = makeCallEventPayload(event: "OUTGOING", callerId: call.remoteAddress?.username, callData: callData)
+                    self.isCallRunning = true
                     self.eventSink?(payload)
                 } else if (state == .OutgoingProgress) {
                     print("Call.State  ->  \(state)")
@@ -152,9 +156,6 @@ class LinphoneSDK : ObservableObject
                     // When we request a call update, for example when toggling video
                 } else if (state == .UpdatedByRemote) {
                     // When the remote requests a call update
-                } else if (state == .End) {
-                    let payload = makeCallEventPayload(event: "ENDED", callerId: nil, callData: nil)
-                    self.eventSink?(payload)
                 }
 
             }, onAudioDeviceChanged: { (core: Core, device: AudioDevice) in
@@ -290,6 +291,7 @@ class LinphoneSDK : ObservableObject
             } catch {
                 print("Decline call error: \(error)")
             }
+//            self.mProviderDelegate.stopCall()
         }
         
         func unregister()
@@ -311,21 +313,21 @@ class LinphoneSDK : ObservableObject
         
         func terminateCall() {
             do {
-                        if (mCore.callsNb == 0) { return }
-                        
-                        // If the call state isn't paused, we can get it using core.currentCall
-                        let coreCall = (mCore.currentCall != nil) ? mCore.currentCall : mCore.calls[0]
-                        
-                        // Terminating a call is quite simple
-                        if let call = coreCall {
-                            try call.terminate()
-                        }
+                self.mProviderDelegate.stopCall()
+                if (mCore.callsNb == 0) { return }
+                
+                // If the call state isn't paused, we can get it using core.currentCall
+                let coreCall = (mCore.currentCall != nil) ? mCore.currentCall : mCore.calls[0]
+                
+                // Terminating a call is quite simple
+                if let call = coreCall {
+                    try call.terminate()
+                }
             } catch {
                 print("Terminate call error: \(error)")
                 NSLog(error.localizedDescription)
                 
             }
-
         }
     
         func pauseOrResume() {
