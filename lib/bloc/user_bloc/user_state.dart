@@ -9,7 +9,7 @@ class UsersState {
   final String searchQuery = "";
   final bool isSearchMode = false;
   copyWith(){}
-  List<UserContact> get users => usersContainer.users;
+  List<UserModel> get users => usersContainer.users;
   final Map<int, bool> onlineUsersDictionary = {};
   final Map<int, ClientUserEvent> clientEventsDictionary = {};
 }
@@ -23,7 +23,7 @@ class UsersLoadedState extends UsersState {
   final bool isAuthenticated;
 
   bool get isSearchMode => searchQuery.isNotEmpty;
-  List<UserContact> get users =>
+  List<UserModel> get users =>
       isSearchMode ? searchUsersContainer.users : usersContainer.users;
 
   UsersLoadedState.initial()

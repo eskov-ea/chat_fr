@@ -456,8 +456,8 @@ bool isUserAllowedToWrite(DialogData? dialogData, int userId) {
   }
 }
 
-UserContact? findPartnerUserProfile(UsersViewCubit usersCubit, int partnerId) {
-  UserContact? user;
+UserModel? findPartnerUserProfile(UsersViewCubit usersCubit, int partnerId) {
+  UserModel? user;
   if (usersCubit.state is UsersViewCubitLoadedState) {
     final state =  usersCubit.state as UsersViewCubitLoadedState;
     for (final u in state.users) {

@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 
 class UsersProvider {
 
-  Future <List<UserContact>> getUsers(String? token) async {
+  Future <List<UserModel>> getUsers(String? token) async {
     try {
       final response = await http.get(
         Uri.parse('https://erp.mcfef.com/api/users'),
@@ -22,7 +22,7 @@ class UsersProvider {
       final error = handleHttpResponse(response);
       if (error != null) throw error;
       List<dynamic> collection = jsonDecode(response.body)["data"];
-      List<UserContact> users = collection.map((user) => UserContact.fromJson(user)).toList();
+      List<UserModel> users = collection.map((user) => UserModel.fromJsonAPI(user)).toList();
       return users;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
@@ -39,7 +39,7 @@ class UsersProvider {
     }
   }
 
-  Map<String, String> setSipContacts(List<UserContact> users) {
+  Map<String, String> setSipContacts(List<UserModel> users) {
     final Map<String, String> map = {};
     users.forEach((user) {
       map["${SipConfig.getPrefix()}${user.id}"] = "${user.lastname} ${user.firstname}";

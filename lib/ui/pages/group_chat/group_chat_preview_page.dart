@@ -28,7 +28,7 @@ class GroupChatPreviewPage extends StatefulWidget {
 }
 
 class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
-  final List<UserContact> groupUsersList = [];
+  final List<UserModel> groupUsersList = [];
   final TextEditingController _textNameFieldController = TextEditingController();
   final TextEditingController _textDescriptionFieldController = TextEditingController();
   final DialogsProvider _dialogsProvider = DialogsProvider();
@@ -253,7 +253,7 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
 
 
 Widget _groupUsersList(
-    List<UserContact> groupUsersList, removeUserFromGroupList) {
+    List<UserModel> groupUsersList, removeUserFromGroupList) {
   return GridView.count(
     crossAxisCount: 2,
     mainAxisSpacing: 10,

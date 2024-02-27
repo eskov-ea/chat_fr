@@ -32,7 +32,7 @@ void openChatScreen({
 
 void openUserProfileInfoPage({
   required BuildContext context,
-  required UserContact? user,
+  required UserModel? user,
   required partnerId
 }) {
   if (user == null) {

@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:chat/bloc/auth_bloc/auth_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_state.dart';
+import 'package:chat/bloc/database_bloc/database_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
 import 'package:chat/services/dialogs/dialogs_api_provider.dart';
@@ -61,33 +62,33 @@ class MyHttpOverrides extends HttpOverrides {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  if (!kIsWeb) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  }
   HttpOverrides.global = MyHttpOverrides();
-  FlutterError.onError = (errorDetails) async {
-    if (!kIsWeb) {
-      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
 
-      final userId = await DataProvider().getUserId();
-      FirebaseCrashlytics.instance.recordError(
-          errorDetails.exception,
-          errorDetails.stack,
-          information: ["[ USER ID ]: $userId"]
-      );
-    }
-
-  };
-  PlatformDispatcher.instance.onError = (error, stack) {
-    if (!kIsWeb) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    }
-    return false;
-  };
+  // if (!kIsWeb) {
+  //   await Firebase.initializeApp(
+  //     options: DefaultFirebaseOptions.currentPlatform,
+  //   );
+  // }
+  // FlutterError.onError = (errorDetails) async {
+  //   if (!kIsWeb) {
+  //     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  //
+  //     final userId = await DataProvider().getUserId();
+  //     FirebaseCrashlytics.instance.recordError(
+  //         errorDetails.exception,
+  //         errorDetails.stack,
+  //         information: ["[ USER ID ]: $userId"]
+  //     );
+  //   }
+  //
+  // };
+  // PlatformDispatcher.instance.onError = (error, stack) {
+  //   if (!kIsWeb) {
+  //     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+  //     return true;
+  //   }
+  //   return false;
+  // };
   runApp(const MyApp());
 }
 
@@ -105,8 +106,29 @@ class MyApp extends StatelessWidget{
     );
     final errorHandlerBloc =  ErrorHandlerBloc();
     final authBloc = AuthBloc(authRepo: AuthRepository());
+    final dialogViewCubit = DialogsViewCubit(
+        dialogsBloc: DialogsBloc(
+            webSocketBloc: websocketBloc,
+            dialogRepository: DialogRepository(),
+            errorHandlerBloc: errorHandlerBloc,
+            initialState: const DialogsState.initial()
+        ),
+        initialState: DialogsLoadingViewCubitState(
+        ));
+    final usersViewCubit = UsersViewCubit(
+        wsBloc: websocketBloc,
+        usersBloc: UsersBloc(
+            errorHandlerBloc: errorHandlerBloc,
+            usersRepository: UsersRepository()
+        )
+    );
     return MultiBlocProvider(
       providers: [
+        BlocProvider(
+          create: (context) => DatabaseBloc(
+              errorHandlerBloc: errorHandlerBloc
+          ),
+        ),
         BlocProvider(
             create: (context) => websocketBloc
         ),
@@ -126,24 +148,10 @@ class MyApp extends StatelessWidget{
             )
         ),
         BlocProvider(
-          create: (_) => UsersViewCubit(
-            wsBloc: websocketBloc,
-            usersBloc: UsersBloc(
-              errorHandlerBloc: errorHandlerBloc,
-              usersRepository: UsersRepository()
-            )
-          )
+          create: (_) => usersViewCubit
         ),
         BlocProvider(
-            create: (context) => DialogsViewCubit(
-                dialogsBloc: DialogsBloc(
-                    webSocketBloc: websocketBloc,
-                    dialogRepository: DialogRepository(),
-                    errorHandlerBloc: errorHandlerBloc,
-                    initialState: const DialogsState.initial()
-                ),
-                initialState: DialogsLoadingViewCubitState(
-                ))),
+            create: (context) => dialogViewCubit),
         BlocProvider(
           create: (_) => WebsocketViewCubit(
               wsBloc: websocketBloc,

@@ -26,8 +26,8 @@ class AddingUserToGroupChatPage extends StatefulWidget {
 
 class _AddingUserToGroupChatPageState extends State<AddingUserToGroupChatPage> {
 
-  List<UserContact> selected = [];
-  List<UserContact> users = [];
+  List<UserModel> selected = [];
+  List<UserModel> users = [];
   late final StreamSubscription userListSubscription;
   //TODO: higt this functionality up to bloc
   final DialogsProvider _dialogsProvider = DialogsProvider();
@@ -49,7 +49,7 @@ class _AddingUserToGroupChatPageState extends State<AddingUserToGroupChatPage> {
     });
   }
 
-  void _setSelected(UserContact user) {
+  void _setSelected(UserModel user) {
     setState(() {
       if (!selected.contains(user)) {
         selected.add(user);

@@ -13,7 +13,7 @@ class UserProfileInfoPage extends StatelessWidget {
     Key? key
   }) : super(key: key);
 
-  final UserContact user;
+  final UserModel user;
   final int partnerId;
 
   @override
@@ -74,7 +74,7 @@ class UserProfileInfoPage extends StatelessWidget {
 }
 
 class UserProfileArguments {
-  final UserContact user;
+  final UserModel user;
   final int partnerId;
 
   UserProfileArguments({required this.user, required this.partnerId});

@@ -6,7 +6,7 @@ import '../../models/contact_model.dart';
 class UsersRepository  {
   UsersProvider usersProvider = UsersProvider();
 
-  Future <List<UserContact>> getAllUsers(token) => usersProvider.getUsers(token);
-  Map<String, String> getSipContacts(List<UserContact> users) => usersProvider.setSipContacts(users);
+  Future <List<UserModel>> getAllUsers(token) => usersProvider.getUsers(token);
+  Map<String, String> getSipContacts(List<UserModel> users) => usersProvider.setSipContacts(users);
 
 }

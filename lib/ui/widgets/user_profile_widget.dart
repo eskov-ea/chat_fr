@@ -8,7 +8,7 @@ class UserProfileWidget extends StatelessWidget {
     Key? key
   }) : super(key: key);
 
-  final UserContact user;
+  final UserModel user;
 
   @override
   Widget build(BuildContext context) {

@@ -31,7 +31,7 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
       //TODO: refactor
       if (state.isAuthenticated) {
         final users = state.users;
-        final Map<String, UserContact> usersDictionary = {};
+        final Map<String, UserModel> usersDictionary = {};
         users.forEach((user) {
           usersDictionary["${user.id}"] = user;
         });

@@ -14,7 +14,7 @@ class UserItem extends StatelessWidget {
     required this.onlineStatus
   }) : super(key: key);
 
-  final UserContact user;
+  final UserModel user;
   final bool onlineStatus;
 
   @override

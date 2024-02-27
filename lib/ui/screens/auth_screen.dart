@@ -217,7 +217,7 @@ void _onAuthViewCubitStateChange (
   AuthViewCubitState state
   ) {
   if (state is AuthViewCubitSuccessAuthState) {
-    Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.homeScreen);
+    Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.dbInitializationScreen);
   }
 }
 

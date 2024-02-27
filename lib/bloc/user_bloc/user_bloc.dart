@@ -38,7 +38,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
       ) async {
     try {
       final String? token = await _secureStorage.getToken();
-      List<UserContact> users = await usersRepository.getAllUsers(token);
+      List<UserModel> users = await usersRepository.getAllUsers(token);
       final usersMap = usersRepository.getSipContacts(users);
       if (!kIsWeb) {
         _methodChannel
@@ -189,9 +189,9 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
   }
 
 
-  List<UserContact> filterUsersBySearchQuery(List<UserContact> users, query) {
+  List<UserModel> filterUsersBySearchQuery(List<UserModel> users, query) {
 
-    final List<UserContact> filteredUsers = [];
+    final List<UserModel> filteredUsers = [];
     for (var user in users) {
       if (user.firstname.toLowerCase().contains(query) || user.lastname.toLowerCase().contains(query)) {
         filteredUsers.add(user);

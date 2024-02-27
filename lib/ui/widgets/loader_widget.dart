@@ -26,7 +26,7 @@ class LoaderWidget extends StatelessWidget {
       ) {
     print('onLoaderViewCubitStateChange,   $state');
     final nextScreen = state == LoaderViewCubitState.authorized
-        ? MainNavigationRouteNames.homeScreen
+        ? MainNavigationRouteNames.dbInitializationScreen
         : MainNavigationRouteNames.auth;
     Navigator.of(context).pushReplacementNamed(nextScreen);
   }

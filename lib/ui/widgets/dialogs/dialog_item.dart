@@ -27,8 +27,8 @@ class DialogItem extends StatelessWidget {
   final Function clearSearch;
   final Map<int, bool> onlineMembers;
 
-  List<UserContact> getPartnersData(List<UserContact> data) {
-    final List<UserContact> partners = [];
+  List<UserModel> getPartnersData(List<UserModel> data) {
+    final List<UserModel> partners = [];
     for (var i = 0; i < data.length; i++)  {
       if (data[i].id != userId) {
         partners.add(data[i]);
@@ -49,7 +49,7 @@ class DialogItem extends StatelessWidget {
     }
   }
 
-  Widget _setDialogAvatar({required DialogData dialogData, required List<UserContact> partners, required ObjectKey key}) {
+  Widget _setDialogAvatar({required DialogData dialogData, required List<UserModel> partners, required ObjectKey key}) {
     if (dialogData.chatType.name == "Приват" || dialogData.chatType.name == "Приват безопасный") {
       return UserAvatarWidget(userId: partners.first.id, objKey: key);
     } else {
@@ -62,7 +62,7 @@ class DialogItem extends StatelessWidget {
   Widget build(BuildContext context) {
 
     final String partnerName = getChatItemName(dialogData, userId);
-    final List<UserContact> partners = getPartnersData(dialogData.usersList);
+    final List<UserModel> partners = getPartnersData(dialogData.usersList);
     final objKey = ObjectKey("${userId}_object_key");
 
     return InkWell(

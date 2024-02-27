@@ -195,7 +195,7 @@ class _CallsPageState extends State<CallsPage> {
   }
 
 
-  Widget getCallInfo(Map<String, UserContact>  users, CallModel call, int index) {
+  Widget getCallInfo(Map<String, UserModel>  users, CallModel call, int index) {
     try {
       CallRenderData? data;
       final toCaller = call.toCaller.replaceAll(new RegExp(r'[^0-9]'), '').substring(1);

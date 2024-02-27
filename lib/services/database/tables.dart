@@ -4,9 +4,9 @@ final Map<String, String> tables = {
       'id INTEGER PRIMARY KEY, '
       'name varchar(255) DEFAULT NULL, '
       'description varchar(255) DEFAULT NULL, '
-      'chat_type varchar(100) REFERENCES chat_type(name), '
-      'user_id INTEGER REFERENCES user(id), '
-      'message INTEGER REFERENCES message(id), '
+      'chat_type_name varchar(100) REFERENCES chat_type(name), '
+      'author_id INTEGER NOT NULL, '
+      'last_message_id INTEGER REFERENCES message(id), '
       'is_closed TINYINT(1) DEFAULT 0, '
       'is_public TINYINT(1) DEFAULT 0, '
       'message_count INTEGER, '
@@ -16,7 +16,7 @@ final Map<String, String> tables = {
 
   'chat_type' :
   'CREATE TABLE chat_type ('
-      'id INTEGER PRIMARY KEY, '
+      'id INTEGER PRIMARY KEY AUTOINCREMENT, '
       'name varchar(255) DEFAULT NULL, '
       'description varchar(255) DEFAULT NULL, '
       'p2p TINYINT(1) DEFAULT NULL, '
@@ -29,7 +29,7 @@ final Map<String, String> tables = {
   'CREATE TABLE chat_user ('
       'chat_id INTEGER, '
       'chat_user_role_id TINYINT(1), '
-      'active BOOLEAN, '
+      'active TINYINT(1), '
       'user_id INTEGER(255) REFERENCES user(id) );',
 
 
@@ -46,7 +46,7 @@ final Map<String, String> tables = {
       'email varchar(100) DEFAULT NULL, '
       'birthdate DATE DEFAULT NULL, '
       'avatar text, '
-      'secure TINYINT(1) DEFAULT NULL, '
+      'banned TINYINT(1) DEFAULT 0, '
       'last_access DATETIME DEFAULT NUll );',
 
 
@@ -73,4 +73,9 @@ final Map<String, String> tables = {
       'updated_at DATETIME DEFAULT CURRENT_TIMESTAMP );',
 
 
+  'app_settings' :
+  'CREATE TABLE app_settings ('
+      'device_id varchar(255) DEFAULT NULL, '
+      'first_initialize TINYINT(1) DEFAULT 1, '
+      'created_at DATETIME DEFAULT CURRENT_TIMESTAMP );',
 };

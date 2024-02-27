@@ -4,17 +4,17 @@ import '../../../../models/contact_model.dart';
 import '../../models/dialog_model.dart';
 
 abstract class UsersViewCubitState {
-  final List<UserContact> users = [];
-  final Map<String, UserContact> usersDictionary = {};
+  final List<UserModel> users = [];
+  final Map<String, UserModel> usersDictionary = {};
   final Map<int, bool> onlineUsersDictionary = {};
   final Map<int, ClientUserEvent> clientEvent = {};
 
 }
 
 class UsersViewCubitLoadedState extends UsersViewCubitState {
-  final List<UserContact> users;
+  final List<UserModel> users;
   final String searchQuery;
-  final Map<String, UserContact> usersDictionary;
+  final Map<String, UserModel> usersDictionary;
   final Map<int, bool> onlineUsersDictionary;
   final Map<int, ClientUserEvent> clientEvent;
 
@@ -42,9 +42,9 @@ class UsersViewCubitLoadedState extends UsersViewCubitState {
   int get hashCode => users.hashCode ^ searchQuery.hashCode ^ clientEvent.hashCode ^ clientEvent.length.hashCode ^ usersDictionary.hashCode;
 
   UsersViewCubitLoadedState copyWith({
-    List<UserContact>? users,
+    List<UserModel>? users,
     String? searchQuery,
-    Map<String, UserContact>? usersDictionary,
+    Map<String, UserModel>? usersDictionary,
     Map<int, bool>? onlineUsersDictionary,
     Map<int, ClientUserEvent>? clientEvent
   }) {

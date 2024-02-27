@@ -14,9 +14,9 @@ class DialogData {
 
   final int dialogId;
   final DialogType chatType;
-  final UserContact userData;
-  // TODO: manage user list to <UserProfileData>
-  final List<UserContact> usersList;
+  final UserModel userData;
+  //TODO: manage user list to <UserProfileData>
+  final List<UserModel> usersList;
   LastMessageData lastMessage;
   final String name;
   final String? description;
@@ -48,7 +48,7 @@ class DialogData {
           chatType: DialogType.fromJson(json["chat_type"]),
           userData: DialogAuthorData.fromJson(json["user"]),
           usersList: json["users"]
-              .map<UserContact>((userData) => UserContact.fromJson(userData))
+              .map<UserModel>((userData) => UserModel.fromJsonAPI(userData))
               .toList(),
           lastMessage: LastMessageData.fromJson(json["message"]),
           messageCount: json["message_count"],
@@ -62,6 +62,8 @@ class DialogData {
       throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
     }
   }
+
+
 
   @override
   bool operator ==(Object other) {
@@ -217,7 +219,7 @@ class DialogAuthorData {
   final String phone;
   final String email;
 
-  static UserContact fromJson(json) => UserContact.fromJson(json);
+  static UserModel fromJson(json) => UserModel.fromJsonAPI(json);
 }
 
 class DialogMessageData {
@@ -281,7 +283,7 @@ class ChatUser {
   final int userId;
   final int chatUserRole;
   final bool active;
-  final UserContact user;
+  final UserModel user;
 
   ChatUser({
     required this.chatId,
@@ -299,8 +301,8 @@ class ChatUser {
           userId: json["user_id"],
           chatUserRole: json["chat_user_role_id"],
           active: json["active"],
-          user: json["user"] != null ?UserContact.fromJson(json["user"])
-            : UserContact(id: json["user_id"], firstname: 'удален', lastname: 'Пользователь', middlename: '', company: '', position: '', phone: '', dept: '', email: '', avatar: null)
+          user: json["user"] != null ?UserModel.fromJsonAPI(json["user"])
+            : UserModel(id: json["user_id"], firstname: 'удален', lastname: 'Пользователь', middlename: '', company: '', position: '', phone: '', dept: '', email: '', avatar: null, birthdate: '', banned: 0, lastAccess: '')
       );
     } catch (err, stack) {
       throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");

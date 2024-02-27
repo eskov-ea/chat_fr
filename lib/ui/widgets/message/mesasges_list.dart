@@ -229,7 +229,7 @@ class MessagesListWidget extends StatelessWidget {
   final Function(String, int, int, String)  setReplyMessage;
   final Function(int)  deleteMessage;
   final bool isSelectedMode;
-  final List<UserContact> users;
+  final List<UserModel> users;
   final Function setSelectedMode;
   final Function(List<SelectedMessage>) openForwardMenu;
   final List<SelectedMessage> selected;
@@ -252,7 +252,7 @@ class MessagesListWidget extends StatelessWidget {
     super.key
   });
 
-  String getSenderName(List<UserContact> users, senderId){
+  String getSenderName(List<UserModel> users, senderId){
     if (senderId == 5) return "MCFEF Бот";
     String name = "Вы";
     //TODO: FOR EACh refactor users list to map

@@ -1,10 +1,10 @@
 import '../../models/contact_model.dart';
 
 class UsersListContainer {
-  final List<UserContact> users;
+  final List<UserModel> users;
 
   const UsersListContainer.initial()
-      : users = const <UserContact>[];
+      : users = const <UserModel>[];
 
   UsersListContainer({
     required this.users,
@@ -22,7 +22,7 @@ class UsersListContainer {
       users.hashCode;
 
   UsersListContainer copyWith({
-    List<UserContact>? users,
+    List<UserModel>? users,
   }) {
     return UsersListContainer(
       users: users ?? this.users

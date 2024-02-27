@@ -24,7 +24,7 @@ class GroupChatInfoPage extends StatefulWidget {
     Key? key
   }) : super(key: key);
 
-  final List<UserContact> users;
+  final List<UserModel> users;
   final List<ChatUser>? chatUsers;
   final DialogData dialogData;
   final UsersViewCubit usersViewCubit;

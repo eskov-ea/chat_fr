@@ -1,6 +1,6 @@
 
 
-final UserContact chatBot = UserContact(
+final UserModel chatBot = UserModel(
     id: 5,
     firstname: "MCFEF Чат-бот",
     lastname: "",
@@ -10,10 +10,13 @@ final UserContact chatBot = UserContact(
     phone: "",
     dept: "",
     email: "",
-    avatar: null
+    avatar: null,
+    banned: 0,
+    lastAccess: '',
+    birthdate: ''
 );
 
-class UserContact {
+class UserModel {
   final int id;
   final String firstname;
   final String lastname;
@@ -23,9 +26,12 @@ class UserContact {
   final String position;
   final String phone;
   final String email;
+  final String birthdate;
   final String? avatar;
+  final int banned;
+  final String? lastAccess;
 
-  UserContact({
+  UserModel({
     required this.id,
     required this.firstname,
     required this.lastname,
@@ -35,14 +41,17 @@ class UserContact {
     required this.phone,
     required this.dept,
     required this.email,
-    required this.avatar
+    required this.birthdate,
+    required this.avatar,
+    required this.banned,
+    required this.lastAccess,
   });
 
-  static UserContact fromJson(json) {
+  static UserModel fromJsonAPI(json) {
     if (json['id'] == 5) {
       return chatBot;
     } else {
-      return UserContact(
+      return UserModel(
           id: json['id'],
           firstname: json['staff']['firstname'] ?? "",
           lastname: json['staff']['lastname'] ?? "",
@@ -52,7 +61,32 @@ class UserContact {
           phone: json['staff']['phone'] ?? "",
           dept: json['staff']['dept'] ?? "",
           email: json['email'] ?? "",
-          avatar: json['staff']['avatar']
+          birthdate: json['staff']['birthdate'] ?? "",
+          avatar: json['staff']['avatar'],
+          banned: 0,
+          lastAccess: json['last_access'] ?? ''
+      );
+    }
+  }
+
+  static UserModel fromJsonDB(json) {
+    if (json['id'] == 5) {
+      return chatBot;
+    } else {
+      return UserModel(
+          id: json['id'],
+          firstname: json['firstname'] ?? "",
+          lastname: json['lastname'] ?? "",
+          middlename: json['middlename'] ?? "",
+          company: json['company'] ?? "",
+          position: json['position'] ?? "",
+          phone: json['phone'] ?? "",
+          dept: json['dept'] ?? "",
+          email: json['email'] ?? "",
+          birthdate: json['birthdate'] ?? "",
+          avatar: json['avatar'],
+          banned: 0,
+          lastAccess: json['last_access'] ?? ''
       );
     }
   }
