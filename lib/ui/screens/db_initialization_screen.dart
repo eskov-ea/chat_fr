@@ -26,6 +26,7 @@ class DatabaseInitializationScreen extends StatelessWidget {
         ),
         child: BlocConsumer<DatabaseBloc, DatabaseBlocState>(
           listener: (context, state) {
+            print('Database state $state');
             if (state is DatabaseBlocDBInitializedState) {
               Navigator.pushReplacementNamed(context, MainNavigationRouteNames.homeScreen);
             }

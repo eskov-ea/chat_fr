@@ -124,7 +124,7 @@ class _DBScreenState extends State<DBScreen> {
                         }
                         fiveDialogs.add(dialogs[i]);
                       }
-                      await db.saveDialog(fiveDialogs);
+                      await db.saveDialogs(fiveDialogs);
                       print('Dialogs saved to db::');
                     },
                     child: Container(

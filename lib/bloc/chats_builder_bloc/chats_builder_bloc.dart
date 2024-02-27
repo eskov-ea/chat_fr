@@ -19,24 +19,24 @@ import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
 class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
   final MessagesRepository messagesRepository;
-  final WsBloc webSocketBloc;
+  // final WsBloc webSocketBloc;
   final ErrorHandlerBloc errorHandlerBloc;
   final DataProvider dataProvider;
   late final StreamSubscription newMessageSubscription;
 
   ChatsBuilderBloc({
-    required this.webSocketBloc,
+    // required this.webSocketBloc,
     required this.dataProvider,
     required this.errorHandlerBloc,
     required this.messagesRepository}) : super( ChatsBuilderState.initial()){
-    newMessageSubscription = webSocketBloc.stream.listen((streamState) {
-      print("streamState   ${streamState}");
-      if (streamState is WsStateReceiveNewMessage){
-        add(ChatsBuilderAddMessageEvent(message: streamState.message, dialogId: streamState.message.dialogId));
-      } else if (streamState is WsStateUpdateStatus){
-        add(ChatsBuilderReceivedUpdatedMessageStatusesEvent(statuses: streamState.statuses));
-      }
-    });
+    // newMessageSubscription = webSocketBloc.stream.listen((streamState) {
+    //   print("streamState   ${streamState}");
+    //   if (streamState is WsStateReceiveNewMessage){
+    //     add(ChatsBuilderAddMessageEvent(message: streamState.message, dialogId: streamState.message.dialogId));
+    //   } else if (streamState is WsStateUpdateStatus){
+    //     add(ChatsBuilderReceivedUpdatedMessageStatusesEvent(statuses: streamState.statuses));
+    //   }
+    // });
 
     on<ChatsBuilderEvent>((event, emit) async {
       print("ChatsBuilderEvent   $event");

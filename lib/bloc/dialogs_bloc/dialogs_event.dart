@@ -10,6 +10,11 @@ abstract class DialogsEvent extends Equatable{
 
 class DialogsLoadEvent extends DialogsEvent {}
 
+class DialogsLoadedEvent extends DialogsEvent {
+  final List<DialogData> dialogs;
+  DialogsLoadedEvent({required this.dialogs});
+}
+
 class DialogsSearchDialogEvent extends DialogsEvent {
   final String searchQuery;
 

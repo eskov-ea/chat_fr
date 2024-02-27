@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:chat/bloc/database_bloc/database_bloc.dart';
+import 'package:chat/bloc/database_bloc/database_state.dart';
 import 'package:chat/bloc/user_bloc/user_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../bloc/user_bloc/user_bloc.dart';
@@ -12,14 +14,14 @@ import 'users_view_cubit_state.dart';
 class UsersViewCubit extends Cubit<UsersViewCubitState> {
   final UsersBloc usersBloc;
   late final StreamSubscription<UsersState> usersBlocSubscription;
-  final WsBloc wsBloc;
-  late final StreamSubscription<WsBlocState> wsBlocSubscription;
+  final DatabaseBloc databaseBloc;
+  late final StreamSubscription<DatabaseBlocState> databaseBlocSubscription;
 
   UsersViewCubit({
     required this.usersBloc,
-    required this.wsBloc
+    required this.databaseBloc
   }) : super(UsersViewCubitLoadingState()) {
-    wsBlocSubscription = wsBloc.stream.listen(_onWsStateChange);
+    databaseBlocSubscription = databaseBloc.stream.listen(_onDBStateChange);
     Future.microtask(() {
       _onState(usersBloc.state);
       usersBlocSubscription = usersBloc.stream.listen(_onState);
@@ -50,45 +52,45 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
     }
   }
 
-  void _onWsStateChange(WsBlocState state) {
+  void _onDBStateChange(DatabaseBlocState state) {
     print("WsBlocState  ${state}");
     if (state is WsStateOnlineUsersInitialState) {
       final Map<int, bool> onlineUsersDictionary = {};
-      state.onlineUsers.forEach((id) {
-        onlineUsersDictionary[id] = true;
-      });
-      usersBloc.add(UsersUpdateOnlineStatusEvent(
-        onlineUsersDictionary: onlineUsersDictionary,
-        joinedUser: null,
-        exitedUser: null,
-        clientEvent: null,
-        dialogId: null
-      ));
-    } else if (state is WsStateOnlineUsersExitState) {
-      usersBloc.add(UsersUpdateOnlineStatusEvent(
-        onlineUsersDictionary: null,
-        joinedUser: null,
-        exitedUser: state.userId,
-        clientEvent: null,
-        dialogId: null
-      ));
-    } else if (state is WsStateOnlineUsersJoinState) {
-      usersBloc.add(UsersUpdateOnlineStatusEvent(
-        onlineUsersDictionary: null,
-        joinedUser: state.userId,
-        exitedUser: null,
-        clientEvent: null,
-        dialogId: null
-      ));
-    } else if (state is WsOnlineUserTypingState) {
-      print("WsBlocState  ${state.clientEvent.event}");
-      usersBloc.add(UsersUpdateOnlineStatusEvent(
-        onlineUsersDictionary: null,
-        joinedUser: null,
-        exitedUser: null,
-        clientEvent: state.clientEvent,
-        dialogId: state.dialogId
-      ));
+      // state.onlineUsers.forEach((id) {
+      //   onlineUsersDictionary[id] = true;
+      // });
+    //   usersBloc.add(UsersUpdateOnlineStatusEvent(
+    //     onlineUsersDictionary: onlineUsersDictionary,
+    //     joinedUser: null,
+    //     exitedUser: null,
+    //     clientEvent: null,
+    //     dialogId: null
+    //   ));
+    // } else if (state is WsStateOnlineUsersExitState) {
+    //   usersBloc.add(UsersUpdateOnlineStatusEvent(
+    //     onlineUsersDictionary: null,
+    //     joinedUser: null,
+    //     exitedUser: state.userId,
+    //     clientEvent: null,
+    //     dialogId: null
+    //   ));
+    // } else if (state is WsStateOnlineUsersJoinState) {
+    //   usersBloc.add(UsersUpdateOnlineStatusEvent(
+    //     onlineUsersDictionary: null,
+    //     joinedUser: state.userId,
+    //     exitedUser: null,
+    //     clientEvent: null,
+    //     dialogId: null
+    //   ));
+    // } else if (state is WsOnlineUserTypingState) {
+    //   print("WsBlocState  ${state.clientEvent.event}");
+    //   usersBloc.add(UsersUpdateOnlineStatusEvent(
+    //     onlineUsersDictionary: null,
+    //     joinedUser: null,
+    //     exitedUser: null,
+    //     clientEvent: state.clientEvent,
+    //     dialogId: state.dialogId
+    //   ));
     }
   }
 

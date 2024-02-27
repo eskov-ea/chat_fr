@@ -23,6 +23,8 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         await onDatabaseBlocInitializeEvent(event, emit);
       } else if (event is DatabaseBlocLoadUsersEvent) {
         await onDatabaseBlocLoadUsersEvent(event, emit);
+      } else if (event is DatabaseBlocLoadDialogsEvent) {
+        await onDatabaseBlocLoadDialogsEvent(event, emit);
       }
     });
   }
@@ -59,6 +61,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
 
   Future<void> onDatabaseBlocLoadDialogsEvent(event, emit) async {
     try {
+      print('onDatabaseBlocLoadDialogsEvent');
       final dialogs = await DialogsProvider().getDialogs();
       await db.saveDialogs(dialogs);
       emit(DatabaseBlocDBInitializedState());

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:chat/bloc/database_bloc/database_bloc.dart';
+import 'package:chat/bloc/database_bloc/database_state.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_bloc.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,9 +12,8 @@ class DialogsViewCubit extends Cubit<DialogsViewCubitState> {
   late final StreamSubscription<DialogsState> dialogBlocSubscription;
 
   DialogsViewCubit({
-    required DialogsViewCubitState initialState,
     required this.dialogsBloc
-  }) : super(initialState) {
+  }) : super(DialogsLoadingViewCubitState()) {
     Future.microtask(() {
       _onState(dialogsBloc.state);
       dialogBlocSubscription = dialogsBloc.stream.listen(_onState);

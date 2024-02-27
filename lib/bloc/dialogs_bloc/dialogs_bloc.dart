@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:chat/bloc/database_bloc/database_bloc.dart';
+import 'package:chat/bloc/database_bloc/database_state.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_list_container.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_state.dart';
@@ -19,68 +21,73 @@ import '../ws_bloc/ws_state.dart';
 class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   final IDialogRepository dialogRepository;
   late final StreamSubscription newMessageSubscription;
-  //TODO: remove WSBloc from this Bloc up to DialogsViewCubit
-  final WsBloc webSocketBloc;
-  //TODO: remove WSBloc from this Bloc up to DialogsViewCubit
   final ErrorHandlerBloc errorHandlerBloc;
+  final DatabaseBloc databaseBloc;
+  late final StreamSubscription<DatabaseBlocState> networkDialogEventSubscription;
 
   DialogsBloc({
     required DialogsState initialState,
-    required this.webSocketBloc,
+    required this.databaseBloc,
     required this.errorHandlerBloc,
     required this.dialogRepository}) : super(initialState) {
-        newMessageSubscription = webSocketBloc.stream.listen((streamState) {
-          print("DialogsEvent   ${streamState}");
-          if (streamState is WsStateReceiveNewMessage){
-            final copyState = state.from();
-            final List<DialogData> newDialogs = [...copyState.dialogsContainer!.dialogs];
-            for (var dialog in newDialogs) {
-              if(dialog.dialogId == streamState.message.dialogId) {
-                if (dialog.lastMessage != null) {
-                  dialog.lastMessage.message = streamState.message.message;
-                  dialog.lastMessage.messageId = streamState.message.messageId;
-                  dialog.lastMessage.senderId = streamState.message.senderId;
-                  dialog.lastMessage.time = streamState.message.rawDate;
-                  dialog.lastMessage.statuses = streamState.message.status;
+    networkDialogEventSubscription = databaseBloc.stream.listen((streamState) {
+      print("DialogsEvent   ${streamState}");
+      if (streamState is DatabaseBlocLoadedDialogsState) {
+        add(DialogsLoadedEvent(dialogs: streamState.dialogs));
+      }
+      // if (streamState is WsStateReceiveNewMessage){
+      //   final copyState = state.from();
+      //   final List<DialogData> newDialogs = [...copyState.dialogsContainer!.dialogs];
+      //   for (var dialog in newDialogs) {
+      //     if(dialog.dialogId == streamState.message.dialogId) {
+      //       if (dialog.lastMessage != null) {
+      //         dialog.lastMessage.message = streamState.message.message;
+      //         dialog.lastMessage.messageId = streamState.message.messageId;
+      //         dialog.lastMessage.senderId = streamState.message.senderId;
+      //         dialog.lastMessage.time = streamState.message.rawDate;
+      //         dialog.lastMessage.statuses = streamState.message.status;
+      //
+      //         newDialogs.remove(dialog);
+      //         newDialogs.insert(0, dialog);
+      //
+      //       } else {
+      //         final jsonMessage = makeJsonMessage(streamState.message);
+      //         dialog.lastMessage = LastMessageData.fromJson(jsonMessage);
+      //       }
+      //     }
+      //   }
+      //   final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
+      //   emit(newState);
+      // } else if (streamState is WsStateUpdateStatus){
+      //   final copyState = state.from();
+      //   final List<DialogData> newDialogs = [...copyState.dialogsContainer?.dialogs ?? <DialogData>[]];
+      //
+      //   for (var dialog in newDialogs) {
+      //     if (dialog.dialogId == streamState.statuses.last.dialogId) {
+      //       dialog.lastMessage.statuses.addAll(streamState.statuses);
+      //     }
+      //   }
+      //   final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
+      //   emit(newState);
+      // } else if (streamState is WsStateNewDialogCreated) {
+      //   add(ReceiveNewDialogEvent(dialog: streamState.dialog));
+      // } else if (streamState is WsStateNewUserJoinDialog) {
+      //   add(DialogUserJoinChatEvent(user: streamState.user, dialogId: streamState.dialogId));
+      // } else if (streamState is WsStateNewUserExitDialog) {
+      //   add(DialogUserExitChatEvent(user: streamState.user, dialogId: streamState.dialogId));
+      // } else if (streamState is WsStateDialogDeleted) {
+      //   add(DialogDeletedChatEvent(dialog: streamState.dialog));
+      // }
+    });
 
-                  newDialogs.remove(dialog);
-                  newDialogs.insert(0, dialog);
-
-                } else {
-                  final jsonMessage = makeJsonMessage(streamState.message);
-                  dialog.lastMessage = LastMessageData.fromJson(jsonMessage);
-                }
-              }
-            }
-            final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
-            emit(newState);
-          } else if (streamState is WsStateUpdateStatus){
-            final copyState = state.from();
-            final List<DialogData> newDialogs = [...copyState.dialogsContainer?.dialogs ?? <DialogData>[]];
-
-            for (var dialog in newDialogs) {
-              if (dialog.dialogId == streamState.statuses.last.dialogId) {
-                dialog.lastMessage.statuses.addAll(streamState.statuses);
-              }
-            }
-            final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
-            emit(newState);
-          } else if (streamState is WsStateNewDialogCreated) {
-            add(ReceiveNewDialogEvent(dialog: streamState.dialog));
-          } else if (streamState is WsStateNewUserJoinDialog) {
-            add(DialogUserJoinChatEvent(user: streamState.user, dialogId: streamState.dialogId));
-          } else if (streamState is WsStateNewUserExitDialog) {
-            add(DialogUserExitChatEvent(user: streamState.user, dialogId: streamState.dialogId));
-          } else if (streamState is WsStateDialogDeleted) {
-            add(DialogDeletedChatEvent(dialog: streamState.dialog));
-          }
-        });
     on<DialogsEvent>((event, emit) async {
       print("DialogsEvent   ${event}  ${state.dialogsContainer}");
       if (event is DialogsLoadEvent) {
         await onDialogsLoadEvent(event, emit);
       } else if (event is ReceiveNewDialogEvent) {
         onReceiveNewDialogEvent(event, emit);
+      } else if (event is DialogsLoadedEvent) {
+        onDialogsLoadedEvent(event, emit);
       } else if (event is UpdateDialogLastMessageEvent) {
         onUpdateDialogLastMessageEvent(event, emit);
       } else if (event is DialogUserJoinChatEvent) {
@@ -154,6 +161,13 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     final newDialogs = [ event.dialog, ...state.dialogsContainer!.dialogs];
     final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
     emit(newState);
+  }
+
+  void onDialogsLoadedEvent(
+      DialogsLoadedEvent event,
+      Emitter<DialogsState> emit
+      ) {
+    emit(state.copyWith(dialogsContainer: DialogsListContainer(dialogs: event.dialogs), isFirstInitialized: true, isAuthenticated: true));
   }
 
   void onDialogUserJoinChatEvent(DialogUserJoinChatEvent event, emit) {

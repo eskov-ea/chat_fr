@@ -7,26 +7,23 @@ import 'package:sqflite/sqflite.dart';
 class UsersDBLayer {
 
   Future saveUsers(List<UserModel> users) async {
-    final db = await DBProvider.db.database;
-    final Batch batch = db.batch();
-    for (var user in users) {
-      batch.insert('user', {
-        "id": user.id,
-        "firstname": user.firstname,
-        "lastname": user.lastname,
-        "middlename": user.middlename,
-        "company": user.company,
-        "dept": user.dept,
-        "position": user.position,
-        "phone": user.phone,
-        "email": user.email,
-        "birthdate": user.birthdate,
-        "avatar": user.avatar,
-        "banned": user.banned,
-        "last_access": user.lastAccess
-      });
+    try {
+      final db = await DBProvider.db.database;
+      final Batch batch = db.batch();
+      for (var user in users) {
+        batch.execute(
+          'INSERT OR IGNORE INTO user(id, firstname, lastname, middlename, company, dept, position, '
+          'phone, email, birthdate, avatar, banned, last_access) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ',
+          [user.id, user.firstname, user.lastname, user.middlename, user.company,
+          user.dept, user.position, user.phone, user.email, user.birthdate,
+          user.avatar, user.banned, user.lastAccess]
+        );
+      }
+      return await batch.commit(noResult: true);
+    } catch(err, stackTrace) {
+      log('DB operation error:  $err');
+      rethrow;
     }
-    await batch.commit(noResult: true);
   }
 
   Future<List<UserModel>> readUsers() async {

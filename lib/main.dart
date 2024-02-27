@@ -99,38 +99,15 @@ class MyApp extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    final websocketBloc =  WsBloc(
-      initialState: Unconnected(),
-      dialogsRepository: DialogRepository(),
-      secureStorage: DataProvider()
-    );
     final errorHandlerBloc =  ErrorHandlerBloc();
     final authBloc = AuthBloc(authRepo: AuthRepository());
-    final dialogViewCubit = DialogsViewCubit(
-        dialogsBloc: DialogsBloc(
-            webSocketBloc: websocketBloc,
-            dialogRepository: DialogRepository(),
-            errorHandlerBloc: errorHandlerBloc,
-            initialState: const DialogsState.initial()
-        ),
-        initialState: DialogsLoadingViewCubitState(
-        ));
-    final usersViewCubit = UsersViewCubit(
-        wsBloc: websocketBloc,
-        usersBloc: UsersBloc(
-            errorHandlerBloc: errorHandlerBloc,
-            usersRepository: UsersRepository()
-        )
+    final databaseBloc = DatabaseBloc(
+        errorHandlerBloc: errorHandlerBloc
     );
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => DatabaseBloc(
-              errorHandlerBloc: errorHandlerBloc
-          ),
-        ),
-        BlocProvider(
-            create: (context) => websocketBloc
+          create: (context) => databaseBloc,
         ),
         BlocProvider(
             create: (_) => AuthViewCubit(authBloc: authBloc, initialState: AuthViewCubitFormFillInProgressState())
@@ -143,18 +120,35 @@ class MyApp extends StatelessWidget{
             create: (context) => ChatsBuilderBloc(
               errorHandlerBloc: errorHandlerBloc,
               messagesRepository: MessagesRepository(),
-              webSocketBloc: websocketBloc,
               dataProvider: DataProvider()
             )
         ),
         BlocProvider(
-          create: (_) => usersViewCubit
+          create: (_) => UsersViewCubit(
+              databaseBloc: databaseBloc,
+              usersBloc: UsersBloc(
+                  errorHandlerBloc: errorHandlerBloc,
+                  usersRepository: UsersRepository()
+              )
+          )
         ),
         BlocProvider(
-            create: (context) => dialogViewCubit),
+            create: (context) => DialogsViewCubit(
+                dialogsBloc: DialogsBloc(
+                    databaseBloc: databaseBloc,
+                    dialogRepository: DialogRepository(),
+                    errorHandlerBloc: errorHandlerBloc,
+                    initialState: const DialogsState.initial()
+                ),
+            )
+        ),
         BlocProvider(
           create: (_) => WebsocketViewCubit(
-              wsBloc: websocketBloc,
+              wsBloc: WsBloc(
+                  initialState: Unconnected(),
+                  dialogsRepository: DialogRepository(),
+                  secureStorage: DataProvider()
+              ),
               initialState: WebsocketViewCubitState.unknown
           ),
         ),
