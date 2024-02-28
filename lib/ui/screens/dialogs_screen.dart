@@ -235,7 +235,7 @@ class _MessagesPageState extends State<MessagesPage> {
 //   }
 // }
 
-bool isMessageReadByMe (List<MessageStatuses>? statuses, int userId) {
+bool isMessageReadByMe (List<MessageStatus>? statuses, int userId) {
   if (statuses == null) return true;
   for (var statusObj in statuses) {
     if (statusObj.userId == userId && statusObj.statusId == 4) {

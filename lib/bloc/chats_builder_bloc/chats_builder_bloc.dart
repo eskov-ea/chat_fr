@@ -176,13 +176,13 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
     //TODO: implement chat dictionary not list
     // final chats = state.from();
     final chats = state.chats;
-    for (final MessageStatuses status in event.statuses) {
+    for (final MessageStatus status in event.statuses) {
       for (var chat in chats) {
         if (chat.chatId == status.dialogId) {
           for (var message in chat.messages) {
             if (message.messageId == status.messageId &&
-            !message.status.contains(status)) {
-              message.status.add(status);
+            !message.statuses.contains(status)) {
+              message.statuses.add(status);
             }
           }
         }
@@ -207,7 +207,7 @@ class ChatsBuilderBloc extends Bloc<ChatsBuilderEvent, ChatsBuilderState> {
         }
         message.isError = false;
         message.isHandling = false;
-        message.status.addAll(event.message.status);
+        message.statuses.addAll(event.message.statuses);
         messagesDictionary.remove("${event.localMessageId}");
         messagesDictionary["${event.message.messageId}"] = true;
       }

@@ -162,13 +162,14 @@ MessageData createLocalMessage({
     rawDate: DateTime.now(),
     file: file,
     isError: false,
-    status: [
-      MessageStatuses(
+    statuses: [
+      MessageStatus(
           id: 0,
           userId: userId,
           statusId: 0,
           messageId: 0,
           dialogId: dialogId!,
+          updatedAt: DateTime.now().toString(),
           createdAt: DateTime.now().toString())
     ],
     forwarderFromUser: getForwardedMessageStatus(messageText),

@@ -115,17 +115,17 @@ class _DBScreenState extends State<DBScreen> {
                 children: [
                   GestureDetector(
                     onTap: () async {
-                      final db = DBProvider.db;
-                      final dialogs = await DialogsProvider().getDialogs();
-                      List<DialogData> fiveDialogs = [];
-                      for (var i=0; i<5; ++i) {
-                        for (var chatUser in dialogs[i].chatUsers) {
-                          await db.saveChatUser(chatUser);
-                        }
-                        fiveDialogs.add(dialogs[i]);
-                      }
-                      await db.saveDialogs(fiveDialogs);
-                      print('Dialogs saved to db::');
+                      // final db = DBProvider.db;
+                      // final dialogs = await DialogsProvider().getDialogs();
+                      // List<DialogData> fiveDialogs = [];
+                      // for (var i=0; i<5; ++i) {
+                      //   for (var chatUser in dialogs[i].chatUsers) {
+                      //     await db.saveChatUsers(chatUserDB);
+                      //   }
+                      //   fiveDialogs.add(dialogs[i]);
+                      // }
+                      // await db.saveDialogs(fiveDialogs);
+                      // print('Dialogs saved to db::');
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width * 0.45,
@@ -142,7 +142,7 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      final result = await db.readDialog();
+                      final result = await db.getDialogs();
                       print('DB result:: $result');
                     },
                     child: Container(
@@ -186,7 +186,7 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      final res = await db.readUsers();
+                      final res = await db.getUsers();
                       print('DB result:: $res');
                     },
                     child: Container(
@@ -209,7 +209,13 @@ class _DBScreenState extends State<DBScreen> {
                 children: [
                   GestureDetector(
                     onTap: () async {
-
+                      final db = await DBProvider.db.database;
+                      return db.transaction((txn) async {
+                      await txn.rawUpdate(
+                      'DROP TABLE IF EXISTS app_settings;'
+                      );
+                      print('table dropped');
+                      });
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width * 0.45,
@@ -217,7 +223,7 @@ class _DBScreenState extends State<DBScreen> {
                         padding: const EdgeInsets.all(5),
                         color: Colors.grey.shade500,
                         child: const Center(
-                            child: Text('Print',
+                            child: Text('Drop app settings',
                               style: TextStyle(color: Colors.white),
                             )
                         )
@@ -226,7 +232,7 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      final res = await db.readChatUsers();
+                      final res = await db.getChatUsers();
                       log('DB result:: $res\r\n\r\n');
                     },
                     child: Container(
@@ -236,6 +242,46 @@ class _DBScreenState extends State<DBScreen> {
                         color: Colors.purple.shade400,
                         child: const Center(
                             child: Text('Read chat users',
+                              style: TextStyle(color: Colors.white),
+                            )
+                        )
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  GestureDetector(
+                    onTap: () async {
+
+                    },
+                    child: Container(
+                        width: MediaQuery.of(context).size.width * 0.45,
+                        height: 70,
+                        padding: const EdgeInsets.all(5),
+                        color: Colors.orange.shade500,
+                        child: const Center(
+                            child: Text('Drop app settings',
+                              style: TextStyle(color: Colors.white),
+                            )
+                        )
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      final db = DBProvider.db;
+                      final res = await db.getMessages();
+                      log('DB result:: $res\r\n\r\n');
+                    },
+                    child: Container(
+                        width: MediaQuery.of(context).size.width * 0.45,
+                        height: 70,
+                        padding: const EdgeInsets.all(5),
+                        color: Colors.green.shade400,
+                        child: const Center(
+                            child: Text('Read messages',
                               style: TextStyle(color: Colors.white),
                             )
                         )

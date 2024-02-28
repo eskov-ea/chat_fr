@@ -27,6 +27,7 @@ final Map<String, String> tables = {
 
   'chat_user' :
   'CREATE TABLE chat_user ('
+      'id INTEGER PRIMARY KEY AUTOINCREMENT, '
       'chat_id INTEGER, '
       'chat_user_role_id TINYINT(1), '
       'active TINYINT(1), '
@@ -53,11 +54,11 @@ final Map<String, String> tables = {
   'message' :
   'CREATE TABLE message ('
       'id INTEGER PRIMARY KEY, '
-      'chat_id INTEGER, '
-      'user_id INTEGER, '
-      'parent_id INTEGER, '
+      'chat_id INTEGER NOT NULL, '
+      'user_id INTEGER NOT NULL, '
+      'parent_id INTEGER DEFAULT NULL, '
       'message text DEFAULT "", '
-      'file INTEGER DEFAULT NULL REFERENCES file(id), '
+      'file INTEGER DEFAULT NULL, '
       'created_at DATETIME DEFAULT CURRENT_TIMESTAMP, '
       'updated_at DATETIME DEFAULT CURRENT_TIMESTAMP );',
 
@@ -65,16 +66,17 @@ final Map<String, String> tables = {
   'message_status' :
   'CREATE TABLE message_status ('
       'id INTEGER PRIMARY KEY, '
-      'chat_id INTEGER, '
-      'user_id INTEGER, '
-      'chat_message_id INTEGER, '
-      'chat_message_status_id INTEGER, '
+      'chat_id INTEGER NOT NULL, '
+      'user_id INTEGER NOT NULL, '
+      'chat_message_id INTEGER NOT NULL REFERENCES message(id) ON DELETE CASCADE, '
+      'chat_message_status_id INTEGER NOT NULL, '
       'created_at DATETIME DEFAULT CURRENT_TIMESTAMP, '
       'updated_at DATETIME DEFAULT CURRENT_TIMESTAMP );',
 
 
   'app_settings' :
   'CREATE TABLE app_settings ('
+      'id INTEGER PRIMARY KEY, '
       'device_id varchar(255) DEFAULT NULL, '
       'first_initialize TINYINT(1) DEFAULT 1, '
       'created_at DATETIME DEFAULT CURRENT_TIMESTAMP );',

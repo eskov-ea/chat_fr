@@ -17,7 +17,7 @@ class DialogData {
   final UserModel userData;
   //TODO: manage user list to <UserProfileData>
   final List<UserModel> usersList;
-  LastMessageData lastMessage;
+  MessageData? lastMessage;
   final String name;
   final String? description;
   final int messageCount;
@@ -50,7 +50,9 @@ class DialogData {
           usersList: json["users"]
               .map<UserModel>((userData) => UserModel.fromJsonAPI(userData))
               .toList(),
-          lastMessage: LastMessageData.fromJson(json["message"]),
+          lastMessage: json["message"] == null
+              ? null
+              : MessageData.fromJson(json["message"]),
           messageCount: json["message_count"],
           picture: json["picture"],
           createdAt: DateTime.tryParse(json["created_at"]),
@@ -99,9 +101,9 @@ class DialogType {
   final int p2p;
   final int secure;
   final int readonly;
-  final String picture;
+  final String? picture;
   final String name;
-  final String description;
+  final String? description;
 
   static DialogType fromJson(json) {
     try {
@@ -125,7 +127,7 @@ class LastMessageData {
   String message;
   int senderId;
   DateTime? time;
-  List<MessageStatuses> statuses;
+  List<MessageStatus> statuses;
 
   LastMessageData(
       {required this.messageId,
@@ -148,7 +150,7 @@ class LastMessageData {
             message: replaceForwardSymbol(json["message"]),
             senderId: json["user_id"],
             time: DateTime.tryParse(json["created_at"]),
-            statuses: MessageStatuses.fromJson(json["statuses"]),
+            statuses: [MessageStatus.fromJson(json["statuses"])],
           );
   }
 

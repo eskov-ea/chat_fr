@@ -51,16 +51,16 @@ class WsStateReceiveNewMessage extends WsBlocState {
       other is WsStateReceiveNewMessage &&
           runtimeType == other.runtimeType &&
           message.messageId == other.message.messageId &&
-          message.status.last.statusId == other.message.status.last.statusId;
+          message.statuses.last.statusId == other.message.statuses.last.statusId;
 
   @override
   int get hashCode =>
       message.messageId.hashCode ^
-      message.status.last.statusId;
+      message.statuses.last.statusId;
 }
 
 class WsStateUpdateStatus extends WsBlocState {
-  final List<MessageStatuses> statuses;
+  final List<MessageStatus> statuses;
 
   const WsStateUpdateStatus({required this.statuses});
 

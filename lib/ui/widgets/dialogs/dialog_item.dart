@@ -155,7 +155,7 @@ class DialogItem extends StatelessWidget {
                     height: 11,
                   ),
                   Text(
-                    dialogData.lastMessage.time != null ? getDateDialogModel(dialogData.lastMessage.time!) : "",
+                    dialogData.lastMessage != null ? getDateDialogModel(dialogData.lastMessage!.rawDate) : "",
                     textAlign: TextAlign.end,
                     style: const TextStyle(
                       fontSize: 13,
@@ -173,16 +173,16 @@ class DialogItem extends StatelessWidget {
                           ? Align(child: Icon(Icons.lock))
                           : SizedBox.shrink(),
                       SizedBox(width: 10,),
-                      ( dialogData.lastMessage.senderId != 0 && dialogData.lastMessage.senderId != userId && Helpers.checkIReadMessage(dialogData.lastMessage.statuses, userId!) != 4)
-                          ? Container(
-                              width: 12,
-                              height: 12,
-                              decoration: const BoxDecoration(
-                                color: AppColors.secondary,
-                                shape: BoxShape.circle,
-                              )
-                          )
-                          : const SizedBox.shrink()
+                      // ( dialogData.lastMessage.senderId != 0 && dialogData.lastMessage.senderId != userId && Helpers.checkIReadMessage(dialogData.lastMessage.statuses, userId!) != 4)
+                      //     ? Container(
+                      //         width: 12,
+                      //         height: 12,
+                      //         decoration: const BoxDecoration(
+                      //           color: AppColors.secondary,
+                      //           shape: BoxShape.circle,
+                      //         )
+                      //     )
+                      //     : const SizedBox.shrink()
                     ],
                   )
                 ],
@@ -195,9 +195,9 @@ class DialogItem extends StatelessWidget {
   }
 
   Widget lastMessageContent() {
-    if (dialogData.lastMessage.message != "") {
+    if (dialogData.lastMessage != null && dialogData.lastMessage!.message != "") {
       return Text(
-        dialogData.lastMessage.message,
+        dialogData.lastMessage!.message,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(

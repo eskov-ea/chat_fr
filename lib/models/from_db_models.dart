@@ -18,6 +18,13 @@ class DialogDataDB {
   final String updatedAt;
   final String chatTypeName;
   final List<int> usersList;
+  final int chatTypeId;
+  final int p2p;
+  final int readonly;
+  final int secure;
+  final String? chatTypePicture;
+  final String? chatTypeDescription;
+
 
   DialogDataDB({
     required this.dialogId,
@@ -32,7 +39,13 @@ class DialogDataDB {
     required this.isClosed,
     required this.isPublic,
     required this.createdAt,
-    required this.updatedAt
+    required this.updatedAt,
+    required this.chatTypeId,
+    required this.p2p,
+    required this.secure,
+    required this.readonly,
+    required this.chatTypePicture,
+    required this.chatTypeDescription
   });
 
   static DialogDataDB fromJson(json) {
@@ -43,17 +56,23 @@ class DialogDataDB {
           description: json["description"],
           chatTypeName: json["chat_type_name"],
           dialogAuthorId: json["author_id"],
-          usersList: json["chat_users"],
+          usersList: json["chat_users"].toString().split(',').map(int.parse).toList(),
           lastMessageId: json["message"],
           messageCount: json["message_count"],
           picture: json["picture"],
           createdAt: json["created_at"],
           updatedAt: json["updated_at"],
           isClosed: json["is_closed"],
-          isPublic: json["is_public"]
+          isPublic: json["is_public"],
+          chatTypeId: json["chat_type_id"],
+          p2p: json["chat_type_p2p"],
+          secure: json["chat_type_secure"],
+          readonly: json["chat_type_readonly"],
+          chatTypePicture: json["chat_type_picture"],
+          chatTypeDescription: json["chat_type_description"]
       );
     } catch (err, stack) {
-      log('DB operational error::  $stack');
+      log('DB operational error:: $err \r\n $stack');
       rethrow;
     }
   }

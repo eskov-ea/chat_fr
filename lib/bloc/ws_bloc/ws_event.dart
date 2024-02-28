@@ -11,7 +11,7 @@ abstract class WsBlocEvent extends Equatable {
 class InitializeSocketEvent extends WsBlocEvent{}
 
 class WsEventUpdateStatus extends WsBlocEvent{
-  final List<MessageStatuses> statuses;
+  final List<MessageStatus> statuses;
 
   WsEventUpdateStatus({required this.statuses});
 

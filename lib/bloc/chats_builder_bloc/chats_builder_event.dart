@@ -14,7 +14,7 @@ class ChatsBuilderUpdateStatusMessagesEvent extends ChatsBuilderEvent {
 }
 
 class ChatsBuilderReceivedUpdatedMessageStatusesEvent extends ChatsBuilderEvent {
-  final List<MessageStatuses> statuses;
+  final List<MessageStatus> statuses;
 
   ChatsBuilderReceivedUpdatedMessageStatusesEvent({
     required this.statuses

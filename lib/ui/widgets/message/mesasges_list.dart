@@ -67,7 +67,7 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
   @override
   void dispose() {
     _scrollController.removeListener(() { setupScrollListener; });
-    _newMessagesSubscription.cancel();
+    // _newMessagesSubscription.cancel();
     super.dispose();
   }
 
@@ -75,7 +75,7 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
   void initState() {
     super.initState();
     // In development if we hot restart the app the yielded state in stream are not reachable
-    _newMessagesSubscription = BlocProvider.of<WsBloc>(context).stream.listen(_onNewMessageReceived);
+    // _newMessagesSubscription = BlocProvider.of<WsBloc>(context).stream.listen(_onNewMessageReceived);
     BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogData.dialogId));
     setupScrollListener(
         scrollController: _scrollController,
@@ -116,13 +116,13 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
     });
   }
 
-  void _onNewMessageReceived(WsBlocState state) {
-    if (state is WsStateReceiveNewMessage) {
-      if (state.message.dialogId == widget.dialogData.dialogId) {
-        BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogData.dialogId));
-      }
-    }
-  }
+  // void _onNewMessageReceived(WsBlocState state) {
+  //   if (state is WsStateReceiveNewMessage) {
+  //     if (state.message.dialogId == widget.dialogData.dialogId) {
+  //       BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogData.dialogId));
+  //     }
+  //   }
+  // }
 
   ChatsData? findChat(List<ChatsData> chats, int dialogId) {
     final it = chats.iterator;
@@ -321,7 +321,7 @@ class MessagesListWidget extends StatelessWidget {
                   messageTime: messages[index].messageTime,
                   focusNode: focusNode,
                   setReplyMessage: setReplyMessage,
-                  status: Helpers.checkPartnerReadMessage(messages[index].status, userId),
+                  status: Helpers.checkPartnerReadMessage(messages[index].statuses, userId),
                   file: messages[index].file,
                   p2p: dialogData.chatType.p2p,
                   forwardFrom: messages[index].forwarderFromUser,

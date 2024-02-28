@@ -26,7 +26,7 @@ class UsersDBLayer {
     }
   }
 
-  Future<List<UserModel>> readUsers() async {
+  Future<List<UserModel>> getUsers() async {
     try {
       final db = await DBProvider.db.database;
       return await db.transaction((txn) async {

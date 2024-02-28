@@ -107,6 +107,7 @@ class MyApp extends StatelessWidget{
     return MultiBlocProvider(
       providers: [
         BlocProvider(
+          lazy: false,
           create: (context) => databaseBloc,
         ),
         BlocProvider(
@@ -133,6 +134,7 @@ class MyApp extends StatelessWidget{
           )
         ),
         BlocProvider(
+            lazy: false,
             create: (context) => DialogsViewCubit(
                 dialogsBloc: DialogsBloc(
                     databaseBloc: databaseBloc,

@@ -1,11 +1,15 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/from_db_models.dart';
+import 'package:chat/models/message_model.dart';
 import 'package:chat/services/database/db_layers/chat_type_layer.dart';
 import 'package:chat/services/database/db_layers/chat_user_db_layer.dart';
 import 'package:chat/services/database/db_layers/dialog_db_layer.dart';
+import 'package:chat/services/database/db_layers/message_db_layer.dart';
+import 'package:chat/services/database/db_layers/message_status_db_layer.dart';
 import 'package:chat/services/database/db_layers/users_db_layer.dart';
 import 'package:chat/services/database/developers.dart';
 import 'package:chat/services/database/tables.dart';
@@ -38,6 +42,12 @@ class DBProvider {
       return await openDatabase(path, version: 1,
           onCreate: (Database db, int version) async {
         await createTables(db);
+        await db.transaction((txn) async {
+          return await txn.rawUpdate(
+              'INSERT INTO app_settings(id, first_initialize) VALUES(?, ?)',
+              [1, 0]
+          );
+        });
       }, onOpen: (db) async {
         final List<Object> rawTables =
             await db.rawQuery('SELECT * FROM sqlite_master');
@@ -63,17 +73,27 @@ class DBProvider {
 
   ///   DIALOGS LAYER
   Future<void> saveDialogs(List<DialogData> dialogs) async => await DialogDBLayer().saveDialog(dialogs);
-  Future<List<DialogData>> readDialog() async => await DialogDBLayer().readDialogs();
+  Future<List<DialogDataDB>> getDialogs() async => await DialogDBLayer().getDialogs();
+
+
+  ///   MESSAGES LAYER
+  Future<List<Object?>> saveMessages(List<MessageData> messages) async => MessageDBLayer().saveMessages(messages);
+  Future<List<MessageData>> getMessages() async => MessageDBLayer().getMessages();
+
+
+  ///   MESSAGE STATUS LAYER
+  Future<List<Object?>> saveMessageStatuses(List<MessageStatus> messages) async => MessageStatusDBLayer().saveMessageStatuses(messages);
+  Future<List<MessageStatus>> getMessageStatuses() async => MessageStatusDBLayer().getMessageStatuses();
 
 
   ///   USERS LAYER
   Future<void> saveUsers(List<UserModel> users) async => await UsersDBLayer().saveUsers(users);
-  Future<List<UserModel>> readUsers() async => await UsersDBLayer().readUsers();
+  Future<List<UserModel>> getUsers() async => await UsersDBLayer().getUsers();
 
 
   ///   CHAT USERS LAYER
-  Future<void> saveChatUser(ChatUser cu) async => await ChatUsersDBLayer().saveChatUser(cu);
-  Future<List<ChatUserDB>> readChatUsers() async => await ChatUsersDBLayer().readChatUsers();
+  Future<void> saveChatUsers(List<ChatUserDB> chatUsers) async => await ChatUsersDBLayer().saveChatUsers(chatUsers);
+  Future<List<ChatUserDB>> getChatUsers() async => await ChatUsersDBLayer().getChatUsers();
 
 
   ///   DB DEVELOPER SERVICE
@@ -92,11 +112,11 @@ class DBProvider {
       print("ERROR:DBProvider:73:: $err");
     }
   }
-
   Future<bool> checkIfDatabaseIsNotEmpty() async {
-    final connection = await db.database;
-    return connection.transaction((txn) async {
+    final db = await database;
+    return db.transaction((txn) async {
       final res = await txn.rawQuery('SELECT * FROM app_settings ');
+      print('checkIfDatabaseIsNotEmpty  $res');
       if (res.isNotEmpty) {
         return res.first["first_initialize"] == 1;
       } else {
@@ -105,11 +125,32 @@ class DBProvider {
     });
   }
 
+  Future<int> updateAppSettingsTable({int? dbInitialized, String? deviceId}) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      final baseSql = 'UPDATE app_settings SET ';
+      final dbInitStatus = dbInitialized == null ? '' : 'first_initialize = $dbInitialized';
+      final deviceQuery = deviceId == null ? '' : ', device_id = $deviceId ';
+      return await txn.rawUpdate(
+        baseSql + dbInitStatus + deviceQuery + ';'
+      );
+    });
+    print('settings updated');
+    return 1;
+  }
+
 
   Future<void> DeveloperModeClearPersonTable() async {
     final db = await database;
     await db.execute("DROP TABLE IF EXISTS dialog");
     await db.execute("DROP TABLE IF EXISTS user");
+    final databasesPath = await getDatabasesPath();
+    String path = join(databasesPath, 'mcfef.db');
+    final dbFile = File(path);
+    print(dbFile.uri);
+    print(dbFile.lengthSync());
+    print(dbFile.lastAccessedSync());
+    dbFile.deleteSync(recursive: true);
     print('Tables deleted');
   }
 

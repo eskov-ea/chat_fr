@@ -282,7 +282,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void initialLoadData() async {
     BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLoadingEvent());
-    BlocProvider.of<DialogsViewCubit>(context).loadDialogs();
+    // BlocProvider.of<DialogsViewCubit>(context).loadDialogs();
     BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(InitializeSocketEvent());
     BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersLoadEvent());
   }

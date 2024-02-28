@@ -5,7 +5,7 @@ abstract class Helpers {
   static final random = Random();
 
 
-  static checkIReadMessage(List<MessageStatuses>? statuses, int userId) {
+  static checkIReadMessage(List<MessageStatus>? statuses, int userId) {
     if (statuses == null) return 0;
     var status = 0;
     for (var statusObj in statuses) {
@@ -15,7 +15,7 @@ abstract class Helpers {
     }
     return status;
   }
-  static checkPartnerReadMessage(List<MessageStatuses>? statuses, int userId) {
+  static checkPartnerReadMessage(List<MessageStatus>? statuses, int userId) {
     if (statuses == null) return 0;
     var status = 0;
     for (var statusObj in statuses) {

@@ -196,7 +196,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
                   });
                 } else if (data["message_status"] != null) {
                   final newStatuses =
-                      MessageStatuses.fromJson([data["message_status"]]);
+                      [MessageStatus.fromJson([data["message_status"]])];
                   print("UPDATE STATUSES    -> ${newStatuses.last.statusId}");
                   add(WsEventUpdateStatus(statuses: newStatuses));
                 } else if (data["join"] != null) {
@@ -291,7 +291,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
           });
         } else if (data["message_status"] != null) {
           final newStatuses =
-              MessageStatuses.fromJson([data["message_status"]]);
+              [MessageStatus.fromJson([data["message_status"]])];
           add(WsEventUpdateStatus(statuses: newStatuses));
         }
       });
@@ -400,8 +400,8 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
         }
       }
       if (statusesCollection!.isNotEmpty) {
-        final List<MessageStatuses> newStatuses =
-        MessageStatuses.fromJson(statusesCollection).toList();
+        final List<MessageStatus> newStatuses = statusesCollection.map((status) =>
+          MessageStatus.fromJson(status)).toList();
         print("UPDATED_INFO STATUSES    $newStatuses");
         add(WsEventUpdateStatus(statuses: newStatuses));
       }
