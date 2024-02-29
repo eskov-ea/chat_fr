@@ -64,7 +64,7 @@ class DialogItem extends StatelessWidget {
   Widget build(BuildContext context) {
 
     final String partnerName = getChatItemName(dialogData, userId);
-    final List<UserModel> partners = getPartnersData(dialogData.chatUsers);
+    final List<UserModel> partners = getPartnersData(dialogData.users);
     final objKey = ObjectKey("${userId}_object_key");
 
     return InkWell(
@@ -77,11 +77,9 @@ class DialogItem extends StatelessWidget {
             userId: userId,
             partnerId: partners.first.id,
             dialogData: dialogData,
-            username: "Placeholder"
-            //TODO: refactor db
-            // username: userId == dialogData.chatUsers.first
-            //     ? "${dialogData.usersList.last.lastname} ${dialogData.usersList.last.firstname}"
-            //     : "${dialogData.usersList.first.lastname} ${dialogData.usersList.first.firstname}"
+            username: userId == dialogData.chatUsers.first.userId
+                ? "${dialogData.chatUsers.last.user.lastname} ${dialogData.chatUsers.last.user.firstname}"
+                : "${dialogData.chatUsers.first.user.lastname} ${dialogData.chatUsers.first.user.firstname}"
         );
       },
       child: Container(
@@ -177,16 +175,16 @@ class DialogItem extends StatelessWidget {
                           ? Align(child: Icon(Icons.lock))
                           : SizedBox.shrink(),
                       SizedBox(width: 10,),
-                      // ( dialogData.lastMessage.senderId != 0 && dialogData.lastMessage.senderId != userId && Helpers.checkIReadMessage(dialogData.lastMessage.statuses, userId!) != 4)
-                      //     ? Container(
-                      //         width: 12,
-                      //         height: 12,
-                      //         decoration: const BoxDecoration(
-                      //           color: AppColors.secondary,
-                      //           shape: BoxShape.circle,
-                      //         )
-                      //     )
-                      //     : const SizedBox.shrink()
+                      ( dialogData.lastMessage?.senderId != 0 && dialogData.lastMessage?.senderId != userId && Helpers.checkIReadMessage(dialogData.lastMessage?.statuses, userId!) != 4)
+                          ? Container(
+                              width: 12,
+                              height: 12,
+                              decoration: const BoxDecoration(
+                                color: AppColors.secondary,
+                                shape: BoxShape.circle,
+                              )
+                          )
+                          : const SizedBox.shrink()
                     ],
                   )
                 ],

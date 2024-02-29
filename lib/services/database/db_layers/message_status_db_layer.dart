@@ -33,7 +33,6 @@ class MessageStatusDBLayer {
             'SELECT id, chat_id, user_id, chat_message_id, chat_message_status_id, created_at, updated_at '
             'FROM message_status; '
         );
-        print('Messages from db::: $res');
         return res.map((el) => MessageStatus.fromJson(el)).toList();
       });
     } catch (err, stackTrace) {

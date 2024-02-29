@@ -65,7 +65,7 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
           context: context,
           userId: int.parse(userId!),
           //TODO: refactor db
-          partnerId: dialogData.chatUsers.first,
+          partnerId: dialogData.users.first,
           dialogData: dialogData,
           username: dialogData.name
       );

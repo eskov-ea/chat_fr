@@ -404,7 +404,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               caller = state.callData.toCaller.substring(1, state.callData.toCaller.length);
               for (var dialog in dialogs) {
                 if (dialog.chatType.typeId == 1) {
-                  for (var userId in dialog.chatUsers) {
+                  for (var userId in dialog.users) {
                     if (userId.toString() == caller) {
                       dialogId = dialog.dialogId;
                       break;

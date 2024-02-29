@@ -284,17 +284,16 @@ import 'messages/messages_repository.dart';
     final Iterator<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogsContainer?.dialogs.iterator;
     if (dialogs == null) return null;
 
-    //TODO: refactor db
-    // while(dialogs.moveNext()) {
-    //   if (dialogs.current.usersList.first.id == userId &&
-    //       dialogs.current.usersList.last.id == partnerId &&
-    //       dialogs.current.chatType.p2p == 1 ||
-    //       dialogs.current.usersList.first.id == partnerId &&
-    //           dialogs.current.usersList.last.id == userId &&
-    //           dialogs.current.chatType.p2p == 1 ) {
-    //     return dialogs.current;
-    //   }
-    // }
+    while(dialogs.moveNext()) {
+      if (dialogs.current.chatUsers.first.id == userId &&
+          dialogs.current.chatUsers.last.id == partnerId &&
+          dialogs.current.chatType.p2p == 1 ||
+          dialogs.current.chatUsers.first.id == partnerId &&
+              dialogs.current.chatUsers.last.id == userId &&
+              dialogs.current.chatType.p2p == 1 ) {
+        return dialogs.current;
+      }
+    }
     return null;
   }
 

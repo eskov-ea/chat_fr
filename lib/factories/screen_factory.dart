@@ -71,7 +71,7 @@ class ScreenFactory {
   Widget makeGroupChatInfoPage(ChatPageArguments arguments) {
     return GroupChatInfoPage(
       // users: arguments.dialogData!.chatUsers,
-      chatUsers: arguments.dialogData!.chatUsers,
+      chatUsers: arguments.dialogData!.users,
       dialogData: arguments.dialogData!,
       usersViewCubit: arguments.usersCubit,
       dialogsViewCubit: arguments.dialogCubit,

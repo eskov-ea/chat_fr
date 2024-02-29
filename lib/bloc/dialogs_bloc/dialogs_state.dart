@@ -98,12 +98,12 @@ class DialogsState {
           lastMessage: dialog.lastMessage,
           // lastMessage: LastMessageData.from(dialog.lastMessage),
           messageCount: dialog.messageCount,
-          chatUsers: [...dialog.chatUsers],
+          users: [...dialog.users],
           createdAt: dialog.createdAt,
           picture: dialog.picture,
           isClosed: dialog.isClosed,
           isPublic: dialog.isPublic,
-          chatUsersAPI: null
+          chatUsers: []
         );
         dialogs.add(d);
       }

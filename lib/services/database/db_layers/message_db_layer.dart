@@ -56,7 +56,6 @@ class MessageDBLayer {
             messages.addAll({message.messageId: message});
           }
         }
-          print('map messages::: ${messages}');
         return messages;
       });
     } catch (err, stackTrace) {

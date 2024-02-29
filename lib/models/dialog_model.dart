@@ -20,8 +20,8 @@ class DialogData {
   final String name;
   final String? description;
   final int messageCount;
-  final List<int> chatUsers;
-  final List<ChatUser>? chatUsersAPI;
+  final List<int> users;
+  final List<ChatUser> chatUsers;
   final DateTime? createdAt;
   final int isClosed;
   final int isPublic;
@@ -35,8 +35,8 @@ class DialogData {
     required this.description,
     required this.lastMessage,
     required this.messageCount,
+    required this.users,
     required this.chatUsers,
-    required this.chatUsersAPI,
     required this.picture,
     required this.isClosed,
     required this.isPublic,
@@ -59,8 +59,8 @@ class DialogData {
           createdAt: DateTime.tryParse(json["created_at"]),
           isClosed: json["is_closed"],
           isPublic: json["is_public"],
-          chatUsers: json["chat_users"].map<int>((chatUser) => ChatUser.fromJson(chatUser).userId).toList(),
-          chatUsersAPI: json["chat_users"]
+          users: json["chat_users"].map<int>((chatUser) => ChatUser.fromJson(chatUser).userId).toList(),
+          chatUsers: json["chat_users"]
             .map<ChatUser>((chatUser) => ChatUser.fromJson(chatUser))
             .toList()
           );
@@ -85,8 +85,8 @@ class DialogData {
           createdAt: DateTime.tryParse(json["created_at"]),
           isClosed: json["is_closed"],
           isPublic: json["is_public"],
-          chatUsersAPI: null,
-          chatUsers: json["chat_users"].toString().split(',').map(int.parse).toList(),
+          chatUsers: [],
+          users: json["chat_users"].toString().split(',').map(int.parse).toList(),
       );
     } catch (err, stack) {
       print('DB operational error:: $json \r\n $err \r\n $stack');
@@ -101,16 +101,16 @@ class DialogData {
     return identical(this, other) ||
         other is DialogData &&
             runtimeType == other.runtimeType &&
-            listEquals(chatUsers, other.chatUsers) &&
-            chatUsers.length == other.chatUsers.length &&
+            listEquals(users, other.users) &&
+            users.length == other.users.length &&
             other.dialogId == dialogId;
   }
   @override
-  int get hashCode => runtimeType.hashCode ^ chatUsers.length.hashCode ^ chatUsers.hashCode ^ dialogId.hashCode;
+  int get hashCode => runtimeType.hashCode ^ users.length.hashCode ^ users.hashCode ^ dialogId.hashCode;
 
   @override
   String toString() {
-    return "Instance of 'DialogData: $dialogId statuses: ${lastMessage?.statuses}'";
+    return "Instance of 'DialogData: chatUsers: $chatUsers'";
   }
 
 }

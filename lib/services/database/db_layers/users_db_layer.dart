@@ -35,7 +35,6 @@ class UsersDBLayer {
             'phone, email, birthdate, avatar, banned, last_access '
             'FROM user '
         );
-        print(res);
         return res.map((el) => UserModel.fromJsonDB(el)).toList();
       });
     } catch (err, stackTrace) {

@@ -160,13 +160,13 @@ class _MessagesPageState extends State<MessagesPage> {
                                     lastMessage: state.dialogs[index].lastMessage,
                                     name: state.dialogs[index].name,
                                     description: state.dialogs[index].description,
-                                    chatUsers: state.dialogs[index].chatUsers,
+                                    users: state.dialogs[index].users,
                                     messageCount: state.dialogs[index].messageCount,
                                     picture: state.dialogs[index].picture,
                                     isPublic: state.dialogs[index].isPublic,
                                     isClosed: state.dialogs[index].isClosed,
                                     createdAt: state.dialogs[index].createdAt,
-                                    chatUsersAPI: null
+                                    chatUsers: state.dialogs[index].chatUsers
                                 ),
                               ),
                             ),
@@ -251,11 +251,12 @@ bool isMessageReadByMe (List<MessageStatus>? statuses, int userId) {
 bool _isDialogActive(DialogData dialog, int userId) {
   bool isUserActive = false;
   //TODO: refactor db
-  // for(var user in dialog.chatUsers) {
-  //   if (user.userId == userId && user.active == true) {
-  //     isUserActive = true;
-  //   }
-  // }
+  print('_isDialogActive  ${dialog.chatUsers}');
+  for(var user in dialog.chatUsers) {
+    if (user.userId == userId && user.active == true) {
+      isUserActive = true;
+    }
+  }
   return isUserActive;
 }
 

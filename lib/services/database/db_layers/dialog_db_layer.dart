@@ -60,8 +60,6 @@ class DialogDBLayer {
             'LEFT JOIN attachments f ON (d.last_message_id = f.chat_message_id) '
             'WHERE d.is_closed = 0; '
          );
-        log('DB get dialogs:::  ${res}');
-        // return [];
         return res.map((el) => DialogData.fromDBJson(el)).toList();
       });
     } catch (err, stackTrace) {

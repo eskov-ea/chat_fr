@@ -46,15 +46,16 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         print('dbDialogs $dbDialogs');
         print('dbMessages $messages');
         List<DialogData> dialogs = [];
+          print('init dialogs:  ${chatUsers}');
         for (var d in dbDialogs) {
           final dd = DialogData(
               dialogId: d.dialogId,
               chatType: d.chatType,
               dialogAuthorId: d.dialogAuthorId,
-              chatUsers: d.chatUsers,
+              users: d.users,
               name: d.name, description: d.description, messageCount: d.messageCount,
               lastMessage: d.lastMessage?.messageId != null ? messages[d.lastMessage!.messageId] : null,
-              picture: d.picture, createdAt: d.createdAt, chatUsersAPI: chatUsers[d.dialogId],
+              picture: d.picture, createdAt: d.createdAt, chatUsers: chatUsers[d.dialogId] ?? [],
               isPublic: d.isPublic, isClosed: d.isClosed
           );
           dialogs.add(dd);
@@ -87,7 +88,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         final files = <MessageAttachmentData>[];
 
         for(var dialog in dialogs) {
-          for (var chatUser in dialog.chatUsersAPI!) {
+          for (var chatUser in dialog.chatUsers!) {
             chatUsers.add(ChatUser(chatId: dialog.dialogId, userId: chatUser.id, chatUserRole: chatUser.chatUserRole, active: chatUser.active, id: chatUser.id, user: chatUser.user));
           }
           if (dialog.lastMessage != null) {

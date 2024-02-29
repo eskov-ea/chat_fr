@@ -446,7 +446,7 @@ bool isUserAllowedToWrite(DialogData? dialogData, int userId) {
   if (dialogData.chatType.typeName != "Групповой для чтения") {
     return true;
   } else {
-    for(var i=0; i < dialogData.chatUsers.length; ++i) {
+    for(var i=0; i < dialogData.users.length; ++i) {
       //TODO: refactor db
       // if(dialogData.chatUsers[i] == userId &&
       //     dialogData.chatUsers[i].chatUserRole == 1) {
