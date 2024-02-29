@@ -78,9 +78,9 @@ class MessageWidget extends StatefulWidget {
   final FocusNode focusNode;
   final Function(String, int, int, String) setReplyMessage;
   final int status;
-  final MessageAttachmentsData? file;
+  final MessageAttachmentData? file;
   final String senderName;
-  final ParentMessage? parentMessage;
+  final RepliedMessage? parentMessage;
   final String? repliedMsgSenderName;
   final int? repliedMsgId;
   final bool isError;
@@ -197,8 +197,8 @@ class _MessageTile extends StatelessWidget {
   final bool isMe;
   final onSwipeRight;
   final int status;
-  final MessageAttachmentsData? file;
-  final ParentMessage? parentMessage;
+  final MessageAttachmentData? file;
+  final RepliedMessage? parentMessage;
   final File? fileAttachment;
   final bool isError;
   final bool isErrorHandling;
@@ -434,7 +434,7 @@ Widget imageFromBase64String(String base64String, int id, BuildContext context) 
   );
 }
 
-Widget RepliedMessageBody(borderRadius, ParentMessage parentMessage, senderName) {
+Widget RepliedMessageBody(borderRadius, RepliedMessage parentMessage, senderName) {
   return Container(
     decoration: BoxDecoration(
       color: Colors.white70,

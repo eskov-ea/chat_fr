@@ -26,7 +26,7 @@ class SendingImagePreview extends StatelessWidget {
   final File file;
   final createDialogFn;
   final TextEditingController controller;
-  final ParentMessage? parentMessage;
+  final RepliedMessage? parentMessage;
 
   @override
   Widget build(BuildContext context) {

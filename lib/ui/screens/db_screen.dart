@@ -51,7 +51,7 @@ class _DBScreenState extends State<DBScreen> {
                     onTap: () async {
                       final db = DBProvider.db;
                       final result = await db.checkExistingTables();
-                      print('DB result:: $result');
+                      log('DB result:: $result');
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width * 0.45,

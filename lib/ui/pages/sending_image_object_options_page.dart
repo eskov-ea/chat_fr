@@ -28,7 +28,7 @@ Widget SendingObjectOptionsPage({
   required userId,
   required dialogId,
   required createDialogFn,
-  required ParentMessage? parentMessage
+  required RepliedMessage? parentMessage
 }) {
 
   final _messageController = messageController;

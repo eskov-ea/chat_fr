@@ -187,7 +187,7 @@ class MessagesProvider {
     }
   }
 
-  Future<MessageAttachmentsData?> loadAttachmentData({required String attachmentId}) async {
+  Future<MessageAttachmentData?> loadAttachmentData({required String attachmentId}) async {
     try {
       final String? token = await _secureStorage.getToken();
       final response = await http.get(
@@ -199,7 +199,7 @@ class MessagesProvider {
       );
       final error = handleHttpResponse(response);
       if (error != null) throw error;
-      return MessageAttachmentsData.fromJson(jsonDecode(response.body)["data"]);
+      return MessageAttachmentData.fromJson(jsonDecode(response.body)["data"]);
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
           "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/message/file/$attachmentId ]");

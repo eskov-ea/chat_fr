@@ -85,7 +85,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   bool isRecording = false;
   String? senderReplyName;
   int? replyedMessageId;
-  ParentMessage? replyedParentMsg;
+  RepliedMessage? replyedParentMsg;
   bool isSelectedMode = false;
   List<SelectedMessage> selected = [];
 
@@ -171,7 +171,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       replyMessage = message;
       replyedMessageId = messageId;
       senderReplyName = senderName;
-      replyedParentMsg = ParentMessage.toJson(parentMessageText: message, parentMessageId: messageId, senderId: senderId);
+      replyedParentMsg = RepliedMessage.toJson(parentMessageText: message, parentMessageId: messageId, senderId: senderId);
     });
   }
 
@@ -447,10 +447,11 @@ bool isUserAllowedToWrite(DialogData? dialogData, int userId) {
     return true;
   } else {
     for(var i=0; i < dialogData.chatUsers.length; ++i) {
-      if(dialogData.chatUsers[i].userId == userId &&
-          dialogData.chatUsers[i].chatUserRole == 1) {
-        return true;
-      }
+      //TODO: refactor db
+      // if(dialogData.chatUsers[i] == userId &&
+      //     dialogData.chatUsers[i].chatUserRole == 1) {
+      //   return true;
+      // }
     }
     return false;
   }
@@ -488,7 +489,7 @@ class SelectedMessage extends Equatable {
   final int id;
   final String message;
   final String author;
-  final MessageAttachmentsData? file;
+  final MessageAttachmentData? file;
 
   const SelectedMessage({required this.id, required this.message, required this.author, required this.file});
 

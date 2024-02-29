@@ -30,7 +30,11 @@ class UsersDBLayer {
     try {
       final db = await DBProvider.db.database;
       return await db.transaction((txn) async {
-        List<Object> res = await txn.rawQuery('SELECT * FROM user ');
+        List<Object> res = await txn.rawQuery(
+            'SELECT id user_id, firstname, lastname, middlename, company, dept, position, '
+            'phone, email, birthdate, avatar, banned, last_access '
+            'FROM user '
+        );
         print(res);
         return res.map((el) => UserModel.fromJsonDB(el)).toList();
       });

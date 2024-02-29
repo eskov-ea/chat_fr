@@ -92,8 +92,7 @@ class DialogsState {
         final d = DialogData(
           dialogId: dialog.dialogId,
           chatType: dialog.chatType,
-          userData: dialog.userData,
-          usersList: [...dialog.usersList],
+          dialogAuthorId: dialog.dialogAuthorId,
           name: dialog.name,
           description: dialog.description,
           lastMessage: dialog.lastMessage,
@@ -101,7 +100,10 @@ class DialogsState {
           messageCount: dialog.messageCount,
           chatUsers: [...dialog.chatUsers],
           createdAt: dialog.createdAt,
-          picture: dialog.picture
+          picture: dialog.picture,
+          isClosed: dialog.isClosed,
+          isPublic: dialog.isPublic,
+          chatUsersAPI: null
         );
         dialogs.add(d);
       }

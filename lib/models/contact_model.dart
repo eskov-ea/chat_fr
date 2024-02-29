@@ -74,7 +74,7 @@ class UserModel {
       return chatBot;
     } else {
       return UserModel(
-          id: json['id'],
+          id: json['user_id'],
           firstname: json['firstname'] ?? "",
           lastname: json['lastname'] ?? "",
           middlename: json['middlename'] ?? "",

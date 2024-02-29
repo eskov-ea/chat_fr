@@ -14,28 +14,32 @@ class DialogData {
 
   final int dialogId;
   final DialogType chatType;
-  final UserModel userData;
+  final int dialogAuthorId;
   //TODO: manage user list to <UserProfileData>
-  final List<UserModel> usersList;
   MessageData? lastMessage;
   final String name;
   final String? description;
   final int messageCount;
-  final List<ChatUser> chatUsers;
+  final List<int> chatUsers;
+  final List<ChatUser>? chatUsersAPI;
   final DateTime? createdAt;
+  final int isClosed;
+  final int isPublic;
   final String? picture;
 
   DialogData({
     required this.dialogId,
     required this.chatType,
-    required this.userData,
-    required this.usersList,
+    required this.dialogAuthorId,
     required this.name,
     required this.description,
     required this.lastMessage,
     required this.messageCount,
     required this.chatUsers,
+    required this.chatUsersAPI,
     required this.picture,
+    required this.isClosed,
+    required this.isPublic,
     required this.createdAt
   });
 
@@ -46,22 +50,47 @@ class DialogData {
           name: json["name"],
           description: json["description"],
           chatType: DialogType.fromJson(json["chat_type"]),
-          userData: DialogAuthorData.fromJson(json["user"]),
-          usersList: json["users"]
-              .map<UserModel>((userData) => UserModel.fromJsonAPI(userData))
-              .toList(),
+          dialogAuthorId: json["user"]["id"],
           lastMessage: json["message"] == null
               ? null
               : MessageData.fromJson(json["message"]),
           messageCount: json["message_count"],
           picture: json["picture"],
           createdAt: DateTime.tryParse(json["created_at"]),
-          chatUsers: json["chat_users"]
+          isClosed: json["is_closed"],
+          isPublic: json["is_public"],
+          chatUsers: json["chat_users"].map<int>((chatUser) => ChatUser.fromJson(chatUser).userId).toList(),
+          chatUsersAPI: json["chat_users"]
             .map<ChatUser>((chatUser) => ChatUser.fromJson(chatUser))
             .toList()
           );
     } catch (err, stack) {
       throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
+    }
+  }
+
+  static DialogData fromDBJson(json) {
+    try {
+      return DialogData(
+          dialogId: json["id"],
+          name: json["name"],
+          description: json["description"],
+          chatType: DialogType.fromDBJson(json),
+          dialogAuthorId: json["author_id"],
+          lastMessage: json["message_id"] == null
+              ? null
+              : MessageData.fromDBJson(json),
+          messageCount: json["message_count"],
+          picture: json["picture"],
+          createdAt: DateTime.tryParse(json["created_at"]),
+          isClosed: json["is_closed"],
+          isPublic: json["is_public"],
+          chatUsersAPI: null,
+          chatUsers: json["chat_users"].toString().split(',').map(int.parse).toList(),
+      );
+    } catch (err, stack) {
+      print('DB operational error:: $json \r\n $err \r\n $stack');
+      rethrow;
     }
   }
 
@@ -81,7 +110,7 @@ class DialogData {
 
   @override
   String toString() {
-    return "Instance of 'DialogData: $dialogId $name'";
+    return "Instance of 'DialogData: $dialogId statuses: ${lastMessage?.statuses}'";
   }
 
 }
@@ -94,7 +123,6 @@ class DialogType {
       required this.secure,
       required this.readonly,
       required this.picture,
-      required this.name,
       required this.description});
   final int typeId;
   final String typeName;
@@ -102,7 +130,6 @@ class DialogType {
   final int secure;
   final int readonly;
   final String? picture;
-  final String name;
   final String? description;
 
   static DialogType fromJson(json) {
@@ -114,8 +141,22 @@ class DialogType {
           secure: json["secure"],
           readonly: json["readonly"],
           picture: json["picture"],
-          name: json["name"],
           description: json["description"]);
+    } catch (err, stack) {
+      throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
+    }
+  }
+
+  static DialogType fromDBJson(json) {
+    try {
+      return DialogType(
+          typeId: json["chat_type_id"],
+          typeName: json["chat_type_name"],
+          p2p: json["chat_type_p2p"],
+          secure: json["chat_type_secure"],
+          readonly: json["chat_type_readonly"],
+          picture: json["chat_type_picture"],
+          description: json["chat_type_description"]);
     } catch (err, stack) {
       throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
     }
@@ -199,31 +240,6 @@ class DialogPartnerData {
   }
 }
 
-class DialogAuthorData {
-  const DialogAuthorData({
-    required this.id,
-    required this.firstname,
-    required this.lastname,
-    required this.middlename,
-    required this.company,
-    required this.position,
-    required this.phone,
-    required this.dept,
-    required this.email,
-  });
-  final int id;
-  final String firstname;
-  final String lastname;
-  final String middlename;
-  final String company;
-  final String dept;
-  final String position;
-  final String phone;
-  final String email;
-
-  static UserModel fromJson(json) => UserModel.fromJsonAPI(json);
-}
-
 class DialogMessageData {
   DialogMessageData(
       {required this.message,
@@ -281,6 +297,7 @@ class SenderMessageData {
 }
 
 class ChatUser {
+  final int id;
   final int chatId;
   final int userId;
   final int chatUserRole;
@@ -288,6 +305,7 @@ class ChatUser {
   final UserModel user;
 
   ChatUser({
+    required this.id,
     required this.chatId,
     required this.userId,
     required this.chatUserRole,
@@ -299,12 +317,28 @@ class ChatUser {
   static ChatUser fromJson(json) {
     try {
       return ChatUser(
+          id: json["id"],
           chatId: json["chat_id"],
           userId: json["user_id"],
           chatUserRole: json["chat_user_role_id"],
           active: json["active"],
           user: json["user"] != null ?UserModel.fromJsonAPI(json["user"])
             : UserModel(id: json["user_id"], firstname: 'удален', lastname: 'Пользователь', middlename: '', company: '', position: '', phone: '', dept: '', email: '', avatar: null, birthdate: '', banned: 0, lastAccess: '')
+      );
+    } catch (err, stack) {
+      throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
+    }
+  }
+
+  static ChatUser fromDBJson(json) {
+    try {
+      return ChatUser(
+        id: json["chat_user_record_id"],
+        chatId: json["chat_id"],
+        userId: json["user_id"],
+        chatUserRole: json["chat_user_role_id"],
+        active: json["active"],
+        user: UserModel.fromJsonDB(json)
       );
     } catch (err, stack) {
       throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");

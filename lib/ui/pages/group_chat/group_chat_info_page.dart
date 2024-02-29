@@ -16,7 +16,7 @@ import 'add_user_to_group_chat_page.dart';
 
 class GroupChatInfoPage extends StatefulWidget {
   const GroupChatInfoPage({
-    required this.users,
+    // required this.users,
     required this.chatUsers,
     required this.dialogData,
     required this.usersViewCubit,
@@ -24,8 +24,9 @@ class GroupChatInfoPage extends StatefulWidget {
     Key? key
   }) : super(key: key);
 
-  final List<UserModel> users;
-  final List<ChatUser>? chatUsers;
+  //TODO: refactor db
+  // final List<UserModel> users;
+  final List<int>? chatUsers;
   final DialogData dialogData;
   final UsersViewCubit usersViewCubit;
   final DialogsViewCubit dialogsViewCubit;
@@ -72,12 +73,13 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
     userId = await DataProvider().getUserId();
     stateUsers = [];
     for (var user in widget.dialogData.chatUsers) {
-      if (user.active) {
-        stateUsers.add(user);
-      }
-      if (user.userId.toString() == userId && user.chatUserRole == 1) {
-        isAdmin = true;
-      }
+      //TODO: refactor db
+      // if (user.active) {
+      //   stateUsers.add(user);
+      // }
+      // if (user.userId.toString() == userId && user.chatUserRole == 1) {
+      //   isAdmin = true;
+      // }
     }
     setState(() {});
   }
@@ -86,14 +88,15 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
     for( var dialog in dialogs) {
       if (dialog.dialogId == widget.dialogData.dialogId) {
         stateUsers = [];
-        for (var user in dialog.chatUsers) {
-          if (user.active) {
-            stateUsers.add(user);
-          }
-          if (user.userId.toString() == userId && user.chatUserRole == 1) {
-            isAdmin = true;
-          }
-        }
+        //TODO: refactor db
+        // for (var user in dialog.chatUsers) {
+        //   if (user.active) {
+        //     stateUsers.add(user);
+        //   }
+        //   if (user.userId.toString() == userId && user.chatUserRole == 1) {
+        //     isAdmin = true;
+        //   }
+        // }
         setState(() {});
         return;
       }
@@ -204,11 +207,12 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                                 child: Container(
                                   padding: EdgeInsets.only(bottom: 10),
                                   decoration: BoxDecoration(
-                                    border: Border(
-                                        bottom: index == widget.users.length - 1
-                                        ? BorderSide(width: 0, color: Colors.transparent)
-                                        : BorderSide(width: 1, color: Colors.black26)
-                                    )
+                                    //TODO: refactor db
+                                    // border: Border(
+                                    //     bottom: index == widget.users.length - 1
+                                    //     ? BorderSide(width: 0, color: Colors.transparent)
+                                    //     : BorderSide(width: 1, color: Colors.black26)
+                                    // )
                                   ),
                                   child: Text("${stateUsers[index].user?.lastname ?? 'Удален'} ${stateUsers[index].user?.firstname ?? 'Удален'}",
                                     style: TextStyle(fontSize: 20),

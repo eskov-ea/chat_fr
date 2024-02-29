@@ -9,7 +9,7 @@ class DialogDataDB {
   final String name;
   final String? description;
   final int dialogAuthorId;
-  final int lastMessageId;
+  final int? lastMessageId;
   final bool isClosed;
   final bool isPublic;
   final int messageCount;
@@ -57,13 +57,13 @@ class DialogDataDB {
           chatTypeName: json["chat_type_name"],
           dialogAuthorId: json["author_id"],
           usersList: json["chat_users"].toString().split(',').map(int.parse).toList(),
-          lastMessageId: json["message"],
+          lastMessageId: json["message_id"],
           messageCount: json["message_count"],
           picture: json["picture"],
           createdAt: json["created_at"],
           updatedAt: json["updated_at"],
-          isClosed: json["is_closed"],
-          isPublic: json["is_public"],
+          isClosed: json["is_closed"] == 1 ? true : false,
+          isPublic: json["is_public"] == 1 ? true : false,
           chatTypeId: json["chat_type_id"],
           p2p: json["chat_type_p2p"],
           secure: json["chat_type_secure"],
@@ -75,51 +75,6 @@ class DialogDataDB {
       log('DB operational error:: $err \r\n $stack');
       rethrow;
     }
-  }
-
-}
-
-
-class ChatUserDB {
-  final int chatId;
-  final int userId;
-  final int chatUserRole;
-  final int active;
-
-  ChatUserDB({
-    required this.chatId,
-    required this.userId,
-    required this.chatUserRole,
-    required this.active
-  });
-
-
-  static ChatUserDB fromJson(json) {
-    try {
-      return ChatUserDB(
-          chatId: json["chat_id"],
-          userId: json["user_id"],
-          chatUserRole: json["chat_user_role_id"],
-          active: json["active"],
-      );
-    } catch (err, stack) {
-      throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
-    }
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is ChatUserDB &&
-            runtimeType == other.runtimeType &&
-            other.active == active &&
-            other.userId == userId;
-  }
-  int get hashCode => runtimeType.hashCode ^ userId.hashCode ^ active.hashCode;
-
-  @override
-  String toString() {
-    return "Instance of ChatUser [ $chatId, $userId ]";
   }
 
 }

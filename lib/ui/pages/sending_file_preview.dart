@@ -27,7 +27,7 @@ class SendingFilePreview extends StatefulWidget {
   final int? dialogId;
   final File file;
   final TextEditingController controller;
-  final ParentMessage? parentMessage;
+  final RepliedMessage? parentMessage;
 
   @override
   State<SendingFilePreview> createState() => _SendingFilePreviewState();

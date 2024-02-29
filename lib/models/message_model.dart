@@ -20,15 +20,13 @@ class MessageData extends Equatable{
     required this.messageTime,
     required this.rawDate,
     required this.file,
-    required this.parentMessageId,
     required this.isError,
-    required this.parentMessage,
+    required this.repliedMessage,
     required this.statuses,
     this.isHandling = false,
   });
   int messageId;
-  int? parentMessageId;
-  final ParentMessage? parentMessage;
+  final RepliedMessage? repliedMessage;
   final int senderId;
   final int dialogId;
   final String message;
@@ -36,7 +34,7 @@ class MessageData extends Equatable{
   final String messageTime;
   final String? forwarderFromUser;
   final DateTime rawDate;
-  final MessageAttachmentsData? file;
+  final MessageAttachmentData? file;
   final List<MessageStatus> statuses;
   bool isError;
   bool isHandling;
@@ -45,7 +43,6 @@ class MessageData extends Equatable{
     try {
       return MessageData(
           messageId: json["id"],
-          parentMessageId: json["parent_id"] != null ? json["parent_id"].toInt() : null,
           senderId: json["user_id"],
           dialogId: json["chat_id"],
           message: replaceForwardSymbol(json["message"]),
@@ -53,15 +50,42 @@ class MessageData extends Equatable{
           messageTime: getTime(DateTime.tryParse(json["created_at"])?.add(getTZ())),
           rawDate: DateTime.tryParse(json["created_at"])!,
           file: json["file"] != null
-              ? MessageAttachmentsData.fromJson(json["file"])
+              ? MessageAttachmentData.fromJson(json["file"])
               : null,
-          parentMessage: json["parent"] == null
+          repliedMessage: json["parent"] == null
               ? null
-              : ParentMessage.fromJson(json["parent"]),
+              : RepliedMessage.fromJson(json["parent"]),
           isError: json["isError"] ?? false,
           isHandling: json["isHandling"] ?? false,
           forwarderFromUser: getForwardedMessageStatus(json["message"]),
           statuses: json["statuses"].map<MessageStatus>((status) => MessageStatus.fromJson(status)).toList()
+      );
+    } catch (err, stack) {
+      log('Parse status error:  $err \r\n $stack');
+      rethrow;
+    }
+  }
+
+  static MessageData fromDBJson(json) {
+    try {
+      return MessageData(
+          messageId: json["message_id"],
+          senderId: json["user_id"],
+          dialogId: json["chat_id"],
+          message: replaceForwardSymbol(json["message"]),
+          messageDate: getDate(DateTime.tryParse(json["message_created_at"])?.add(getTZ())),
+          messageTime: getTime(DateTime.tryParse(json["message_created_at"])?.add(getTZ())),
+          rawDate: DateTime.tryParse(json["message_created_at"])!,
+          file: json["file_id"] == null
+              ? null
+              : MessageAttachmentData.fromDBJson(json),
+          repliedMessage: json["replied_message_id"] == null
+              ? null
+              : RepliedMessage.fromDBJson(json),
+          isError: json["isError"] ?? false,
+          isHandling: json["isHandling"] ?? false,
+          forwarderFromUser: getForwardedMessageStatus(json["message"]),
+          statuses: <MessageStatus>[]
       );
     } catch (err, stack) {
       log('Parse status error:  $err \r\n $stack');
@@ -84,11 +108,11 @@ class MessageData extends Equatable{
   @override
   String toString() {
     return "Inctance of MessageData[ id: $messageId, author: $senderId, chat_id: $dialogId, "
-        "parent_id: $parentMessageId, message: $message, created_at: $rawDate} "
+        "message: $message, created_at: $rawDate} "
         "file: {id: ${file?.attachmentId}, name: ${file?.name} ]"
         "${messageId.runtimeType}, ${senderId.runtimeType}, ${dialogId.runtimeType} "
-        "${parentMessageId.runtimeType}, ${message.runtimeType}, ${file.runtimeType}, "
-        "${file?.attachmentId.runtimeType}"
+        "repliedId: ${repliedMessage?.parentMessageId}, ${message.runtimeType}, ${file.runtimeType}, "
+        "${file?.attachmentId.runtimeType}, statuses: ${statuses}"
         "";
   }
 }
@@ -120,6 +144,16 @@ class MessageStatus extends Equatable {
         createdAt: json["created_at"],
         updatedAt: json["updated_at"]
     );
+
+  static MessageStatus fromDBJson(json) => MessageStatus(
+      id: json["message_status_id"],
+      userId: json["user_id"],
+      messageId: json["chat_message_id"],
+      dialogId: json["chat_id"],
+      statusId: json["chat_message_status_id"],
+      createdAt: json["message_status_created_at"],
+      updatedAt: json["message_status_updated_at"]
+  );
 
   @override
   List<Object?> get props => [id, statusId];
@@ -160,8 +194,8 @@ class MessageDialogData {
   );
 }
 
-class ParentMessage extends Equatable{
-  const ParentMessage({
+class RepliedMessage extends Equatable{
+  const RepliedMessage({
     required this.parentMessageText,
     required this.senderId,
     required this.parentMessageId
@@ -170,14 +204,20 @@ class ParentMessage extends Equatable{
   final int parentMessageId;
   final int senderId;
 
-  static ParentMessage fromJson(json) => ParentMessage(
+  static RepliedMessage fromJson(json) => RepliedMessage(
     parentMessageText: json["message"],
     parentMessageId: json["id"],
     senderId: json["user_id"]
   );
 
-  static ParentMessage toJson({required parentMessageText,
-      required parentMessageId, senderId}) => ParentMessage(
+  static RepliedMessage fromDBJson(json) => RepliedMessage(
+      parentMessageText: json["replied_message_text"],
+      parentMessageId: json["replied_message_id"],
+      senderId: json["replied_message_author"]
+  );
+
+  static RepliedMessage toJson({required parentMessageText,
+      required parentMessageId, senderId}) => RepliedMessage(
     parentMessageId: parentMessageId,
     parentMessageText: parentMessageText,
     senderId: senderId
@@ -187,14 +227,16 @@ class ParentMessage extends Equatable{
   List<Object?> get props => [senderId, parentMessageId];
 }
 
-class MessageAttachmentsData  extends Equatable{
-  MessageAttachmentsData({
+class MessageAttachmentData  extends Equatable{
+  MessageAttachmentData({
     required this.attachmentId,
     required this.chatMessageId,
     required this.name,
     required this.filetype,
     required this.preview,
-    required this.content
+    required this.content,
+    required this.path,
+    required this.createdAt
   });
   int attachmentId;
   final int chatMessageId;
@@ -202,16 +244,32 @@ class MessageAttachmentsData  extends Equatable{
   final String filetype;
   final String? preview;
   final String? content;
+  final String? path;
+  final String createdAt;
 
-  static MessageAttachmentsData fromJson(json) =>
-    MessageAttachmentsData(
+  static MessageAttachmentData fromJson(json) =>
+    MessageAttachmentData(
       attachmentId: json["id"],
       chatMessageId: json["chat_message_id"],
       name: json["name"],
       filetype: json["ext"],
       preview: json["preview"],
-      content: json["content"]
+      content: json["content"],
+      path: json["path"],
+      createdAt: json["created_at"]
     );
+
+  static MessageAttachmentData fromDBJson(json) =>
+      MessageAttachmentData(
+          attachmentId: json["file_id"],
+          chatMessageId: json["message_id"],
+          name: json["file_name"],
+          filetype: json["file_ext"],
+          preview: json["file_preview"],
+          content: json["content"],
+          path: json["file_path"],
+          createdAt: json["file_created_at"]
+      );
 
   @override
   List<Object?> get props => [attachmentId];

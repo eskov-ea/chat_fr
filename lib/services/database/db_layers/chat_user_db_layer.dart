@@ -7,7 +7,7 @@ import 'package:sqflite/sqlite_api.dart';
 class ChatUsersDBLayer {
 
 
-  Future<List<Object?>> saveChatUsers(List<ChatUserDB> chatUsers) async {
+  Future<List<Object?>> saveChatUsers(List<ChatUser> chatUsers) async {
     try {
       final db = await DBProvider.db.database;
       final Batch batch = db.batch();
@@ -29,13 +29,27 @@ class ChatUsersDBLayer {
     }
   }
 
-  Future<List<ChatUserDB>> getChatUsers() async {
+  Future<Map<int, List<ChatUser>>> getChatUsers() async {
     try {
+      final chatUsersMap = <int, List<ChatUser>>{};
       final db = await DBProvider.db.database;
       return await db.transaction((txn) async {
-        List<Object> res = await txn.rawQuery('SELECT * FROM chat_user ');
+        List<Object> res = await txn.rawQuery(
+            'SELECT cu.id chat_user_record_id, cu.chat_id, cu.chat_user_role_id, cu.active, cu.user_id, '
+            'u.firstname, u.lastname, u.middlename, u.company, u.dept, u.position, u.phone, u.email, u.birthdate, u.avatar, u.banned, u.last_access '
+            'FROM chat_user cu '
+            'JOIN user u ON (cu.user_id = u.id); '
+        );
         print('Chat users::: $res');
-        return res.map((el) => ChatUserDB.fromJson(el)).toList();
+        res.map((el) {
+          el as Map;
+          if(chatUsersMap.containsKey(el["chat_id"])) {
+            chatUsersMap[el["chat_id"]]!.add(ChatUser.fromJson(el));
+          } else {
+            chatUsersMap.addAll({el["chat_id"]: [ChatUser.fromJson(el)]});
+          }
+        });
+        return chatUsersMap;
       });
     } catch (err, stackTrace) {
       log('DB operation error:  $stackTrace');

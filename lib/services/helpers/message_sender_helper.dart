@@ -23,7 +23,7 @@ sendMessageUnix({
   required File? file,
   required int dialogId,
   required int userId,
-  required ParentMessage? parentMessage
+  required RepliedMessage? parentMessage
 }) async {
 
 // 0. Process file if it is
@@ -74,7 +74,7 @@ sendMessageUnix({
 sendForwardMessage({
   required ChatsBuilderBloc bloc,
   required String? messageText,
-  required MessageAttachmentsData? attachment,
+  required MessageAttachmentData? attachment,
   required int dialogId,
   required int userId
 }) async {
@@ -136,24 +136,25 @@ MessageData createLocalMessage({
   required String? filetype,
   required String? content
 }) {
-  MessageAttachmentsData? file;
+  MessageAttachmentData? file;
   final r = Random().nextInt(100000);
   final int _id = int.parse("000$r");
   if (filename != null && filetype != null && content != null) {
-    file = MessageAttachmentsData(
+    file = MessageAttachmentData(
         attachmentId: _id,
         chatMessageId: _id,
         name: "$filename.$filetype",
         filetype: filetype,
         preview: "",
+        createdAt: DateTime.now().toString(),
+        path: null,
         content: content
     );
   }
 
   return MessageData(
     messageId: _id,
-    parentMessageId: replyedMessageId,
-    parentMessage: parentMessage,
+    repliedMessage: parentMessage,
     senderId: userId,
     dialogId: dialogId,
     message: replaceForwardSymbol(messageText),
@@ -202,9 +203,9 @@ void resendErrorMessage({
   required int dialogId,
   required int userId,
   required ChatsBuilderBloc bloc,
-  required MessageAttachmentsData? file,
+  required MessageAttachmentData? file,
   required String messageText,
-  required ParentMessage? parentMessage,
+  required RepliedMessage? parentMessage,
   required int? repliedMessageId
 }) async {
   bloc.add(ChatsBuilderUpdateMessageWithErrorEvent(messageId: messageId, dialog: dialogId, isHandling: true));

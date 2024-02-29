@@ -56,9 +56,10 @@ final Map<String, String> tables = {
       'id INTEGER PRIMARY KEY, '
       'chat_id INTEGER NOT NULL, '
       'user_id INTEGER NOT NULL, '
-      'parent_id INTEGER DEFAULT NULL, '
       'message text DEFAULT "", '
-      'file INTEGER DEFAULT NULL, '
+      'replied_message_id INTEGER DEFAULT NULL, '
+      'replied_message_author INTEGER DEFAULT NULL, '
+      'replied_message_text TEXT DEFAULT NULL, '
       'created_at DATETIME DEFAULT CURRENT_TIMESTAMP, '
       'updated_at DATETIME DEFAULT CURRENT_TIMESTAMP );',
 
@@ -72,6 +73,17 @@ final Map<String, String> tables = {
       'chat_message_status_id INTEGER NOT NULL, '
       'created_at DATETIME DEFAULT CURRENT_TIMESTAMP, '
       'updated_at DATETIME DEFAULT CURRENT_TIMESTAMP );',
+
+
+  'attachments' :
+  'CREATE TABLE attachments ('
+      'id INTEGER PRIMARY KEY, '
+      'chat_message_id INTEGER NOT NULL, '
+      'name varchar(255) NOT NULL, '
+      'ext varchar(30) NOT NULL, '
+      'preview TEXT DEFAULT NULL, '
+      'path varchar(255) DEFAULT NULL, '
+      'created_at DATETIME DEFAULT CURRENT_TIMESTAMP );',
 
 
   'app_settings' :

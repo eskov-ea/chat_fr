@@ -133,12 +133,13 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
         generalEventSubscription = channel.bind('update').listen((event) {
           final DialogData newDialog = DialogData.fromJson(jsonDecode(event.data)["chat"]);
           print("CHATINFO   ->  $newDialog");
-          for (var user in newDialog.usersList) {
-            if (user.id == userId) {
-              add(WsEventNewDialogCreated(dialog: newDialog));
-              return;
-            }
-          }
+          //TODO: refactor db
+          // for (var user in newDialog.usersList) {
+          //   if (user.id == userId) {
+          //     add(WsEventNewDialogCreated(dialog: newDialog));
+          //     return;
+          //   }
+          // }
         });
         channel.subscribeIfNotUnsubscribed();
 
@@ -152,12 +153,13 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
           final data = jsonDecode(event.data);
           if (data["chat_join"] != null) {
             final DialogData newDialog = DialogData.fromJson(data["chat_join"]);
-            for (var user in newDialog.usersList) {
-              if (user.id == userId) {
-                add(WsEventNewDialogCreated(dialog: newDialog));
-                return;
-              }
-            }
+            //TODO: refactor db
+            // for (var user in newDialog.usersList) {
+            //   if (user.id == userId) {
+            //     add(WsEventNewDialogCreated(dialog: newDialog));
+            //     return;
+            //   }
+            // }
           } else if(data["chat_exit"] != null) {
             final DialogData newDialog = DialogData.fromJson(data["chat_exit"]);
             print("UNSUBSCRIBE CHAT   -->   private-chat.${newDialog.dialogId}");

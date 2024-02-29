@@ -10,7 +10,7 @@ class TextBodyWidget extends StatelessWidget {
   final String messageTime;
   final bool isMe;
   final int p2p;
-  final ParentMessage? parentMessage;
+  final RepliedMessage? parentMessage;
   final String? repliedMsgSenderName;
   const TextBodyWidget({
     required this.message,

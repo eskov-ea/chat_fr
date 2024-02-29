@@ -18,6 +18,7 @@ class DialogItem extends StatelessWidget {
     required this.userId,
     required this.checkOnline,
     required this.clearSearch,
+    required this.users,
     required this.onlineMembers
   }) : super(key: key);
 
@@ -26,16 +27,17 @@ class DialogItem extends StatelessWidget {
   final Function checkOnline;
   final Function clearSearch;
   final Map<int, bool> onlineMembers;
+  final List<UserModel> users;
 
-  List<UserModel> getPartnersData(List<UserModel> data) {
+  List<UserModel> getPartnersData(List<int> chatUsers) {
     final List<UserModel> partners = [];
-    for (var i = 0; i < data.length; i++)  {
-      if (data[i].id != userId) {
-        partners.add(data[i]);
+    for (var i = 0; i < chatUsers.length; i++)  {
+      final id = chatUsers[i];
+      if (id != userId) {
+        final user = users.firstWhere((u) => u.id == id);
+        partners.add(user);
       }
     }
-    if (partners.isEmpty) partners.add(data[0]);
-
     return partners;
   }
 
@@ -50,7 +52,7 @@ class DialogItem extends StatelessWidget {
   }
 
   Widget _setDialogAvatar({required DialogData dialogData, required List<UserModel> partners, required ObjectKey key}) {
-    if (dialogData.chatType.name == "Приват" || dialogData.chatType.name == "Приват безопасный") {
+    if (dialogData.chatType.typeName == "Приват" || dialogData.chatType.typeName == "Приват безопасный") {
       return UserAvatarWidget(userId: partners.first.id, objKey: key);
     } else {
       return DialogAvatar(base64String: dialogData.picture);
@@ -62,7 +64,7 @@ class DialogItem extends StatelessWidget {
   Widget build(BuildContext context) {
 
     final String partnerName = getChatItemName(dialogData, userId);
-    final List<UserModel> partners = getPartnersData(dialogData.usersList);
+    final List<UserModel> partners = getPartnersData(dialogData.chatUsers);
     final objKey = ObjectKey("${userId}_object_key");
 
     return InkWell(
@@ -75,9 +77,11 @@ class DialogItem extends StatelessWidget {
             userId: userId,
             partnerId: partners.first.id,
             dialogData: dialogData,
-            username: userId == dialogData.usersList.first.id
-                ? "${dialogData.usersList.last.lastname} ${dialogData.usersList.last.firstname}"
-                : "${dialogData.usersList.first.lastname} ${dialogData.usersList.first.firstname}"
+            username: "Placeholder"
+            //TODO: refactor db
+            // username: userId == dialogData.chatUsers.first
+            //     ? "${dialogData.usersList.last.lastname} ${dialogData.usersList.last.firstname}"
+            //     : "${dialogData.usersList.first.lastname} ${dialogData.usersList.first.firstname}"
         );
       },
       child: Container(

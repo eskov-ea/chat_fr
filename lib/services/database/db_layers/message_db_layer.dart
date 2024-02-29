@@ -14,10 +14,10 @@ class MessageDBLayer {
       for (var message in messages) {
         lastObject = message.toString();
         batch.execute(
-            'INSERT OR IGNORE INTO message(id, chat_id, user_id, parent_id, message, file, created_at, '
-            'updated_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?) ',
-            [message.messageId, message.dialogId, message.senderId, message.parentMessageId,
-              message.message, message.file?.attachmentId, message.rawDate.toString(), message.rawDate.toString()]
+            'INSERT OR IGNORE INTO message(id, chat_id, user_id, message, created_at, '
+            'updated_at, replied_message_id, replied_message_author, replied_message_text) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?) ',
+            [message.messageId, message.dialogId, message.senderId, message.message, message.rawDate.toString(),
+            message.rawDate.toString(), message.repliedMessage?.parentMessageId, message.repliedMessage?.senderId, message.repliedMessage?.parentMessageText]
         );
       }
       return await batch.commit(noResult: true);
@@ -27,42 +27,37 @@ class MessageDBLayer {
     }
   }
 
-  Future<List<MessageData>> getMessages() async {
+  Future<Map<int, MessageData>> getMessages() async {
     try {
       final db = await DBProvider.db.database;
       return await db.transaction((txn) async {
         List<Object> res = await txn.rawQuery(
-            'SELECT m.id, m.chat_id, m.user_id, m.parent_id, m.message, m.file, m.created_at, m.updated_at, '
+            'SELECT m.id message_id, m.chat_id, m.user_id, m.message, m.created_at message_created_at, m.updated_at, '
+            'm.replied_message_id, m.replied_message_author, m.replied_message_text, '
             's.id message_status_id, s.user_id message_status_user_id, '
-            's.chat_message_id, s.chat_message_status_id '
+            's.chat_message_id, s.chat_message_status_id, s.created_at message_status_created_at, s.updated_at message_status_updated_at, '
+            'f.id file_id, f.name file_name, f.preview file_preview, f.path file_path, f.ext file_ext, f.created_at file_created_at '
             'FROM message m '
             ''
             'LEFT JOIN message_status s ON (m.id = s.chat_message_id) '
+            'LEFT JOIN attachments f ON (m.id = f.chat_message_id); '
         );
-        log('Messages from db::: $res');
-        Map<int, String> messages = {};
+        Map<int, MessageData> messages = {};
         for (var messageObj  in res) {
           messageObj as Map;
-          final id = messageObj["id"];
+          final id = messageObj["message_id"];
           if (messages.containsKey(id)) {
-            final status = "{id: ${messageObj["message_status_id"]}, "
-                "user_id: ${messageObj["message_status_user_id"]}, chat_id: ${messageObj["chat_id"]}, "
-                "chat_message_status_id: ${messageObj["chat_message_status_id"]}}";
-            print('EXISITING status::');
+            final status = MessageStatus.fromDBJson(messageObj);
+            messages[id]!.statuses.add(status);
           } else {
-            final messageWithStatus = "{"
-                "id: $id, chat_id: ${messageObj["chat_id"]}, user_id: ${messageObj["user_id"]}, parent_id: ${messageObj["parent_id"]}, "
-                "message: ${messageObj["message"]}, file: ${messageObj["file"]}, created_at: ${messageObj["created_at"]}, "
-                "updated_at: ${messageObj["updated_at"]}, "
-                "statuses: [{id: ${messageObj["message_status_id"]}, "
-                "user_id: ${messageObj["message_status_user_id"]}, chat_id: ${messageObj["chat_id"]}, "
-                "chat_message_status_id: ${messageObj["chat_message_status_id"]}}]"
-            "}";
+            final message = MessageData.fromDBJson(messageObj);
+            final status = MessageStatus.fromDBJson(messageObj);
+            message.statuses.add(status);
+            messages.addAll({message.messageId: message});
           }
-          print('::://:::  ${messageObj["id"]}');
         }
-        // return res.map((el) => MessageData.fromJson(el)).toList();
-        return [];
+          print('map messages::: ${messages}');
+        return messages;
       });
     } catch (err, stackTrace) {
       log('DB operation error:  $stackTrace');

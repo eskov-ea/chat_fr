@@ -11,7 +11,7 @@ class MessageAttachmentIconPreview extends StatelessWidget {
   final bool isMe;
   final String messageTime;
   final int status;
-  final MessageAttachmentsData file;
+  final MessageAttachmentData file;
   const MessageAttachmentIconPreview({
     required this.width,
     required this.iconPath,

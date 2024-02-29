@@ -31,7 +31,7 @@ class ImagePreviewWidget extends StatefulWidget {
   final String? senderName;
   final String messageTime;
   final double borderRadius;
-  final MessageAttachmentsData? file;
+  final MessageAttachmentData? file;
   final File? localFileAttachment;
   final Widget status;
 
@@ -177,7 +177,7 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
 }
 
 Widget? getImagePreview({
-    required MessageAttachmentsData? file,
+    required MessageAttachmentData? file,
     required File? localFileAttachment,
     required bool isDownloading,
     required Function downloadImageFunction,

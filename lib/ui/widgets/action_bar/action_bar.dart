@@ -46,7 +46,7 @@ class ActionBar extends StatefulWidget {
   final bool isRecording;
   final DialogData? dialogData;
   final DialogsViewCubit dialogCubit;
-  final ParentMessage? parentMessage;
+  final RepliedMessage? parentMessage;
   final List<SelectedMessage> selected;
   final bool isSelectedMode;
   final Function() deleteMessages;
@@ -474,7 +474,7 @@ class ActionBarState extends State<ActionBar> {
     );
   }
 
-  _sendMessage(context, ParentMessage? parentMessage) async {
+  _sendMessage(context, RepliedMessage? parentMessage) async {
     sendMessageUnix(
         bloc: BlocProvider.of<ChatsBuilderBloc>(context),
         messageText: _messageController.text,

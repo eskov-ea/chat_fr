@@ -13,8 +13,8 @@ class MessageErrorWidget extends StatelessWidget {
   final int userId;
   final int? repliedMsgId;
   final String message;
-  final MessageAttachmentsData? file;
-  final ParentMessage? parentMessage;
+  final MessageAttachmentData? file;
+  final RepliedMessage? parentMessage;
 
   const MessageErrorWidget({required this.isError,
     required this.isErrorHandling,

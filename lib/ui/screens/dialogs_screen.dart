@@ -150,12 +150,12 @@ class _MessagesPageState extends State<MessagesPage> {
                               child: DialogItem(
                                 clearSearch: clearSearch,
                                 userId: userId,
+                                users: BlocProvider.of<UsersViewCubit>(context).state.users,
                                 checkOnline: isMemberOnline,
                                 onlineMembers: onlineMembers,
                                 dialogData: DialogData(
-                                    userData: state.dialogs[index].userData,
+                                    dialogAuthorId: state.dialogs[index].dialogAuthorId,
                                     dialogId: state.dialogs[index].dialogId,
-                                    usersList: state.dialogs[index].usersList,
                                     chatType: state.dialogs[index].chatType,
                                     lastMessage: state.dialogs[index].lastMessage,
                                     name: state.dialogs[index].name,
@@ -163,7 +163,10 @@ class _MessagesPageState extends State<MessagesPage> {
                                     chatUsers: state.dialogs[index].chatUsers,
                                     messageCount: state.dialogs[index].messageCount,
                                     picture: state.dialogs[index].picture,
-                                    createdAt: state.dialogs[index].createdAt
+                                    isPublic: state.dialogs[index].isPublic,
+                                    isClosed: state.dialogs[index].isClosed,
+                                    createdAt: state.dialogs[index].createdAt,
+                                    chatUsersAPI: null
                                 ),
                               ),
                             ),
@@ -247,13 +250,12 @@ bool isMessageReadByMe (List<MessageStatus>? statuses, int userId) {
 
 bool _isDialogActive(DialogData dialog, int userId) {
   bool isUserActive = false;
-  for(var user in dialog.chatUsers!) {
-    if (user.userId == userId && user.active == true) {
-      isUserActive = true;
-      return isUserActive;
-    }
-  }
-
+  //TODO: refactor db
+  // for(var user in dialog.chatUsers) {
+  //   if (user.userId == userId && user.active == true) {
+  //     isUserActive = true;
+  //   }
+  // }
   return isUserActive;
 }
 

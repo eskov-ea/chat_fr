@@ -212,11 +212,12 @@ import 'messages/messages_repository.dart';
 
   String getChatItemName(DialogData data, int? userId) {
     if (data.chatType.p2p == 1) {
-      for (var i = 0; i < data.usersList.length; i++)  {
-        if (data.usersList[i].id != userId) {
-          return "${data.usersList[i].lastname} ${data.usersList[i].firstname}";
-        }
-      }
+      //TODO: refactor db
+      // for (var i = 0; i < data.usersList.length; i++)  {
+      //   if (data.usersList[i].id != userId) {
+      //     return "${data.usersList[i].lastname} ${data.usersList[i].firstname}";
+      //   }
+      // }
     } else {
       return data.name;
     }
@@ -283,16 +284,17 @@ import 'messages/messages_repository.dart';
     final Iterator<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogsContainer?.dialogs.iterator;
     if (dialogs == null) return null;
 
-    while(dialogs.moveNext()) {
-      if (dialogs.current.usersList.first.id == userId &&
-          dialogs.current.usersList.last.id == partnerId &&
-          dialogs.current.chatType.p2p == 1 ||
-          dialogs.current.usersList.first.id == partnerId &&
-              dialogs.current.usersList.last.id == userId &&
-              dialogs.current.chatType.p2p == 1 ) {
-        return dialogs.current;
-      }
-    }
+    //TODO: refactor db
+    // while(dialogs.moveNext()) {
+    //   if (dialogs.current.usersList.first.id == userId &&
+    //       dialogs.current.usersList.last.id == partnerId &&
+    //       dialogs.current.chatType.p2p == 1 ||
+    //       dialogs.current.usersList.first.id == partnerId &&
+    //           dialogs.current.usersList.last.id == userId &&
+    //           dialogs.current.chatType.p2p == 1 ) {
+    //     return dialogs.current;
+    //   }
+    // }
     return null;
   }
 

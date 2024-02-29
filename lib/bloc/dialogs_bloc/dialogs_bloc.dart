@@ -33,6 +33,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     databaseDialogEventSubscription = databaseBloc.stream.listen((streamState) {
         print("Database state change   ${streamState}");
         if (streamState is DatabaseBlocDBInitializedState) {
+          print('initialized:: ${streamState.dialogs}');
           add(DialogsLoadedEvent(dialogs: streamState.dialogs));
         }
         // if (streamState is WsStateReceiveNewMessage){
@@ -174,15 +175,16 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     try {
       final copyState = state.from();
       final newDialogs = [ ...copyState.dialogsContainer!.dialogs];
-      for (var dialog in newDialogs) {
-        if(dialog.dialogId == event.dialogId) {
-          dialog.usersList.add(event.user.user);
-          dialog.chatUsers.add(event.user);
-          final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
-          emit(newState);
-          return;
-        }
-      }
+      //TODO: refactor db
+      // for (var dialog in newDialogs) {
+      //   if(dialog.dialogId == event.dialogId) {
+      //     dialog.usersList.add(event.user.user);
+      //     dialog.chatUsers.add(event.user);
+      //     final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
+      //     emit(newState);
+      //     return;
+      //   }
+      // }
     } catch (err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
     }
@@ -192,17 +194,18 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   void onDialogUserExitChatEvent(DialogUserExitChatEvent event, emit) {
     final copyState = state.from();
     final newDialogs = [ ...copyState.dialogsContainer!.dialogs];
-    for (var dialog in newDialogs) {
-      if(dialog.dialogId == event.dialogId) {
-        for (var user in dialog.chatUsers) {
-          if (user.userId == event.user.userId) {
-            dialog.chatUsers.remove(user);
-            break;
-          }
-        }
-        break;
-      }
-    }
+    //TODO: refactor db
+    // for (var dialog in newDialogs) {
+    //   if(dialog.dialogId == event.dialogId) {
+    //     for (var user in dialog.chatUsers) {
+    //       if (user.userId == event.user.userId) {
+    //         dialog.chatUsers.remove(user);
+    //         break;
+    //       }
+    //     }
+    //     break;
+    //   }
+    // }
     final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
     emit(newState);
   }

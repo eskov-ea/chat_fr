@@ -20,7 +20,7 @@ import '../../../services/helpers/file_types_helper.dart';
 
 class MessageContentWidget extends StatelessWidget {
   final bool isMe;
-  final MessageAttachmentsData? file;
+  final MessageAttachmentData? file;
   final Function(SelectedMessage) setSelected;
   final int messageId;
   final int p2p;
@@ -33,7 +33,7 @@ class MessageContentWidget extends StatelessWidget {
   final double borderRadius;
   final File? fileAttachment;
   final String? forwardFrom;
-  final ParentMessage? parentMessage;
+  final RepliedMessage? parentMessage;
   const MessageContentWidget({
     required this.isMe,
     required this.file,

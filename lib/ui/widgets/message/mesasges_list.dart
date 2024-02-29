@@ -326,10 +326,10 @@ class MessagesListWidget extends StatelessWidget {
                   p2p: dialogData.chatType.p2p,
                   forwardFrom: messages[index].forwarderFromUser,
                   senderName: senderName,
-                  parentMessage: messages[index].parentMessage,
+                  parentMessage: messages[index].repliedMessage,
                   isError: messages[index].isError,
-                  repliedMsgSenderName: messages[index].parentMessage != null ? getSenderName(users, messages[index].parentMessage!.senderId) : null,
-                  repliedMsgId: messages[index].parentMessage?.parentMessageId,
+                  repliedMsgSenderName: messages[index].repliedMessage != null ? getSenderName(users, messages[index].repliedMessage!.senderId) : null,
+                  repliedMsgId: messages[index].repliedMessage?.parentMessageId,
                   dialogId: dialogData.dialogId,
                   isErrorHandling: messages[index].isHandling,
                   deleteMessage: deleteMessage

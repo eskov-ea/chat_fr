@@ -34,23 +34,31 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       await db.database;
       await db.initDB();
       final bool isDatabaseNotEmpty = await db.checkIfDatabaseIsNotEmpty();
-      if (false) {
+      if (isDatabaseNotEmpty) {
         print('Initialize from db');
 
         emit(DatabaseBlocLoadingUsersState());
         final users = await db.getUsers();
+        final messages = await db.getMessages();
         emit(DatabaseBlocLoadingDialogsState());
-        await db.getChatUsers();
+        final chatUsers = await db.getChatUsers();
         final dbDialogs = await db.getDialogs();
+        print('dbDialogs $dbDialogs');
+        print('dbMessages $messages');
         List<DialogData> dialogs = [];
-        // for (var d in dbDialogs) {
-        //   final dd = DialogData(dialogId: d.dialogId,
-        //       chatType: DialogType(typeId: d.chatTypeId, typeName: d.chatTypeName, p2p: d.p2p, secure: d.secure, readonly: d.readonly, picture: d.chatTypePicture, name: d.chatTypeName, description: d.chatTypeDescription),
-        //       userData: d.dialogAuthorId, usersList: d.usersList, name: d.name, description: d.description,
-        //       lastMessage: d.lastMessageId, messageCount: d.messageCount, chatUsers: d.usersList,
-        //       picture: d.picture, createdAt: DateTime.parse(d.createdAt)
-        //   );
-        // }
+        for (var d in dbDialogs) {
+          final dd = DialogData(
+              dialogId: d.dialogId,
+              chatType: d.chatType,
+              dialogAuthorId: d.dialogAuthorId,
+              chatUsers: d.chatUsers,
+              name: d.name, description: d.description, messageCount: d.messageCount,
+              lastMessage: d.lastMessage?.messageId != null ? messages[d.lastMessage!.messageId] : null,
+              picture: d.picture, createdAt: d.createdAt, chatUsersAPI: chatUsers[d.dialogId],
+              isPublic: d.isPublic, isClosed: d.isClosed
+          );
+          dialogs.add(dd);
+        }
         emit(DatabaseBlocLoadingCallsState());
         await Future.delayed(const Duration(seconds: 2));
         final calls = <CallModel>[];
@@ -69,24 +77,32 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         emit(DatabaseBlocLoadingUsersState());
         final users = await UsersProvider().getUsers(token);
         await db.saveUsers(users);
+        emit(DatabaseBlocLoadingDialogsState());
+
         final dialogs = await DialogsProvider().getDialogs();
-        final chatUsers = <ChatUserDB>[];
+
+        final chatUsers = <ChatUser>[];
         final dialogsLastMessages = <MessageData>[];
         final statuses = <MessageStatus>[];
+        final files = <MessageAttachmentData>[];
+
         for(var dialog in dialogs) {
-          for (var chatUser in dialog.chatUsers) {
-            chatUsers.add(ChatUserDB(chatId: dialog.dialogId, userId: chatUser.userId, chatUserRole: chatUser.chatUserRole, active: chatUser.active ? 1 : 0));
+          for (var chatUser in dialog.chatUsersAPI!) {
+            chatUsers.add(ChatUser(chatId: dialog.dialogId, userId: chatUser.id, chatUserRole: chatUser.chatUserRole, active: chatUser.active, id: chatUser.id, user: chatUser.user));
           }
           if (dialog.lastMessage != null) {
             dialogsLastMessages.add(dialog.lastMessage!);
-            print('STATUSES::;:  $statuses');
             for(var status in dialog.lastMessage!.statuses) {
               statuses.add(status);
             }
           }
+          if (dialog.lastMessage?.file != null) {
+            files.add(dialog.lastMessage!.file!);
+          }
         }
         print('Dialogs lm::: $dialogsLastMessages');
         await db.saveMessages(dialogsLastMessages);
+        await db.saveAttachments(files);
         await db.saveMessageStatuses(statuses);
         await db.saveChatUsers(chatUsers);
         await db.saveDialogs(dialogs);

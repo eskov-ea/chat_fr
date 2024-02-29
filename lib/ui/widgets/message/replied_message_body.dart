@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class RepliedMessageBodyWidget extends StatelessWidget {
   final String senderName;
-  final ParentMessage parentMessage;
+  final RepliedMessage parentMessage;
   const RepliedMessageBodyWidget({
     required this.senderName,
     required this.parentMessage,
