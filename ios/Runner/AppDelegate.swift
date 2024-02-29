@@ -233,6 +233,11 @@ import PushKit
     ) {
         print("Failed to register: \(error)")
     }
+    
+    override func applicationDidBecomeActive(_ application: UIApplication) {
+        print("App become active")
+        application.applicationIconBadgeNumber = 0
+    }
 }
 
 class SwiftStreamHandlerSip: NSObject, FlutterStreamHandler {
