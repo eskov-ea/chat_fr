@@ -13,7 +13,7 @@ import '../../storage/data_storage.dart';
 class AuthBloc
     extends Bloc<AuthEvent, AuthState> {
     final AuthRepository authRepo;
-    final _dataProvider = DataProvider();
+    final _dataProvider = DataProvider.storage;
 
     AuthBloc({
        required this.authRepo

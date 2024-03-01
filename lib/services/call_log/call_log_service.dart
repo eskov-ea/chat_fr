@@ -10,7 +10,7 @@ import '../logger/logger_service.dart';
 
 
 class CallLogService {
-  final _secureStorage = DataProvider();
+  final _secureStorage = DataProvider.storage;
 
   Future<List<CallModel>> getCallLogs({required passwd}) async {
     try {

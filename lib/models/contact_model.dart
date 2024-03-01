@@ -70,7 +70,7 @@ class UserModel {
   }
 
   static UserModel fromJsonDB(json) {
-    if (json['id'] == 5) {
+    if (json['user_id'] == 5) {
       return chatBot;
     } else {
       return UserModel(

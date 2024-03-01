@@ -50,7 +50,7 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
   Future<void> _startChat() async {
     PopupManager.showLoadingPopup(context);
     try {
-      final String? userId = await DataProvider().getUserId();
+      final String? userId = await DataProvider.storage.getUserId();
       await Future.delayed(const Duration(milliseconds: 40));
       final DialogData dialogData = await _dialogsProvider.createDialog(
         chatType: currentChatType,

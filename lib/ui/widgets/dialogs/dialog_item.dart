@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chat/helpers.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
@@ -30,12 +32,16 @@ class DialogItem extends StatelessWidget {
   final List<UserModel> users;
 
   List<UserModel> getPartnersData(List<int> chatUsers) {
+    //TODO: refactor
     final List<UserModel> partners = [];
-    for (var i = 0; i < chatUsers.length; i++)  {
+    for (var i = 0; i < chatUsers.length; i++) {
       final id = chatUsers[i];
       if (id != userId) {
-        final user = users.firstWhere((u) => u.id == id);
-        partners.add(user);
+        for(var user in users) {
+          if(user.id == id) {
+            partners.add(user);
+          }
+        }
       }
     }
     return partners;
@@ -67,6 +73,7 @@ class DialogItem extends StatelessWidget {
     final List<UserModel> partners = getPartnersData(dialogData.users);
     final objKey = ObjectKey("${userId}_object_key");
 
+    if(partners.isEmpty) return const SizedBox.shrink();
     return InkWell(
       key: objKey,
       onTap: () async {

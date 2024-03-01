@@ -166,7 +166,7 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      final token = await DataProvider().getToken();
+                      final token = await DataProvider.storage.getToken();
                       final users = await UsersProvider().getUsers(token);
                       await db.saveUsers(users);
                       print('Users saved');

@@ -8,5 +8,6 @@ class UsersRepository  {
 
   Future <List<UserModel>> getAllUsers(token) => usersProvider.getUsers(token);
   Map<String, String> getSipContacts(List<UserModel> users) => usersProvider.setSipContacts(users);
+  String prepareSipContactsList(Map<int, UserModel> users) => usersProvider.prepareSipContactsList(users);
 
 }

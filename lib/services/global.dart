@@ -212,16 +212,15 @@ import 'messages/messages_repository.dart';
 
   String getChatItemName(DialogData data, int? userId) {
     if (data.chatType.p2p == 1) {
-      //TODO: refactor db
-      // for (var i = 0; i < data.usersList.length; i++)  {
-      //   if (data.usersList[i].id != userId) {
-      //     return "${data.usersList[i].lastname} ${data.usersList[i].firstname}";
-      //   }
-      // }
+      for (var i = 0; i < data.chatUsers.length; i++)  {
+        if (data.chatUsers[i].userId != userId) {
+          return "${data.chatUsers[i].user.lastname} ${data.chatUsers[i].user.firstname}";
+        }
+      }
     } else {
       return data.name;
     }
-    return "Dialog";
+    return 'Корпоративный чат';
   }
 
   webPlatformSaveFile({required bytes, required filename}) async {

@@ -46,4 +46,12 @@ class UsersProvider {
     });
     return map;
   }
+
+  String prepareSipContactsList(Map<int, UserModel> users) {
+    final Map<String, String> map = {};
+    users.forEach((key, user) {
+      map["${SipConfig.getPrefix()}${user.id}"] = "${user.lastname} ${user.firstname}";
+    });
+    return map.toString();
+  }
 }

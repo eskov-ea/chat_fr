@@ -10,7 +10,7 @@ import '../logger/logger_service.dart';
 
 
 class UserProfileProvider {
-  final _secureStorage = DataProvider();
+  final _secureStorage = DataProvider.storage;
 
 
   Future<UserProfileData> getUserProfile(String? token) async {

@@ -13,7 +13,7 @@ class ChatUsersDBLayer {
       final Batch batch = db.batch();
       for (var chatUser in chatUsers) {
         batch.execute(
-            'INSERT INTO chat_user(id, chat_id, chat_user_role_id, active, user_id) VALUES(?, ?, ?, ?) '
+            'INSERT INTO chat_user(id, chat_id, chat_user_role_id, active, user_id) VALUES(?, ?, ?, ?, ?) '
                 'ON CONFLICT(id) DO UPDATE SET '
                 'chat_id = ${chatUser.chatId}, '
                 'chat_user_role_id = ${chatUser.chatUserRole}, '
@@ -35,7 +35,7 @@ class ChatUsersDBLayer {
       final db = await DBProvider.db.database;
       return await db.transaction((txn) async {
         List<Object> res = await txn.rawQuery(
-            'SELECT cu.id chat_user_record_id, cu.chat_id, cu.chat_user_role_id, cu.active, cu.user_id, '
+            'SELECT cu.id, cu.chat_id, cu.chat_user_role_id, cu.active, cu.user_id, '
             'u.firstname, u.lastname, u.middlename, u.company, u.dept, u.position, u.phone, u.email, u.birthdate, u.avatar, u.banned, u.last_access '
             'FROM chat_user cu '
             'JOIN user u ON (cu.user_id = u.id); '
@@ -44,9 +44,9 @@ class ChatUsersDBLayer {
         for(var obj in res) {
           obj as Map;
           if(chatUsersMap.containsKey(obj["chat_id"])) {
-            chatUsersMap[obj["chat_id"]]!.add(ChatUser.fromJson(obj));
+            chatUsersMap[obj["chat_id"]]!.add(ChatUser.fromDBJson(obj));
           } else {
-            chatUsersMap.addAll({obj["chat_id"]: [ChatUser.fromJson(obj)]});
+            chatUsersMap.addAll({obj["chat_id"]: [ChatUser.fromDBJson(obj)]});
           }
         }
 

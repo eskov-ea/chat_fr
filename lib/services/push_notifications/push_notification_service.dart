@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import '../../bloc/error_handler_bloc/error_types.dart';
 
 class PushNotificationService {
-  final _secureStorage = DataProvider();
+  final _secureStorage = DataProvider.storage;
 
   sendMissCallPush({required userId, required userName}) async {
     try {

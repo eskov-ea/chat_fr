@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   late final StreamSubscription userProfileDataSubscription;
   final PushNotificationService _pushNotificationService = PushNotificationService();
   bool _isPushSent = false;
-  final DataProvider _dataProvider = DataProvider();
+  final DataProvider _dataProvider = DataProvider.storage;
   String? callerName;
   String? myUserName;
   String? os;
@@ -276,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLoadingEvent());
       BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.add(DialogsLoadEvent());
       BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(InitializeSocketEvent());
-      BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersLoadEvent());
+      // BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersLoadEvent());
     }
   }
 
@@ -284,7 +284,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLoadingEvent());
     // BlocProvider.of<DialogsViewCubit>(context).loadDialogs();
     BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(InitializeSocketEvent());
-    BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersLoadEvent());
+    // BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersLoadEvent());
   }
 
   void getUserCallLog(UserProfileAsteriskSettings settings) {

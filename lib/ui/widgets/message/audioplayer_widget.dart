@@ -89,7 +89,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       setState(() {
         isError = true;
       });
-      final userId = await DataProvider().getUserId();
+      final userId = await DataProvider.storage.getUserId();
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: " [ USER ID: $userId ] \r\nError initializing audio widget / audio data");
     }
   }

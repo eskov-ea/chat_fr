@@ -57,13 +57,15 @@ class _MessagesPageState extends State<MessagesPage> {
       });
     });
     _readUserId().then((v) {
-      userId = v;
+      setState(() {
+        userId = v;
+      });
     });
     super.initState();
   }
 
   Future<int?> _readUserId() async {
-    final userIdFromStorage = await DataProvider().getUserId();
+    final userIdFromStorage = await DataProvider.storage.getUserId();
     return userIdFromStorage == null ? null : int.parse(userIdFromStorage);
   }
 
@@ -92,7 +94,9 @@ class _MessagesPageState extends State<MessagesPage> {
   }
 
   Widget _mapStateToWidget(BuildContext context, DialogsViewCubitState state) {
+    print('dialog new state:  user id: ${userId}');
     if (state is DialogsLoadedViewCubitState && userId != null) {
+      print('dialog new state:  isLoading: ${state.isLoading} \r\n${state.dialogs}');
       if (!state.isFirstInitialized || state.isLoading) {
         return DialogsShimmer();
       }
@@ -250,10 +254,8 @@ bool isMessageReadByMe (List<MessageStatus>? statuses, int userId) {
 
 bool _isDialogActive(DialogData dialog, int userId) {
   bool isUserActive = false;
-  //TODO: refactor db
-  print('_isDialogActive  ${dialog.chatUsers}');
   for(var user in dialog.chatUsers) {
-    if (user.userId == userId && user.active == true) {
+    if (user.userId == userId && user.active == 1) {
       isUserActive = true;
     }
   }

@@ -110,7 +110,7 @@ class DialogData {
 
   @override
   String toString() {
-    return "Instance of 'DialogData: chatUsers: $chatUsers'";
+    return "Instance of 'DialogData $dialogId: chatUsers: $chatUsers'";
   }
 
 }
@@ -301,7 +301,7 @@ class ChatUser {
   final int chatId;
   final int userId;
   final int chatUserRole;
-  final bool active;
+  final int active;
   final UserModel user;
 
   ChatUser({
@@ -321,11 +321,12 @@ class ChatUser {
           chatId: json["chat_id"],
           userId: json["user_id"],
           chatUserRole: json["chat_user_role_id"],
-          active: json["active"],
+          active: json["active"] ? 1 : 0,
           user: json["user"] != null ?UserModel.fromJsonAPI(json["user"])
             : UserModel(id: json["user_id"], firstname: 'удален', lastname: 'Пользователь', middlename: '', company: '', position: '', phone: '', dept: '', email: '', avatar: null, birthdate: '', banned: 0, lastAccess: '')
       );
     } catch (err, stack) {
+      print('Parse err:  $err\r\n$stack');
       throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
     }
   }
@@ -333,7 +334,7 @@ class ChatUser {
   static ChatUser fromDBJson(json) {
     try {
       return ChatUser(
-        id: json["chat_user_record_id"],
+        id: json["id"],
         chatId: json["chat_id"],
         userId: json["user_id"],
         chatUserRole: json["chat_user_role_id"],
@@ -354,7 +355,10 @@ class ChatUser {
             other.userId == userId;
   }
   int get hashCode => runtimeType.hashCode ^ userId.hashCode ^ active.hashCode;
-
+  @override
+  String toString() {
+    return "Instance of 'ChatUser(id: $id, user_id: $userId, chat_id: $chatId)'";
+  }
 }
 
 class DialogId {

@@ -73,7 +73,7 @@ void main() async {
   //   if (!kIsWeb) {
   //     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
   //
-  //     final userId = await DataProvider().getUserId();
+  //     final userId = await DataProvider.storage.getUserId();
   //     FirebaseCrashlytics.instance.recordError(
   //         errorDetails.exception,
   //         errorDetails.stack,
@@ -121,13 +121,14 @@ class MyApp extends StatelessWidget{
             create: (context) => ChatsBuilderBloc(
               errorHandlerBloc: errorHandlerBloc,
               messagesRepository: MessagesRepository(),
-              dataProvider: DataProvider()
+              dataProvider: DataProvider.storage
             )
         ),
         BlocProvider(
+          lazy: false,
           create: (_) => UsersViewCubit(
-              databaseBloc: databaseBloc,
               usersBloc: UsersBloc(
+                  databaseBloc: databaseBloc,
                   errorHandlerBloc: errorHandlerBloc,
                   usersRepository: UsersRepository()
               )
@@ -149,7 +150,7 @@ class MyApp extends StatelessWidget{
               wsBloc: WsBloc(
                   initialState: Unconnected(),
                   dialogsRepository: DialogRepository(),
-                  secureStorage: DataProvider()
+                  secureStorage: DataProvider.storage
               ),
               initialState: WebsocketViewCubitState.unknown
           ),

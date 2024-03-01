@@ -11,7 +11,7 @@ import '../error_handler_bloc/error_types.dart';
 class ProfileBloc extends Bloc<ProfileBlocEvent, UserProfileState> {
   final UserProfileRepository _userProfileRepository = UserProfileRepository();
   final ErrorHandlerBloc errorHandlerBloc;
-  final _secureStorage = DataProvider();
+  final _secureStorage = DataProvider.storage;
 
   ProfileBloc({
     required this.errorHandlerBloc

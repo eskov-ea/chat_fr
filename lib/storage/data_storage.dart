@@ -20,6 +20,14 @@ AndroidOptions _getAndroidOptions() => const AndroidOptions(
 );
 
 class DataProvider {
+
+  DataProvider._();
+  static DataProvider? _instance;
+
+  static DataProvider get storage {
+    _instance ??= DataProvider._();
+    return _instance!;
+  }
   static final _secureStorage = FlutterSecureStorage(
     aOptions: _getAndroidOptions(),
     iOptions: _getIOSOptions()

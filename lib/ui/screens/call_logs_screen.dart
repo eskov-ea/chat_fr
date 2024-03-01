@@ -41,7 +41,7 @@ class _CallsPageState extends State<CallsPage> {
 
   @override
   void initState() {
-    DataProvider().getUserId().then( (val) {
+    DataProvider.storage.getUserId().then( (val) {
       userId = val;
     });
     setState(() {

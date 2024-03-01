@@ -10,7 +10,7 @@ import '../logger/logger_service.dart';
 
 
 class DialogsProvider {
-  final _secureStorage = DataProvider();
+  final _secureStorage = DataProvider.storage;
 
   Future<List<DialogData>> getDialogs() async {
     try {

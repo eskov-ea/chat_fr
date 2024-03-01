@@ -7,7 +7,7 @@ abstract class DatabaseBlocState {}
 
 class DatabaseBlocDBInitializedState extends DatabaseBlocState {
   final List<DialogData> dialogs;
-  final List<UserModel> users;
+  final Map<int, UserModel> users;
   final List<CallModel> calls;
   DatabaseBlocDBInitializedState({required this.dialogs, required this.users,
     required this.calls});

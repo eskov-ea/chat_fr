@@ -12,7 +12,7 @@ import '../user_profile/user_profile_api_provider.dart';
 
 
 class AuthRepository {
-  final _secureStorage = DataProvider();
+  final _secureStorage = DataProvider.storage;
   final _profileProvider = UserProfileProvider();
   final _logger = Logger.getInstance();
 
@@ -78,19 +78,19 @@ class AuthRepository {
 
   ///TODO: refactor this non-production solution caused iOS platform specific behavior
   Future<String?> _tokenAccessGuard() async {
-    String? token = await DataProvider().getToken();
+    String? token = await DataProvider.storage.getToken();
     if (token == null) {
       await Future.delayed(const Duration(milliseconds: 150));
-      token = await DataProvider().getToken();
+      token = await DataProvider.storage.getToken();
     }
     if (token == null) {
       await Future.delayed(const Duration(milliseconds: 50));
-      token = await DataProvider().getToken();
+      token = await DataProvider.storage.getToken();
     }
     if (token == null) {
       final os = Platform.operatingSystem;
       final version = Platform.operatingSystemVersion;
-      final user = await DataProvider().getUserId();
+      final user = await DataProvider.storage.getUserId();
 
       Logger.getInstance().sendDebugMessage(message: "Device token not found. USER ID: [ $user ], OS: [ $os ], VERSION: [ $version ]", operation: "Reading token");
     }

@@ -24,7 +24,7 @@ class UserItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
       child: InkWell(
         onTap:  () async {
-          final userIdString = await DataProvider().getUserId();
+          final userIdString = await DataProvider.storage.getUserId();
           final userId = int.parse(userIdString!);
           final dialogData= findDialog(context, userId, user.id);
           openChatScreen(

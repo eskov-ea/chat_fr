@@ -6,7 +6,7 @@ import '../../storage/data_storage.dart';
 
 class Logger {
 
-  final _secureStorage = DataProvider();
+  final _secureStorage = DataProvider.storage;
   static Logger? logger;
 
   Logger._();

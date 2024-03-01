@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:chat/bloc/database_bloc/database_bloc.dart';
+import 'package:chat/bloc/database_bloc/database_state.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/bloc/user_bloc/user_event.dart';
 import 'package:chat/bloc/user_bloc/user_state.dart';
@@ -18,52 +20,66 @@ import '../error_handler_bloc/error_handler_events.dart';
 class UsersBloc extends Bloc<UsersEvent, UsersState> {
   final UsersRepository usersRepository;
   final ErrorHandlerBloc errorHandlerBloc;
-  final _secureStorage = DataProvider();
+  final _secureStorage = DataProvider.storage;
   final _logger = Logger.getInstance();
   final _methodChannel = const MethodChannel("com.application.chat/permission_method_channel");
+  final DatabaseBloc databaseBloc;
+  late final StreamSubscription<DatabaseBlocState> databaseBlocSubscription;
   int i = 0;
 
   UsersBloc({
     required this.usersRepository,
     required this.errorHandlerBloc,
+    required this.databaseBloc
   }) :  super(UsersState()) {
-    on<UsersLoadEvent>(onUsersLoadEvent);
+    databaseBlocSubscription = databaseBloc.stream.listen(_onDBStateChange);
+
+    on<UsersLoadedEvent>(onUsersLoadedEvent);
     on<UsersSearchEvent>(onUsersSearchEvent);
     on<UsersDeleteUsersEvent>(onUsersDeleteEvent);
     on<UsersUpdateOnlineStatusEvent>(onUsersUpdateOnlineStatusEvent);
   }
 
-  void onUsersLoadEvent (
-      UsersLoadEvent event, Emitter<UsersState> emit
+  void _onDBStateChange(DatabaseBlocState state) {
+    print('DB state::: $state');
+    if (state is DatabaseBlocDBInitializedState) {
+      add(UsersLoadedEvent(users: state.users));
+    }
+  }
+
+  void onUsersLoadedEvent (
+      UsersLoadedEvent event, Emitter<UsersState> emit
       ) async {
     try {
-      final String? token = await _secureStorage.getToken();
-      List<UserModel> users = await usersRepository.getAllUsers(token);
-      final usersMap = usersRepository.getSipContacts(users);
+      final users = event.users;
+      final usersMap = usersRepository.prepareSipContactsList(users);
       if (!kIsWeb) {
         _methodChannel
             .invokeMethod("SAVE_SIP_CONTACTS", {"data": usersMap.toString()});
       }
-      users.sort((a, b) => a.lastname.compareTo(b.lastname));
+      final usersList = users.entries.map((user) => user.value).toList();
+      // usersList.sort((a, b) => a.lastname.compareTo(b.lastname));
       if (state.isSearchMode) {
         final query = state.searchQuery.toLowerCase();
         final container = state.searchUsersContainer;
-        final filteredUsers = filterUsersBySearchQuery(users, query);
+        final filteredUsers = filterUsersBySearchQuery(usersList, query);
         final newContainer = container.copyWith(users: filteredUsers);
         emit(UsersLoadedState(
             usersContainer: state.usersContainer,
             searchQuery: query,
             searchUsersContainer: newContainer,
+            usersMapped: users,
             onlineUsersDictionary: state.onlineUsersDictionary,
             clientEventsDictionary: state.clientEventsDictionary,
             isAuthenticated: true
         ));
       } else {
         final container = state.usersContainer;
-        final newContainer = container.copyWith(users: users);
+        final newContainer = container.copyWith(users: usersList);
         emit(UsersLoadedState(
             usersContainer: newContainer,
             searchQuery: '',
+            usersMapped: users,
             searchUsersContainer: state.searchUsersContainer,
             onlineUsersDictionary: state.onlineUsersDictionary,
             clientEventsDictionary: state.clientEventsDictionary,
@@ -91,6 +107,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
         emit(UsersLoadedState(
             usersContainer: state.usersContainer,
             searchQuery: query,
+            usersMapped: state.usersMapped,
             searchUsersContainer: newContainer,
             onlineUsersDictionary: state.onlineUsersDictionary,
             clientEventsDictionary: state.clientEventsDictionary,
@@ -102,6 +119,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
         emit(UsersLoadedState(
             usersContainer: newContainer,
             searchQuery: '',
+            usersMapped: state.usersMapped,
             searchUsersContainer: state.searchUsersContainer,
             onlineUsersDictionary: state.onlineUsersDictionary,
             clientEventsDictionary: state.clientEventsDictionary,
@@ -117,6 +135,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
         usersContainer: const UsersListContainer.initial(),
         searchUsersContainer: const UsersListContainer.initial(),
         searchQuery: "",
+        usersMapped: {},
         onlineUsersDictionary: {},
         isAuthenticated: false,
         clientEventsDictionary: {}

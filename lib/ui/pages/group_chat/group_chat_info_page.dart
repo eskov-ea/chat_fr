@@ -70,7 +70,7 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
   }
 
   getInitialUsers() async {
-    userId = await DataProvider().getUserId();
+    userId = await DataProvider.storage.getUserId();
     stateUsers = [];
     for (var user in widget.dialogData.users) {
       //TODO: refactor db

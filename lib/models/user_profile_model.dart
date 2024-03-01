@@ -12,6 +12,7 @@ class UserProfileData extends Equatable{
   final String position;
   final String phone;
   final String email;
+  final String birthdate;
   final String? avatar;
   final UserProfileAsteriskSettings? userProfileSettings;
   final AppSettings? appSettings;
@@ -27,6 +28,7 @@ class UserProfileData extends Equatable{
     required this.phone,
     required this.dept,
     required this.avatar,
+    required this.birthdate,
     required this.email,
     required this.userProfileSettings,
     required this.appSettings,
@@ -44,6 +46,7 @@ class UserProfileData extends Equatable{
           dept: json['user']['staff']['dept'] ?? "",
           email: json['user']['email'] ?? "",
           avatar: json['user']['staff']["avatar"],
+          birthdate: json['user']['staff']['birthdate'],
           userProfileSettings: UserProfileAsteriskSettings.fromJson(json['settings']),
           appSettings: AppSettings.fromJson(json['settings']),
           chatSettings: ChatSettings.fromJson(json['settings'])

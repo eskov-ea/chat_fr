@@ -21,7 +21,7 @@ import './icon_base64.dart';
 
 
 class MessagesProvider {
-  final _secureStorage = DataProvider();
+  final _secureStorage = DataProvider.storage;
 
 
   Future <List<MessageData>> getMessages(userId, dialogId, pageNumber) async {

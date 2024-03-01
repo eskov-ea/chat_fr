@@ -23,7 +23,7 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen> {
 
   static const methodChannel = MethodChannel("com.application.chat/method");
-  final DataProvider _dataProvider = DataProvider();
+  final DataProvider _dataProvider = DataProvider.storage;
   String deviceToken = '';
   late String os;
   late final platformSipStream ;

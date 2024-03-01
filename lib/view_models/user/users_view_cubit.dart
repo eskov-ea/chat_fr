@@ -14,14 +14,10 @@ import 'users_view_cubit_state.dart';
 class UsersViewCubit extends Cubit<UsersViewCubitState> {
   final UsersBloc usersBloc;
   late final StreamSubscription<UsersState> usersBlocSubscription;
-  final DatabaseBloc databaseBloc;
-  late final StreamSubscription<DatabaseBlocState> databaseBlocSubscription;
 
   UsersViewCubit({
-    required this.usersBloc,
-    required this.databaseBloc
+    required this.usersBloc
   }) : super(UsersViewCubitLoadingState()) {
-    databaseBlocSubscription = databaseBloc.stream.listen(_onDBStateChange);
     Future.microtask(() {
       _onState(usersBloc.state);
       usersBlocSubscription = usersBloc.stream.listen(_onState);

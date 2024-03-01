@@ -58,7 +58,8 @@ class DialogDBLayer {
             'LEFT JOIN chat_type ct ON (d.chat_type_name = ct.name) '
             'LEFT JOIN message m ON (d.last_message_id = m.id) '
             'LEFT JOIN attachments f ON (d.last_message_id = f.chat_message_id) '
-            'WHERE d.is_closed = 0; '
+            'WHERE d.is_closed = 0 '
+            'ORDER BY CASE WHEN m.created_at IS NOT NULL THEN m.created_at ELSE d.created_at END DESC; '
          );
         return res.map((el) => DialogData.fromDBJson(el)).toList();
       });

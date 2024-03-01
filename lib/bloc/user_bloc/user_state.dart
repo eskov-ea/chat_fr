@@ -12,6 +12,7 @@ class UsersState {
   List<UserModel> get users => usersContainer.users;
   final Map<int, bool> onlineUsersDictionary = {};
   final Map<int, ClientUserEvent> clientEventsDictionary = {};
+  final Map<int, UserModel> usersMapped = {};
 }
 
 class UsersLoadedState extends UsersState {
@@ -21,6 +22,7 @@ class UsersLoadedState extends UsersState {
   final Map<int, bool> onlineUsersDictionary;
   final Map<int, ClientUserEvent> clientEventsDictionary;
   final bool isAuthenticated;
+  final Map<int, UserModel> usersMapped;
 
   bool get isSearchMode => searchQuery.isNotEmpty;
   List<UserModel> get users =>
@@ -31,6 +33,7 @@ class UsersLoadedState extends UsersState {
         searchUsersContainer = const UsersListContainer.initial(),
         onlineUsersDictionary = {},
         clientEventsDictionary = {},
+        usersMapped = {},
         isAuthenticated = true,
         searchQuery = "";
 
@@ -40,6 +43,7 @@ class UsersLoadedState extends UsersState {
     required this.searchQuery,
     required this.onlineUsersDictionary,
     required this.isAuthenticated,
+    required this.usersMapped,
     required this.clientEventsDictionary
   });
 
@@ -75,6 +79,7 @@ class UsersLoadedState extends UsersState {
     String? searchQuery,
     Map<int, bool>? onlineUsersDictionary,
     Map<int, ClientUserEvent>? clientEvent,
+    Map<int, UserModel>? usersMapped,
     bool? isAuthenticated
   }) {
     return UsersLoadedState(
@@ -82,6 +87,7 @@ class UsersLoadedState extends UsersState {
       searchUsersContainer: searchUsersContainer ?? this.searchUsersContainer,
       searchQuery: searchQuery ?? this.searchQuery,
       onlineUsersDictionary: onlineUsersDictionary ?? this.onlineUsersDictionary,
+      usersMapped: usersMapped ?? this.usersMapped,
       clientEventsDictionary: clientEvent ?? this.clientEventsDictionary,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated
     );

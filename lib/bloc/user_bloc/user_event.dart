@@ -1,3 +1,4 @@
+import 'package:chat/models/contact_model.dart';
 import 'package:equatable/equatable.dart';
 import '../../models/dialog_model.dart';
 
@@ -7,6 +8,12 @@ abstract class UsersEvent extends Equatable{
 }
 
 class UsersLoadEvent extends UsersEvent {}
+
+class UsersLoadedEvent extends UsersEvent {
+  final Map<int, UserModel> users;
+
+  UsersLoadedEvent({required this.users});
+}
 
 class UsersDeleteUsersEvent extends UsersEvent{}
 

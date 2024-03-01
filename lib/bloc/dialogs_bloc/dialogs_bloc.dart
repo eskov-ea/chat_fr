@@ -134,7 +134,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       print("Dialogs search ${event.searchQuery}");
       if (event.searchQuery != "") {
         final query = event.searchQuery.toLowerCase();
-        final userId = await DataProvider().getUserId();
+        final userId = await DataProvider.storage.getUserId();
         final filteredDialogs =
             filterDialogsBySearchQuery(state.dialogsContainer!.dialogs, query, int.parse(userId!));
         final container = state.searchedContainer!.copyWith(dialogs: filteredDialogs);

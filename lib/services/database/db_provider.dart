@@ -93,7 +93,7 @@ class DBProvider {
 
   ///   USERS LAYER
   Future<void> saveUsers(List<UserModel> users) async => await UsersDBLayer().saveUsers(users);
-  Future<List<UserModel>> getUsers() async => await UsersDBLayer().getUsers();
+  Future<Map<int, UserModel>> getUsers() async => await UsersDBLayer().getUsers();
 
 
   ///   CHAT USERS LAYER
@@ -117,15 +117,15 @@ class DBProvider {
       print("ERROR:DBProvider:73:: $err");
     }
   }
-  Future<bool> checkIfDatabaseIsNotEmpty() async {
+  Future<bool> checkIfDatabaseIsEmpty() async {
     final db = await database;
     return db.transaction((txn) async {
       final res = await txn.rawQuery('SELECT * FROM app_settings ');
       print('checkIfDatabaseIsNotEmpty  $res');
-      if (res.isNotEmpty) {
-        return res.first["first_initialize"] == 1;
+      if (res.isEmpty) {
+        return true;
       } else {
-        return false;
+        return res.first["first_initialize"] == 0;
       }
     });
   }
