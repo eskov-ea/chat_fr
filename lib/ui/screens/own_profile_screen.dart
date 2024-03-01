@@ -93,6 +93,13 @@ class ProfilePage extends StatelessWidget {
                             style: const TextStyle(color: Colors.black54, fontStyle: FontStyle.italic),
                           ),
                         ),
+                      if (kIsWeb) Container(
+                        padding: const EdgeInsets.only(left: 10, bottom: 2),
+                        alignment: Alignment.centerLeft,
+                        child: const Text("Текущая версия:  1.0.30",
+                          style: TextStyle(color: Colors.black54, fontStyle: FontStyle.italic),
+                        ),
+                      ),
                         !kIsWeb && Platform.isAndroid
                           ? OutlinedButton(
                               onPressed: () async {

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
-// import 'dart:html' as html;
+import 'dart:html' as html;
 import 'dart:io';
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_event.dart';
@@ -225,22 +225,22 @@ import 'messages/messages_repository.dart';
 
   webPlatformSaveFile({required bytes, required filename}) async {
 
-    // if(kIsWeb) {
-    //   final blob = html.Blob([bytes]);
-    //   final url = html.Url.createObjectUrlFromBlob(blob);
-    //   final anchor = html.document.createElement('a') as html.AnchorElement
-    //     ..href = url
-    //     ..style.display = 'none'
-    //     ..download = '$filename';
-    //   html.document.body?.children.add(anchor);
-    //
-    //   anchor.click();
-    //
-    //   html.document.body?.children.remove(anchor);
-    //   html.Url.revokeObjectUrl(url);
-    // } else {
-    //   throw Exception("Should be called on web only");
-    // }
+    if(kIsWeb) {
+      final blob = html.Blob([bytes]);
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.document.createElement('a') as html.AnchorElement
+        ..href = url
+        ..style.display = 'none'
+        ..download = '$filename';
+      html.document.body?.children.add(anchor);
+
+      anchor.click();
+
+      html.document.body?.children.remove(anchor);
+      html.Url.revokeObjectUrl(url);
+    } else {
+      throw Exception("Should be called on web only");
+    }
   }
 
   double getWidthMaxWidthGuard(BuildContext context) {
