@@ -56,10 +56,27 @@ class MessageDBLayer {
             messages.addAll({message.messageId: message});
           }
         }
+        log('statusese db::: ${messages[6035]}');
         return messages;
       });
     } catch (err, stackTrace) {
       log('DB operation error:  $stackTrace');
+      rethrow;
+    }
+  }
+
+  Future<String> getMessageInfo() async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        List<Object> res = await txn.rawQuery(
+            'SELECT * FROM message WHERE id = 6035; '
+        );
+        print('Message read::: $res');
+        return "";
+      });
+    } catch (err, stackTrace) {
+      log('DB operation error batch: \r\n  $err \r\n  $stackTrace');
       rethrow;
     }
   }

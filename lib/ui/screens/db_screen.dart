@@ -272,8 +272,7 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      final res = await db.getMessages();
-                      log('DB result:: $res\r\n\r\n');
+                      final res = await db.getMessageInfo();
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width * 0.45,

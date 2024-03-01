@@ -80,6 +80,7 @@ class DBProvider {
   ///   MESSAGES LAYER
   Future<List<Object?>> saveMessages(List<MessageData> messages) async => MessageDBLayer().saveMessages(messages);
   Future<Map<int, MessageData>> getMessages() async => MessageDBLayer().getMessages();
+  Future<String> getMessageInfo() async => MessageDBLayer().getMessageInfo();
 
 
   ///   MESSAGE STATUS LAYER

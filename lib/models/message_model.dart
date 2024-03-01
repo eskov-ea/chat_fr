@@ -147,7 +147,7 @@ class MessageStatus extends Equatable {
 
   static MessageStatus fromDBJson(json) => MessageStatus(
       id: json["message_status_id"],
-      userId: json["user_id"],
+      userId: json["message_status_user_id"],
       messageId: json["chat_message_id"],
       dialogId: json["chat_id"],
       statusId: json["chat_message_status_id"],
@@ -160,7 +160,7 @@ class MessageStatus extends Equatable {
 
   @override
   String toString() {
-    return "Instance of MessageStatus[ $id, $dialogId, $statusId ]";
+    return "Instance of MessageStatus[ $id, $dialogId, $statusId, $userId ]";
   }
 
 }
