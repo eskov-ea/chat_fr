@@ -160,6 +160,9 @@ Widget SendingObjectOptionsPage({
               ],
             ));
           final bytes = result.files.first.bytes;
+          final image = await decodeImageFromList(bytes!);
+          final width = image.width;
+
           String base64 = base64Encode(bytes!);
           final response = await MessagesRepository()
             .messagesProvider

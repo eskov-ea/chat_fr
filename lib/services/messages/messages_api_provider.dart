@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:chat/services/helpers/file_types_helper.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../bloc/error_handler_bloc/error_types.dart';
@@ -271,6 +272,7 @@ class MessagesProvider {
     required String? content
   }) async {
     try {
+      print('Trying to send image');
       String? preview;
       final String? token = await _secureStorage.getToken();
 
@@ -373,7 +375,24 @@ class MessagesProvider {
     try {
       final String? token = await _secureStorage.getToken();
       final uniq = DateTime.now().microsecondsSinceEpoch.toString();
-      final preview = await resizeImageWeb(bytes);
+      Uint8List? targetUint8List;
+      if (bytes != null) {
+        final image = await decodeImageFromList(bytes!);
+        int width = image.width;
+        int height = image.height;
+        Uint8List resizedResult = bytes;
+        int counter =0;
+        while (resizedResult.lengthInBytes > 63000) {
+          height > 300 ? height = 200 : height = height ~/ 2;
+          width > 300 ? width = 200 : width = width ~/2;
+          resizedResult = await resizeImageWeb(bytes, height, width);
+          ++counter;
+          print('resized image base64 size is ${resizedResult.lengthInBytes}, iteration: $counter');
+        }
+        targetUint8List = resizedResult;
+      }
+      print('we out of while with ${targetUint8List?.lengthInBytes}');
+      final preview = targetUint8List != null ? convert.base64Encode(targetUint8List) : base64icon;
       final postData = jsonEncode(<String, Object>{
         'data': {
           'message': '',
@@ -447,22 +466,18 @@ String? resizeImage(Uint8List data) {
   }
 }
 
-resizeImageWeb(Uint8List? bytes) async {
+Future<Uint8List> resizeImageWeb(Uint8List bytes, int targetHeight, int targetWidth) async {
 
-  if (bytes == null) return "";
   var codec = await UI.instantiateImageCodec(bytes,
-      targetHeight: 200, targetWidth: 200, allowUpscaling: false);
+      targetHeight: targetHeight, targetWidth: targetWidth, allowUpscaling: false);
   var frameInfo = await codec.getNextFrame();
   UI.Image targetUiImage = frameInfo.image;
 
   ByteData? targetByteData =
   await targetUiImage.toByteData(format: UI.ImageByteFormat.png);
   print('resized image WxH size is ${targetUiImage.width}x${targetUiImage.width}');
-  final Uint8List targetlUinit8List = targetByteData!.buffer.asUint8List();
-
-  String resizedBase64Image = convert.base64Encode(targetlUinit8List);
-  print('resized image base64 size is ${resizedBase64Image.length}');
-  return resizedBase64Image;
+  final Uint8List targetUint8List = targetByteData!.buffer.asUint8List();
+  return targetUint8List;
 }
 
 
