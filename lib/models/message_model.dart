@@ -41,6 +41,7 @@ class MessageData extends Equatable{
 
   static MessageData fromJson(json) {
     try {
+      print('DBBloc send:: res: $json');
       return MessageData(
           messageId: json["id"],
           senderId: json["user_id"],
@@ -61,7 +62,7 @@ class MessageData extends Equatable{
           statuses: json["statuses"].map<MessageStatus>((status) => MessageStatus.fromJson(status)).toList()
       );
     } catch (err, stack) {
-      log('Parse status error:  $err \r\n $stack');
+      log('Parse status error:  $err \r\n $json \r\n $stack');
       rethrow;
     }
   }
@@ -145,15 +146,23 @@ class MessageStatus extends Equatable {
         updatedAt: json["updated_at"]
     );
 
-  static MessageStatus fromDBJson(json) => MessageStatus(
-      id: json["message_status_id"],
-      userId: json["message_status_user_id"],
-      messageId: json["chat_message_id"],
-      dialogId: json["chat_id"],
-      statusId: json["chat_message_status_id"],
-      createdAt: json["message_status_created_at"],
-      updatedAt: json["message_status_updated_at"]
-  );
+  static MessageStatus? fromDBJson(json) {
+    if (json["message_status_user_id"] == null) return null;
+    try {
+      return MessageStatus(
+          id: json["message_status_id"],
+          userId: json["message_status_user_id"],
+          messageId: json["chat_message_id"],
+          dialogId: json["chat_id"],
+          statusId: json["chat_message_status_id"],
+          createdAt: json["message_status_created_at"],
+          updatedAt: json["message_status_updated_at"]
+      );
+    } catch (err) {
+      log('Parse error $err\r\n$json');
+      rethrow;
+    }
+  }
 
   @override
   List<Object?> get props => [id, statusId];

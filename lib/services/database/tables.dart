@@ -11,6 +11,7 @@ final Map<String, String> tables = {
       'is_public TINYINT(1) DEFAULT 0, '
       'message_count INTEGER, '
       'picture text, '
+      'last_page INTEGER DEFAULT NULL, '
       'created_at DATETIME DEFAULT CURRENT_TIMESTAMP, '
       'updated_at DATETIME DEFAULT CURRENT_TIMESTAMP );',
 
@@ -60,6 +61,8 @@ final Map<String, String> tables = {
       'replied_message_id INTEGER DEFAULT NULL, '
       'replied_message_author INTEGER DEFAULT NULL, '
       'replied_message_text TEXT DEFAULT NULL, '
+      'local_id INTEGER DEFAULT NULL, '
+      'send_failed TINYINT(1) DEFAULT 0, '
       'created_at DATETIME DEFAULT CURRENT_TIMESTAMP, '
       'updated_at DATETIME DEFAULT CURRENT_TIMESTAMP );',
 
@@ -93,4 +96,5 @@ final Map<String, String> tables = {
       'last_update DATETIME DEFAULT CURRENT_TIMESTAMP, '
       'first_initialize TINYINT(1) DEFAULT 1, '
       'created_at DATETIME DEFAULT CURRENT_TIMESTAMP );',
+
 };

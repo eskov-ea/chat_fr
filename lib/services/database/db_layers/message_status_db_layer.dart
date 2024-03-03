@@ -41,4 +41,21 @@ class MessageStatusDBLayer {
       rethrow;
     }
   }
+
+  Future<int?> saveLocalMessageStatus(MessageStatus? status) async {
+    if ( status == null) return null;
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        return await txn.rawInsert(
+            'INSERT OR IGNORE INTO message_status(id, chat_id, user_id, chat_message_id, chat_message_status_id, '
+                'created_at, updated_at) VALUES(?, ?, ?, ?, ?, ?, ?) ',
+            [status.id, status.dialogId, status.userId, status.messageId,
+              status.statusId, status.createdAt, status.createdAt]
+        );
+      });
+    } catch (err, stackTrace) {
+      rethrow;
+    }
+  }
 }

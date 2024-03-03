@@ -1,15 +1,20 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:chat/bloc/database_bloc/database_events.dart';
 import 'package:chat/bloc/database_bloc/database_state.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/call_model.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/from_db_models.dart';
 import 'package:chat/models/message_model.dart';
+import 'package:chat/models/message_model.dart' as messageModel;
 import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/dialogs/dialogs_api_provider.dart';
+import 'package:chat/services/helpers/message_sender_helper.dart';
+import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/services/user_profile/user_profile_api_provider.dart';
 import 'package:chat/services/users/users_api_provider.dart';
 import 'package:chat/storage/data_storage.dart';
@@ -27,8 +32,10 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     on<DatabaseBlocEvent>((event, emit) async {
       if (event is DatabaseBlocInitializeEvent) {
         await onDatabaseBlocInitializeEvent(event, emit);
+      } else if (event is DatabaseBlocSendMessageEvent) {
+        await onDatabaseBlocSendMessageEvent(event, emit);
       }
-    });
+    }, transformer: concurrent());
   }
 
   Future<void> onDatabaseBlocInitializeEvent(event, emit) async {
@@ -109,7 +116,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
             name: d.name, description: d.description, messageCount: d.messageCount,
             lastMessage: d.lastMessage?.messageId != null ? messages[d.lastMessage!.messageId] : null,
             picture: d.picture, createdAt: d.createdAt, chatUsers: chatUsers[d.dialogId] ?? [],
-            isPublic: d.isPublic, isClosed: d.isClosed
+            isPublic: d.isPublic, isClosed: d.isClosed, lastPage: d.lastPage
         );
         dialogs.add(dd);
       }
@@ -129,6 +136,48 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     } on Exception catch(err, stackTrace) {
       log('DB error:  $err \r\n  $stackTrace');
       emit(DatabaseBlocDBFailedInitializeState());
+    }
+  }
+
+  onDatabaseBlocSendMessageEvent(DatabaseBlocSendMessageEvent event, emit) async {
+    print("DBBloc send:: start");
+    try {
+      final userId = await DataProvider.storage.getUserId();
+      if (userId == null) throw AppErrorException(AppErrorExceptionType.other);
+      int messageId = UUID();
+      while(await db.checkIfMessageExistWithThisId(messageId) != 0) {
+        messageId = UUID();
+      }
+      final attachmentId = event.content == null ? null : UUID();
+
+      final message = createLocalMessage(
+          messageId: messageId,
+          attachmentId: attachmentId,
+          userId: int.parse(userId),
+          dialogId: event.dialogId,
+          messageText: event.messageText,
+          filename: event.filename,
+          filetype: event.filetype,
+          content: event.content,
+          parentMessage: event.parentMessage
+      );
+      emit(DatabaseBlocNewMessageState(message: message));
+
+      await db.saveLocalMessage(message);
+      await db.saveLocalMessageStatus(message.statuses.isEmpty ? null : message.statuses.first);
+      log('DBBloc send:: message: $message\r\n${message.statuses}');
+
+
+      final sentMessageBody = await MessagesRepository().sendMessage(dialogId: event.dialogId,
+          messageText: event.messageText, parentMessageId: event.parentMessage?.parentMessageId,
+          filetype: event.filetype, bytes: event.bytes, filename: event.filename, content: event.content);
+      final sentMessage = MessageData.fromJson(jsonDecode(sentMessageBody)["data"]);
+
+      await db.saveMessageStatuses(sentMessage.statuses);
+      final res = await db.updateMessageId(messageId, sentMessage.messageId);
+      print("DBBloc send:: finish $res");
+    } catch (err, stackTrace) {
+      log('DBBloc send:: error: $err\r\n$stackTrace');
     }
   }
 

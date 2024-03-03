@@ -1,17 +1,10 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:chat/bloc/chats_builder_bloc/chats_builder_bloc.dart';
-import 'package:chat/bloc/chats_builder_bloc/chats_builder_event.dart';
-import 'package:chat/bloc/error_handler_bloc/error_types.dart';
-import 'package:chat/helpers.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/storage/data_storage.dart';
-import 'package:chat/theme.dart';
-import 'package:chat/ui/widgets/dialog_avatar_widget.dart';
 import 'package:chat/ui/widgets/dialogs/dialog_item.dart';
 import 'package:chat/ui/widgets/dialogs/dialog_search_widget.dart';
 import 'package:chat/ui/widgets/dialogs/dialogs_skeleton.dart';
-import 'package:chat/ui/widgets/search_widget.dart';
 import 'package:chat/ui/widgets/unauthenticated_widget.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit_state.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
@@ -19,11 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../models/dialog_model.dart';
-import '../../../utils.dart';
-import '../../models/contact_model.dart';
 import '../../models/message_model.dart';
-import '../../services/global.dart';
-import '../../services/helpers/navigation_helpers.dart';
 import '../widgets/app_bar.dart';
 import '../widgets/avatar_widget.dart';
 import '../widgets/shimmer.dart';
@@ -80,7 +69,8 @@ class _MessagesPageState extends State<MessagesPage> {
 
   void refreshAllData(){
     BlocProvider.of<DialogsViewCubit>(context).refreshAllDialogs();
-    BlocProvider.of<ChatsBuilderBloc>(context).add(RefreshChatsBuilderEvent());
+    //TODO: refacrot messageBloc
+    // BlocProvider.of<ChatsBuilderBloc>(context).add(RefreshChatsBuilderEvent());
   }
 
   void searchDialog(String val) {
@@ -170,6 +160,7 @@ class _MessagesPageState extends State<MessagesPage> {
                                     isPublic: state.dialogs[index].isPublic,
                                     isClosed: state.dialogs[index].isClosed,
                                     createdAt: state.dialogs[index].createdAt,
+                                    lastPage: state.dialogs[index].lastPage,
                                     chatUsers: state.dialogs[index].chatUsers
                                 ),
                               ),

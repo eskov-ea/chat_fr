@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-import 'package:chat/bloc/chats_builder_bloc/chats_builder_state.dart';
+import 'package:chat/bloc/database_bloc/database_bloc.dart';
+import 'package:chat/bloc/database_bloc/database_events.dart';
+import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
@@ -16,8 +18,6 @@ import 'package:flutter_sound/public/flutter_sound_recorder.dart';
 import 'package:flutter_sound_platform_interface/flutter_sound_recorder_platform_interface.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
-import '../../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../../models/dialog_model.dart';
 import '../../../services/dialogs/dialogs_api_provider.dart';
 import '../../../services/helpers/message_sender_helper.dart';
@@ -475,20 +475,22 @@ class ActionBarState extends State<ActionBar> {
   }
 
   _sendMessage(context, RepliedMessage? parentMessage) async {
-    sendMessageUnix(
-        bloc: BlocProvider.of<ChatsBuilderBloc>(context),
-        messageText: _messageController.text,
-        dialogId: widget.dialogId!,
-        userId: widget.userId,
-        parentMessage: parentMessage,
-        file: null
-    );
+    BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocSendMessageEvent(dialogId: widget.dialogId!, messageText: _messageController.text,
+        filetype: null, parentMessage: parentMessage, bytes: null, filename: null, content: null));
+    // sendMessageUnix(
+    //     bloc: BlocProvider.of<ChatsBuilderBloc>(context),
+    //     messageText: _messageController.text,
+    //     dialogId: widget.dialogId!,
+    //     userId: widget.userId,
+    //     parentMessage: parentMessage,
+    //     file: null
+    // );
     _messageController.clear();
   }
 
   _sendAudioMessage(File file, userId, dialogId) {
     sendMessageUnix(
-        bloc: BlocProvider.of<ChatsBuilderBloc>(context),
+        bloc: BlocProvider.of<MessageBloc>(context),
         messageText: _messageController.text,
         file: file,
         dialogId: widget.dialogId!,
@@ -507,17 +509,18 @@ class ActionBarState extends State<ActionBar> {
     setState(() {
       widget.dialogId = newDialog.dialogId;
     });
-    final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);
-    final initLength = chatsBuilderBloc.state.chats.length;
-    whenFinishAddingDialog(Stream<ChatsBuilderState> source) async {
-      chatsBuilderBloc.add(ChatsBuilderLoadMessagesEvent(dialogId: widget.dialogId!));
-      await for (var value in source) {
-        if (value.chats.length > initLength) {
-          return;
-        }
-      }
-    }
-    await whenFinishAddingDialog(chatsBuilderBloc.stream);
+    //TODO: refacrot messageBloc
+    // final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);
+// final initLength = chatsBuilderBloc.state.chats.length;
+    // whenFinishAddingDialog(Stream<MessagesBlocState> source) async {
+    //   chatsBuilderBloc.add(ChatsBuilderLoadMessagesEvent(dialogId: widget.dialogId!));
+    //   await for (var value in source) {
+    //     if (value.chats.length > initLength) {
+    //       return;
+    //     }
+    //   }
+    // }
+    // await whenFinishAddingDialog(chatsBuilderBloc.stream);
     if (newDialog != null) {
       widget.setDialogData(widget.rootWidget, newDialog);
     }

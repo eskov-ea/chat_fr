@@ -1,9 +1,9 @@
 import 'dart:io';
+import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../services/helpers/message_sender_helper.dart';
 import '../navigation/main_navigation.dart';
 
@@ -112,7 +112,7 @@ class SendingImagePreview extends StatelessWidget {
                 controller.clear();
                 if(dialogId == null) await createDialogFn();
                 sendMessageUnix(
-                    bloc: BlocProvider.of<ChatsBuilderBloc>(context),
+                    bloc: BlocProvider.of<MessageBloc>(context),
                     messageText: messageText,
                     file: file,
                     dialogId: dialogId!,

@@ -26,6 +26,7 @@ class DialogData {
   final int isClosed;
   final int isPublic;
   final String? picture;
+  int? lastPage;
 
   DialogData({
     required this.dialogId,
@@ -40,7 +41,8 @@ class DialogData {
     required this.picture,
     required this.isClosed,
     required this.isPublic,
-    required this.createdAt
+    required this.createdAt,
+    required this.lastPage
   });
 
   static DialogData fromJson(json) {
@@ -60,6 +62,7 @@ class DialogData {
           isClosed: json["is_closed"],
           isPublic: json["is_public"],
           users: json["chat_users"].map<int>((chatUser) => ChatUser.fromJson(chatUser).userId).toList(),
+          lastPage: json["last_page"],
           chatUsers: json["chat_users"]
             .map<ChatUser>((chatUser) => ChatUser.fromJson(chatUser))
             .toList()
@@ -85,6 +88,7 @@ class DialogData {
           createdAt: DateTime.tryParse(json["created_at"]),
           isClosed: json["is_closed"],
           isPublic: json["is_public"],
+          lastPage: json["last_page"],
           chatUsers: [],
           users: json["chat_users"].toString().split(',').map(int.parse).toList(),
       );
@@ -110,7 +114,7 @@ class DialogData {
 
   @override
   String toString() {
-    return "Instance of 'DialogData $dialogId: chatUsers: $chatUsers'";
+    return "Instance of 'DialogData $dialogId: lastPage: $lastPage, chatUsers: $chatUsers'";
   }
 
 }

@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:io';
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_event.dart';
-import 'package:chat/bloc/chats_builder_bloc/chats_builder_event.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_state.dart';
+import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/models/app_notification_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/user_profile_model.dart';
@@ -23,7 +23,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../bloc/calls_bloc/calls_bloc.dart';
 import '../../bloc/calls_bloc/calls_state.dart';
-import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
 import '../../bloc/error_handler_bloc/error_types.dart';
 import '../../bloc/profile_bloc/profile_bloc.dart';
 import '../../bloc/profile_bloc/profile_events.dart';
@@ -241,7 +240,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           }
           if(isJoined == true) {
             BlocProvider.of<DialogsViewCubit>(context).refreshAllDialogs();
-            BlocProvider.of<ChatsBuilderBloc>(context).add(RefreshChatsBuilderEvent());
+            //TODO: refacrot messageBloc
+            // BlocProvider.of<ChatsBuilderBloc>(context).add(RefreshChatsBuilderEvent());
           }
         }
       } catch (err) {
@@ -313,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void _sendMissCallNotification({required int? dialogId, required String caller, required String? userId}) async {
     print("SEND MISCALL MESSAGE  $dialogId   //   $caller   //   $userId");
     _isPushSent = true;
-    final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);
+    final chatsBuilderBloc = BlocProvider.of<MessageBloc>(context);
     dialogId ??= await createDialog(chatsBuilderBloc: chatsBuilderBloc, partnerId: int.parse(caller));
     _pushNotificationService.sendMissCallPush(
         userId: caller, userName: myUserName);

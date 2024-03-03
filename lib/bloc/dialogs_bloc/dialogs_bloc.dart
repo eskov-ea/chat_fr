@@ -255,8 +255,6 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     emit(state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs)));
   }
 
-
-
 }
 
 

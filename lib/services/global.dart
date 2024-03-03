@@ -23,8 +23,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
-import '../bloc/chats_builder_bloc/chats_builder_bloc.dart';
-import '../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../models/dialog_model.dart';
 import '../ui/navigation/main_navigation.dart';
 import 'package:chat/view_models/auth/auth_view_cubit.dart';
@@ -92,7 +90,8 @@ import 'messages/messages_repository.dart';
 
   void logoutHelper(BuildContext context) {
     BlocProvider.of<DialogsViewCubit>(context).deleteAllDialogs();
-    BlocProvider.of<ChatsBuilderBloc>(context).add(DeleteAllChatsEvent());
+    //TODO: refacrot messageBloc
+    // BlocProvider.of<ChatsBuilderBloc>(context).add(DeleteAllChatsEvent());
     BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLogoutEvent());
     BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(WsEventCloseConnection());
     BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersDeleteUsersEvent());

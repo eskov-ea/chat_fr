@@ -14,19 +14,13 @@ import 'package:chat/ui/widgets/pdf_viewer_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:focused_menu/focused_menu.dart';
 import 'package:focused_menu/modals.dart';
 import 'package:swipe_to/swipe_to.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
-import '../../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../../services/global.dart';
-import '../../../services/helpers/message_sender_helper.dart';
 import '../../../theme.dart';
 import '../../navigation/main_navigation.dart';
-import 'audioplayer_widget.dart';
 
 class MessageWidget extends StatefulWidget {
   const MessageWidget({

@@ -1,7 +1,6 @@
 import 'package:chat/bloc/dialogs_bloc/dialogs_list_container.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/dialog_model.dart';
-import '../../services/helpers/equality_helper.dart';
 
 class DialogsState {
   final DialogsListContainer dialogsContainer;
@@ -103,6 +102,7 @@ class DialogsState {
           picture: dialog.picture,
           isClosed: dialog.isClosed,
           isPublic: dialog.isPublic,
+          lastPage: dialog.lastPage,
           chatUsers: []
         );
         dialogs.add(d);

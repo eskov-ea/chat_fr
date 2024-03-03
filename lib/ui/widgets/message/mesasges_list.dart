@@ -1,11 +1,10 @@
 import 'dart:async';
-import 'dart:io';
-
-import 'package:chat/bloc/chats_builder_bloc/chats_builder_bloc.dart';
-import 'package:chat/bloc/chats_builder_bloc/chats_builder_event.dart';
-import 'package:chat/bloc/chats_builder_bloc/chats_builder_state.dart';
-import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
-import 'package:chat/bloc/ws_bloc/ws_state.dart';
+import 'dart:collection';
+import 'package:chat/bloc/dialogs_bloc/dialogs_bloc.dart';
+import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
+import 'package:chat/bloc/messge_bloc/message_bloc.dart';
+import 'package:chat/bloc/messge_bloc/message_event.dart';
+import 'package:chat/bloc/messge_bloc/message_state.dart';
 import 'package:chat/helpers.dart';
 import 'package:chat/models/chat_builder_model.dart';
 import 'package:chat/models/contact_model.dart';
@@ -35,6 +34,7 @@ class MessagesListStatefullWidget extends StatefulWidget {
     required this.setSelected,
     required this.openForwardMenu,
     required this.deleteMessage,
+    required this.scrollController,
   }) : super(key: key);
 
   final int userId;
@@ -49,6 +49,7 @@ class MessagesListStatefullWidget extends StatefulWidget {
   final Function(SelectedMessage) setSelected;
   final Function(List<SelectedMessage>) openForwardMenu;
   final Function(int) deleteMessage;
+  final ScrollController scrollController;
 
   @override
   State<MessagesListStatefullWidget> createState() => _MessagesListStatefullWidgetState();
@@ -57,7 +58,6 @@ class MessagesListStatefullWidget extends StatefulWidget {
 class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidget> {
 
   final messagesRepository = MessagesRepository();
-  final ScrollController _scrollController = ScrollController();
   bool _shouldAutoscroll = true;
   int pageNumber = 1;
   bool isLoadingMessages = false;
@@ -66,7 +66,7 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
 
   @override
   void dispose() {
-    _scrollController.removeListener(() { setupScrollListener; });
+    widget.scrollController.removeListener(() { setupScrollListener; });
     // _newMessagesSubscription.cancel();
     super.dispose();
   }
@@ -76,9 +76,10 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
     super.initState();
     // In development if we hot restart the app the yielded state in stream are not reachable
     // _newMessagesSubscription = BlocProvider.of<WsBloc>(context).stream.listen(_onNewMessageReceived);
-    BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: widget.dialogData.dialogId));
+    //TODO: refacrot messageBloc
+    // BlocProvider.of<ChatsBuilderBloc>(context).add(MessageBlocUpdateStatusMessagesEvent(dialogId: widget.dialogData.dialogId));
     setupScrollListener(
-        scrollController: _scrollController,
+        scrollController: widget.scrollController,
         onAtTop: () {
           print("Loaded messages:   onAtTop    $pageNumber");
           loadNextMessages();
@@ -87,12 +88,17 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
   }
 
   void loadNextMessages() {
-    if (!BlocProvider.of<ChatsBuilderBloc>(context).state.isError) {
-      BlocProvider.of<ChatsBuilderBloc>(context).add(
-          ChatsBuilderLoadMessagesEvent(
-              dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
-      pageNumber++;
-    }
+    //TODO: refacrot messageBloc
+    BlocProvider.of<MessageBloc>(context).add(MessageBlocLoadNextPortionMessagesEvent(
+      dialogId: widget.dialogData.dialogId,
+      page: widget.dialogData.lastPage! + 1
+    ));
+// if (!BlocProvider.of<ChatsBuilderBloc>(context).state.isError) {
+    //   BlocProvider.of<ChatsBuilderBloc>(context).add(
+    //       ChatsBuilderLoadMessagesEvent(
+    //           dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
+    //   pageNumber++;
+    // }
   }
 
   void resetMessagesAndReload() {
@@ -137,63 +143,49 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ChatsBuilderBloc, ChatsBuilderState>(
+    return BlocConsumer<MessageBloc, MessagesBlocState>(
+      listenWhen: (prev, current) => current is MessageBlocInitializationSuccessState,
+      listener: (context, state) {
+        state as MessageBlocInitializationSuccessState;
+        print('last dialog page::: ${widget.dialogData.lastPage}');
+        if (widget.dialogData.lastPage != state.dialogLastPage) {
+          widget.dialogData.lastPage = state.dialogLastPage;
+        }
+        print('last dialog page::: ${widget.dialogData.lastPage}');
+      },
       builder: (context, state) {
-        if (state is ChatsBuilderState) {
-          print("Finding chats:   ${state.chats}");
-          final ChatsData? currentState = findChat(state.chats, widget.dialogData.dialogId);
-          if (state.isError) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Text("Произошла ошибка при загрузке сообщений"),
-                SizedBox(height: 10, width: MediaQuery.of(context).size.width),
-                ElevatedButton(
-                  onPressed: () {
-                    BlocProvider.of<ChatsBuilderBloc>(context).add(
-                        ChatsBuilderLoadMessagesEvent(
-                            dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
-                    pageNumber++;
-                  },
-                  child: Text("Обновить"),
-                )
-              ],
-            );
-          }
-          if (currentState == null) {
-            loadNextMessages();
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircularProgressIndicator(),
-                  // Transform.translate(
-                  //   offset: isConnectionThrottling ? const Offset(0, 50) : const Offset(0, -150),
-                  //   child: const Text("Данные загружаются подозрительно долго, возможно причина в Интернет-подключении",
-                  //     textAlign: TextAlign.center,
-                  //     style: TextStyle(fontSize: 16),
-                  //   ),
-                  // ),
-                  // Transform.translate(
-                  //   offset: isConnectionThrottling ? const Offset(0, 80) : const Offset(0, -180),
-                  //   child: ElevatedButton(
-                  //     onPressed: () { loadNextMessages(); },
-                  //     child: const Text("Обновить"),
-                  //   ),
-                  // )
-                ],
-              ),
-            );
-          }
-          else if ( currentState.messages.isEmpty) {
+        if (state is MessageBlocInitializeInProgressState) {
+          return const Center(child: CircularProgressIndicator(
+            color: Colors.blueAccent,
+            strokeCap: StrokeCap.round,
+            strokeWidth: 8.0,
+          ));
+        } else if (state is MessageBlocInitializationFailedState) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Text("Произошла ошибка при загрузке сообщений"),
+              SizedBox(height: 10, width: MediaQuery.of(context).size.width),
+              ElevatedButton(
+                onPressed: () {
+                  BlocProvider.of<MessageBloc>(context).add(
+                    MessageBlocReadMessagesFromDBEvent(dialogId: widget.dialogData.dialogId, page: widget.dialogData.lastPage!)
+                  );
+                },
+                child: Text("Обновить"),
+              )
+            ],
+          );
+        } else if (state is MessageBlocInitializationSuccessState) {
+          if (state.messagesDictionary.isEmpty) {
             return const Center(child: Text('Нет сообщений'),);
           } else {
             return Column(
               children: [
                 MessagesListWidget(
-                    messages: currentState.messages,
-                    scrollController: _scrollController,
+                    messages: List.from(state.messagesDictionary.entries.map<MessageData>((el) => el.value).toList().reversed),
+                    scrollController: widget.scrollController,
                     userId: widget.userId,
                     dialogData: widget.dialogData,
                     focusNode: widget.focusNode,
@@ -211,7 +203,11 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
             );
           }
         } else {
-          return const Center(child: Text('Загрузка...'),);
+          return const Center(child: CircularProgressIndicator(
+            color: Colors.blueAccent,
+            strokeCap: StrokeCap.round,
+            strokeWidth: 8.0,
+          ));
         }
       },
     );
@@ -261,7 +257,6 @@ class MessagesListWidget extends StatelessWidget {
         name = "${user.lastname} ${user.firstname}";
       }
     });
-    print('Get sender name::  $senderId  -  $name');
     return name;
   }
 

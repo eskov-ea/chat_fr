@@ -7,17 +7,13 @@ import 'package:chat/ui/pages/sending_file_preview.dart';
 import 'package:chat/ui/pages/sending_image_preview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:image/image.dart' as IMG;
 import 'package:path_provider/path_provider.dart';
-import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
-import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../models/message_model.dart';
-import '../../services/global.dart';
 
 
 
@@ -91,8 +87,9 @@ Widget SendingObjectOptionsPage({
                 filetype: result.name.split('.').last,
                 parentMessageId: parentMessage?.parentMessageId,
                 bytes: bytes);
-        BlocProvider.of<ChatsBuilderBloc>(context)
-            .add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
+        //TODO: refacrot messageBloc
+        // BlocProvider.of<ChatsBuilderBloc>(context)
+        //     .add(MessageBlocUpdateStatusMessagesEvent(dialogId: dialogId!));
         Navigator.pop(context);
         Navigator.pop(context);
       }
@@ -171,8 +168,9 @@ Widget SendingObjectOptionsPage({
             bytes: null
           );
           MessageData.fromJson(jsonDecode(response)["data"]);
-          BlocProvider.of<ChatsBuilderBloc>(context)
-              .add(ChatsBuilderUpdateStatusMessagesEvent(dialogId: dialogId!));
+          //TODO: refacrot messageBloc
+          // BlocProvider.of<ChatsBuilderBloc>(context)
+          //       .add(MessageBlocUpdateStatusMessagesEvent(dialogId: dialogId!));
           Navigator.pop(context);
           Navigator.pop(context);
       }

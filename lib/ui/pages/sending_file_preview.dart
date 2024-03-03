@@ -1,14 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:easy_pdf_viewer/easy_pdf_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
-import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../models/message_model.dart';
 import '../../services/global.dart';
 import '../../services/helpers/message_sender_helper.dart';
-import '../../services/messages/messages_repository.dart';
 import '../navigation/main_navigation.dart';
 
 class SendingFilePreview extends StatefulWidget {
@@ -171,7 +169,7 @@ class _SendingFilePreviewState extends State<SendingFilePreview> {
                 final String filetype = widget.file.path.split('.').last;
                 widget.controller.clear();
                 sendMessageUnix(
-                    bloc: BlocProvider.of<ChatsBuilderBloc>(context),
+                    bloc: BlocProvider.of<MessageBloc>(context),
                     messageText: messageText,
                     file: widget.file,
                     dialogId: widget.dialogId!,

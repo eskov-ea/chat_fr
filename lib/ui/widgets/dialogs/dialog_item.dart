@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:chat/bloc/messge_bloc/message_bloc.dart';
+import 'package:chat/bloc/messge_bloc/message_event.dart';
 import 'package:chat/helpers.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
@@ -77,6 +79,8 @@ class DialogItem extends StatelessWidget {
     return InkWell(
       key: objKey,
       onTap: () async {
+        print('send flush event');
+        BlocProvider.of<MessageBloc>(context).add(MessageBlocFlushMessagesEvent());
         await Future.delayed(Duration(milliseconds: 100));
         clearSearch();
         openChatScreen(

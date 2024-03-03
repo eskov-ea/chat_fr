@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
+import 'package:chat/bloc/messge_bloc/message_bloc.dart';
+import 'package:chat/bloc/messge_bloc/message_event.dart';
 import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/theme.dart';
@@ -13,8 +15,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../bloc/chats_builder_bloc/chats_builder_bloc.dart';
-import '../../bloc/chats_builder_bloc/chats_builder_event.dart';
 import '../../models/contact_model.dart';
 import '../../models/message_model.dart';
 import '../../services/global.dart';
@@ -88,11 +88,21 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   RepliedMessage? replyedParentMsg;
   bool isSelectedMode = false;
   List<SelectedMessage> selected = [];
+  final ScrollController scrollController = ScrollController();
+
+  int currentPage = 1;
 
 
   @override
   void initState() {
 
+    if (widget.dialogData != null) {
+      if(widget.dialogData?.lastPage == null) {
+        BlocProvider.of<MessageBloc>(context).add(MessageBlocLoadMessagesEvent(dialogId: widget.dialogData!.dialogId, page: 1));
+      } else {
+        BlocProvider.of<MessageBloc>(context).add(MessageBlocReadMessagesFromDBEvent(dialogId: widget.dialogData!.dialogId, page: widget.dialogData!.lastPage!));
+      }
+    }
     setState(() {
       isOnline = BlocProvider.of<UsersViewCubit>(context).state.onlineUsersDictionary[widget.partnerId] != null;
     });
@@ -209,9 +219,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       }
       final bool response = await MessagesProvider().deleteMessage(messageId: ids);
       if (response) {
-        BlocProvider.of<ChatsBuilderBloc>(context).add(
-            ChatsBuilderDeleteMessagesEvent(
-                messagesId: ids, dialogId: widget.dialogData!.dialogId));
+        //TODO: refacrot messageBloc
+        // BlocProvider.of<MessageBloc>(context).add(
+        //     ChatsBuilderDeleteMessagesEvent(
+        //         messagesId: ids, dialogId: widget.dialogData!.dialogId));
       } else {
         customToastMessage(context: context, message: 'Не получилось удалить сообщения. Попробуйте еще раз');
       }
@@ -227,9 +238,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     try {
       final bool response = await MessagesProvider().deleteMessage(messageId: [id]);
       if (response) {
-        BlocProvider.of<ChatsBuilderBloc>(context).add(
-            ChatsBuilderDeleteMessagesEvent(
-                messagesId: [id], dialogId: widget.dialogData!.dialogId));
+        //TODO: refacrot messageBloc
+        // BlocProvider.of<MessageBloc>(context).add(
+        //     ChatsBuilderDeleteMessagesEvent(
+        //         messagesId: [id], dialogId: widget.dialogData!.dialogId));
       } else {
         customToastMessage(context: context, message: 'Не получилось удалить сообщения. Попробуйте еще раз');
       }
@@ -335,7 +347,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                                 selected: selected,
                                 setSelected: setSelected,
                                 openForwardMenu: openForwardMenu,
-                                deleteMessage: deleteMessage
+                                deleteMessage: deleteMessage,
+                                scrollController: scrollController
                             )
                                 : const Center(child: Text('Нет сообщений'),)
                         ),

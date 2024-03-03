@@ -1,7 +1,4 @@
-import 'dart:io';
-
-import 'package:chat/bloc/chats_builder_bloc/chats_builder_bloc.dart';
-import 'package:chat/models/message_model.dart';
+import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/message_forwarding_util.dart';
 import 'package:chat/services/helpers/message_sender_helper.dart';
@@ -105,7 +102,7 @@ class _ForwardMessageAlertDialogState extends State<ForwardMessageAlertDialog>{
         }
 
         sendForwardMessage(
-            bloc: BlocProvider.of<ChatsBuilderBloc>(context),
+            bloc: BlocProvider.of<MessageBloc>(context),
             messageText: forwardMessage(message.message, message.author),
             attachment: message.file,
             dialogId: dialogId,

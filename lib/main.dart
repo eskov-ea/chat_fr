@@ -6,10 +6,9 @@ import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_state.dart';
 import 'package:chat/bloc/database_bloc/database_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
+import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
-import 'package:chat/services/dialogs/dialogs_api_provider.dart';
 import 'package:chat/services/dialogs/dialogs_repository.dart';
-import 'package:chat/services/messages/messages_api_provider.dart';
 import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/services/users/users_repository.dart';
 import 'package:chat/storage/data_storage.dart';
@@ -29,8 +28,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'bloc/calls_bloc/calls_bloc.dart';
-import 'bloc/chats_builder_bloc/chats_builder_bloc.dart';
-import 'bloc/chats_builder_bloc/chats_builder_event.dart';
 import 'bloc/dialogs_bloc/dialogs_bloc.dart';
 import 'bloc/dialogs_bloc/dialogs_state.dart';
 import 'bloc/profile_bloc/profile_bloc.dart';
@@ -118,10 +115,11 @@ class MyApp extends StatelessWidget{
         ),
         BlocProvider(
             lazy: false,
-            create: (context) => ChatsBuilderBloc(
+            create: (context) => MessageBloc(
               errorHandlerBloc: errorHandlerBloc,
               messagesRepository: MessagesRepository(),
-              dataProvider: DataProvider.storage
+              dataProvider: DataProvider.storage,
+              databaseBloc: databaseBloc
             )
         ),
         BlocProvider(

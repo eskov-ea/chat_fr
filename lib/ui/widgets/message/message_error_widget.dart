@@ -1,5 +1,4 @@
-import 'package:chat/bloc/chats_builder_bloc/chats_builder_bloc.dart';
-import 'package:chat/bloc/chats_builder_bloc/chats_builder_event.dart';
+import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/services/helpers/message_sender_helper.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +30,8 @@ class MessageErrorWidget extends StatelessWidget {
   Widget build(BuildContext context) {
 
     void deleteErroredMessage() {
-      BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderDeleteLocalMessageEvent(dialogId: dialogId, messageId: messageId));
+      //TODO: refacrot messageBloc
+      // BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderDeleteLocalMessageEvent(dialogId: dialogId, messageId: messageId));
     }
 
     Widget mIcon = isErrorHandling
@@ -68,7 +68,7 @@ class MessageErrorWidget extends StatelessWidget {
                         onTap: (){
                           Navigator.of(context).pop();
                           resendErrorMessage(
-                              messageId: messageId, dialogId: dialogId, bloc: BlocProvider.of<ChatsBuilderBloc>(context), userId: userId,
+                              messageId: messageId, dialogId: dialogId, bloc: BlocProvider.of<MessageBloc>(context), userId: userId,
                               messageText: message, parentMessage: parentMessage, repliedMessageId: repliedMsgId,
                               file: file );
                         },

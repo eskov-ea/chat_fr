@@ -1,6 +1,7 @@
 import 'package:chat/models/call_model.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
+import 'package:chat/models/message_model.dart';
 
 
 abstract class DatabaseBlocState {}
@@ -18,3 +19,9 @@ class DatabaseBlocDBFailedInitializeState extends DatabaseBlocState {}
 class DatabaseBlocLoadingUsersState extends DatabaseBlocState {}
 class DatabaseBlocLoadingDialogsState extends DatabaseBlocState {}
 class DatabaseBlocLoadingCallsState extends DatabaseBlocState {}
+
+class DatabaseBlocNewMessageState extends DatabaseBlocState {
+  final MessageData message;
+
+  DatabaseBlocNewMessageState({required this.message});
+}

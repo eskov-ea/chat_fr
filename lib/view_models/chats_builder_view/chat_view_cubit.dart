@@ -1,13 +1,12 @@
 import 'dart:async';
-import 'package:chat/bloc/chats_builder_bloc/chats_builder_bloc.dart';
-import 'package:chat/bloc/chats_builder_bloc/chats_builder_event.dart';
-import 'package:chat/bloc/chats_builder_bloc/chats_builder_state.dart';
+import 'package:chat/bloc/messge_bloc/message_bloc.dart';
+import 'package:chat/bloc/messge_bloc/message_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'chat_view_cubit_state.dart';
 
 class ChatBuilderScreenViewCubit extends Cubit<ChatScreenViewCubitState> {
-  final ChatsBuilderBloc chatsBuilderBloc;
-  late final StreamSubscription<ChatsBuilderState> messagesBlocSubscription;
+  final MessageBloc chatsBuilderBloc;
+  late final StreamSubscription<MessagesBlocState> messagesBlocSubscription;
 
   ChatBuilderScreenViewCubit({
     required ChatScreenViewCubitState initialState,
@@ -17,16 +16,16 @@ class ChatBuilderScreenViewCubit extends Cubit<ChatScreenViewCubitState> {
       messagesBlocSubscription = chatsBuilderBloc.stream.listen(_onState);
   }
 
-  void _onState(ChatsBuilderState state) {
+  void _onState(MessagesBlocState state) {
     // if (state is ChatsBuilderInProgressState) {
     //   emit(ChatScreenViewCubitInProgressState());
     //   return;
     // }
-    emit(ChatScreenViewCubitSuccessState(chats: state.chats));
+    // emit(ChatScreenViewCubitSuccessState(chats: state.chats));
   }
 
   void refreshAllChats() {
-    chatsBuilderBloc.add(RefreshChatsBuilderEvent());
+    // chatsBuilderBloc.add(RefreshChatsBuilderEvent());
   }
 
   void deleteMessagesCubitEvent(List<int> messagesId) {
