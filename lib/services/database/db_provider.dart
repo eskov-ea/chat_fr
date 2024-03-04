@@ -49,6 +49,7 @@ class DBProvider {
               [1, 0]
           );
         });
+        configAppValues(db);
       }, onOpen: (db) async {
         final List<Object> rawTables =
             await db.rawQuery('SELECT * FROM sqlite_master');
@@ -76,12 +77,14 @@ class DBProvider {
   Future<void> saveDialogs(List<DialogData> dialogs) async => await DialogDBLayer().saveDialog(dialogs);
   Future<List<DialogData>> getDialogs() async => await DialogDBLayer().getDialogs();
   Future<int> updateDialogLastPage(int dialogId, int page) async => DialogDBLayer().updateDialogLastPage(dialogId, page);
+  Future<int?> getLastDialogPage(int dialogId) async => DialogDBLayer().getLastDialogPage(dialogId);
+  Future<MessageData?> getMessageById(int messageId) async => MessageDBLayer().getMessageById(messageId);
 
 
   ///   MESSAGES LAYER
   Future<List<Object?>> saveMessages(List<MessageData> messages) async => MessageDBLayer().saveMessages(messages);
   Future<Map<int, MessageData>> getMessages() async => MessageDBLayer().getMessages();
-  Future<Map<int, MessageData>> getMessagesByDialog(int dialogId) async => MessageDBLayer().getMessagesByDialog(dialogId);
+  Future<List<MessageData>> getMessagesByDialog(int dialogId) async => MessageDBLayer().getMessagesByDialog(dialogId);
   Future<String> getMessageInfo() async => MessageDBLayer().getMessageInfo();
   Future<int> saveLocalMessage(MessageData message) async => MessageDBLayer().saveLocalMessage(message);
   Future<int> updateMessageWithSendFailed(int messageId, int sendFailed) => MessageDBLayer().updateMessageWithSendFailed(messageId, sendFailed);
@@ -89,7 +92,7 @@ class DBProvider {
 
 
   ///   MESSAGE STATUS LAYER
-  Future<List<Object?>> saveMessageStatuses(List<MessageStatus> messages) async => MessageStatusDBLayer().saveMessageStatuses(messages);
+  Future<List<Object?>> saveMessageStatuses(List<MessageStatus> statuses) async => MessageStatusDBLayer().saveMessageStatuses(statuses);
   Future<List<MessageStatus>> getMessageStatuses() async => MessageStatusDBLayer().getMessageStatuses();
   Future<int?> saveLocalMessageStatus(MessageStatus? status) async => MessageStatusDBLayer().saveLocalMessageStatus(status);
   Future<int> checkIfMessageExistWithThisId(int id) async => MessageDBLayer().checkIfMessageExistWithThisId(id);
@@ -97,6 +100,8 @@ class DBProvider {
 
       ///   MESSAGE ATTACHMENTS LAYER
   Future saveAttachments(List<MessageAttachmentData> files) async => AttachmentDBLayer().saveAttachment(files);
+  Future<List<MessageAttachmentData>> getAttachments() async => AttachmentDBLayer().getAttachments();
+  Future<MessageAttachmentData> getAttachmentById(int id) async => AttachmentDBLayer().getAttachmentById(id);
 
 
   ///   USERS LAYER
@@ -150,6 +155,18 @@ class DBProvider {
     });
     print('settings updated');
     return 1;
+  }
+
+  Future<int> configAppValues(Database db) async {
+    return await db.transaction((txn) async {
+      return await txn.rawInsert(
+          'INSERT OR IGNORE INTO user(id, firstname, lastname, middlename, company, dept, position, '
+              'phone, email, birthdate, avatar, banned, last_access) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ',
+          [5, '', 'MCFEF Чат-бот', '', '',
+            '', '', '', '', '',
+            null, 0, null]
+      );
+    });
   }
 
 

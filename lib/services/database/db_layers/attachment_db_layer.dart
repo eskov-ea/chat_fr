@@ -21,4 +21,34 @@ class AttachmentDBLayer {
       rethrow;
     }
   }
+
+  Future<List<MessageAttachmentData>> getAttachments() async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        List<Object> res = await txn.rawQuery(
+            'SELECT * FROM attachments; '
+        );
+        return res.map((json) => MessageAttachmentData.fromJson(json)).toList();
+      });
+    } catch (err, stackTrace) {
+      log('DB operation error batch: \r\n  $err \r\n  $stackTrace');
+      rethrow;
+    }
+  }
+
+  Future<MessageAttachmentData> getAttachmentById(int id) async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        List<Object> res = await txn.rawQuery(
+            'SELECT * FROM attachments ; '
+        );
+        return MessageAttachmentData.fromJson(res.first);
+      });
+    } catch (err, stackTrace) {
+      log('DB operation error batch: \r\n  $err \r\n  $stackTrace');
+      rethrow;
+    }
+  }
 }

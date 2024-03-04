@@ -65,7 +65,7 @@ class MessageDBLayer {
     }
   }
 
-  Future<Map<int, MessageData>> getMessagesByDialog(int dialogId) async {
+  Future<List<MessageData>> getMessagesByDialog(int dialogId) async {
     try {
       final db = await DBProvider.db.database;
       return await db.transaction((txn) async {
@@ -79,24 +79,61 @@ class MessageDBLayer {
                 ''
                 'LEFT JOIN message_status s ON (m.id = s.chat_message_id) '
                 'LEFT JOIN attachments f ON (m.id = f.chat_message_id) '
-                'WHERE m.chat_id = "$dialogId"; '
+                'WHERE m.chat_id = "$dialogId" '
+                'ORDER BY m.id DESC; '
         );
-        Map<int, MessageData> messages = {};
+        final messages = <MessageData>[];
         for (var messageObj  in res) {
           messageObj as Map;
-          final id = messageObj["message_id"];
-          if (messages.containsKey(id)) {
+          if (messages.isNotEmpty && messages.last.messageId == messageObj["message_id"]) {
             final status = MessageStatus.fromDBJson(messageObj);
-            if (status != null) messages[id]!.statuses.add(status);
+            if (status != null) messages.last.statuses.add(status);
           } else {
             final message = MessageData.fromDBJson(messageObj);
             final status = MessageStatus.fromDBJson(messageObj);
             if (status != null) message.statuses.add(status);
-            messages.addAll({message.messageId: message});
+            messages.add(message);
           }
         }
-        log('statusese db::: ${messages[6035]}');
         return messages;
+      });
+    } catch (err, stackTrace) {
+      log('DB operation error:  $stackTrace');
+      rethrow;
+    }
+  }
+
+  Future<MessageData?> getMessageById(int messageId) async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        List<Object> res = await txn.rawQuery(
+            'SELECT m.id message_id, m.chat_id, m.user_id, m.message, m.created_at message_created_at, m.updated_at, '
+                'm.replied_message_id, m.replied_message_author, m.replied_message_text, '
+                's.id message_status_id, s.user_id message_status_user_id, '
+                's.chat_message_id, s.chat_message_status_id, s.created_at message_status_created_at, s.updated_at message_status_updated_at, '
+                'f.id file_id, f.name file_name, f.preview file_preview, f.path file_path, f.ext file_ext, f.created_at file_created_at '
+                'FROM message m '
+                ''
+                'LEFT JOIN message_status s ON (m.id = s.chat_message_id) '
+                'LEFT JOIN attachments f ON (m.id = f.chat_message_id) '
+                'WHERE m.id = "$messageId" '
+                'ORDER BY m.id DESC; '
+        );
+        print('jkhjk:::::  $res');
+        MessageData? message;
+        for (var messageObj  in res) {
+          messageObj as Map;
+          if (message != null) {
+            final status = MessageStatus.fromDBJson(messageObj);
+            if (status != null) message.statuses.add(status);
+          } else {
+            message = MessageData.fromDBJson(messageObj);
+            final status = MessageStatus.fromDBJson(messageObj);
+            if (status != null) message.statuses.add(status);
+          }
+        }
+        return message;
       });
     } catch (err, stackTrace) {
       log('DB operation error:  $stackTrace');

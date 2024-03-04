@@ -280,6 +280,48 @@ class _DBScreenState extends State<DBScreen> {
                         padding: const EdgeInsets.all(5),
                         color: Colors.green.shade400,
                         child: const Center(
+                            child: Text('Message w file',
+                              style: TextStyle(color: Colors.white),
+                            )
+                        )
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  GestureDetector(
+                    onTap: () async {
+                      final db = DBProvider.db;
+                      final res = await db.getAttachmentById(415);
+                      print('jkhjk:::::  $res');
+                    },
+                    child: Container(
+                        width: MediaQuery.of(context).size.width * 0.45,
+                        height: 70,
+                        padding: const EdgeInsets.all(5),
+                        color: Colors.blueAccent.shade200,
+                        child: const Center(
+                            child: Text('Message file',
+                              style: TextStyle(color: Colors.white),
+                            )
+                        )
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      final db = DBProvider.db;
+                      final res = await db.getMessageById(4993);
+                      print('jkhjk:::::  $res');
+                    },
+                    child: Container(
+                        width: MediaQuery.of(context).size.width * 0.45,
+                        height: 70,
+                        padding: const EdgeInsets.all(5),
+                        color: Colors.redAccent.shade100,
+                        child: const Center(
                             child: Text('Read messages',
                               style: TextStyle(color: Colors.white),
                             )

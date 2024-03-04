@@ -59,7 +59,6 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
 
   final messagesRepository = MessagesRepository();
   bool _shouldAutoscroll = true;
-  int pageNumber = 1;
   bool isLoadingMessages = false;
   bool isConnectionThrottling = false;
   late final StreamSubscription _newMessagesSubscription;
@@ -74,14 +73,10 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
   @override
   void initState() {
     super.initState();
-    // In development if we hot restart the app the yielded state in stream are not reachable
-    // _newMessagesSubscription = BlocProvider.of<WsBloc>(context).stream.listen(_onNewMessageReceived);
     //TODO: refacrot messageBloc
-    // BlocProvider.of<ChatsBuilderBloc>(context).add(MessageBlocUpdateStatusMessagesEvent(dialogId: widget.dialogData.dialogId));
     setupScrollListener(
         scrollController: widget.scrollController,
         onAtTop: () {
-          print("Loaded messages:   onAtTop    $pageNumber");
           loadNextMessages();
         }
     );
@@ -90,20 +85,12 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
   void loadNextMessages() {
     //TODO: refacrot messageBloc
     BlocProvider.of<MessageBloc>(context).add(MessageBlocLoadNextPortionMessagesEvent(
-      dialogId: widget.dialogData.dialogId,
-      page: widget.dialogData.lastPage! + 1
+      dialogId: widget.dialogData.dialogId
     ));
-// if (!BlocProvider.of<ChatsBuilderBloc>(context).state.isError) {
-    //   BlocProvider.of<ChatsBuilderBloc>(context).add(
-    //       ChatsBuilderLoadMessagesEvent(
-    //           dialogId: widget.dialogData.dialogId, pageNumber: pageNumber));
-    //   pageNumber++;
-    // }
   }
 
   void resetMessagesAndReload() {
     setState(() {
-      pageNumber = 1;
       isLoadingMessages = true;
     });
 
@@ -143,16 +130,7 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<MessageBloc, MessagesBlocState>(
-      listenWhen: (prev, current) => current is MessageBlocInitializationSuccessState,
-      listener: (context, state) {
-        state as MessageBlocInitializationSuccessState;
-        print('last dialog page::: ${widget.dialogData.lastPage}');
-        if (widget.dialogData.lastPage != state.dialogLastPage) {
-          widget.dialogData.lastPage = state.dialogLastPage;
-        }
-        print('last dialog page::: ${widget.dialogData.lastPage}');
-      },
+    return BlocBuilder<MessageBloc, MessagesBlocState>(
       builder: (context, state) {
         if (state is MessageBlocInitializeInProgressState) {
           return const Center(child: CircularProgressIndicator(
@@ -178,13 +156,13 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
             ],
           );
         } else if (state is MessageBlocInitializationSuccessState) {
-          if (state.messagesDictionary.isEmpty) {
+          if (state.messages.isEmpty) {
             return const Center(child: Text('Нет сообщений'),);
           } else {
             return Column(
               children: [
                 MessagesListWidget(
-                    messages: List.from(state.messagesDictionary.entries.map<MessageData>((el) => el.value).toList().reversed),
+                    messages: state.messages,
                     scrollController: widget.scrollController,
                     userId: widget.userId,
                     dialogData: widget.dialogData,

@@ -97,11 +97,13 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   void initState() {
 
     if (widget.dialogData != null) {
-      if(widget.dialogData?.lastPage == null) {
-        BlocProvider.of<MessageBloc>(context).add(MessageBlocLoadMessagesEvent(dialogId: widget.dialogData!.dialogId, page: 1));
-      } else {
-        BlocProvider.of<MessageBloc>(context).add(MessageBlocReadMessagesFromDBEvent(dialogId: widget.dialogData!.dialogId, page: widget.dialogData!.lastPage!));
-      }
+      BlocProvider.of<MessageBloc>(context).add(MessageBlocLoadMessagesEvent(dialogId: widget.dialogData!.dialogId));
+
+      // if(widget.dialogData?.lastPage == null) {
+      //   BlocProvider.of<MessageBloc>(context).add(MessageBlocLoadMessagesEvent(dialogId: widget.dialogData!.dialogId));
+      // } else {
+      //   BlocProvider.of<MessageBloc>(context).add(MessageBlocReadMessagesFromDBEvent(dialogId: widget.dialogData!.dialogId, page: widget.dialogData!.lastPage!));
+      // }
     }
     setState(() {
       isOnline = BlocProvider.of<UsersViewCubit>(context).state.onlineUsersDictionary[widget.partnerId] != null;

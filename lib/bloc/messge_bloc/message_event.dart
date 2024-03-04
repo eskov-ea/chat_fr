@@ -19,9 +19,8 @@ class MessageBlocReadMessagesFromDBEvent extends MessageBlocEvent {
 
 class MessageBlocLoadMessagesEvent extends MessageBlocEvent {
   final int dialogId;
-  final int page;
 
-  MessageBlocLoadMessagesEvent({required this.dialogId, required this.page});
+  MessageBlocLoadMessagesEvent({required this.dialogId});
 
   @override
   List<Object?> get props => [dialogId];
@@ -29,12 +28,11 @@ class MessageBlocLoadMessagesEvent extends MessageBlocEvent {
 
 class MessageBlocLoadNextPortionMessagesEvent extends MessageBlocEvent {
   final int dialogId;
-  final int page;
 
-  MessageBlocLoadNextPortionMessagesEvent({required this.dialogId, required this.page});
+  MessageBlocLoadNextPortionMessagesEvent({required this.dialogId});
 
   @override
-  List<Object?> get props => [dialogId, page];
+  List<Object?> get props => [dialogId];
 }
 
 class MessageBlocReceivedMessageEvent extends MessageBlocEvent {

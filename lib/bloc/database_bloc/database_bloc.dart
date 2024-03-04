@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
@@ -5,6 +6,8 @@ import 'package:chat/bloc/database_bloc/database_events.dart';
 import 'package:chat/bloc/database_bloc/database_state.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
+import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
+import 'package:chat/bloc/ws_bloc/ws_state.dart';
 import 'package:chat/models/call_model.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
@@ -23,19 +26,43 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
   final ErrorHandlerBloc errorHandlerBloc;
+  final WsBloc websocketBloc;
   final DBProvider db = DBProvider.db;
   final _storage = DataProvider.storage;
+  late final StreamSubscription websocketEventSubscription;
 
   DatabaseBloc({
+    required this.websocketBloc,
     required this.errorHandlerBloc
   }): super( DatabaseBlocDBNotInitializedState()){
+    websocketEventSubscription = websocketBloc.stream.listen(_onWebsocketEvent);
     on<DatabaseBlocEvent>((event, emit) async {
       if (event is DatabaseBlocInitializeEvent) {
         await onDatabaseBlocInitializeEvent(event, emit);
       } else if (event is DatabaseBlocSendMessageEvent) {
         await onDatabaseBlocSendMessageEvent(event, emit);
+      } else if (event is DatabaseBlocNewMessageReceivedEvent) {
+        await onDatabaseBlocNewMessageReceivedEvent(event, emit);
+      } else if (event is DatabaseBlocNewDialogReceivedEvent) {
+        await onDatabaseBlocNewDialogReceivedEvent(event, emit);
+      } else if (event is DatabaseBlocNewMessageStatusEvent) {
+        onDatabaseBlocNewMessageStatusEvent(event, emit);
       }
     }, transformer: concurrent());
+  }
+
+  void _onWebsocketEvent(WsBlocState event) async {
+    if (event is WsStateReceiveNewMessage) {
+      add(DatabaseBlocNewMessageReceivedEvent(message: event.message));
+    } else if (event is WsStateUpdateStatus) {
+      await db.saveMessageStatuses(event.statuses);
+    } else if (event is WsStateNewDialogCreated) {
+      if (state is DatabaseBlocDBInitializedState) {
+        add(DatabaseBlocNewDialogReceivedEvent(dialog: event.dialog));
+      }
+    } else if (event is WsStateUpdateStatus) {
+      add(DatabaseBlocNewMessageStatusEvent(statuses: event.statuses));
+    }
   }
 
   Future<void> onDatabaseBlocInitializeEvent(event, emit) async {
@@ -139,7 +166,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     }
   }
 
-  onDatabaseBlocSendMessageEvent(DatabaseBlocSendMessageEvent event, emit) async {
+  Future<void> onDatabaseBlocSendMessageEvent(DatabaseBlocSendMessageEvent event, emit) async {
     print("DBBloc send:: start");
     try {
       final userId = await DataProvider.storage.getUserId();
@@ -161,7 +188,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
           content: event.content,
           parentMessage: event.parentMessage
       );
-      emit(DatabaseBlocNewMessageState(message: message));
+      emit(DatabaseBlocNewMessageReceivedState(message: message));
 
       await db.saveLocalMessage(message);
       await db.saveLocalMessageStatus(message.statuses.isEmpty ? null : message.statuses.first);
@@ -181,5 +208,34 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     }
   }
 
+  Future<void> onDatabaseBlocNewMessageReceivedEvent(
+      DatabaseBlocNewMessageReceivedEvent event,
+      emit
+  ) async {
+    await db.saveMessageStatuses(event.message.statuses);
+    if (event.message.file != null) await db.saveAttachments([event.message.file!]);
+    await db.saveMessages([event.message]);
 
+    emit(DatabaseBlocNewMessageReceivedState(message: event.message));
+  }
+
+  Future<void> onDatabaseBlocNewDialogReceivedEvent(
+      DatabaseBlocNewDialogReceivedEvent event,
+      emit
+  ) async {
+    await db.saveDialogs([event.dialog]);
+    if (event.dialog.lastMessage != null) await db.saveMessages([event.dialog.lastMessage!]);
+    if (event.dialog.lastMessage?.statuses != null) await db.saveMessageStatuses(event.dialog.lastMessage!.statuses);
+    if (event.dialog.lastMessage?.file != null) await db.saveAttachments([event.dialog.lastMessage!.file!]);
+
+    emit(DatabaseBlocNewDialogReceivedState(dialog: event.dialog));
+  }
+
+  Future<void> onDatabaseBlocNewMessageStatusEvent(
+      DatabaseBlocNewMessageStatusEvent event,
+      emit
+  ) async {
+    await db.saveMessageStatuses(event.statuses);
+    emit(DatabaseBlocUpdateMessageStatusesState(statuses: event.statuses));
+  }
 }

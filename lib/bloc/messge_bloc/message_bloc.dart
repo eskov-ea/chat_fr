@@ -34,25 +34,25 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
     required this.dataProvider,
     required this.errorHandlerBloc,
     required this.messagesRepository}) : super(MessageBlocInitialState()){
-    newMessageSubscription = databaseBloc.stream.listen((state) {
-      print("streamState   ${state}");
-      if (state is DatabaseBlocNewMessageState){
-        add(MessageBlocReceivedMessageEvent(message: state.message));
+    newMessageSubscription = databaseBloc.stream.listen((event) {
+      print("newMessageSubscription::::   ${event}");
+      if (event is DatabaseBlocNewMessageReceivedState){
+        add(MessageBlocReceivedMessageEvent(message: event.message));
       }
     });
 
     on<MessageBlocEvent>((event, emit) async {
       print("ChatsBuilderEvent   $event");
-      if (event is MessageBlocReadMessagesFromDBEvent) {
-        await onMessageBlocReadMessagesFromDBEvent(event, emit);
-      } else if (event is MessageBlocReceivedMessageEvent) {
+      if (event is MessageBlocReceivedMessageEvent) {
         onMessageBlocReceivedMessageEvent(event, emit);
       } else if (event is MessageBlocLoadMessagesEvent) {
         await onMessageBlocLoadMessagesEvent(event, emit);
       } else if (event is MessageBlocFlushMessagesEvent) {
         onMessageBlocFlushMessagesEvent(event, emit);
       } else if (event is MessageBlocLoadNextPortionMessagesEvent) {
-        onMessageBlocLoadNextPortionMessagesEvent(event, emit);
+        await onMessageBlocLoadNextPortionMessagesEvent(event, emit);
+      } else if (event is MessageBlocReceivedMessageEvent) {
+        onMessageBlocReceivedMessageEvent(event, emit);
       }
 
 
@@ -80,68 +80,57 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
     }, transformer: sequential());
   }
 
-  Future onMessageBlocReadMessagesFromDBEvent(
-      MessageBlocReadMessagesFromDBEvent event,
-      emit
-  ) async {
-    print('got messages:::  db');
-    final messages = await db.getMessagesByDialog(event.dialogId);
-    emit(MessageBlocInitializationSuccessState(
-        dialogId: event.dialogId, messagesDictionary: messages, dialogLastPage: event.page));
-  }
-
   Future onMessageBlocLoadMessagesEvent(
       MessageBlocLoadMessagesEvent event,
       emit
       ) async {
-    print('got messages::: network');
-    final userId = await dataProvider.getUserId();
-    final messages = await MessagesRepository().getMessages(userId, event.dialogId, event.page);
-    await db.saveMessages(messages);
-    await db.updateDialogLastPage(event.dialogId, event.page);
+    final lastDialogPage = await db.getLastDialogPage(event.dialogId);
 
-    final messagesDictionary = <int, MessageData>{};
+    if(lastDialogPage != null) {
+      print('got messages:::  db');
+      final messages = await db.getMessagesByDialog(event.dialogId);
+      emit(MessageBlocInitializationSuccessState(
+          dialogId: event.dialogId, messages: messages));
+    } else {
+      print('got messages::: network');
+      final userId = await dataProvider.getUserId();
+      final messages = await MessagesRepository().getMessages(userId, event.dialogId, 1);
+      final statuses = <MessageStatus>[];
+      final files = <MessageAttachmentData>[];
 
-    messages.forEach((el) {
-      messagesDictionary.addAll({el.messageId: el});
-    });
+      for(var message in messages) {
+        statuses.addAll(message.statuses);
+        if (message.file != null) files.add(message.file!);
+      }
 
-    emit(MessageBlocInitializationSuccessState(
-        dialogId: event.dialogId, messagesDictionary: messagesDictionary, dialogLastPage: event.page));
+      await db.saveMessageStatuses(statuses);
+      await db.saveAttachments(files);
+      await db.saveMessages(messages);
+      await db.updateDialogLastPage(event.dialogId, 1);
+
+      emit(MessageBlocInitializationSuccessState(
+          dialogId: event.dialogId, messages: messages));
+    }
   }
 
   Future onMessageBlocLoadNextPortionMessagesEvent(
       MessageBlocLoadNextPortionMessagesEvent event,
       emit
       ) async {
-    print('got messages::: network');
     final userId = await dataProvider.getUserId();
-    final messages = await MessagesRepository().getMessages(userId, event.dialogId, event.page);
-    await db.saveMessages(messages);
-    if (messages.isNotEmpty) {
-      await db.updateDialogLastPage(event.dialogId, event.page);
-      final messagesDictionary = (state as MessageBlocInitializationSuccessState).messagesDictionary;
+    final lastDialogPage = await db.getLastDialogPage(event.dialogId);
+    final currentDialogPage = lastDialogPage! + 1;
+    final newMessages = await MessagesRepository().getMessages(userId, event.dialogId, currentDialogPage);
+    if (newMessages.isNotEmpty) {
+      await db.saveMessages(newMessages);
+      await db.updateDialogLastPage(event.dialogId, currentDialogPage );
+      final messages = (state as MessageBlocInitializationSuccessState).messages;
 
-      messages.forEach((el) {
-        messagesDictionary.addAll({el.messageId: el});
-      });
+      messages.addAll(newMessages);
 
       emit(MessageBlocInitializationSuccessState(
-          dialogId: event.dialogId, messagesDictionary: messagesDictionary, dialogLastPage: event.page)
+          dialogId: event.dialogId, messages: messages)
       );
-    }
-
-
-  }
-
-  void onMessageBlocReceivedMessageEvent(
-      MessageBlocReceivedMessageEvent event,
-      emit
-      ) {
-    if (state is MessageBlocInitializationSuccessState) {
-      final s = state as MessageBlocInitializationSuccessState;
-      if (s.dialogId != event.message.dialogId) return;
-      s.messagesDictionary.addAll({event.message.messageId: event.message});
     }
   }
 
@@ -150,6 +139,19 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
       emit
       ) {
     emit(MessageBlocInitialState());
+  }
+
+  void onMessageBlocReceivedMessageEvent(
+      MessageBlocReceivedMessageEvent event,
+      emit
+  ) {
+    print('onMessageBlocReceivedMessageEvent');dlkjdflkj
+    if (state is MessageBlocInitializationSuccessState) {
+      final messages = (state as MessageBlocInitializationSuccessState).messages;
+      final dialogId = (state as MessageBlocInitializationSuccessState).dialogId;
+      messages.add(event.message);
+      emit(MessageBlocInitializationSuccessState(dialogId: dialogId, messages: messages));
+    }
   }
 
   // Future<void> onChatsBuilderLoadMessagesEvent (

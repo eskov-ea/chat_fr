@@ -323,6 +323,7 @@ class _MessageTile extends StatelessWidget {
                                 style: TextStyle(color: Colors.black54),
                               ),
                               onPressed: () {
+                                print('MESSAGE INFO::  id: ${messageId}, file: ${file}');
                                 _copyMessageToClipboard(context);
                               },
                               trailingIcon: const Icon(Icons.copy)),

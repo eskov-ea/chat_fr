@@ -30,11 +30,13 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     required this.errorHandlerBloc,
     required this.dialogRepository
   }) : super(initialState) {
-    databaseDialogEventSubscription = databaseBloc.stream.listen((streamState) {
-        print("Database state change   ${streamState}");
-        if (streamState is DatabaseBlocDBInitializedState) {
-          print('initialized:: ${streamState.dialogs}');
-          add(DialogsLoadedEvent(dialogs: streamState.dialogs));
+    databaseDialogEventSubscription = databaseBloc.stream.listen((event) {
+        print("Database state change   ${event}");
+        if (event is DatabaseBlocDBInitializedState) {
+          print('initialized:: ${event.dialogs}');
+          add(DialogsLoadedEvent(dialogs: event.dialogs));
+        } else if (event is DatabaseBlocNewDialogReceivedState) {
+          add(ReceiveNewDialogEvent(dialog: event.dialog));
         }
         // if (streamState is WsStateReceiveNewMessage){
         //   final copyState = state.from();

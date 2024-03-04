@@ -97,10 +97,18 @@ class MyApp extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     final errorHandlerBloc =  ErrorHandlerBloc();
+    final websocketBloc = WsBloc(
+        initialState: Unconnected(),
+        dialogsRepository: DialogRepository(),
+        secureStorage: DataProvider.storage
+    );
     final authBloc = AuthBloc(authRepo: AuthRepository());
     final databaseBloc = DatabaseBloc(
-        errorHandlerBloc: errorHandlerBloc
+      websocketBloc: websocketBloc,
+      errorHandlerBloc: errorHandlerBloc
     );
+    //TODO: refactor bloc=to-bloc dependency with representation layer
+    /// https://stackoverflow.com/questions/59137180/flutter-listen-bloc-state-from-other-bloc/72496719#72496719
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -145,11 +153,7 @@ class MyApp extends StatelessWidget{
         ),
         BlocProvider(
           create: (_) => WebsocketViewCubit(
-              wsBloc: WsBloc(
-                  initialState: Unconnected(),
-                  dialogsRepository: DialogRepository(),
-                  secureStorage: DataProvider.storage
-              ),
+              wsBloc: websocketBloc,
               initialState: WebsocketViewCubitState.unknown
           ),
         ),

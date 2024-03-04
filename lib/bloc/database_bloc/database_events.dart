@@ -1,3 +1,4 @@
+import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:flutter/foundation.dart';
 
@@ -23,4 +24,21 @@ class DatabaseBlocSendMessageEvent extends DatabaseBlocEvent {
     required this.content
   });
 }
+class DatabaseBlocNewDialogReceivedEvent extends DatabaseBlocEvent {
+  final DialogData dialog;
+
+  DatabaseBlocNewDialogReceivedEvent({required this.dialog});
+}
+class DatabaseBlocNewMessageReceivedEvent extends DatabaseBlocEvent {
+  final MessageData message;
+
+  DatabaseBlocNewMessageReceivedEvent({required this.message});
+}
+class DatabaseBlocNewMessageStatusEvent extends DatabaseBlocEvent {
+  final List<MessageStatus> statuses;
+
+  DatabaseBlocNewMessageStatusEvent({required this.statuses});
+}
+
+
 
