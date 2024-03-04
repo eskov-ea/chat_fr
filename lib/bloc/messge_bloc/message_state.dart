@@ -15,7 +15,6 @@ class MessageBlocInitializationSuccessState extends MessagesBlocState {
   final List<MessageData> messages;
 
   MessageBlocInitializationSuccessState({required this.dialogId, required this.messages});
-
 }
 
 class MessageBlocInitializationFailedState extends MessagesBlocState {

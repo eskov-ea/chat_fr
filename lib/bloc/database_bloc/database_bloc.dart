@@ -52,6 +52,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
   }
 
   void _onWebsocketEvent(WsBlocState event) async {
+    print('websocket event:::  $event');
     if (event is WsStateReceiveNewMessage) {
       add(DatabaseBlocNewMessageReceivedEvent(message: event.message));
     } else if (event is WsStateUpdateStatus) {
@@ -215,7 +216,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     await db.saveMessageStatuses(event.message.statuses);
     if (event.message.file != null) await db.saveAttachments([event.message.file!]);
     await db.saveMessages([event.message]);
-
+    print('onDatabaseBlocNewMessageReceivedEvent');
     emit(DatabaseBlocNewMessageReceivedState(message: event.message));
   }
 

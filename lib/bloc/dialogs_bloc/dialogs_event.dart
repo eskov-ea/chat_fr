@@ -32,10 +32,10 @@ class DialogDeletedChatEvent extends DialogsEvent{
   DialogDeletedChatEvent({required this.dialog});
 }
 
-class UpdateDialogLastMessageEvent extends DialogsEvent{
+class DialogStateNewMessageReceived extends DialogsEvent{
   final MessageData message;
 
-  UpdateDialogLastMessageEvent({required this.message});
+  DialogStateNewMessageReceived({required this.message});
 }
 
 class DialogsSearchEvent extends DialogsEvent{

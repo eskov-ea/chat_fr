@@ -114,7 +114,7 @@ class DialogData {
 
   @override
   String toString() {
-    return "Instance of 'DialogData $dialogId: lastPage: $lastPage, chatUsers: $chatUsers'";
+    return "Instance of 'DialogData $dialogId: lastPage: $lastPage, chatUsers: $chatUsers, message: ${lastMessage?.message}'";
   }
 
 }

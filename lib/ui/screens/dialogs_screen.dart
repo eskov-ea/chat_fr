@@ -84,7 +84,7 @@ class _MessagesPageState extends State<MessagesPage> {
   }
 
   Widget _mapStateToWidget(BuildContext context, DialogsViewCubitState state) {
-    print('dialog new state:  user id: ${userId}');
+    print('dialog new state: ${state}');
     if (state is DialogsLoadedViewCubitState && userId != null) {
       print('dialog new state:  isLoading: ${state.isLoading} \r\n${state.dialogs}');
       if (!state.isFirstInitialized || state.isLoading) {

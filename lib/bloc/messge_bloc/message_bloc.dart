@@ -145,11 +145,11 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
       MessageBlocReceivedMessageEvent event,
       emit
   ) {
-    print('onMessageBlocReceivedMessageEvent');dlkjdflkj
     if (state is MessageBlocInitializationSuccessState) {
+    print('onMessageBlocReceivedMessageEvent ${(state as MessageBlocInitializationSuccessState).messages.length}');
       final messages = (state as MessageBlocInitializationSuccessState).messages;
       final dialogId = (state as MessageBlocInitializationSuccessState).dialogId;
-      messages.add(event.message);
+      messages.insert(0, event.message);
       emit(MessageBlocInitializationSuccessState(dialogId: dialogId, messages: messages));
     }
   }
