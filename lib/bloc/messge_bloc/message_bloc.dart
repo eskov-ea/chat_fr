@@ -23,7 +23,6 @@ import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
   final MessagesRepository messagesRepository;
 
-  // final WsBloc webSocketBloc;
   final DatabaseBloc databaseBloc;
   final ErrorHandlerBloc errorHandlerBloc;
   final DataProvider dataProvider;
