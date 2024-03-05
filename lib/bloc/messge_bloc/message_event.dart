@@ -45,3 +45,25 @@ class MessageBlocReceivedMessageEvent extends MessageBlocEvent {
 }
 
 class MessageBlocFlushMessagesEvent extends MessageBlocEvent {}
+
+class MessageBlocSendReadMessagesStatusEvent extends MessageBlocEvent {
+  final int dialogId;
+
+  MessageBlocSendReadMessagesStatusEvent({required this.dialogId});
+}
+
+class MessageBlocNewMessageStatusesReceivedEvent extends MessageBlocEvent {
+  final List<MessageStatus> statuses;
+
+  MessageBlocNewMessageStatusesReceivedEvent({required this.statuses});
+}
+
+class MessageBlocUpdateLocalMessageEvent extends MessageBlocEvent {
+  final int localId;
+  final int messageId;
+  final int dialogId;
+  final List<MessageStatus> statuses;
+
+  MessageBlocUpdateLocalMessageEvent({required this.localId, required this.dialogId, required this.messageId, required this.statuses});
+
+}

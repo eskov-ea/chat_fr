@@ -41,7 +41,6 @@ class MessageData extends Equatable{
 
   static MessageData fromJson(json) {
     try {
-      print('DBBloc send:: res: $json');
       return MessageData(
           messageId: json["id"],
           senderId: json["user_id"],
@@ -169,7 +168,7 @@ class MessageStatus extends Equatable {
 
   @override
   String toString() {
-    return "Instance of MessageStatus[ $id, $dialogId, $statusId, $userId ]";
+    return "Instance of MessageStatus[ $id, $dialogId, $messageId,  $statusId, $userId ]";
   }
 
 }

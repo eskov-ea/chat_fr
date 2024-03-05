@@ -45,7 +45,7 @@ class DialogData {
     required this.lastPage
   });
 
-  static DialogData fromJson(json) {
+  static DialogData? fromJson(json) {
     try {
       return DialogData(
           dialogId: json["id"],
@@ -68,7 +68,8 @@ class DialogData {
             .toList()
           );
     } catch (err, stack) {
-      throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
+      // throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
+      return null;
     }
   }
 

@@ -178,7 +178,7 @@ class MessageDBLayer {
       final db = await DBProvider.db.database;
       return await db.transaction((txn) async {
         return await txn.rawUpdate(
-            'UPDATE message SET id = "$messageId" WHERE local_id = "$localMessageId"; '
+            'UPDATE message SET id = "$messageId", local_id = NULL WHERE local_id = "$localMessageId"; '
         );
       });
     } catch (err, stackTrace) {
@@ -204,9 +204,33 @@ class MessageDBLayer {
       final db = await DBProvider.db.database;
       return await db.transaction((txn) async {
         final res = await txn.rawQuery(
-            'SELECT FROM message WHERE id = "$id"; '
+            'SELECT id FROM message WHERE id = $id; '
         );
+        print('DBBloc send:: res id: $res');
         return res.isEmpty ? 1 : 0;
+      });
+    } catch (err, stackTrace) {
+      rethrow;
+    }
+  }
+
+  Future<List<int>?> updateLocalMessageByContent(int messageId, String message) async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        final res = await txn.rawQuery(
+            'SELECT id FROM message '
+            'WHERE message = "$message" AND local_id IS NOT NULL; '
+        );
+        print('updated result  $res  where $messageId, $message');
+        if (res.isNotEmpty) {
+          final localId = res.first["id"];
+          await txn.rawUpdate(
+            'UPDATE message SET id = "$messageId", local_id = NULL WHERE id = "$localId"; '
+          );
+          return [localId as int, messageId];
+        }
+        return null;
       });
     } catch (err, stackTrace) {
       rethrow;

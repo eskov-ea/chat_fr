@@ -22,6 +22,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   final IDialogRepository dialogRepository;
   final ErrorHandlerBloc errorHandlerBloc;
   final DatabaseBloc databaseBloc;
+  final _storage = DataProvider.storage;
   late final StreamSubscription<DatabaseBlocState> databaseDialogEventSubscription;
 
   DialogsBloc({
@@ -39,6 +40,8 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         add(ReceiveNewDialogEvent(dialog: event.dialog));
       } else if (event is DatabaseBlocNewMessageReceivedState) {
         add(DialogStateNewMessageReceived(message: event.message));
+      } else if (event is DatabaseBlocUpdateMessageStatusesState) {
+        add(DialogStateNewMessageStatusesReceived(statuses: event.statuses));
       }
     });
 
@@ -64,6 +67,8 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         onDialogDeletedChatEvent(event, emit);
       } else if (event is DialogsSearchDialogEvent) {
         await onDialogsSearchEvent(event, emit);
+      } else if (event is DialogStateNewMessageStatusesReceived) {
+        await onDialogStateNewMessageStatusesReceived(event, emit);
       }
     });
   }
@@ -84,6 +89,21 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         err as AppErrorException;
         final errorState = state.copyWith(dialogsContainer: const DialogsListContainer.initial(), isLoading: false, searchQuery: "", isErrorHappened: true, errorType: err.type, isFirstInitialized: true);
         emit(errorState);
+      }
+    }
+  }
+
+  Future<void> onDialogStateNewMessageStatusesReceived(
+      DialogStateNewMessageStatusesReceived event,
+      emit
+  ) async {
+    final userId = await _storage.getUserId();
+    for (final status in event.statuses) {
+      for (final dialog in state.dialogs) {
+        if(dialog.dialogId == status.dialogId) {
+          if (dialog.lastMessage != null) dialog.lastMessage!.statuses.add(status);
+          if (userId != null && status.userId == int.parse(userId)) emit(state.copyWith());
+        }
       }
     }
   }
@@ -129,6 +149,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       DialogsLoadedEvent event,
       Emitter<DialogsState> emit
       ) {
+    print('onReceiveNewDialogEvent:: 11 ${state.dialogsContainer.dialogs}');
     emit(state.copyWith(dialogsContainer: DialogsListContainer(dialogs: event.dialogs), isFirstInitialized: true, isAuthenticated: true, isLoading: false));
   }
 
@@ -175,10 +196,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       DialogStateNewMessageReceived event,
       Emitter<DialogsState> emit
       ) {
-    final d1 = state.dialogs.firstWhere((element) => element.dialogId == event.message.dialogId);
-    print('onDialogStateNewMessageReceived  ${d1.lastMessage?.message}');
-    final copyState = state.from();
-    List<DialogData> newDialogs = [ ...copyState.dialogsContainer!.dialogs];
+    final newDialogs = state.dialogs;
     for (var dialog in newDialogs) {
       if (dialog.dialogId == event.message.dialogId) {
         dialog.lastMessage = event.message;
@@ -188,9 +206,8 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         // dialog.lastMessage.statuses = event.message.status;
       }
     }
-    final d2 = newDialogs.firstWhere((element) => element.dialogId == event.message.dialogId);
-    print('onDialogStateNewMessageReceived  ${d2.lastMessage?.message}');
-    final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
+    print('onDialogStateNewMessageReceived  $newDialogs');
+    final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: sortDialogsByLastMessage(newDialogs)));
     emit(newState);
   }
 
@@ -260,11 +277,12 @@ Map<String, dynamic> makeJsonMessage(MessageData message) {
 }
 
 
-sortDialogsByLastMessage(List<DialogData> dialogs){
+List<DialogData> sortDialogsByLastMessage(List<DialogData> dialogs){
   dialogs.sort((a, b) {
     final DateTime? aTime = a.lastMessage?.rawDate ?? a.createdAt;
     final DateTime? bTime = b.lastMessage?.rawDate ?? b.createdAt;
 
     return bTime!.millisecondsSinceEpoch.compareTo(aTime!.millisecondsSinceEpoch);
   });
+  return dialogs;
 }

@@ -54,6 +54,12 @@ class DialogUserJoinChatEvent extends DialogsEvent{
   });
 }
 
+class DialogStateNewMessageStatusesReceived extends DialogsEvent {
+  final List<MessageStatus> statuses;
+
+  DialogStateNewMessageStatusesReceived({required this.statuses});
+}
+
 class DialogUserExitChatEvent extends DialogsEvent{
   final ChatUser user;
   final int dialogId;

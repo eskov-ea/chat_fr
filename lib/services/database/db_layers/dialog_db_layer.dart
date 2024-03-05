@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/from_db_models.dart';
+import 'package:chat/models/message_model.dart';
 import 'package:chat/services/database/db_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -76,6 +77,21 @@ class DialogDBLayer {
         return txn.rawUpdate(
           'UPDATE dialog SET last_page = "$page" '
           'WHERE id = "$dialogId"; '
+        );
+      });
+    } catch (err, stackTrace) {
+      log('DB operation error:  $stackTrace');
+      rethrow;
+    }
+  }
+
+  Future<int> updateDialogLastMessage(MessageData message) async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        return txn.rawUpdate(
+          'UPDATE dialog SET last_message_id = "${message.messageId}" '
+          'WHERE id = "${message.dialogId}"; '
         );
       });
     } catch (err, stackTrace) {

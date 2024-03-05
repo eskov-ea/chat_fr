@@ -24,20 +24,33 @@ class DatabaseBlocSendMessageEvent extends DatabaseBlocEvent {
     required this.content
   });
 }
+
 class DatabaseBlocNewDialogReceivedEvent extends DatabaseBlocEvent {
   final DialogData dialog;
 
   DatabaseBlocNewDialogReceivedEvent({required this.dialog});
 }
+
 class DatabaseBlocNewMessageReceivedEvent extends DatabaseBlocEvent {
   final MessageData message;
 
   DatabaseBlocNewMessageReceivedEvent({required this.message});
 }
-class DatabaseBlocNewMessageStatusEvent extends DatabaseBlocEvent {
+
+class DatabaseBlocUpdateLocalMessageEvent extends DatabaseBlocEvent {
+  final int localId;
+  final int messageId;
+  final int dialogId;
   final List<MessageStatus> statuses;
 
-  DatabaseBlocNewMessageStatusEvent({required this.statuses});
+  DatabaseBlocUpdateLocalMessageEvent({required this.localId, required this.messageId, required this.statuses, required this.dialogId});
+
+}
+
+class DatabaseBlocNewMessageStatusEvent extends DatabaseBlocEvent {
+  final MessageStatus status;
+
+  DatabaseBlocNewMessageStatusEvent({required this.status});
 }
 
 

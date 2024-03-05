@@ -9,7 +9,7 @@ abstract class Helpers {
 
   static checkIReadMessage(List<MessageStatus>? statuses, int userId, DialogData? d) {
     if (statuses?.first.dialogId == 354) {
-      print('check status::: bject info: ${d?.lastMessage}');
+      if (d?.dialogId == 354) print('check status::: bject info: ${d?.lastMessage?.statuses}');
     }
     if (statuses == null) return 0;
     var status = 0;

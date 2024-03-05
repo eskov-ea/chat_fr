@@ -46,7 +46,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       } else if (event is DatabaseBlocNewDialogReceivedEvent) {
         await onDatabaseBlocNewDialogReceivedEvent(event, emit);
       } else if (event is DatabaseBlocNewMessageStatusEvent) {
-        onDatabaseBlocNewMessageStatusEvent(event, emit);
+        await onDatabaseBlocNewMessageStatusEvent(event, emit);
       }
     }, transformer: concurrent());
   }
@@ -56,13 +56,11 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     if (event is WsStateReceiveNewMessage) {
       add(DatabaseBlocNewMessageReceivedEvent(message: event.message));
     } else if (event is WsStateUpdateStatus) {
-      await db.saveMessageStatuses(event.statuses);
+      add(DatabaseBlocNewMessageStatusEvent(status: event.statuses.first));
     } else if (event is WsStateNewDialogCreated) {
       if (state is DatabaseBlocDBInitializedState) {
         add(DatabaseBlocNewDialogReceivedEvent(dialog: event.dialog));
       }
-    } else if (event is WsStateUpdateStatus) {
-      add(DatabaseBlocNewMessageStatusEvent(statuses: event.statuses));
     }
   }
 
@@ -134,7 +132,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       final dbDialogs = await db.getDialogs();
       print('dbDialogs $dbDialogs');
       List<DialogData> dialogs = [];
-        print('init dialogs:  ${chatUsers}');
+      print('init dialogs:  ${messages[6548]}');
       for (var d in dbDialogs) {
         final dd = DialogData(
             dialogId: d.dialogId,
@@ -173,7 +171,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       final userId = await DataProvider.storage.getUserId();
       if (userId == null) throw AppErrorException(AppErrorExceptionType.other);
       int messageId = UUID();
-      while(await db.checkIfMessageExistWithThisId(messageId) != 0) {
+      while(await db.checkIfMessageExistWithThisId(messageId) == 0) {
         messageId = UUID();
       }
       final attachmentId = event.content == null ? null : UUID();
@@ -202,21 +200,49 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       final sentMessage = MessageData.fromJson(jsonDecode(sentMessageBody)["data"]);
 
       await db.saveMessageStatuses(sentMessage.statuses);
-      final res = await db.updateMessageId(messageId, sentMessage.messageId);
-      print("DBBloc send:: finish $res");
+      // final updateRes = await db.updateMessageId(messageId, sentMessage.messageId);
+      // print('update result  $updateRes');
     } catch (err, stackTrace) {
       log('DBBloc send:: error: $err\r\n$stackTrace');
     }
+  }
+  List<MessageData> updateLocalMessage(List<MessageData> messages, int localMessageId, MessageData sentMessage) {
+    final range = messages.length > 10 ? 10 : messages.length;
+    for (var i = 0; i < range; i++ ) {
+      final message = messages[i];
+      if (message.messageId == localMessageId) {
+        messages.removeAt(i);
+        messages.insert(i, sentMessage);
+        return messages;
+      }
+    }
+    return messages;
   }
 
   Future<void> onDatabaseBlocNewMessageReceivedEvent(
       DatabaseBlocNewMessageReceivedEvent event,
       emit
   ) async {
+    final userId = await _storage.getUserId();
+    if (userId != null && int.parse(userId) == event.message.senderId) {
+      final updated = await db.updateLocalMessageByContent(
+          event.message.messageId, event.message.message);
+      if (updated != null) {
+        await db.saveMessageStatuses(event.message.statuses);
+        emit(DatabaseBlocUpdateLocalMessageState(
+            localId: updated[0],
+            dialogId: event.message.dialogId,
+            messageId: updated[1],
+            statuses: event.message.statuses
+        ));
+        return;
+      }
+    }
+
     await db.saveMessageStatuses(event.message.statuses);
     if (event.message.file != null) await db.saveAttachments([event.message.file!]);
     await db.saveMessages([event.message]);
-    print('onDatabaseBlocNewMessageReceivedEvent');
+    await db.updateDialogLastMessage(event.message);
     emit(DatabaseBlocNewMessageReceivedState(message: event.message));
   }
 
@@ -236,7 +262,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       DatabaseBlocNewMessageStatusEvent event,
       emit
   ) async {
-    await db.saveMessageStatuses(event.statuses);
-    emit(DatabaseBlocUpdateMessageStatusesState(statuses: event.statuses));
+    await db.saveMessageStatus(event.status);
+    emit(DatabaseBlocUpdateMessageStatusesState(statuses: [event.status]));
   }
 }

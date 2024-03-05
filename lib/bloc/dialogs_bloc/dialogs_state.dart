@@ -37,17 +37,18 @@ class DialogsState {
     required this.isLoading
   });
 
+  //TODO: refactor these rules
   @override
-  bool operator ==(Object other) =>
-          other is DialogsState &&
-              runtimeType == other.runtimeType &&
-              dialogsContainer == other.dialogsContainer &&
-              searchQuery == other.searchQuery &&
-              errorType == other.errorType &&
-              isAuthenticated == other.isAuthenticated &&
-              isFirstInitialized == other.isFirstInitialized &&
-              isLoading == other.isLoading &&
-              isErrorHappened == other.isErrorHappened;
+  bool operator ==(Object other) => false;
+          // other is DialogsState &&
+          //     runtimeType == other.runtimeType &&
+          //     dialogsContainer == other.dialogsContainer &&
+          //     searchQuery == other.searchQuery &&
+          //     errorType == other.errorType &&
+          //     isAuthenticated == other.isAuthenticated &&
+          //     isFirstInitialized == other.isFirstInitialized &&
+          //     isLoading == other.isLoading &&
+          //     isErrorHappened == other.isErrorHappened;
 
   @override
   int get hashCode =>
@@ -103,7 +104,7 @@ class DialogsState {
           isClosed: dialog.isClosed,
           isPublic: dialog.isPublic,
           lastPage: dialog.lastPage,
-          chatUsers: []
+          chatUsers: dialog.chatUsers
         );
         dialogs.add(d);
       }

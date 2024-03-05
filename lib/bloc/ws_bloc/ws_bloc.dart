@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/bloc/ws_bloc/ws_event.dart';
@@ -131,9 +132,9 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
             authToken: token, client: socket, channelName: 'private-chatinfo');
         channels[channel.name] = channel;
         generalEventSubscription = channel.bind('update').listen((event) {
-          final DialogData newDialog = DialogData.fromJson(jsonDecode(event.data)["chat"]);
-          print("CHATINFO   ->  $newDialog");
-          //TODO: refactor db
+          // final DialogData newDialog = DialogData.fromJson(jsonDecode(event.data)["chat"]);
+          // print("CHATINFO   ->  $newDialog");
+          //TODO: refactor db      new dialog comes
           // for (var user in newDialog.usersList) {
           //   if (user.id == userId) {
           //     add(WsEventNewDialogCreated(dialog: newDialog));
@@ -152,7 +153,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
           print("USERINFOCHANNEL  ${event.channelName}   ${jsonDecode(event.data)}");
           final data = jsonDecode(event.data);
           if (data["chat_join"] != null) {
-            final DialogData newDialog = DialogData.fromJson(data["chat_join"]);
+            // final DialogData newDialog = DialogData.fromJson(data["chat_join"]);
             //TODO: refactor db
             // for (var user in newDialog.usersList) {
             //   if (user.id == userId) {
@@ -161,9 +162,10 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
             //   }
             // }
           } else if(data["chat_exit"] != null) {
-            final DialogData newDialog = DialogData.fromJson(data["chat_exit"]);
-            print("UNSUBSCRIBE CHAT   -->   private-chat.${newDialog.dialogId}");
-            add(WsEventDialogDeleted(dialog: newDialog, channelName: "private-chat.${newDialog.dialogId}"));
+            //TODO: refactor db
+// final DialogData newDialog = DialogData.fromJson(data["chat_exit"]);
+            // print("UNSUBSCRIBE CHAT   -->   private-chat.${newDialog.dialogId}");
+            // add(WsEventDialogDeleted(dialog: newDialog, channelName: "private-chat.${newDialog.dialogId}"));
             return;
           }
         });
@@ -198,7 +200,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
                   });
                 } else if (data["message_status"] != null) {
                   final newStatuses = [MessageStatus.fromJson(data["message_status"])];
-                  print("UPDATE STATUSES    -> ${newStatuses.last.statusId}");
+                  print("UPDATE STATUSES    -> ${newStatuses}");
                   add(WsEventUpdateStatus(statuses: newStatuses));
                 } else if (data["join"] != null) {
                   print("EVENTJOIN  ${data["join"]}");
@@ -217,7 +219,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
       await socket!.connect();
       emit(const Connected());
     } catch (err, stackTrace) {
-      print("SOCKET CONNECTING:  $err \r\n$stackTrace");
+      log("SOCKET CONNECTING:  $err \r\n$stackTrace");
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "SOCKET CONNECTING ERROR");
       emit(Unconnected());
     }
@@ -383,6 +385,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
       if (dialogsCollection!.isNotEmpty) {
         final List<DialogData> newDialogs = dialogsCollection
             .map((dialog) => DialogData.fromJson(dialog))
+            .whereType<DialogData>()
             .toList();
         print("UPDATED_INFO DIALOGS    $newDialogs");
         for (var dialog in newDialogs) {

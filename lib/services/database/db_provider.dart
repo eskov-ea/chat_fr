@@ -78,8 +78,7 @@ class DBProvider {
   Future<List<DialogData>> getDialogs() async => await DialogDBLayer().getDialogs();
   Future<int> updateDialogLastPage(int dialogId, int page) async => DialogDBLayer().updateDialogLastPage(dialogId, page);
   Future<int?> getLastDialogPage(int dialogId) async => DialogDBLayer().getLastDialogPage(dialogId);
-  Future<MessageData?> getMessageById(int messageId) async => MessageDBLayer().getMessageById(messageId);
-
+  Future<int> updateDialogLastMessage(MessageData message) async => DialogDBLayer().updateDialogLastMessage(message);
 
   ///   MESSAGES LAYER
   Future<List<Object?>> saveMessages(List<MessageData> messages) async => MessageDBLayer().saveMessages(messages);
@@ -89,16 +88,20 @@ class DBProvider {
   Future<int> saveLocalMessage(MessageData message) async => MessageDBLayer().saveLocalMessage(message);
   Future<int> updateMessageWithSendFailed(int messageId, int sendFailed) => MessageDBLayer().updateMessageWithSendFailed(messageId, sendFailed);
   Future<int> updateMessageId(int localMessageId, int messageId) async => MessageDBLayer().updateMessageId(localMessageId, messageId);
+  Future<MessageData?> getMessageById(int messageId) async => MessageDBLayer().getMessageById(messageId);
+  Future<List<int>?> updateLocalMessageByContent(int messageId, String message) async => MessageDBLayer().updateLocalMessageByContent(messageId, message);
+  Future<int> checkIfMessageExistWithThisId(int id) async => MessageDBLayer().checkIfMessageExistWithThisId(id);
 
 
   ///   MESSAGE STATUS LAYER
   Future<List<Object?>> saveMessageStatuses(List<MessageStatus> statuses) async => MessageStatusDBLayer().saveMessageStatuses(statuses);
+  Future<Object?> saveMessageStatus(MessageStatus status) async => MessageStatusDBLayer().saveMessageStatus(status);
   Future<List<MessageStatus>> getMessageStatuses() async => MessageStatusDBLayer().getMessageStatuses();
   Future<int?> saveLocalMessageStatus(MessageStatus? status) async => MessageStatusDBLayer().saveLocalMessageStatus(status);
-  Future<int> checkIfMessageExistWithThisId(int id) async => MessageDBLayer().checkIfMessageExistWithThisId(id);
+  Future<List<MessageStatus>> getMessageStatusesByMessageId(int id) async => MessageStatusDBLayer().getMessageStatusesByMessageId(id);
 
 
-      ///   MESSAGE ATTACHMENTS LAYER
+  ///   MESSAGE ATTACHMENTS LAYER
   Future saveAttachments(List<MessageAttachmentData> files) async => AttachmentDBLayer().saveAttachment(files);
   Future<List<MessageAttachmentData>> getAttachments() async => AttachmentDBLayer().getAttachments();
   Future<MessageAttachmentData> getAttachmentById(int id) async => AttachmentDBLayer().getAttachmentById(id);

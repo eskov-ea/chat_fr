@@ -38,13 +38,26 @@ class DatabaseBlocNewMessageReceivedState extends DatabaseBlocState {
 
   DatabaseBlocNewMessageReceivedState({required this.message});
 }
+
 class DatabaseBlocNewDialogReceivedState extends DatabaseBlocState {
   final DialogData dialog;
 
   DatabaseBlocNewDialogReceivedState({required this.dialog});
 }
+
 class DatabaseBlocUpdateMessageStatusesState extends DatabaseBlocState {
   final List<MessageStatus> statuses;
 
   DatabaseBlocUpdateMessageStatusesState({required this.statuses});
 }
+
+class DatabaseBlocUpdateLocalMessageState extends DatabaseBlocState {
+  final int localId;
+  final int messageId;
+  final int dialogId;
+  final List<MessageStatus> statuses;
+
+  DatabaseBlocUpdateLocalMessageState({required this.localId, required this.dialogId, required this.messageId, required this.statuses});
+
+}
+

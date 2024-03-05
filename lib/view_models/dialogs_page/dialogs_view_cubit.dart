@@ -21,7 +21,7 @@ class DialogsViewCubit extends Cubit<DialogsViewCubitState> {
   }
 
   void _onState(DialogsState state) {
-    print("GetDialogs:: state $state");
+    print("GetDialogs:: state ${state.dialogs.length}: ${state.dialogs} ");
     final newState = DialogsLoadedViewCubitState(dialogs: state.dialogs, searchQuery: "", isError: state.isErrorHappened, isLoading: state.isLoading,
         errorType: state.errorType, isAuthenticated: state.isAuthenticated, isFirstInitialized: state.isFirstInitialized);
     emit(newState);

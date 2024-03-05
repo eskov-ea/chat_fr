@@ -29,7 +29,7 @@ class DialogsProvider {
       print("LOAD DIALOGS:  ${error}");
       List<dynamic> collection = jsonDecode(response.body)["data"];
       List<DialogData> dialogs =
-          collection.map((dialog) => DialogData.fromJson(dialog)).toList();
+          collection.map((dialog) => DialogData.fromJson(dialog)).whereType<DialogData>().toList();
       return dialogs;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
@@ -61,7 +61,7 @@ class DialogsProvider {
       if (error != null) throw error;
       List<dynamic> collection = jsonDecode(response.body)["data"];
       List<DialogData> dialogs =
-      collection.map((dialog) => DialogData.fromJson(dialog)).toList();
+      collection.map((dialog) => DialogData.fromJson(dialog)).whereType<DialogData>().toList();
       return dialogs;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
@@ -101,7 +101,10 @@ class DialogsProvider {
       );
       final error = handleHttpResponse(response);
       if (error != null) throw error;
-      DialogData dialog = DialogData.fromJson(jsonDecode(response.body)["data"]);
+      DialogData? dialog = DialogData.fromJson(jsonDecode(response.body)["data"]);
+      if (dialog == null) {
+        throw AppErrorException(AppErrorExceptionType.parsing, message: 'Cant create dialog with users: $users');
+      }
       return dialog;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
