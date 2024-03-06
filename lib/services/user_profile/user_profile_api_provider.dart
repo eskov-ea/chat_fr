@@ -37,6 +37,7 @@ class UserProfileProvider {
     } on AppErrorException {
       rethrow;
     } catch (err, stackTrace) {
+      print('Loading error::  $err\r\n$stackTrace');
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
       throw AppErrorException(AppErrorExceptionType.other);
     }

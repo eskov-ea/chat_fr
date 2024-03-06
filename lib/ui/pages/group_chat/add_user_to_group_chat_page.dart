@@ -1,8 +1,9 @@
 import 'dart:async';
-
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
+import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../models/contact_model.dart';
 import '../../../services/dialogs/dialogs_api_provider.dart';
 import '../../widgets/avatar_widget.dart';
@@ -27,9 +28,8 @@ class AddingUserToGroupChatPage extends StatefulWidget {
 class _AddingUserToGroupChatPageState extends State<AddingUserToGroupChatPage> {
 
   List<UserModel> selected = [];
-  List<UserModel> users = [];
+  // List<UserModel> users = [];
   late final StreamSubscription userListSubscription;
-  //TODO: higt this functionality up to bloc
   final DialogsProvider _dialogsProvider = DialogsProvider();
   addUsersToDialog() async {
     for (var user in selected) {
@@ -41,12 +41,12 @@ class _AddingUserToGroupChatPageState extends State<AddingUserToGroupChatPage> {
   @override
   void initState() {
     super.initState();
-    users = widget.usersViewCubit.state.users;
-    userListSubscription = widget.usersViewCubit.stream.listen((event) {
-      setState(() {
-        users = event.users;
-      });
-    });
+    // users = widget.usersViewCubit.state.users;
+    // userListSubscription = widget.usersViewCubit.stream.listen((event) {
+    //   setState(() {
+    //     users = event.users;
+    //   });
+    // });
   }
 
   void _setSelected(UserModel user) {
@@ -68,88 +68,105 @@ class _AddingUserToGroupChatPageState extends State<AddingUserToGroupChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          SizedBox(height: 50,),
-          Padding(
-              padding:
-              const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              child: SearchWidget(cubit: widget.usersViewCubit)
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: users.length,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: (){
-                    _setSelected(users[index]);
-                  },
-                  child: Container(
-                    color:  selected.contains(users[index].id)
-                      ? Colors.white24
-                      : Colors.transparent,
-                    padding: const EdgeInsets.only(
-                        left: 14, right: 14, top: 10, bottom: 10),
-                    child: Align(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          UserAvatarWidget(userId: users[index].id, size: 20),
-                          const SizedBox(width: 20,),
-                          Expanded(
-                            child: Container(
-                              padding: EdgeInsets.only(bottom: 10),
-                              decoration: BoxDecoration(
-                                  border: Border(
-                                      bottom: index == users.length - 1
-                                          ? BorderSide(width: 0, color: Colors.transparent)
-                                          : BorderSide(width: 1, color: Colors.black26)
+      body: BlocBuilder(
+        builder: (context, state) {
+          if (state is UsersViewCubitLoadedState) {
+            return Column(
+              children: [
+                SizedBox(height: 50,),
+                Padding(
+                    padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                    child: SearchWidget(cubit: widget.usersViewCubit)
+                ),
+                Expanded(
+                  child: ListView.builder(
+                      itemCount: state.users.length,
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: (){
+                            _setSelected(state.users[index]);
+                          },
+                          child: Container(
+                            color:  selected.contains(state.users[index].id)
+                                ? Colors.white24
+                                : Colors.transparent,
+                            padding: const EdgeInsets.only(
+                                left: 14, right: 14, top: 10, bottom: 10),
+                            child: Align(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  UserAvatarWidget(userId: state.users[index].id, size: 20),
+                                  const SizedBox(width: 20,),
+                                  Expanded(
+                                    child: Container(
+                                      padding: EdgeInsets.only(bottom: 10),
+                                      decoration: BoxDecoration(
+                                          border: Border(
+                                              bottom: index == state.users.length - 1
+                                                  ? BorderSide(width: 0, color: Colors.transparent)
+                                                  : BorderSide(width: 1, color: Colors.black26)
+                                          )
+                                      ),
+                                      child: Text("${state.users[index].lastname} ${state.users[index].firstname} ",
+                                        style: TextStyle(fontSize: 20),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10,),
+                                  selected.contains(state.users[index])
+                                      ? IconButton(
+                                      onPressed: (){},
+                                      icon: const Icon(Icons.close)
                                   )
-                              ),
-                              child: Text("${users[index].lastname} ${users[index].firstname} ",
-                                style: TextStyle(fontSize: 20),
+                                      : SizedBox.shrink()
+                                ],
                               ),
                             ),
                           ),
-                          const SizedBox(width: 10,),
-                          selected.contains(users[index])
-                              ? IconButton(
-                              onPressed: (){},
-                              icon: const Icon(Icons.close)
-                          )
-                              : SizedBox.shrink()
-                        ],
-                      ),
+                        );
+                      }
+                  ),
+                ),
+                Container(
+                  width: MediaQuery
+                      .of(context)
+                      .size
+                      .width,
+                  height: 60,
+                  color: Colors.blue,
+                  child: GestureDetector(
+                    onTap: () {
+                      addUsersToDialog();
+                      Navigator.of(context).pop();
+                    },
+                    child: const Center(
+                        child: Text(
+                          "Готово",
+                          style: TextStyle(fontSize: 26,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        )
                     ),
                   ),
-                );
-              }
-            ),
-          ),
-          Container(
-            width: MediaQuery
-                .of(context)
-                .size
-                .width,
-            height: 60,
-            color: Colors.blue,
-            child: GestureDetector(
-              onTap: () {
-                addUsersToDialog();
-                Navigator.of(context).pop();
-              },
-              child: const Center(
-                  child: Text(
-                    "Готово",
-                    style: TextStyle(fontSize: 26,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold),
-                  )
+                )
+              ],
+            );
+          } else {
+            return const Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 10.0,
+                  strokeCap: StrokeCap.round,
+                ),
               ),
-            ),
-          )
-        ],
-      ),
+            );
+          }
+        }
+      )
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:chat/models/dialog_model.dart';
+import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
@@ -19,7 +20,7 @@ class GroupChatInfoPage extends StatefulWidget {
     // required this.users,
     required this.chatUsers,
     required this.dialogData,
-    required this.usersViewCubit,
+    required this.users,
     required this.dialogsViewCubit,
     Key? key
   }) : super(key: key);
@@ -28,7 +29,7 @@ class GroupChatInfoPage extends StatefulWidget {
   // final List<UserModel> users;
   final List<int>? chatUsers;
   final DialogData dialogData;
-  final UsersViewCubit usersViewCubit;
+  final List<UserModel> users;
   final DialogsViewCubit dialogsViewCubit;
 
   @override
@@ -72,14 +73,13 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
   getInitialUsers() async {
     userId = await DataProvider.storage.getUserId();
     stateUsers = [];
-    for (var user in widget.dialogData.users) {
-      //TODO: refactor db
-      // if (user.active) {
-      //   stateUsers.add(user);
-      // }
-      // if (user.userId.toString() == userId && user.chatUserRole == 1) {
-      //   isAdmin = true;
-      // }
+    for (var user in widget.dialogData.chatUsers) {
+      if (user.active == 1) {
+        stateUsers.add(user);
+      }
+      if (user.userId.toString() == userId && user.chatUserRole == 1) {
+        isAdmin = true;
+      }
     }
     setState(() {});
   }
@@ -88,15 +88,14 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
     for( var dialog in dialogs) {
       if (dialog.dialogId == widget.dialogData.dialogId) {
         stateUsers = [];
-        //TODO: refactor db
-        // for (var user in dialog.chatUsers) {
-        //   if (user.active) {
-        //     stateUsers.add(user);
-        //   }
-        //   if (user.userId.toString() == userId && user.chatUserRole == 1) {
-        //     isAdmin = true;
-        //   }
-        // }
+        for (var user in dialog.chatUsers) {
+          if (user.active == 1) {
+            stateUsers.add(user);
+          }
+          if (user.userId.toString() == userId && user.chatUserRole == 1) {
+            isAdmin = true;
+          }
+        }
         setState(() {});
         return;
       }
@@ -104,11 +103,18 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
   }
 
   deleteUserFromChat(ChatUser user) {
-    //TODO: add check
+    if (!isAdmin) {
+      return customToastMessage(context: context, message: 'Только администратор может удалить пользователя из чата');
+    }
+    if (user.userId.toString() == userId) {
+      return customToastMessage(context: context, message: 'Вы не можете удалиться из чата, тк вы его создатель');
+    }
+
     setState(() {
       stateUsers.remove(user);
     });
     _dialogsProvider.exitDialog(user.userId, widget.dialogData.dialogId);
+
   }
 
 
@@ -293,12 +299,12 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                     OutlinedButton(
                         onPressed: () async {
                           try {
-                            openUsersListToAddToChat(
-                              context: context,
-                              usersViewCubit: widget.usersViewCubit,
-                              dialogId:  widget.dialogData.dialogId,
-                              addUserCallback: addUserCallback
-                            );
+                            // openUsersListToAddToChat(
+                            //   context: context,
+                            //   usersViewCubit: widget.usersViewCubit,
+                            //   dialogId:  widget.dialogData.dialogId,
+                            //   addUserCallback: addUserCallback
+                            // );
                           } catch (err) {
                             ClientErrorHandler.informErrorHappened(context, "Произошла непредвиденная ошибка. Попробуйте еще раз.");
                           }

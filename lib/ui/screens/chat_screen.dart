@@ -35,7 +35,7 @@ class ChatScreen extends StatefulWidget {
           required dialogData,
           required username,
           required dialogCubit,
-          required usersCubit
+          required users
           }) =>
       MaterialPageRoute(
         builder: (context) => ChatScreen(
@@ -44,14 +44,14 @@ class ChatScreen extends StatefulWidget {
             partnerId: partnerId,
             username: username,
             dialogCubit: dialogCubit,
-            usersCubit: usersCubit
+            users: users
         ),
       );
 
   ChatScreen({
     Key? key,
     required this.dialogCubit,
-    required this.usersCubit,
+    required this.users,
     required this.dialogData,
     required this.username,
     required this.userId,
@@ -59,7 +59,7 @@ class ChatScreen extends StatefulWidget {
   }) : super(key: key);
 
   DialogsViewCubit dialogCubit;
-  UsersViewCubit usersCubit;
+  final List<UserModel> users;
   final int userId;
   final int partnerId;
   final String username;
@@ -101,12 +101,13 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     }
     BlocProvider.of<MessageBloc>(context).add(MessageBlocSendReadMessagesStatusEvent(dialogId: widget.dialogData!.dialogId));
     setState(() {
-      isOnline = BlocProvider.of<UsersViewCubit>(context).state.onlineUsersDictionary[widget.partnerId] != null;
+      // isOnline = BlocProvider.of<UsersViewCubit>(context).state.onlineUsersDictionary[widget.partnerId] != null;
     });
     usersViewCubitStateSubscription = BlocProvider.of<UsersViewCubit>(context).stream.listen((state) {
       setState(() {
-        isOnline = state.onlineUsersDictionary[widget.partnerId] != null ? true : false;
-        isTyping = state.clientEvent[widget.dialogData?.dialogId] != null && state.clientEvent[widget.dialogData?.dialogId]?.event == "typing";
+        // users = cubitUsers;
+        // isOnline = state.onlineUsersDictionary[widget.partnerId] != null ? true : false;
+        // isTyping = state.clientEvent[widget.dialogData?.dialogId] != null && state.clientEvent[widget.dialogData?.dialogId]?.event == "typing";
       });
     });
     focusNode.addListener(() {
@@ -337,7 +338,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                                 dialogData: widget.dialogData!,
                                 focusNode: focusNode,
                                 setReplyMessage: setReplyMessage,
-                                usersCubit: widget.usersCubit,
+                                users: widget.users,
                                 partnerName: widget.username,
                                 setSelectedMode: setSelectedMode,
                                 isSelectedMode: isSelectedMode,
@@ -394,16 +395,17 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
           child: IconButton(
             icon: const Icon(CupertinoIcons.back, color: AppColors.secondary, size: 30,),
             onPressed: () {
-              Navigator.of(context).pop();
+              Navigator.of(context).maybePop();
             },
           ),
         ),
         title: InkWell(
           onTap: (){
+            final usersCubit = BlocProvider.of<UsersViewCubit>(context);
             if (widget.dialogData == null || widget.dialogData?.chatType.p2p == 1) {
-              openUserProfileInfoPage(context: context, user: findPartnerUserProfile(widget.usersCubit, widget.partnerId), partnerId: widget.partnerId);
+              openUserProfileInfoPage(context: context, user: findPartnerUserProfile(usersCubit, widget.partnerId), partnerId: widget.partnerId);
             } else {
-              openGroupChatInfoPage(context: context, usersCubit: widget.usersCubit, dialogData: widget.dialogData, userId: null, dialogCubit: widget.dialogCubit, username: widget.username, partnerId: widget.partnerId, );
+              openGroupChatInfoPage(context: context, users: widget.users, dialogData: widget.dialogData, userId: null, dialogCubit: widget.dialogCubit, username: widget.username, partnerId: widget.partnerId, );
             }
           },
           child: getDialogName(widget.dialogData, widget.username),
@@ -488,10 +490,10 @@ class ChatPageArguments {
   final DialogData? dialogData;
   final String username;
   DialogsViewCubit dialogCubit;
-  UsersViewCubit usersCubit;
+  List<UserModel> users;
 
   ChatPageArguments({required this.userId, required this.partnerId,
-    required this.dialogData, required this.username, required this.dialogCubit, required this.usersCubit});
+    required this.dialogData, required this.username, required this.dialogCubit, required this.users});
 }
 
 

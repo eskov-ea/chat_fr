@@ -155,7 +155,8 @@ class ChatSettings extends Equatable{
         ? null
         : ChatSettings(
           autoJoinChats: json['chat']["autojoin"]
-              .map<DialogData>((dialog) => DialogData.fromJson(dialog))
+              .map<DialogData?>((dialog) => DialogData.fromJson(dialog))
+              .whereType<DialogData>()
               .toList()
         );
   }

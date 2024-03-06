@@ -1,44 +1,69 @@
-import 'dart:developer';
-import 'dart:io';
+import 'dart:async';
+import 'package:chat/bloc/user_bloc/online_users_manager.dart';
+import 'package:chat/models/contact_model.dart';
+import 'package:chat/services/global.dart';
+import 'package:chat/services/helpers/navigation_helpers.dart';
+import 'package:chat/storage/data_storage.dart';
 import 'package:flutter/material.dart';
-import '../../models/contact_model.dart';
-import '../../services/global.dart';
-import '../../services/helpers/navigation_helpers.dart';
-import '../../storage/data_storage.dart';
 import 'avatar_widget.dart';
 
-class UserItem extends StatelessWidget {
+class UserItem extends StatefulWidget {
   const UserItem({
     Key? key,
     required this.user,
-    required this.onlineStatus
   }) : super(key: key);
 
   final UserModel user;
-  final bool onlineStatus;
+
+  @override
+  State<UserItem> createState() => _UserItemState();
+}
+
+class _UserItemState extends State<UserItem> {
+
+  final UserOnlineStatusManager _userStatusManagement = UserOnlineStatusManager.instance;
+  late final StreamSubscription<Map<int, bool>> _userStatusSubscription;
+  bool onlineStatus = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_userStatusManagement.onlineUsers.containsKey(widget.user.id)) {
+      setState(() {
+        onlineStatus = true;
+      });
+    }
+    _userStatusSubscription = _userStatusManagement.status.listen((event) {
+      if (event.containsKey(widget.user.id)) {
+        setState(() {
+          onlineStatus = event[widget.user.id]!;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      key: ObjectKey("${user.id}_container_key"),
+      key: ObjectKey("${widget.user.id}_container_key"),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
       child: InkWell(
         onTap:  () async {
           final userIdString = await DataProvider.storage.getUserId();
           final userId = int.parse(userIdString!);
-          final dialogData= findDialog(context, userId, user.id);
+          final dialogData= findDialog(context, userId, widget.user.id);
           openChatScreen(
               context: context,
               userId: userId,
-              partnerId: user.id,
+              partnerId: widget.user.id,
               dialogData: dialogData,
-              username: user.firstname + " " + user.lastname
+              username: widget.user.firstname + " " + widget.user.lastname
           );
         },
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            UserAvatarWidget(userId: user.id),
+            UserAvatarWidget(userId: widget.user.id),
             Padding(
               padding: const EdgeInsets.only(left: 12.0),
               child: Column(
@@ -48,7 +73,7 @@ class UserItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        user.lastname + " " + user.firstname,
+                        widget.user.lastname + " " + widget.user.firstname,
                         style: const TextStyle(fontSize: 16),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
@@ -64,7 +89,7 @@ class UserItem extends StatelessWidget {
                   Container(
                     width: getWidthMaxWidthGuard(context) * 0.6,
                     child: Text(
-                      "${user.company} | ${user.dept}",
+                      "${widget.user.company} | ${widget.user.dept}",
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 12),
                       maxLines: 1,
@@ -74,7 +99,7 @@ class UserItem extends StatelessWidget {
                   Container(
                     width: getWidthMaxWidthGuard(context) * 0.6,
                     child: Text(
-                      user.position,
+                      widget.user.position,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 12),
                       maxLines: 1,
@@ -89,5 +114,4 @@ class UserItem extends StatelessWidget {
       ),
     );
   }
-
 }

@@ -1,20 +1,16 @@
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
+import 'package:chat/models/contact_model.dart';
+import 'package:chat/models/dialog_model.dart';
 
-import '../../../../models/contact_model.dart';
-import '../../models/dialog_model.dart';
 
 abstract class UsersViewCubitState {
-  final List<UserModel> users = [];
-  final Map<String, UserModel> usersDictionary = {};
-  final Map<int, bool> onlineUsersDictionary = {};
-  final Map<int, ClientUserEvent> clientEvent = {};
 
 }
 
 class UsersViewCubitLoadedState extends UsersViewCubitState {
   final List<UserModel> users;
   final String searchQuery;
-  final Map<String, UserModel> usersDictionary;
+  final Map<int, UserModel> usersDictionary;
   final Map<int, bool> onlineUsersDictionary;
   final Map<int, ClientUserEvent> clientEvent;
 
@@ -44,7 +40,7 @@ class UsersViewCubitLoadedState extends UsersViewCubitState {
   UsersViewCubitLoadedState copyWith({
     List<UserModel>? users,
     String? searchQuery,
-    Map<String, UserModel>? usersDictionary,
+    Map<int, UserModel>? usersDictionary,
     Map<int, bool>? onlineUsersDictionary,
     Map<int, ClientUserEvent>? clientEvent
   }) {

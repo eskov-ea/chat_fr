@@ -14,6 +14,8 @@ import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/from_db_models.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/models/message_model.dart' as messageModel;
+import 'package:chat/services/ws/ws_repositor_interface.dart';
+import 'package:chat/services/ws/ws_repository.dart';
 import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/dialogs/dialogs_api_provider.dart';
 import 'package:chat/services/helpers/message_sender_helper.dart';
@@ -26,16 +28,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
   final ErrorHandlerBloc errorHandlerBloc;
-  final WsBloc websocketBloc;
+  final WebsocketRepository websocketRepository;
   final DBProvider db = DBProvider.db;
   final _storage = DataProvider.storage;
   late final StreamSubscription websocketEventSubscription;
 
   DatabaseBloc({
-    required this.websocketBloc,
+    required this.websocketRepository,
     required this.errorHandlerBloc
   }): super( DatabaseBlocDBNotInitializedState()){
-    websocketEventSubscription = websocketBloc.stream.listen(_onWebsocketEvent);
+    websocketEventSubscription = websocketRepository.events.listen(_onWebsocketEvent);
     on<DatabaseBlocEvent>((event, emit) async {
       if (event is DatabaseBlocInitializeEvent) {
         await onDatabaseBlocInitializeEvent(event, emit);
@@ -51,15 +53,15 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     }, transformer: concurrent());
   }
 
-  void _onWebsocketEvent(WsBlocState event) async {
-    print('websocket event:::  $event');
-    if (event is WsStateReceiveNewMessage) {
-      add(DatabaseBlocNewMessageReceivedEvent(message: event.message));
-    } else if (event is WsStateUpdateStatus) {
-      add(DatabaseBlocNewMessageStatusEvent(status: event.statuses.first));
-    } else if (event is WsStateNewDialogCreated) {
+  void _onWebsocketEvent(WebsocketEventPayload payload) async {
+    print('websocket event:::  ${payload.event} ${payload.data}');
+    if (payload.event == WebsocketEvent.message) {
+      add(DatabaseBlocNewMessageReceivedEvent(message: payload.data?["message"]));
+    } else if (payload.event == WebsocketEvent.status) {
+      add(DatabaseBlocNewMessageStatusEvent(status: payload.data?["status"]));
+    } else if (payload.event == WebsocketEvent.dialog) {
       if (state is DatabaseBlocDBInitializedState) {
-        add(DatabaseBlocNewDialogReceivedEvent(dialog: event.dialog));
+        add(DatabaseBlocNewDialogReceivedEvent(dialog: payload.data?["dialog"]));
       }
     }
   }
@@ -146,6 +148,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         );
         dialogs.add(dd);
       }
+      websocketRepository.connect(dialogs);
       emit(DatabaseBlocLoadingCallsState());
       await Future.delayed(const Duration(seconds: 2));
       final calls = <CallModel>[];

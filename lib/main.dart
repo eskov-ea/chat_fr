@@ -1,16 +1,16 @@
-import 'dart:convert';
 import 'dart:io';
-import 'dart:ui';
 import 'package:chat/bloc/auth_bloc/auth_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_state.dart';
 import 'package:chat/bloc/database_bloc/database_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
-import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
+import 'package:chat/bloc/user_bloc/online_users_manager.dart';
+import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/dialogs/dialogs_repository.dart';
 import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/services/users/users_repository.dart';
+import 'package:chat/services/ws/ws_repository.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/theme.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
@@ -60,6 +60,8 @@ class MyHttpOverrides extends HttpOverrides {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
+  WebsocketRepository.instance;
+  UserOnlineStatusManager.instance;
 
   // if (!kIsWeb) {
   //   await Firebase.initializeApp(
@@ -96,15 +98,11 @@ class MyApp extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
+    final websocketRepo = WebsocketRepository.instance;
     final errorHandlerBloc =  ErrorHandlerBloc();
-    final websocketBloc = WsBloc(
-        initialState: Unconnected(),
-        dialogsRepository: DialogRepository(),
-        secureStorage: DataProvider.storage
-    );
     final authBloc = AuthBloc(authRepo: AuthRepository());
     final databaseBloc = DatabaseBloc(
-      websocketBloc: websocketBloc,
+      websocketRepository: websocketRepo,
       errorHandlerBloc: errorHandlerBloc
     );
     //TODO: refactor bloc=to-bloc dependency with representation layer
@@ -133,8 +131,9 @@ class MyApp extends StatelessWidget{
         BlocProvider(
           lazy: false,
           create: (_) => UsersViewCubit(
+              databaseBloc: databaseBloc,
+              wsRepo: websocketRepo,
               usersBloc: UsersBloc(
-                  databaseBloc: databaseBloc,
                   errorHandlerBloc: errorHandlerBloc,
                   usersRepository: UsersRepository()
               )
@@ -150,12 +149,6 @@ class MyApp extends StatelessWidget{
                     initialState: const DialogsState.initial()
                 ),
             )
-        ),
-        BlocProvider(
-          create: (_) => WebsocketViewCubit(
-              wsBloc: websocketBloc,
-              initialState: WebsocketViewCubitState.unknown
-          ),
         ),
         BlocProvider(
           create: (_) => ProfileBloc(

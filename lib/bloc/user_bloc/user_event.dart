@@ -22,14 +22,12 @@ class UsersUpdateOnlineStatusEvent extends UsersEvent{
   final int? joinedUser;
   final int? exitedUser;
   final ClientUserEvent? clientEvent;
-  final int? dialogId;
 
   UsersUpdateOnlineStatusEvent({
     required this.onlineUsersDictionary,
     required this.joinedUser,
     required this.exitedUser,
-    required this.clientEvent,
-    required this.dialogId
+    required this.clientEvent
   });
 }
 

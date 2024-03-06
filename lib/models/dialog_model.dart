@@ -394,16 +394,21 @@ class ClientUserEvent {
   final int fromUser;
   final int toUser;
   final String event;
+  final int dialogId;
 
   ClientUserEvent({
     required this.fromUser,
     required this.toUser,
+    required this.dialogId,
     required this.event
   });
 
   static ClientUserEvent fromJson(json) => ClientUserEvent(
-    fromUser: json["fromUser"],
-    toUser: json["toUser"],
-    event: json["event"]
+      fromUser: json["fromUser"],
+      toUser: json["toUser"],
+      dialogId: json["dialogId"],
+      event: json["event"]
   );
+
+  Map<String, dynamic> toMap() => {"dialogId" : dialogId, "event" : "finish_typing", "fromUser" : fromUser, "toUser": toUser};
 }

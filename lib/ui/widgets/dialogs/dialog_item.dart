@@ -79,7 +79,7 @@ class DialogItem extends StatelessWidget {
     return InkWell(
       key: objKey,
       onTap: () async {
-        print('send flush event');
+        print('open dialog:  ${dialogData.dialogId}');
         BlocProvider.of<MessageBloc>(context).add(MessageBlocFlushMessagesEvent());
         await Future.delayed(Duration(milliseconds: 100));
         clearSearch();
@@ -133,7 +133,7 @@ class DialogItem extends StatelessWidget {
                           ),
                           children: [
                             const WidgetSpan(child: SizedBox(width: 5),),
-                            if (dialogData.chatType.p2p == 1 && onlineMembers[partners.first.id] != null)
+                            if (dialogData.chatType.p2p == 1 && isPartnerOnline[partners.first.id] != null)
                               const WidgetSpan(
                                 child: Icon(Icons.circle, color: Colors.green, size: 15,),
                               )
@@ -186,7 +186,7 @@ class DialogItem extends StatelessWidget {
                           ? Align(child: Icon(Icons.lock))
                           : SizedBox.shrink(),
                       SizedBox(width: 10,),
-                      ( dialogData.lastMessage?.senderId != 0 && dialogData.lastMessage?.senderId != userId && Helpers.checkIReadMessage(dialogData.lastMessage?.statuses, userId!, dialogData) != 4)
+                      ( dialogData.lastMessage != null && dialogData.lastMessage?.senderId != 0 && dialogData.lastMessage?.senderId != userId && Helpers.checkIReadMessage(dialogData.lastMessage?.statuses, userId!, dialogData) != 4)
                           ? Container(
                               width: 12,
                               height: 12,
@@ -207,9 +207,21 @@ class DialogItem extends StatelessWidget {
     );
   }
 
+  bool isPartnerOnline(int id) {
+
+  }
 
   Widget lastMessageContent() {
-    if (dialogData.lastMessage != null && dialogData.lastMessage!.message != "") {
+    if (dialogData.lastMessage == null) {
+      return const Text(
+        'Нет сообщений',
+        style: const TextStyle(
+            fontSize: 14,
+            color: LightColors.secondaryText,
+            fontWeight: FontWeight.w600
+        ),
+      );
+    } else if (dialogData.lastMessage != null && dialogData.lastMessage!.message != "") {
       return Text(
         dialogData.lastMessage!.message,
         maxLines: 1,

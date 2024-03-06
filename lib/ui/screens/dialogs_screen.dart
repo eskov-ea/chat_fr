@@ -8,6 +8,7 @@ import 'package:chat/ui/widgets/dialogs/dialogs_skeleton.dart';
 import 'package:chat/ui/widgets/unauthenticated_widget.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit_state.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
+import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,7 +42,7 @@ class _MessagesPageState extends State<MessagesPage> {
   void initState() {
     presenceOnlineInfoChannelSubscription = BlocProvider.of<UsersViewCubit>(context).stream.listen((state) {
       setState(() {
-        onlineMembers = state.onlineUsersDictionary;
+        // onlineMembers = state.onlineUsersDictionary;
         counter++;
       });
     });
@@ -144,7 +145,7 @@ class _MessagesPageState extends State<MessagesPage> {
                               child: DialogItem(
                                 clearSearch: clearSearch,
                                 userId: userId,
-                                users: BlocProvider.of<UsersViewCubit>(context).state.users,
+                                users: (BlocProvider.of<UsersViewCubit>(context).state as UsersViewCubitLoadedState).users,
                                 checkOnline: isMemberOnline,
                                 onlineMembers: onlineMembers,
                                 dialogData: DialogData(

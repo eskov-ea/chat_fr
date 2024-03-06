@@ -26,7 +26,7 @@ class MessagesListStatefullWidget extends StatefulWidget {
     required this.dialogData,
     required this.focusNode,
     required this.setReplyMessage,
-    required this.usersCubit,
+    required this.users,
     required this.partnerName,
     required this.isSelectedMode,
     required this.setSelectedMode,
@@ -42,7 +42,7 @@ class MessagesListStatefullWidget extends StatefulWidget {
   final FocusNode focusNode;
   final String partnerName;
   final Function(String, int, int, String)  setReplyMessage;
-  final UsersViewCubit usersCubit;
+  final List<UserModel> users;
   final bool isSelectedMode;
   final Function setSelectedMode;
   final List<SelectedMessage> selected;
@@ -167,7 +167,7 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
                     userId: widget.userId,
                     dialogData: widget.dialogData,
                     focusNode: widget.focusNode,
-                    users: widget.usersCubit.state.users,
+                    users: widget.users,
                     partnerName: widget.partnerName,
                     setReplyMessage: widget.setReplyMessage,
                     isSelectedMode: widget.isSelectedMode,
@@ -244,72 +244,75 @@ class MessagesListWidget extends StatelessWidget {
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: ListView.builder(
-          controller: scrollController,
-          itemCount: messages.length,
-          reverse: true,
-          itemBuilder: (context, index) {
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: ListView.builder(
+            controller: scrollController,
+            itemCount: messages.length,
+            reverse: true,
+            itemBuilder: (context, index) {
 
-            final senderName = getSenderName(users, messages[index].senderId);
+              final senderName = getSenderName(users, messages[index].senderId);
 
-            return Column(
-              children: [
-                if (index == messages.length - 1 ||
-                    (index < messages.length - 1 &&
-                        messages[index].messageDate !=
-                            messages[index + 1].messageDate))
-                  Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white54,
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      child: Text(
-                        messages[index].messageDate,
+              return Column(
+                children: [
+                  if (index == messages.length - 1 ||
+                      (index < messages.length - 1 &&
+                          messages[index].messageDate !=
+                              messages[index + 1].messageDate))
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.white54,
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        child: Text(
+                          messages[index].messageDate,
+                        ),
                       ),
                     ),
-                  ),
-                if (index == messages.length - 1 ||
-                    (index < messages.length - 1 &&
-                        messages[index].messageDate !=
-                            messages[index + 1].messageDate))
-                  SizedBox(
-                    height: 8,
-                  ),
-                MessageWidget(
-                  key: ValueKey<int>(messages[index].messageId),
-                  index: index,
-                  senderId: messages[index].senderId,
-                  userId: userId,
-                  selected: selected,
-                  selectedMode: isSelectedMode,
-                  setSelectedMode: setSelectedMode,
-                  setSelected: setSelected,
-                  openForwardMenu: openForwardMenu,
-                  messageId: messages[index].messageId,
-                  message: messages[index].message,
-                  messageDate: messages[index].messageDate,
-                  messageTime: messages[index].messageTime,
-                  focusNode: focusNode,
-                  setReplyMessage: setReplyMessage,
-                  status: Helpers.checkPartnerReadMessage(messages[index].statuses, userId),
-                  file: messages[index].file,
-                  p2p: dialogData.chatType.p2p,
-                  forwardFrom: messages[index].forwarderFromUser,
-                  senderName: senderName,
-                  parentMessage: messages[index].repliedMessage,
-                  isError: messages[index].isError,
-                  repliedMsgSenderName: messages[index].repliedMessage != null ? getSenderName(users, messages[index].repliedMessage!.senderId) : null,
-                  repliedMsgId: messages[index].repliedMessage?.parentMessageId,
-                  dialogId: dialogData.dialogId,
-                  isErrorHandling: messages[index].isHandling,
-                  deleteMessage: deleteMessage
-                )
-              ],
-            );
-          }
+                  if (index == messages.length - 1 ||
+                      (index < messages.length - 1 &&
+                          messages[index].messageDate !=
+                              messages[index + 1].messageDate))
+                    SizedBox(
+                      height: 8,
+                    ),
+                  MessageWidget(
+                    key: ValueKey<int>(messages[index].messageId),
+                    index: index,
+                    senderId: messages[index].senderId,
+                    userId: userId,
+                    selected: selected,
+                    selectedMode: isSelectedMode,
+                    setSelectedMode: setSelectedMode,
+                    setSelected: setSelected,
+                    openForwardMenu: openForwardMenu,
+                    messageId: messages[index].messageId,
+                    message: messages[index].message,
+                    messageDate: messages[index].messageDate,
+                    messageTime: messages[index].messageTime,
+                    focusNode: focusNode,
+                    setReplyMessage: setReplyMessage,
+                    status: Helpers.checkPartnerReadMessage(messages[index].statuses, userId),
+                    file: messages[index].file,
+                    p2p: dialogData.chatType.p2p,
+                    forwardFrom: messages[index].forwarderFromUser,
+                    senderName: senderName,
+                    parentMessage: messages[index].repliedMessage,
+                    isError: messages[index].isError,
+                    repliedMsgSenderName: messages[index].repliedMessage != null ? getSenderName(users, messages[index].repliedMessage!.senderId) : null,
+                    repliedMsgId: messages[index].repliedMessage?.parentMessageId,
+                    dialogId: dialogData.dialogId,
+                    isErrorHandling: messages[index].isHandling,
+                    deleteMessage: deleteMessage
+                  )
+                ],
+              );
+            }
+          ),
         )
       ),
     );

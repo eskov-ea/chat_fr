@@ -53,7 +53,7 @@ class ScreenFactory {
   Widget makeChatScreen(ChatPageArguments arguments) {
     return ChatScreen(
       dialogCubit: arguments.dialogCubit,
-      usersCubit: arguments.usersCubit,
+      users: arguments.users,
       dialogData: arguments.dialogData,
       username: arguments.username,
       userId: arguments.userId!,
@@ -73,7 +73,7 @@ class ScreenFactory {
       // users: arguments.dialogData!.chatUsers,
       chatUsers: arguments.dialogData!.users,
       dialogData: arguments.dialogData!,
-      usersViewCubit: arguments.usersCubit,
+      users: arguments.users,
       dialogsViewCubit: arguments.dialogCubit,
     );
   }

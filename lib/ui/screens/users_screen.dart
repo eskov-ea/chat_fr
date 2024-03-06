@@ -1,13 +1,13 @@
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
+import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
+import 'package:chat/ui/widgets/app_bar.dart';
+import 'package:chat/ui/widgets/search_widget.dart';
 import 'package:chat/ui/widgets/unauthenticated_widget.dart';
+import 'package:chat/ui/widgets/user_item.dart';
 import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../services/global.dart';
-import '../widgets/app_bar.dart';
-import '../widgets/user_item.dart';
-import '../widgets/search_widget.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
 
 class ContactsPage extends StatefulWidget {
@@ -65,8 +65,7 @@ class _ContactsPageState extends State<ContactsPage> {
                                       left: 14, right: 14, top: 0, bottom: 0),
                                     child: Align(
                                       child: UserItem(
-                                        user: state.users[index],
-                                        onlineStatus: isOnline(state.users[index].id, state.onlineUsersDictionary),
+                                        user: state.users[index]
                                       ),
                                     // Text(state.users[index].username),
                                     ),

@@ -1,92 +1,91 @@
 import 'dart:async';
 import 'package:chat/bloc/database_bloc/database_bloc.dart';
 import 'package:chat/bloc/database_bloc/database_state.dart';
+import 'package:chat/bloc/user_bloc/user_bloc.dart';
 import 'package:chat/bloc/user_bloc/user_event.dart';
+import 'package:chat/bloc/user_bloc/user_state.dart';
+import 'package:chat/bloc/ws_bloc/ws_state.dart';
+import 'package:chat/models/contact_model.dart';
+import 'package:chat/services/ws/ws_repositor_interface.dart';
+import 'package:chat/services/ws/ws_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../bloc/user_bloc/user_bloc.dart';
-import '../../../../bloc/user_bloc/user_state.dart';
-import '../../bloc/ws_bloc/ws_bloc.dart';
-import '../../bloc/ws_bloc/ws_state.dart';
-import '../../models/contact_model.dart';
-import '../../models/dialog_model.dart';
 import 'users_view_cubit_state.dart';
 
 class UsersViewCubit extends Cubit<UsersViewCubitState> {
   final UsersBloc usersBloc;
+  final DatabaseBloc databaseBloc;
+  final WebsocketRepository wsRepo;
   late final StreamSubscription<UsersState> usersBlocSubscription;
+  late final StreamSubscription<DatabaseBlocState> databaseEventSubscription;
+  late final StreamSubscription<WebsocketEventPayload> websocketEventSubscription;
 
   UsersViewCubit({
-    required this.usersBloc
+    required this.usersBloc,
+    required this.wsRepo,
+    required this.databaseBloc,
   }) : super(UsersViewCubitLoadingState()) {
     Future.microtask(() {
-      _onState(usersBloc.state);
-      usersBlocSubscription = usersBloc.stream.listen(_onState);
+      _onUserBlocState(usersBloc.state);
+      usersBlocSubscription = usersBloc.stream.listen(_onUserBlocState);
+      databaseEventSubscription = databaseBloc.stream.listen(_onDatabaseState);
     });
+    websocketEventSubscription = wsRepo.events.asBroadcastStream().listen(_onWebsocketUserEvent);
   }
 
-  void _onState(UsersState state) {
+  void _onUserBlocState(UsersState state) {
     if (state is UsersLoadedState){
-      //TODO: refactor
-      if (state.isAuthenticated) {
-        final users = state.users;
-        final Map<String, UserModel> usersDictionary = {};
-        users.forEach((user) {
-          usersDictionary["${user.id}"] = user;
-        });
-        emit(UsersViewCubitLoadedState(
-            users: users,
-            searchQuery: '',
-            usersDictionary: usersDictionary,
-            onlineUsersDictionary: state.onlineUsersDictionary,
-            clientEvent: state.clientEventsDictionary
-        ));
-      } else {
-        emit(UsersViewCubitLogoutState());
-      }
+      emit(UsersViewCubitLoadedState(
+          users: state.users,
+          searchQuery: '',
+          usersDictionary: state.usersMapped,
+          onlineUsersDictionary: state.onlineUsersDictionary,
+          clientEvent: state.clientEventsDictionary
+      ));
     } else if (state is UsersErrorState) {
       emit(UsersViewCubitErrorState(errorType: state.errorType));
     }
   }
 
-  void _onDBStateChange(DatabaseBlocState state) {
-    print("WsBlocState  ${state}");
-    if (state is WsStateOnlineUsersInitialState) {
-      final Map<int, bool> onlineUsersDictionary = {};
-      // state.onlineUsers.forEach((id) {
-      //   onlineUsersDictionary[id] = true;
-      // });
-    //   usersBloc.add(UsersUpdateOnlineStatusEvent(
-    //     onlineUsersDictionary: onlineUsersDictionary,
-    //     joinedUser: null,
-    //     exitedUser: null,
-    //     clientEvent: null,
-    //     dialogId: null
-    //   ));
-    // } else if (state is WsStateOnlineUsersExitState) {
-    //   usersBloc.add(UsersUpdateOnlineStatusEvent(
-    //     onlineUsersDictionary: null,
-    //     joinedUser: null,
-    //     exitedUser: state.userId,
-    //     clientEvent: null,
-    //     dialogId: null
-    //   ));
-    // } else if (state is WsStateOnlineUsersJoinState) {
-    //   usersBloc.add(UsersUpdateOnlineStatusEvent(
-    //     onlineUsersDictionary: null,
-    //     joinedUser: state.userId,
-    //     exitedUser: null,
-    //     clientEvent: null,
-    //     dialogId: null
-    //   ));
-    // } else if (state is WsOnlineUserTypingState) {
-    //   print("WsBlocState  ${state.clientEvent.event}");
-    //   usersBloc.add(UsersUpdateOnlineStatusEvent(
-    //     onlineUsersDictionary: null,
-    //     joinedUser: null,
-    //     exitedUser: null,
-    //     clientEvent: state.clientEvent,
-    //     dialogId: state.dialogId
-    //   ));
+  void _onDatabaseState(DatabaseBlocState state) {
+    print("DatabaseState  ${state}");
+    if (state is DatabaseBlocDBInitializedState) {
+      usersBloc.add(UsersLoadedEvent(users: state.users));
+    }
+  }
+
+  void _onWebsocketUserEvent(WebsocketEventPayload payload) {
+    if (payload.event == WebsocketEvent.onlineUsers) {
+      final online = <int, bool>{};
+      for (var id in payload.data?["online_users"]) {
+        online.addAll({id: true});
+      }
+      usersBloc.add(UsersUpdateOnlineStatusEvent(
+        onlineUsersDictionary: online,
+        joinedUser: null,
+        exitedUser: null,
+        clientEvent: null
+      ));
+    } else if (payload.event == WebsocketEvent.online) {
+      usersBloc.add(UsersUpdateOnlineStatusEvent(
+          onlineUsersDictionary: null,
+          joinedUser: payload.data?["online"],
+          exitedUser: null,
+          clientEvent: null
+      ));
+    } else if (payload.event == WebsocketEvent.offline) {
+      usersBloc.add(UsersUpdateOnlineStatusEvent(
+          onlineUsersDictionary: null,
+          joinedUser: null,
+          exitedUser: payload.data?["online"],
+          clientEvent: null
+      ));
+    } else if (payload.event == WebsocketEvent.userEvent) {
+      usersBloc.add(UsersUpdateOnlineStatusEvent(
+          onlineUsersDictionary: null,
+          joinedUser: null,
+          exitedUser: null,
+          clientEvent: payload.data?["user_event"]
+      ));
     }
   }
 

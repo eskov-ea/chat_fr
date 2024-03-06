@@ -9,6 +9,7 @@ import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/models/app_notification_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/user_profile_model.dart';
+import 'package:chat/services/ws/ws_repository.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/ui/widgets/app_notification_widget.dart';
@@ -78,6 +79,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   late final CallConnectingAudioPlayer callPlayer;
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
   String? currentVersion;
+  final _websocketRepo = WebsocketRepository.instance;
 
   AppNotificationModel? notification;
   bool isNotificationActive = false;
@@ -438,14 +440,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
-    var bloc = BlocProvider.of<WsBloc>(context);
     switch(state){
       case AppLifecycleState.resumed:
-        bloc.add(WsEventReconnect());
-        final passwd = BlocProvider.of<ProfileBloc>(context).state.user?.userProfileSettings?.asteriskUserPassword;
-        if (passwd == null) return;
-        BlocProvider.of<CallLogsBloc>(context).add(UpdateCallLogsEvent(passwd: passwd));
-        break;
+        _websocketRepo.reconnect();
       case AppLifecycleState.paused:
 
       default:

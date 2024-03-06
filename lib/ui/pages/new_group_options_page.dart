@@ -244,9 +244,7 @@ class _NewMessagePageState extends State<NewMessagePage> {
                               },
                             ),
                           ),
-                        Expanded(child: UserItem(
-                          user: bloc.usersBloc.state.users[index],
-                          onlineStatus: isOnline(bloc.usersBloc.state.users[index].id, bloc.state.onlineUsersDictionary) ,)
+                        Expanded(child: UserItem(user: bloc.usersBloc.state.users[index])
                         ),
 
                       ],

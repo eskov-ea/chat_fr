@@ -20,19 +20,13 @@ import '../error_handler_bloc/error_handler_events.dart';
 class UsersBloc extends Bloc<UsersEvent, UsersState> {
   final UsersRepository usersRepository;
   final ErrorHandlerBloc errorHandlerBloc;
-  final _secureStorage = DataProvider.storage;
   final _logger = Logger.getInstance();
   final _methodChannel = const MethodChannel("com.application.chat/permission_method_channel");
-  final DatabaseBloc databaseBloc;
-  late final StreamSubscription<DatabaseBlocState> databaseBlocSubscription;
-  int i = 0;
 
   UsersBloc({
     required this.usersRepository,
-    required this.errorHandlerBloc,
-    required this.databaseBloc
+    required this.errorHandlerBloc
   }) :  super(UsersState()) {
-    databaseBlocSubscription = databaseBloc.stream.listen(_onDBStateChange);
 
     on<UsersLoadedEvent>(onUsersLoadedEvent);
     on<UsersSearchEvent>(onUsersSearchEvent);
@@ -40,12 +34,6 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
     on<UsersUpdateOnlineStatusEvent>(onUsersUpdateOnlineStatusEvent);
   }
 
-  void _onDBStateChange(DatabaseBlocState state) {
-    print('DB state::: $state');
-    if (state is DatabaseBlocDBInitializedState) {
-      add(UsersLoadedEvent(users: state.users));
-    }
-  }
 
   void onUsersLoadedEvent (
       UsersLoadedEvent event, Emitter<UsersState> emit
@@ -178,16 +166,16 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
               onlineUsersDictionary: st.onlineUsersDictionary,
               clientEvent: st.clientEventsDictionary);
           emit(newState);
-        } else if (event.clientEvent != null && event.dialogId != null) {
+        } else if (event.clientEvent != null && event.clientEvent?.dialogId != null) {
           Map<int, ClientUserEvent> newClientEventDictionary =
               st.clientEventsDictionary;
           print(
               "onUsersUpdateOnlineStatusEvent     state is   ${newClientEventDictionary.length} ${newClientEventDictionary[193]?.event}  ${event.clientEvent?.event}");
           if (event.clientEvent?.event == "typing") {
-            newClientEventDictionary[event.dialogId!] = event.clientEvent!;
+            newClientEventDictionary[event.clientEvent!.dialogId] = event.clientEvent!;
           }
           if (event.clientEvent?.event == "finish_typing") {
-            newClientEventDictionary.remove(event.dialogId!);
+            newClientEventDictionary.remove(event.clientEvent!.dialogId!);
           }
           newState = st.copyWith(
               usersContainer: st.usersContainer,

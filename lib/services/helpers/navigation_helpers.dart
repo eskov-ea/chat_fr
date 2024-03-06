@@ -1,6 +1,7 @@
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/services/popup_manager.dart';
+import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../ui/navigation/main_navigation.dart';
@@ -25,7 +26,7 @@ void openChatScreen({
       partnerId: partnerId,
       dialogData: dialogData,
       username: username,
-      usersCubit: BlocProvider.of<UsersViewCubit>(context)
+      users: (BlocProvider.of<UsersViewCubit>(context).state as UsersViewCubitLoadedState).users
     ),
   );
 }
@@ -47,7 +48,7 @@ void openUserProfileInfoPage({
 
 void openGroupChatInfoPage({
   required BuildContext context,
-  required usersCubit,
+  required users,
   required username,
   required dialogData,
   required partnerId,
@@ -57,7 +58,7 @@ void openGroupChatInfoPage({
   Navigator.of(context).pushNamed(
       MainNavigationRouteNames.groupChatInfoPage,
       arguments: ChatPageArguments(
-        usersCubit: usersCubit,
+        users: users,
         username: username,
         dialogData: dialogData,
         partnerId: partnerId,

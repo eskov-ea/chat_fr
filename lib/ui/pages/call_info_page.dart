@@ -1,4 +1,5 @@
 import 'package:chat/view_models/user/users_view_cubit.dart';
+import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -122,7 +123,7 @@ class CallInfoPage extends StatelessWidget {
                             dialogData: dialogData,
                             username: callData.callerName,
                             dialogCubit: BlocProvider.of<DialogsViewCubit>(context),
-                            usersCubit: BlocProvider.of<UsersViewCubit>(context),
+                            users: (BlocProvider.of<UsersViewCubit>(context).state as UsersViewCubitLoadedState).users,
                           );
                           Navigator.of(context).pushNamed(MainNavigationRouteNames.chatPage, arguments: chatArgs);
                         },

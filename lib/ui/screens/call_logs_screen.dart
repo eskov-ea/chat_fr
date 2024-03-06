@@ -16,7 +16,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/call_logs_bloc/call_logs_event.dart';
 import '../../bloc/call_logs_bloc/call_logs_state.dart';
 import '../../bloc/profile_bloc/profile_bloc.dart';
-import '../../services/global.dart';
 import '../../view_models/user/users_view_cubit.dart';
 import '../../view_models/user/users_view_cubit_state.dart';
 import '../widgets/app_bar.dart';
@@ -104,14 +103,14 @@ class _CallsPageState extends State<CallsPage> {
                     radius: const Radius.circular(7),
                     scrollbarOrientation: ScrollbarOrientation.right,
                     child: ListView.builder(
-                        itemCount: state.callLog.length,
-                        itemBuilder: (context, index) {
-                          return getCallInfo(
-                              _usersState.usersDictionary,
-                              state.callLog[index],
-                              index
-                          );
-                        }),
+                      itemCount: state.callLog.length,
+                      itemBuilder: (context, index) {
+                        return getCallInfo(
+                            _usersState is UsersViewCubitLoadedState ? (_usersState as UsersViewCubitLoadedState).usersDictionary : <int, UserModel>{},
+                          state.callLog[index],
+                          index
+                        );
+                      }),
                   ),
                 ),
               ),
@@ -195,7 +194,7 @@ class _CallsPageState extends State<CallsPage> {
   }
 
 
-  Widget getCallInfo(Map<String, UserModel>  users, CallModel call, int index) {
+  Widget getCallInfo(Map<int, UserModel>  users, CallModel call, int index) {
     try {
       CallRenderData? data;
       final toCaller = call.toCaller.replaceAll(new RegExp(r'[^0-9]'), '').substring(1);
