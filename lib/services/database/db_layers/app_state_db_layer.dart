@@ -1,29 +1,30 @@
 import 'dart:developer';
-import 'package:chat/models/contact_model.dart';
 import 'package:chat/services/database/db_provider.dart';
-import 'package:sqflite/sqflite.dart';
 
 
 class AppStateDBLayer {
-
-
-
-  Future<Map<int, UserModel>> getUsers() async {
+  Future<String> getLastUpdateTime() async {
     try {
       final db = await DBProvider.db.database;
-      final users = <int, UserModel>{};
       return await db.transaction((txn) async {
         List<Object> res = await txn.rawQuery(
-            'SELECT id user_id, firstname, lastname, middlename, company, dept, position, '
-                'phone, email, birthdate, avatar, banned, last_access '
-                'FROM user '
-                'ORDER BY user.lastname; '
+            'SELECT last_update FROM app_settings;'
         );
-        res as List<Map>;
-        for (var user in res) {
-          users.addAll({user['user_id']: UserModel.fromJsonDB(user)});
-        }
-        return users;
+        return res.first.toString();
+      });
+    } catch (err, stackTrace) {
+      log('DB operation error:  $stackTrace');
+      rethrow;
+    }
+  }
+
+  Future<int> setLastUpdateTime() async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        return await txn.rawUpdate(
+            'UPDATE app_settings SET last_update = "${DateTime.now()}" ;'
+        );
       });
     } catch (err, stackTrace) {
       log('DB operation error:  $stackTrace');

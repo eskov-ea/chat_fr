@@ -49,8 +49,12 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         await onDatabaseBlocNewDialogReceivedEvent(event, emit);
       } else if (event is DatabaseBlocNewMessageStatusEvent) {
         await onDatabaseBlocNewMessageStatusEvent(event, emit);
+      } else if (event is DatabaseBlocNewMessageStatusEvent) {
+        await onDatabaseBlocNewMessageStatusEvent(event, emit);
+      } else if (event is DatabaseBlocGetUpdatesOnResume) {
+        await onDatabaseBlocGetUpdatesOnResume(event, emit);
       }
-    }, transformer: concurrent());
+    }, transformer: sequential());
   }
 
   void _onWebsocketEvent(WebsocketEventPayload payload) async {
@@ -166,6 +170,13 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       log('DB error:  $err \r\n  $stackTrace');
       emit(DatabaseBlocDBFailedInitializeState());
     }
+  }
+
+  Future<void> onDatabaseBlocGetUpdatesOnResume(
+      DatabaseBlocGetUpdatesOnResume event,
+      emit
+  ) async {
+    final lastUpdate = await db.getLastUpdateTime();
   }
 
   Future<void> onDatabaseBlocSendMessageEvent(DatabaseBlocSendMessageEvent event, emit) async {

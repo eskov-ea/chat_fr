@@ -53,5 +53,7 @@ class DatabaseBlocNewMessageStatusEvent extends DatabaseBlocEvent {
   DatabaseBlocNewMessageStatusEvent({required this.status});
 }
 
+class DatabaseBlocGetUpdatesOnResume extends DatabaseBlocEvent {}
+
 
 

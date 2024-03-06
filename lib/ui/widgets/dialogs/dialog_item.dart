@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/bloc/messge_bloc/message_event.dart';
+import 'package:chat/bloc/user_bloc/online_users_manager.dart';
 import 'package:chat/helpers.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
@@ -15,7 +17,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class DialogItem extends StatelessWidget {
+class DialogItem extends StatefulWidget {
   const DialogItem({
     Key? key,
     required this.dialogData,
@@ -33,13 +35,51 @@ class DialogItem extends StatelessWidget {
   final Map<int, bool> onlineMembers;
   final List<UserModel> users;
 
+  @override
+  State<DialogItem> createState() => _DialogItemState();
+}
+
+class _DialogItemState extends State<DialogItem> {
+
+  final UserOnlineStatusManager _userStatusManagement = UserOnlineStatusManager.instance;
+  late final StreamSubscription<Map<int, bool>>? _userStatusSubscription;
+  bool online = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.dialogData.chatType.p2p == 1) {
+      final List<UserModel> partners = getPartnersData(widget.dialogData.users);
+      if (_userStatusManagement.onlineUsers.containsKey(partners.first.id)) {
+        setState(() {
+          online = true;
+        });
+      }
+      _userStatusSubscription = _userStatusManagement.status.listen((event) {
+        if (event.containsKey(partners.first.id)) {
+          setState(() {
+            online = event[partners.first.id]!;
+          });
+        }
+      });
+    } else {
+      _userStatusSubscription = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    _userStatusSubscription?.cancel();
+    super.dispose();
+  }
+
   List<UserModel> getPartnersData(List<int> chatUsers) {
     //TODO: refactor
     final List<UserModel> partners = [];
     for (var i = 0; i < chatUsers.length; i++) {
       final id = chatUsers[i];
-      if (id != userId) {
-        for(var user in users) {
+      if (id != widget.userId) {
+        for(var user in widget.users) {
           if(user.id == id) {
             partners.add(user);
           }
@@ -50,7 +90,7 @@ class DialogItem extends StatelessWidget {
   }
 
   WidgetSpan isOnlineWidget (int id) {
-    if (checkOnline(id)) {
+    if (widget.checkOnline(id)) {
       return WidgetSpan(
         child: Icon(Icons.circle, color: Colors.green, size: 15,),
       );
@@ -67,30 +107,29 @@ class DialogItem extends StatelessWidget {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
 
-    final String partnerName = getChatItemName(dialogData, userId);
-    final List<UserModel> partners = getPartnersData(dialogData.users);
-    final objKey = ObjectKey("${userId}_object_key");
+    final String partnerName = getChatItemName(widget.dialogData, widget.userId);
+    final List<UserModel> partners = getPartnersData(widget.dialogData.users);
+    final objKey = ObjectKey("${widget.userId}_object_key");
 
     if(partners.isEmpty) return const SizedBox.shrink();
     return InkWell(
       key: objKey,
       onTap: () async {
-        print('open dialog:  ${dialogData.dialogId}');
+        print('open dialog:  ${widget.dialogData.dialogId}');
         BlocProvider.of<MessageBloc>(context).add(MessageBlocFlushMessagesEvent());
         await Future.delayed(Duration(milliseconds: 100));
-        clearSearch();
+        widget.clearSearch();
         openChatScreen(
             context: context,
-            userId: userId,
+            userId: widget.userId,
             partnerId: partners.first.id,
-            dialogData: dialogData,
-            username: userId == dialogData.chatUsers.first.userId
-                ? "${dialogData.chatUsers.last.user.lastname} ${dialogData.chatUsers.last.user.firstname}"
-                : "${dialogData.chatUsers.first.user.lastname} ${dialogData.chatUsers.first.user.firstname}"
+            dialogData: widget.dialogData,
+            username: widget.userId == widget.dialogData.chatUsers.first.userId
+                ? "${widget.dialogData.chatUsers.last.user.lastname} ${widget.dialogData.chatUsers.last.user.firstname}"
+                : "${widget.dialogData.chatUsers.first.user.lastname} ${widget.dialogData.chatUsers.first.user.firstname}"
         );
       },
       child: Container(
@@ -110,7 +149,7 @@ class DialogItem extends StatelessWidget {
             Padding(
                 padding: const EdgeInsets.only(right: 12.0),
                 child: Center(
-                    child: _setDialogAvatar(dialogData: dialogData, partners: partners, key: objKey)
+                    child: _setDialogAvatar(dialogData: widget.dialogData, partners: partners, key: objKey)
                 )
             ),
             Expanded(
@@ -133,7 +172,7 @@ class DialogItem extends StatelessWidget {
                           ),
                           children: [
                             const WidgetSpan(child: SizedBox(width: 5),),
-                            if (dialogData.chatType.p2p == 1 && isPartnerOnline[partners.first.id] != null)
+                            if (online)
                               const WidgetSpan(
                                 child: Icon(Icons.circle, color: Colors.green, size: 15,),
                               )
@@ -168,7 +207,7 @@ class DialogItem extends StatelessWidget {
                     height: 11,
                   ),
                   Text(
-                    dialogData.lastMessage != null ? getDateDialogModel(dialogData.lastMessage!.rawDate) : "",
+                    widget.dialogData.lastMessage != null ? getDateDialogModel(widget.dialogData.lastMessage!.rawDate) : "",
                     textAlign: TextAlign.end,
                     style: const TextStyle(
                       fontSize: 13,
@@ -182,11 +221,11 @@ class DialogItem extends StatelessWidget {
                   ),
                   Row(
                     children: [
-                      dialogData.chatType.typeId == 3 || dialogData.chatType.typeId == 4
+                      widget.dialogData.chatType.typeId == 3 || widget.dialogData.chatType.typeId == 4
                           ? Align(child: Icon(Icons.lock))
                           : SizedBox.shrink(),
                       SizedBox(width: 10,),
-                      ( dialogData.lastMessage != null && dialogData.lastMessage?.senderId != 0 && dialogData.lastMessage?.senderId != userId && Helpers.checkIReadMessage(dialogData.lastMessage?.statuses, userId!, dialogData) != 4)
+                      ( widget.dialogData.lastMessage != null && widget.dialogData.lastMessage?.senderId != 0 && widget.dialogData.lastMessage?.senderId != widget.userId && Helpers.checkIReadMessage(widget.dialogData.lastMessage?.statuses, widget.userId!, widget.dialogData) != 4)
                           ? Container(
                               width: 12,
                               height: 12,
@@ -207,12 +246,8 @@ class DialogItem extends StatelessWidget {
     );
   }
 
-  bool isPartnerOnline(int id) {
-
-  }
-
   Widget lastMessageContent() {
-    if (dialogData.lastMessage == null) {
+    if (widget.dialogData.lastMessage == null) {
       return const Text(
         'Нет сообщений',
         style: const TextStyle(
@@ -221,9 +256,9 @@ class DialogItem extends StatelessWidget {
             fontWeight: FontWeight.w600
         ),
       );
-    } else if (dialogData.lastMessage != null && dialogData.lastMessage!.message != "") {
+    } else if (widget.dialogData.lastMessage != null && widget.dialogData.lastMessage!.message != "") {
       return Text(
-        dialogData.lastMessage!.message,
+        widget.dialogData.lastMessage!.message,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(

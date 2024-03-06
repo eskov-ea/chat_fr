@@ -43,6 +43,12 @@ class _UserItemState extends State<UserItem> {
   }
 
   @override
+  void dispose() {
+    _userStatusSubscription.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       key: ObjectKey("${widget.user.id}_container_key"),
