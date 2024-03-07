@@ -4,8 +4,6 @@ import 'package:chat/bloc/database_bloc/database_state.dart';
 import 'package:chat/bloc/user_bloc/user_bloc.dart';
 import 'package:chat/bloc/user_bloc/user_event.dart';
 import 'package:chat/bloc/user_bloc/user_state.dart';
-import 'package:chat/bloc/ws_bloc/ws_state.dart';
-import 'package:chat/models/contact_model.dart';
 import 'package:chat/services/ws/ws_repositor_interface.dart';
 import 'package:chat/services/ws/ws_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

@@ -2,17 +2,33 @@ import 'dart:async';
 import 'dart:io';
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_event.dart';
+import 'package:chat/bloc/calls_bloc/calls_bloc.dart';
+import 'package:chat/bloc/calls_bloc/calls_state.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_state.dart';
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
+import 'package:chat/bloc/profile_bloc/profile_bloc.dart';
+import 'package:chat/bloc/profile_bloc/profile_events.dart';
+import 'package:chat/bloc/profile_bloc/profile_state.dart';
+import 'package:chat/factories/screen_factory.dart';
 import 'package:chat/models/app_notification_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/user_profile_model.dart';
+import 'package:chat/services/dialogs/dialogs_api_provider.dart';
+import 'package:chat/services/global.dart';
+import 'package:chat/services/helpers/message_sender_helper.dart';
+import 'package:chat/services/push_notifications/push_notification_service.dart';
 import 'package:chat/services/ws/ws_repository.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/storage/data_storage.dart';
+import 'package:chat/theme.dart';
+import 'package:chat/ui/navigation/main_navigation.dart';
+import 'package:chat/ui/widgets/active_call_widget.dart';
 import 'package:chat/ui/widgets/app_notification_widget.dart';
+import 'package:chat/ui/widgets/call_connecting_audio_player.dart';
+import 'package:chat/ui/widgets/session_expires_widget.dart';
 import 'package:chat/ui/widgets/web_container_wrapper.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/cupertino.dart';
@@ -22,27 +38,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../bloc/calls_bloc/calls_bloc.dart';
-import '../../bloc/calls_bloc/calls_state.dart';
-import '../../bloc/error_handler_bloc/error_types.dart';
-import '../../bloc/profile_bloc/profile_bloc.dart';
-import '../../bloc/profile_bloc/profile_events.dart';
-import '../../bloc/profile_bloc/profile_state.dart';
-import '../../bloc/user_bloc/user_event.dart';
-import '../../bloc/ws_bloc/ws_bloc.dart';
-import '../../bloc/ws_bloc/ws_event.dart';
-import '../../factories/screen_factory.dart';
-import '../../services/dialogs/dialogs_api_provider.dart';
-import '../../services/global.dart';
-import '../../services/helpers/message_sender_helper.dart';
-import '../../services/push_notifications/push_notification_service.dart';
-import '../../theme.dart';
-import '../../view_models/websocket/websocket_view_cubit.dart';
-import '../navigation/main_navigation.dart';
-import 'package:chat/view_models/user/users_view_cubit.dart';
-import '../widgets/active_call_widget.dart';
-import '../widgets/call_connecting_audio_player.dart';
-import '../widgets/session_expires_widget.dart';
 import 'running_call_screen.dart';
 
 
@@ -474,13 +469,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               children: [
                 !kIsWeb && isIncomingCall && Platform.isAndroid
                     ? ActiveCallStatusWidget(message: "Входящий вызов", screenCallback: _openCallScreen,)
-                    : SizedBox.shrink(),
+                    : const SizedBox.shrink(),
                 !kIsWeb && isOutgoingCall
                     ? ActiveCallStatusWidget(message: "Исходящий вызов", screenCallback: _openCallScreen,)
-                    : SizedBox.shrink(),
+                    : const SizedBox.shrink(),
                 !kIsWeb && isActiveCall
                     ? RunningCallStatusWidget(screenCallback: _openCallScreen)
-                    : SizedBox.shrink(),
+                    : const SizedBox.shrink(),
                 Expanded(
                   child: IndexedStack(
                     index: _selectedTab,

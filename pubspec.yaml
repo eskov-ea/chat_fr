@@ -69,5 +69,6 @@ flutter:
    - assets/images/
    - assets/sounds/
    - assets/icons/
+   - assets/player/
    - assets/call_controls/
 

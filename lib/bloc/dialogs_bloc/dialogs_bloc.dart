@@ -8,18 +8,16 @@ import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_events.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/dialog_model.dart';
+import 'package:chat/models/message_model.dart';
+import 'package:chat/services/dialogs/dialogs_repository.dart';
 import 'package:chat/services/global.dart';
+import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../models/message_model.dart';
-import '../../services/dialogs/dialogs_repository.dart';
-import '../../services/logger/logger_service.dart';
-import '../ws_bloc/ws_bloc.dart';
-import '../ws_bloc/ws_state.dart';
 
 
 class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
-  final IDialogRepository dialogRepository;
+  final DialogRepository dialogRepository;
   final ErrorHandlerBloc errorHandlerBloc;
   final DatabaseBloc databaseBloc;
   final _storage = DataProvider.storage;

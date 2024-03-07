@@ -251,8 +251,6 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
 
   Widget _controlButtons() {
-    final color = isPlaying ? Colors.red : Colors.blue;
-    final icon = isPlaying ? Icons.pause : Icons.play_arrow;
     return GestureDetector(
       onTap: () {
         if (isPlaying) {
@@ -263,8 +261,8 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
       },
       child: SizedBox(
         width: 30,
-        height: 25,
-        child: Icon(icon, color: color, size: 25),
+        height: 30,
+        child: isPlaying ? Image.asset("assets/player/pause.png") : Image.asset("assets/player/play2.png")
       ),
     );
   }
