@@ -410,5 +410,5 @@ class ClientUserEvent {
       event: json["event"]
   );
 
-  Map<String, dynamic> toMap() => {"dialogId" : dialogId, "event" : "finish_typing", "fromUser" : fromUser, "toUser": toUser};
+  Map<String, dynamic> toMap() => {"dialogId" : dialogId, "event" : event, "fromUser" : fromUser, "toUser": toUser};
 }
