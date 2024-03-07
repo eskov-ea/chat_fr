@@ -13,6 +13,7 @@ import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
 import 'package:chat/bloc/ws_bloc/ws_event.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/services/user_profile/user_profile_api_provider.dart';
+import 'package:chat/services/ws/ws_repository.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:chat/view_models/websocket/websocket_view_cubit.dart';
@@ -93,7 +94,7 @@ import 'messages/messages_repository.dart';
     //TODO: refacrot messageBloc
     // BlocProvider.of<ChatsBuilderBloc>(context).add(DeleteAllChatsEvent());
     BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLogoutEvent());
-    BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(WsEventCloseConnection());
+    WebsocketRepository.instance.disconnect();
     BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersDeleteUsersEvent());
     BlocProvider.of<CallLogsBloc>(context).add(DeleteCallsOnLogoutEvent());
 

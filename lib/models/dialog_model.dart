@@ -411,4 +411,9 @@ class ClientUserEvent {
   );
 
   Map<String, dynamic> toMap() => {"dialogId" : dialogId, "event" : event, "fromUser" : fromUser, "toUser": toUser};
+
+  @override
+  String toString() {
+    return "Instance of 'ClientUserEvent' [ dialog_id: $dialogId, event: $event, fromUser: $fromUser, toUser: $toUser]";
+  }
 }

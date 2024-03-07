@@ -205,6 +205,10 @@ class WebsocketRepository extends IWebsocketRepository{
     );
   }
 
+  void disconnect() {
+    _socket?.disconnect();
+  }
+
   void _onSocketEvent(PusherChannelsReadEvent event) {
     try {
       if (event.rootObject["event"] ==

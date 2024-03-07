@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/bloc/messge_bloc/message_event.dart';
+import 'package:chat/bloc/user_bloc/online_users_manager.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/message_model.dart';
@@ -77,7 +78,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   late Animation _forwardMenuAnimation;
   late AnimationController _selectedMessagesOptionsMenuAnimationController;
   late Animation _selectedMessagesOptionsMenuAnimation;
-  late final StreamSubscription usersViewCubitStateSubscription;
   List<SelectedMessage>? forwardingMessages;
   final focusNode = FocusNode();
   String? replyMessage;
@@ -88,7 +88,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   bool isSelectedMode = false;
   List<SelectedMessage> selected = [];
   final ScrollController scrollController = ScrollController();
-  final _websocketRepo = WebsocketRepository.instance;
+  final _userStatusManager = UserOnlineStatusManager.instance;
+  late final StreamSubscription<Map<int, bool>> usersStatusEventSubscription;
+  late final StreamSubscription<ClientUserEvent> usersClientEventSubscription;
 
   int currentPage = 1;
 
@@ -101,14 +103,22 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     }
     BlocProvider.of<MessageBloc>(context).add(MessageBlocSendReadMessagesStatusEvent(dialogId: widget.dialogData!.dialogId));
     setState(() {
-      // isOnline = BlocProvider.of<UsersViewCubit>(context).state.onlineUsersDictionary[widget.partnerId] != null;
+      isOnline = _userStatusManager.onlineUsers[widget.partnerId] == true;
     });
-    usersViewCubitStateSubscription = BlocProvider.of<UsersViewCubit>(context).stream.listen((state) {
-      setState(() {
-        // users = cubitUsers;
-        // isOnline = state.onlineUsersDictionary[widget.partnerId] != null ? true : false;
-        // isTyping = state.clientEvent[widget.dialogData?.dialogId] != null && state.clientEvent[widget.dialogData?.dialogId]?.event == "typing";
-      });
+    usersClientEventSubscription = _userStatusManager.event.listen((event) {
+      if (event.dialogId == widget.dialogData?.dialogId) {
+        setState(() {
+          isTyping = event.toUser == widget.userId && event.event == 'typing';
+        });
+      }
+    });
+    usersStatusEventSubscription = _userStatusManager.status.listen((event) {
+      final status = event[widget.userId];
+      if (status != null && isOnline != status) {
+        setState(() {
+          isOnline = status;
+        });
+      }
     });
     focusNode.addListener(() {
       if(focusNode.hasFocus) {
@@ -155,7 +165,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   void _sendTypingEvent() async {
     if (widget.dialogData?.dialogId != null) {
       final event = ClientUserEvent(fromUser: widget.userId, toUser: widget.partnerId, dialogId: widget.dialogData!.dialogId, event: "typing");
-      _websocketRepo.trigger(event);
+      _userStatusManager.sendEvent(event);
     }
 
   }
@@ -163,7 +173,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   void _sendFinishTypingEvent() async {
     if (widget.dialogData?.dialogId != null) {
       final event = ClientUserEvent(fromUser: widget.userId, toUser: widget.partnerId, dialogId: widget.dialogData!.dialogId, event: "finish_typing");
-      _websocketRepo.trigger(event);
+      _userStatusManager.sendEvent(event);
     }
   }
 
@@ -296,7 +306,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   void dispose() {
     focusNode.dispose();
     _forwardMenuAnimationController.dispose();
-    usersViewCubitStateSubscription.cancel();
+    usersStatusEventSubscription.cancel();
+    usersStatusEventSubscription.cancel();
     super.dispose();
   }
 

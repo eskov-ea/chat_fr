@@ -26,4 +26,9 @@ class WebsocketEventPayload {
   final Map<String, dynamic>? data;
 
   WebsocketEventPayload({required this.event, required this.data});
+
+  @override
+  String toString() {
+    return "Instance of WebsocketEventPayload [$event:  $data]";
+  }
 }

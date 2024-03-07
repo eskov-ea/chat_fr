@@ -277,16 +277,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (context.read<ProfileBloc>().state is UserProfileLoggedOutState) {
       BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLoadingEvent());
       BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.add(DialogsLoadEvent());
-      BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(InitializeSocketEvent());
       // BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersLoadEvent());
     }
   }
 
   void initialLoadData() async {
     BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLoadingEvent());
-    // BlocProvider.of<DialogsViewCubit>(context).loadDialogs();
-    BlocProvider.of<WebsocketViewCubit>(context).wsBloc.add(InitializeSocketEvent());
-    // BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersLoadEvent());
   }
 
   void getUserCallLog(UserProfileAsteriskSettings settings) {
