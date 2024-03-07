@@ -54,11 +54,11 @@ class MessagesProvider {
     }
   }
 
-  Future<Map<String, dynamic>?> getNewUpdatesOnResume() async {
+  Future<Map<String, dynamic>?> getNewUpdatesOnResume(int time) async {
     try {
       final String? token = await _secureStorage.getToken();
       final response = await http.get(
-        Uri.parse('https://erp.mcfef.com/api/chat/pull/4000'),
+        Uri.parse('https://erp.mcfef.com/api/chat/pull/$time'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token'

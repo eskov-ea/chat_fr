@@ -10,7 +10,7 @@ class MessagesRepository  {
   final MessageHelper _messageHelper = MessageHelper();
 
   Future <List<MessageData>> getMessages(userId, dialogId, pageNumber) => messagesProvider.getMessages(userId, dialogId, pageNumber);
-  Future <Map<String, dynamic>?> getNewUpdatesOnResume(userId, dialogId, pageNumber) => messagesProvider.getNewUpdatesOnResume();
+  Future <Map<String, dynamic>?> getNewUpdatesOnResume(userId, dialogId, pageNumber, time) => messagesProvider.getNewUpdatesOnResume(time);
   Future <bool> deleteMessage({required userId, required messageId}) => messagesProvider.deleteMessage(messageId: messageId);
   Future <void> updateMessageStatuses({required dialogId}) => messagesProvider.updateMessageStatuses(dialogId: dialogId);
   Future <MessageAttachmentData?> loadAttachmentData({required String attachmentId}) => messagesProvider.loadAttachmentData(attachmentId: attachmentId);

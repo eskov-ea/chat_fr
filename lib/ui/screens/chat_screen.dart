@@ -1,29 +1,28 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui';
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/bloc/messge_bloc/message_event.dart';
-import 'package:chat/bloc/ws_bloc/ws_bloc.dart';
+import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
+import 'package:chat/models/message_model.dart';
+import 'package:chat/services/global.dart';
+import 'package:chat/services/helpers/navigation_helpers.dart';
+import 'package:chat/services/messages/messages_api_provider.dart';
+import 'package:chat/services/ws/ws_repository.dart';
 import 'package:chat/theme.dart';
+import 'package:chat/ui/widgets/action_bar/action_bar.dart';
 import 'package:chat/ui/widgets/action_bar/forward_message_alert_dialog.dart';
+import 'package:chat/ui/widgets/chat_screen_call_button.dart';
 import 'package:chat/ui/widgets/message/mesasges_list.dart';
 import 'package:chat/ui/widgets/message/reply_message_bar_widget.dart';
 import 'package:chat/ui/widgets/web_container_wrapper.dart';
+import 'package:chat/view_models/user/users_view_cubit.dart';
+import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../models/contact_model.dart';
-import '../../models/message_model.dart';
-import '../../services/global.dart';
-import '../../services/helpers/navigation_helpers.dart';
-import '../../services/messages/messages_api_provider.dart';
-import '../../view_models/user/users_view_cubit.dart';
-import '../../view_models/user/users_view_cubit_state.dart';
-import '../widgets/action_bar/action_bar.dart';
-import '../widgets/chat_screen_call_button.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 
 
@@ -89,6 +88,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   bool isSelectedMode = false;
   List<SelectedMessage> selected = [];
   final ScrollController scrollController = ScrollController();
+  final _websocketRepo = WebsocketRepository.instance;
 
   int currentPage = 1;
 
@@ -154,22 +154,16 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   void _sendTypingEvent() async {
     if (widget.dialogData?.dialogId != null) {
-      while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
-        await Future.delayed(const Duration(seconds: 3));
-      }
-      BlocProvider.of<WsBloc>(context).presenceChannel!.trigger(eventName: "client-user-event",
-          data: {"dialogId" : widget.dialogData?.dialogId, "event" : "typing", "fromUser" : widget.userId, "toUser": widget.partnerId});
+      final event = ClientUserEvent(fromUser: widget.userId, toUser: widget.partnerId, dialogId: widget.dialogData!.dialogId, event: "typing");
+      _websocketRepo.trigger(event);
     }
 
   }
 
   void _sendFinishTypingEvent() async {
     if (widget.dialogData?.dialogId != null) {
-      while (BlocProvider.of<WsBloc>(context).presenceChannel == null) {
-        await Future.delayed(const Duration(seconds: 3));
-      }
-      BlocProvider.of<WsBloc>(context).presenceChannel!.trigger(eventName: "client-user-event",
-          data: {"dialogId" : widget.dialogData?.dialogId, "event" : "finish_typing", "fromUser" : widget.userId, "toUser": widget.partnerId});
+      final event = ClientUserEvent(fromUser: widget.userId, toUser: widget.partnerId, dialogId: widget.dialogData!.dialogId, event: "finish_typing");
+      _websocketRepo.trigger(event);
     }
   }
 

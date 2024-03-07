@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/storage/data_storage.dart';
-import 'package:chat/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -76,16 +74,17 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     _mPlayerSubscription = player.onProgress!.listen((e) {
       print("subscription    ${e.position}");
       setState(() {
-        pos = getAudioMessageDuration(e.position.inSeconds);
+        pos = getAudioMessageDuration(e.position.inMilliseconds);
         position = e.position;
         duration = e.duration;
       });
     });
-    player.setSubscriptionDuration(Duration(milliseconds: 100));
-    print(_mPlayerSubscription);
+    player.setSubscriptionDuration(const Duration(milliseconds: 50));
+    print('_mPlayerSubscription  $_mPlayerSubscription');
     try {
       await decodeBase64File();
     } catch (err, stackTrace) {
+      print('PLAYER INITED:: error $err');
       setState(() {
         isError = true;
       });
@@ -128,19 +127,16 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
 
   Future<void> setSubscriptionDuration(double d) async {
-    print('FuturesetSubscriptionDuration   $d');
-    // _mSubscriptionDuration = d;
     setState(() {
       position = Duration(seconds: d.toInt());
     });
     await player.seekToPlayer(position);
   }
-
   decodeBase64File() async {
-    final rawFile = await loadFileAndSaveLocally(
+    file = await loadFileAndSaveLocally(
         attachmentId: widget.attachmentId, fileName: widget.fileName);
-    if (rawFile != null) {
-      await audioPlayer.setSourceAsset(file!.path);
+    if (file != null) {
+      await audioPlayer.setSourceUrl(file!.path);
       final d = await audioPlayer.getDuration();
       setState(() {
         duration = d!;
@@ -158,13 +154,10 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    //TODO: fix it. It is temporary solution to have audio messaging feature.
-    return audioWidgetWithData();
-  }
-
-  Widget audioWidgetWithData() {
     if(isError) {
-      return Container(
+      return SizedBox(
+        height: 40,
+        width: 220,
         child: Row(
           mainAxisAlignment: widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.max,
@@ -174,8 +167,6 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                 init().then((value) {
                   setState(() {
                     _playerIsInited = true;
-                  });
-                  setState(() {
                     isError = false;
                   });
                 }).catchError((_) {
@@ -190,6 +181,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                 child: Image.asset("assets/images/download.png", fit: BoxFit.fitWidth),
               ),
             ),
+            const SizedBox(width: 15),
             SizedBox(
               width: 150,
               height: 35,
@@ -199,66 +191,81 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
         ),
       );
     } else {
-      return SizedBox(
-          height: 50,
-          width: 220,
-          child: Row(
-            mainAxisAlignment: widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              _playerIsInited && _dataIsLoaded
-                  ? _controlButtons()
-                  : const SizedBox(
-                  width: 15,
-                  height: 15,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                  )
-              ),
-              SizedBox(
-                width: 150,
-                child: Slider(
-                  value: position.inSeconds.toDouble(),
-                  min: 0,
-                  max: duration.inSeconds.toDouble(),
-                  onChanged: setSubscriptionDuration,
-                  // divisions: 100
+      return Padding(
+        padding: const EdgeInsets.only(top: 5),
+        child: SizedBox(
+            height: 40,
+            width: 220,
+            child: Row(
+              mainAxisAlignment: widget.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                SizedBox(
+                  height: 40,
+                  child: _playerIsInited && _dataIsLoaded
+                      ? _controlButtons()
+                      : const SizedBox(
+                      width: 25,
+                      height: 25,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 4.0,
+                        strokeCap: StrokeCap.round,
+                      )
+                  ),
                 ),
-              ),
-              Text(
-                getAudioMessageDuration(duration.inSeconds),
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              )
-            ],
-          )
+                const SizedBox(width: 5),
+                SizedBox(
+                  width: 135,
+                  height: 20,
+                  child: SliderTheme(
+                    data: SliderThemeData(
+                      trackHeight: 10.0,
+                      activeTrackColor: Colors.blueAccent,
+                      inactiveTrackColor: Colors.black12,
+                      thumbShape: RoundSliderThumbShape(enabledThumbRadius: 5.0),
+                      overlayShape: RoundSliderOverlayShape(overlayRadius: 5.0),
+                    ),
+                    child: Slider(
+                      value: position.inMilliseconds.toDouble(),
+                      min: 0,
+                      max: duration.inMilliseconds.toDouble(),
+                      onChanged: setSubscriptionDuration,
+                      // divisions: 100
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                SizedBox(
+                  height: 20,
+                  child: Text(
+                    getAudioMessageDuration(duration.inSeconds),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                )
+              ],
+            )
+        ),
       );
     }
   }
 
+
   Widget _controlButtons() {
     final color = isPlaying ? Colors.red : Colors.blue;
     final icon = isPlaying ? Icons.pause : Icons.play_arrow;
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(0),
-          child: GestureDetector(
-            onTap: () {
-              if (isPlaying) {
-                pause();
-              } else {
-                play();
-              }
-            },
-            child: SizedBox(
-              width: 30,
-              height: 35,
-              child: Icon(icon, color: color, size: 35),
-            ),
-          ),
-        )
-      ],
+    return GestureDetector(
+      onTap: () {
+        if (isPlaying) {
+          pause();
+        } else {
+          play();
+        }
+      },
+      child: SizedBox(
+        width: 30,
+        height: 25,
+        child: Icon(icon, color: color, size: 25),
+      ),
     );
   }
 }

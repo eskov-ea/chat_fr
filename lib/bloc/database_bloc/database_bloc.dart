@@ -177,6 +177,11 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       emit
   ) async {
     final lastUpdate = await db.getLastUpdateTime();
+
+    final now = DateTime.now();
+    final tRawDifference = (now.millisecondsSinceEpoch - DateTime.parse(lastUpdate).millisecondsSinceEpoch) / 1000;
+    final diff = tRawDifference.ceil();
+    print('last update was:: $lastUpdate   diff: $diff');
   }
 
   Future<void> onDatabaseBlocSendMessageEvent(DatabaseBlocSendMessageEvent event, emit) async {
@@ -237,21 +242,24 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       DatabaseBlocNewMessageReceivedEvent event,
       emit
   ) async {
+    print('UPDATMESSAGE:: start');
+
     final userId = await _storage.getUserId();
     if (userId != null && int.parse(userId) == event.message.senderId) {
       final updated = await db.updateLocalMessageByContent(
           event.message.messageId, event.message.message);
+      print('UPDATMESSAGE:: $updated');
       if (updated != null) {
         await db.saveMessageStatuses(event.message.statuses);
-        emit(DatabaseBlocUpdateLocalMessageState(
+        return emit(DatabaseBlocUpdateLocalMessageState(
             localId: updated[0],
             dialogId: event.message.dialogId,
             messageId: updated[1],
             statuses: event.message.statuses
         ));
-        return;
       }
     }
+    print('UPDATMESSAGE:: no way');
 
     await db.saveMessageStatuses(event.message.statuses);
     if (event.message.file != null) await db.saveAttachments([event.message.file!]);

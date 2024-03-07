@@ -100,8 +100,8 @@ class MessageContentWidget extends StatelessWidget {
                     softWrap: true, style: TextStyle(fontSize: 12, height: 1),
                   ),
                 ) : Container(
-                  height: 80,
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8 ),
+                  height: 40,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   child: AudioPlayerWidget(
                     attachmentId: file!.attachmentId,
                     fileName: file!.name,
@@ -135,7 +135,7 @@ class MessageContentWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(top: 5, right: 10, bottom: 8),
+                    padding: const EdgeInsets.only(top: 5, right: 0, bottom: 8),
                     child: Text(
                       messageTime,
                       style: const TextStyle(
@@ -146,11 +146,13 @@ class MessageContentWidget extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (isMe) const SizedBox(width: 1),
-                  if (isMe) Padding(
-                    padding: const EdgeInsets.only(bottom: 5),
-                    child: StatusWidget(status)
-                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 5, right: 5),
+                    child: SizedBox(
+                      width: isMe ? 25 : 0,
+                      child: isMe ? StatusWidget(status) : const SizedBox.shrink()
+                      ),
+                    ),
                   const SizedBox(width: 5)
                 ],
               )

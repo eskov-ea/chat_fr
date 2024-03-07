@@ -374,7 +374,7 @@ class WsBloc extends Bloc<WsBlocEvent, WsBlocState> {
   onWsEventGetUpdatesOnResume(event, emit) async {
     try {
       final Map<String, dynamic>? newUpdates =
-      await _messagesProvider.getNewUpdatesOnResume();
+      await _messagesProvider.getNewUpdatesOnResume(4000);
       print("newUpdates   $newUpdates     dialogsCollection     ${newUpdates?["chats"]}");
       if (newUpdates == null) return;
       final List<dynamic>? dialogsCollection = newUpdates["chats"];

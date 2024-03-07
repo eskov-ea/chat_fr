@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/dialogs/dialogs_api_provider.dart';
+import 'package:chat/services/messages/messages_api_provider.dart';
 import 'package:chat/services/users/users_api_provider.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:flutter/material.dart';
@@ -314,8 +315,14 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      final res = await db.getMessageById(4993);
-                      print('jkhjk:::::  $res');
+                      final res = await db.getLastUpdateTime();
+                      final now = DateTime.now();
+                      final tRawDifference = (now.millisecondsSinceEpoch - DateTime.parse(res).millisecondsSinceEpoch) / 1000;
+
+                      final Map<String, dynamic>? newUpdates =
+                      await MessagesProvider().getNewUpdatesOnResume(tRawDifference.ceil() + 250000);
+
+                      print('jkhjk:::::  ${newUpdates}');
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width * 0.45,
@@ -323,7 +330,7 @@ class _DBScreenState extends State<DBScreen> {
                         padding: const EdgeInsets.all(5),
                         color: Colors.redAccent.shade100,
                         child: const Center(
-                            child: Text('Read messages',
+                            child: Text('last update',
                               style: TextStyle(color: Colors.white),
                             )
                         )

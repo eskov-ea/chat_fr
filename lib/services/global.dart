@@ -153,6 +153,7 @@ import 'messages/messages_repository.dart';
     final Directory documentDirectory = await getApplicationDocumentsDirectory();
     final String path = documentDirectory.path;
     final File file = File('$path/$fileName');
+
     if (await file.exists()) {
       return file;
     } else {

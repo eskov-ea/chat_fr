@@ -10,7 +10,7 @@ class AppStateDBLayer {
         List<Object> res = await txn.rawQuery(
             'SELECT last_update FROM app_settings;'
         );
-        return res.first.toString();
+        return (res.first as Map)["last_update"];
       });
     } catch (err, stackTrace) {
       log('DB operation error:  $stackTrace');

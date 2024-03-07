@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 
 Widget StatusWidget(int status) {
   switch (status) {
+    case 0:
+      return const Icon(
+        Icons.sync,
+        color: Colors.grey,
+        size: 15.0,
+      );
     case 2:
       return const Icon(
         Icons.check_outlined,
@@ -10,7 +16,7 @@ Widget StatusWidget(int status) {
       );
     case 3:
       return const Stack(
-        alignment: Alignment.center,
+        alignment: Alignment.centerRight,
         children: [
           Icon(
             Icons.check_outlined,
@@ -29,6 +35,7 @@ Widget StatusWidget(int status) {
       );
     case 4:
       return const Stack(
+        alignment: Alignment.centerRight,
         children: [
           Icon(
             Icons.check_outlined,

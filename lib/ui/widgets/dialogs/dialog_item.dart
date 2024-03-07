@@ -48,8 +48,8 @@ class _DialogItemState extends State<DialogItem> {
   @override
   void initState() {
     super.initState();
-    if (widget.dialogData.chatType.p2p == 1) {
-      final List<UserModel> partners = getPartnersData(widget.dialogData.users);
+    final List<UserModel> partners = getPartnersData(widget.dialogData.users);
+    if (widget.dialogData.chatType.p2p == 1 && partners.isNotEmpty) {
       if (_userStatusManagement.onlineUsers.containsKey(partners.first.id)) {
         setState(() {
           online = true;

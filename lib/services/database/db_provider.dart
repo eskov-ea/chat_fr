@@ -5,6 +5,7 @@ import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/from_db_models.dart';
 import 'package:chat/models/message_model.dart';
+import 'package:chat/services/database/db_layers/app_state_db_layer.dart';
 import 'package:chat/services/database/db_layers/attachment_db_layer.dart';
 import 'package:chat/services/database/db_layers/chat_type_layer.dart';
 import 'package:chat/services/database/db_layers/chat_user_db_layer.dart';
@@ -115,6 +116,11 @@ class DBProvider {
   ///   CHAT USERS LAYER
   Future<void> saveChatUsers(List<ChatUser> chatUsers) async => await ChatUsersDBLayer().saveChatUsers(chatUsers);
   Future<Map<int, List<ChatUser>>> getChatUsers() async => await ChatUsersDBLayer().getChatUsers();
+
+
+  /// APP STATE DB LAYER
+  Future<String> getLastUpdateTime() async => await AppStateDBLayer().getLastUpdateTime();
+  Future<int> setLastUpdateTime() async => await AppStateDBLayer().setLastUpdateTime();
 
 
   ///   DB DEVELOPER SERVICE
