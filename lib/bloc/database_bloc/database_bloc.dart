@@ -80,6 +80,10 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
 
   Future<void> onDatabaseBlocInitializeEvent(event, emit) async {
     try {
+      emit(DatabaseBlocInitializationInProgressState(
+          message: 'Подключение к Базе Данных',
+          progress: 0.05
+      ));
       final DateTime start = DateTime.now();
       await db.database;
       await db.initDB();
@@ -89,7 +93,10 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         final token = await _storage.getToken();
         await db.initializeChatTypeValues();
 
-        emit(DatabaseBlocLoadingUsersState());
+        emit(DatabaseBlocInitializationInProgressState(
+          message: 'Синхронизируем данные с сервера',
+          progress: 0.12
+        ));
         final profile = await UserProfileProvider().getUserProfile(token);
         await DataProvider.storage.setUserId(profile.id);
         print('Set user id:  ${profile.id}');
@@ -99,7 +106,6 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
             dept: profile.dept, email: profile.email, birthdate: profile.birthdate, avatar: profile.avatar, banned: 0,
             lastAccess: null));
         await db.saveUsers(users);
-        emit(DatabaseBlocLoadingDialogsState());
 
         final dialogs = await DialogsProvider().getDialogs();
 
@@ -128,7 +134,6 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         await db.saveMessageStatuses(statuses);
         await db.saveChatUsers(chatUsers);
         await db.saveDialogs(dialogs);
-        emit(DatabaseBlocLoadingCallsState());
         await Future.delayed(const Duration(seconds: 2));
         final calls = <CallModel>[];
 
@@ -138,10 +143,16 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
 
       print('Initialize from db');
 
-      emit(DatabaseBlocLoadingUsersState());
+      emit(DatabaseBlocInitializationInProgressState(
+          message: 'Загружаем пользователей',
+          progress: 0.5
+      ));
       final users = await db.getUsers();
       final messages = await db.getMessages();
-      emit(DatabaseBlocLoadingDialogsState());
+      emit(DatabaseBlocInitializationInProgressState(
+          message: 'Загружаем диалоги',
+          progress: 0.6
+      ));
       final chatUsers = await db.getChatUsers();
       final dbDialogs = await db.getDialogs();
       print('dbDialogs $dbDialogs');
@@ -161,7 +172,10 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         dialogs.add(dd);
       }
       websocketRepository.connect(dialogs);
-      emit(DatabaseBlocLoadingCallsState());
+      emit(DatabaseBlocInitializationInProgressState(
+          message: 'Загружаем историю звонков',
+          progress: 0.85
+      ));
       await Future.delayed(const Duration(seconds: 2));
       final calls = <CallModel>[];
 

@@ -26,12 +26,17 @@ class DatabaseBlocDBInitializedState extends DatabaseBlocState {
     );
   }
 }
-class DatabaseBlocDBNotInitializedState extends DatabaseBlocState {}
-class DatabaseBlocDBFailedInitializeState extends DatabaseBlocState {}
 
-class DatabaseBlocLoadingUsersState extends DatabaseBlocState {}
-class DatabaseBlocLoadingDialogsState extends DatabaseBlocState {}
-class DatabaseBlocLoadingCallsState extends DatabaseBlocState {}
+class DatabaseBlocDBNotInitializedState extends DatabaseBlocState {}
+
+class DatabaseBlocInitializationInProgressState extends DatabaseBlocState {
+  final String message;
+  final double progress;
+
+  DatabaseBlocInitializationInProgressState({required this.message, required this.progress});
+}
+
+class DatabaseBlocDBFailedInitializeState extends DatabaseBlocState {}
 
 class DatabaseBlocNewMessageReceivedState extends DatabaseBlocState {
   final MessageData message;

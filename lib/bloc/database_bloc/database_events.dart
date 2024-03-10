@@ -6,7 +6,12 @@ abstract class DatabaseBlocEvent {}
 
 class DatabaseBlocInitializeEvent extends DatabaseBlocEvent {}
 
-class DatabaseBlocInitializeInProgressEvent extends DatabaseBlocEvent {}
+class DatabaseBlocInitializeInProgressEvent extends DatabaseBlocEvent {
+  final String? message;
+  final double? progress;
+
+  DatabaseBlocInitializeInProgressEvent({required this.message, required this.progress});
+}
 
 class DatabaseBlocCheckAuthTokenEvent extends DatabaseBlocEvent {}
 

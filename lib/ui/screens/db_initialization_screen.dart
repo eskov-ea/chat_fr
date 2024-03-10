@@ -26,17 +26,12 @@ class _DatabaseInitializationScreenState extends State<DatabaseInitializationScr
     super.initState();
     _databaseStateSubscription = BlocProvider.of<DatabaseBloc>(context).stream.listen((event) {
       print('_databaseStateSubscription  $event');
-      if (event is DatabaseBlocLoadingUsersState) {
+      if (event is DatabaseBlocInitializationInProgressState) {
         setState(() {
-          message = 'Загружаем \r\n пользователей';
-          stepProgress = 0.65;
+          message = event.message;
+          stepProgress = event.progress;
         });
-      } else if (event is DatabaseBlocLoadingDialogsState) {
-        setState(() {
-          message = 'Загружаем \r\n диалоги';
-          stepProgress = 0.75;
-        });
-      } else if (event is DatabaseBlocDBInitializedState) {
+      }else if (event is DatabaseBlocDBInitializedState) {
         setState(() {
           message = 'Загрузка завершена';
           stepProgress = 1;
