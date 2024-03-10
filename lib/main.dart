@@ -8,6 +8,7 @@ import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/bloc/user_bloc/online_users_manager.dart';
 import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/dialogs/dialogs_repository.dart';
+import 'package:chat/services/error_handling_service/error_handling_repository.dart';
 import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/services/users/users_repository.dart';
 import 'package:chat/services/ws/ws_repository.dart';
@@ -60,6 +61,7 @@ void main() async {
   HttpOverrides.global = MyHttpOverrides();
   WebsocketRepository.instance;
   UserOnlineStatusManager.instance;
+  ErrorHandlingRepository.instance;
 
   // if (!kIsWeb) {
   //   await Firebase.initializeApp(

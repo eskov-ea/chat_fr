@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool isOutgoingCall = false;
   bool isUpdateAvailable = false;
   bool isCallBeenAnswered = false;
-  String? userId;
+  int? userId;
   late final CallConnectingAudioPlayer callPlayer;
   late final StreamSubscription<ErrorHandlerState> _errorHandlerBlocSubscription;
   String? currentVersion;
@@ -291,7 +291,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       if (Platform.isIOS && state is! IncomingCallState || !Platform.isIOS) {
         Navigator.of(context).pushNamed(
             MainNavigationRouteNames.runningCallScreen,
-            arguments: CallScreenArguments(userId: userId));
+            arguments: CallScreenArguments(userId: userId.toString()));
       }
     } catch(_) {
       setState(() {
@@ -406,7 +406,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 }
               }
             }
-            _sendMissCallNotification(dialogId: dialogId, caller: caller, userId: userId);
+            _sendMissCallNotification(dialogId: dialogId, caller: caller, userId: userId.toString());
           }
         } else if (state is StreamRunningCallState) {
           callPlayer.stopPlayConnectingSound();

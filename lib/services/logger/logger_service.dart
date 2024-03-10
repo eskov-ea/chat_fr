@@ -24,7 +24,7 @@ class Logger {
     try {
       level == null ? 'debug' : level;
       // final String? token = await _secureStorage.getToken();
-      final String? userId = await _secureStorage.getUserId();
+      final int? userId = await _secureStorage.getUserId();
       final PackageInfo packageInfo = await PackageInfo.fromPlatform();
       final String? version = packageInfo.version;
       final platform = Platform.operatingSystem;
@@ -51,7 +51,7 @@ class Logger {
   Future<void> sendDebugMessage({required String message, required String operation, String? level}) async {
     level ?? 'debug';
     try {
-      final String? userId = await _secureStorage.getUserId();
+      final int? userId = await _secureStorage.getUserId();
       final postData = jsonEncode(<String, Object>{
         'data': {
           'message':

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/dialogs/dialogs_api_provider.dart';
+import 'package:chat/services/dialogs/dialogs_repository.dart';
 import 'package:chat/services/messages/messages_api_provider.dart';
 import 'package:chat/services/users/users_api_provider.dart';
 import 'package:chat/storage/data_storage.dart';
@@ -256,7 +257,8 @@ class _DBScreenState extends State<DBScreen> {
                 children: [
                   GestureDetector(
                     onTap: () async {
-
+                      final db = DBProvider.db;
+                      await db.setUserId(1010);
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width * 0.45,
@@ -264,7 +266,7 @@ class _DBScreenState extends State<DBScreen> {
                         padding: const EdgeInsets.all(5),
                         color: Colors.orange.shade500,
                         child: const Center(
-                            child: Text('Drop app settings',
+                            child: Text('set user',
                               style: TextStyle(color: Colors.white),
                             )
                         )
@@ -273,7 +275,7 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      final res = await db.getMessageStatusesByMessageId(6551);
+                      final res = await db.getUserId();
                       print('::::::::::::::::::   $res');
                     },
                     child: Container(
@@ -282,7 +284,7 @@ class _DBScreenState extends State<DBScreen> {
                         padding: const EdgeInsets.all(5),
                         color: Colors.green.shade400,
                         child: const Center(
-                            child: Text('Message w file',
+                            child: Text('get user id',
                               style: TextStyle(color: Colors.white),
                             )
                         )
@@ -297,7 +299,7 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      final res = await db.getAttachmentById(415);
+                      final res = await db.getToken();
                       print('jkhjk:::::  $res');
                     },
                     child: Container(
@@ -306,7 +308,7 @@ class _DBScreenState extends State<DBScreen> {
                         padding: const EdgeInsets.all(5),
                         color: Colors.blueAccent.shade200,
                         child: const Center(
-                            child: Text('Message file',
+                            child: Text('get token',
                               style: TextStyle(color: Colors.white),
                             )
                         )

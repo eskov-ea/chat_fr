@@ -19,7 +19,6 @@ class LoaderViewCubit extends Cubit<LoaderViewCubitState> {
           () {
         _onState(authBloc.state);
         authBlocSubscription = authBloc.stream.listen(_onState);
-        authBloc.add(AuthCheckStatusEvent());
       },
     );
   }
@@ -32,6 +31,11 @@ class LoaderViewCubit extends Cubit<LoaderViewCubitState> {
       print('notAuthorized');
       emit(LoaderViewCubitState.notAuthorized);
     }
+  }
+
+  start() {
+    print('AUTHSTATE:::: step1 ${DateTime.now().millisecondsSinceEpoch}');
+    authBloc.add(AuthCheckStatusEvent());
   }
 
   @override

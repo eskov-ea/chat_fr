@@ -12,6 +12,7 @@ abstract class IWebsocketRepository {
 
   void sinkState(PusherChannelsClientLifeCycleState payload) => _stateController.sink.add(payload);
   void sinkEvent(WebsocketEventPayload payload) => _eventController.sink.add(payload);
+
 }
 
 class WebsocketStatePayload {

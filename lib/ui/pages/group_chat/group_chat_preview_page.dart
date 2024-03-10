@@ -50,7 +50,7 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
   Future<void> _startChat() async {
     PopupManager.showLoadingPopup(context);
     try {
-      final String? userId = await DataProvider.storage.getUserId();
+      final int? userId = await DataProvider.storage.getUserId();
       await Future.delayed(const Duration(milliseconds: 40));
       final DialogData dialogData = await _dialogsProvider.createDialog(
         chatType: currentChatType,
@@ -63,7 +63,7 @@ class _GroupChatPreviewPageState extends State<GroupChatPreviewPage> {
 
       openChatScreen(
           context: context,
-          userId: int.parse(userId!),
+          userId: userId!,
           //TODO: refactor db
           partnerId: dialogData.users.first,
           dialogData: dialogData,

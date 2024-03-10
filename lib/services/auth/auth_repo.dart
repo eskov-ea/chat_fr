@@ -67,9 +67,10 @@ class AuthRepository {
           'Authorization': 'Bearer $token',
         },
       );
-      await _secureStorage.deleteUserId();
-      await _secureStorage.deleteToken();
-      await _secureStorage.deleteDeviceID();
+      //TODO: refactor db
+      // await _secureStorage.deleteUserId();
+      // await _secureStorage.deleteToken();
+      // await _secureStorage.deleteDeviceID();
     } catch (err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
       throw AppErrorException(AppErrorExceptionType.auth);

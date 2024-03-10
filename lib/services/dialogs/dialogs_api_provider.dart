@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
+import 'package:chat/services/error_handling_service/error_handling_repository.dart';
 import 'package:http/http.dart' as http;
 import '../../models/dialog_model.dart';
 import '../../storage/data_storage.dart';
@@ -11,10 +12,12 @@ import '../logger/logger_service.dart';
 
 class DialogsProvider {
   final _secureStorage = DataProvider.storage;
+  final _errorHandler = ErrorHandlingRepository.instance;
 
   Future<List<DialogData>> getDialogs() async {
     try {
       final String? token = await _secureStorage.getToken();
+      // throw AppErrorException(AppErrorExceptionType.getData);
       final response = await http.get(
         Uri.parse('https://erp.mcfef.com/api/chat/chats'),
         headers: <String, String>{
@@ -31,19 +34,9 @@ class DialogsProvider {
       List<DialogData> dialogs =
           collection.map((dialog) => DialogData.fromJson(dialog)).whereType<DialogData>().toList();
       return dialogs;
-    } on SocketException catch(err, stackTrace) {
-      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "
-          "address: ${err.address}, port: ${err.port}, url was: https://erp.mcfef.com/api/chat/chats ]");
-      throw AppErrorException(AppErrorExceptionType.network);
-    } on http.ClientException catch (err, stackTrace) {
-      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: "HTTP ClientException", additionalInfo: err.toString());
-      throw AppErrorException(AppErrorExceptionType.network);
-    } on AppErrorException {
-      rethrow;
-    } catch (err, stackTrace) {
-      log("GetDialogs:: $err \r\n $stackTrace");
-      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
-      throw AppErrorException(AppErrorExceptionType.other);
+    } on Exception catch (err, stackTrace) {
+      print('Error handler::: start 1  $err');
+      throw _errorHandler.handleError(err, stackTrace);
     }
   }
 

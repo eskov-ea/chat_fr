@@ -45,8 +45,7 @@ class WebsocketRepository extends IWebsocketRepository{
     StreamSubscription? generalEventSubscription;
 
     final token = await _secureStorage.getToken();
-    final rawUserId = await _secureStorage.getUserId();
-    final userId = int.parse(rawUserId!);
+    final userId = await _secureStorage.getUserId();
     try {
       final List<DialogData>? dialogs = await DialogRepository().getDialogs();
 
@@ -105,7 +104,7 @@ class WebsocketRepository extends IWebsocketRepository{
         final Channel userInfoChannel = clientSubscribeToChannel(
             authToken: token,
             client: _socket,
-            channelName: 'private-userinfo.$rawUserId');
+            channelName: 'private-userinfo.$userId');
         channels[userInfoChannel.name] = userInfoChannel;
         generalEventSubscription = userInfoChannel.bind('update').listen((event) {
               print("USERINFOCHANNEL  ${event.channelName}   ${jsonDecode(

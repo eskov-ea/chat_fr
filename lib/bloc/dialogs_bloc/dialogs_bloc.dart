@@ -100,7 +100,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       for (final dialog in state.dialogs) {
         if(dialog.dialogId == status.dialogId) {
           if (dialog.lastMessage != null) dialog.lastMessage!.statuses.add(status);
-          if (userId != null && status.userId == int.parse(userId)) emit(state.copyWith());
+          if (userId != null && status.userId == userId) emit(state.copyWith());
         }
       }
     }
@@ -115,7 +115,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         final query = event.searchQuery.toLowerCase();
         final userId = await DataProvider.storage.getUserId();
         final filteredDialogs =
-            filterDialogsBySearchQuery(state.dialogsContainer!.dialogs, query, int.parse(userId!));
+            filterDialogsBySearchQuery(state.dialogsContainer!.dialogs, query, userId!);
         final container = state.searchedContainer!.copyWith(dialogs: filteredDialogs);
         emit(state.copyWith(searchedDialogs: container, searchQuery: event.searchQuery));
       } else {

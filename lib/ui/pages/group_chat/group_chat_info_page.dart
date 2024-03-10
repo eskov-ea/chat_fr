@@ -71,13 +71,13 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
   }
 
   getInitialUsers() async {
-    userId = await DataProvider.storage.getUserId();
+    int? userId = await DataProvider.storage.getUserId();
     stateUsers = [];
     for (var user in widget.dialogData.chatUsers) {
       if (user.active == 1) {
         stateUsers.add(user);
       }
-      if (user.userId.toString() == userId && user.chatUserRole == 1) {
+      if (user.userId == userId && user.chatUserRole == 1) {
         isAdmin = true;
       }
     }

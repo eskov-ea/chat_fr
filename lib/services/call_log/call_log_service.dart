@@ -14,7 +14,7 @@ class CallLogService {
 
   Future<List<CallModel>> getCallLogs({required passwd}) async {
     try {
-      final String? userId = await _secureStorage.getUserId();
+      final int? userId = await _secureStorage.getUserId();
       final postData = jsonEncode({
         "id": "${SipConfig.getPrefix()}$userId",
         "password": passwd

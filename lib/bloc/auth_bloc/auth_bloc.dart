@@ -60,6 +60,7 @@ class AuthBloc
         final bool auth = await authRepo.checkAuthStatus();
         final newState =
             auth == true ? const Authenticated() : Unauthenticated();
+        print('AUTHSTATE:::: step3 ${DateTime.now().millisecondsSinceEpoch}');
         emit(newState);
     } catch (err, stackTrace) {
         Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: stackTrace.toString(), uri: 'https://erp.mcfef.com/api/profile');

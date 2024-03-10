@@ -55,9 +55,8 @@ class _UserItemState extends State<UserItem> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
       child: InkWell(
         onTap:  () async {
-          final userIdString = await DataProvider.storage.getUserId();
-          final userId = int.parse(userIdString!);
-          final dialogData= findDialog(context, userId, widget.user.id);
+          final userId = await DataProvider.storage.getUserId();
+          final dialogData= findDialog(context, userId!, widget.user.id);
           openChatScreen(
               context: context,
               userId: userId,

@@ -121,6 +121,14 @@ class DBProvider {
   /// APP STATE DB LAYER
   Future<String> getLastUpdateTime() async => await AppStateDBLayer().getLastUpdateTime();
   Future<int> setLastUpdateTime() async => await AppStateDBLayer().setLastUpdateTime();
+  Future<String?> getToken() async => await AppStateDBLayer().getToken();
+  Future<int?> getUserId() async => await AppStateDBLayer().getUserId();
+  Future<String> getDeviceId() async => await AppStateDBLayer().getDeviceId();
+  Future<int> setToken(String token) async => AppStateDBLayer().setToken(token);
+  Future<int> setUserId(int userId) async => AppStateDBLayer().setUserId(userId);
+  Future<String> getSipContacts() async => AppStateDBLayer().getSipContacts();
+  Future<int> setSipContacts(String contacts) async => AppStateDBLayer().setSipContacts(contacts);
+  Future<int> setDeviceId(String deviceId) async => AppStateDBLayer().setDeviceId(deviceId);
 
 
   ///   DB DEVELOPER SERVICE

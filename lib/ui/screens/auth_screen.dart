@@ -46,9 +46,8 @@ class _AuthScreenState extends State<AuthScreen> {
       }
       if (!kIsWeb) {
         deviceToken = await methodChannel.invokeMethod('getDeviceToken');
-        _dataProvider.setDeviceID(deviceToken);
+        _dataProvider.setDeviceId(deviceToken);
       }
-      _dataProvider.setOs(os);
     } on PlatformException catch (e) {
       await Future.delayed(const Duration(seconds: 2), (){
         if (!kIsWeb) _checkDeviceToken();

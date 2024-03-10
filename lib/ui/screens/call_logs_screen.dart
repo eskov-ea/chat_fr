@@ -34,7 +34,7 @@ class CallsPage extends StatefulWidget {
 class _CallsPageState extends State<CallsPage> {
 
   late final StreamSubscription _usersSubscription;
-  String? userId;
+  int? userId;
   late UsersViewCubitState _usersState;
   final _controller = ScrollController();
 
@@ -202,7 +202,7 @@ class _CallsPageState extends State<CallsPage> {
       if (toCaller == userId) {
         final user = users["$fromCaller"]!;
         data = CallRenderData(
-            userId: int.parse(userId!),
+            userId: userId!,
             callName:
                 call.callStatus == "ANSWERED" ? "Входящий" : "Пропущенный",
             callerName: "${user.lastname} ${user.firstname}",
@@ -212,7 +212,7 @@ class _CallsPageState extends State<CallsPage> {
       } else {
         final user = users["$toCaller"]!;
         data = CallRenderData(
-            userId: int.parse(userId!),
+            userId: userId!,
             callName: "Исходящий",
             callerName: "${user.lastname} ${user.firstname}",
             callerNumber: toCaller,

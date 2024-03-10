@@ -55,8 +55,7 @@ class _MessagesPageState extends State<MessagesPage> {
   }
 
   Future<int?> _readUserId() async {
-    final userIdFromStorage = await DataProvider.storage.getUserId();
-    return userIdFromStorage == null ? null : int.parse(userIdFromStorage);
+    return await DataProvider.storage.getUserId();
   }
 
   void clearSearch() {

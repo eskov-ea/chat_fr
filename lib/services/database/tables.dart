@@ -93,8 +93,11 @@ final Map<String, String> tables = {
   'CREATE TABLE app_settings ('
       'id INTEGER PRIMARY KEY, '
       'device_id varchar(255) DEFAULT NULL, '
+      'user_id INTEGER DEFAULT NULL, '
+      'auth_token varchar(255) DEFAULT NULL, '
       'last_update DATETIME DEFAULT CURRENT_TIMESTAMP, '
       'first_initialize TINYINT(1) DEFAULT 1, '
+      'sip_contacts text DEFAULT NULL, '
       'created_at DATETIME DEFAULT CURRENT_TIMESTAMP );',
 
 };

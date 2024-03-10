@@ -8,16 +8,4 @@ class AppErrorException implements Exception {
 
   @override
   toString() => "AppErrorException type: $type, message: ${message ?? "no message"}";
-
-  @override
-  bool operator ==(Object other) =>
-    other is AppErrorException &&
-    runtimeType == other.runtimeType &&
-    type == other.type &&
-    message == other.message;
-
-  @override
-  int get hashCode =>
-      type.hashCode ^
-      message.hashCode;
 }

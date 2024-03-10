@@ -51,6 +51,8 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         await onDatabaseBlocNewMessageStatusEvent(event, emit);
       } else if (event is DatabaseBlocGetUpdatesOnResume) {
         await onDatabaseBlocGetUpdatesOnResume(event, emit);
+      } else if (event is DatabaseBlocCheckAuthTokenEvent) {
+        await onDatabaseBlocCheckAuthTokenEvent(event, emit);
       }
     }, transformer: sequential());
   }
@@ -66,6 +68,14 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         add(DatabaseBlocNewDialogReceivedEvent(dialog: payload.data?["dialog"]));
       }
     }
+  }
+
+  Future<bool> onDatabaseBlocCheckAuthTokenEvent(
+      DatabaseBlocCheckAuthTokenEvent event,
+      emit
+  ) async {
+    final token = await db.getToken();
+    return token != null;
   }
 
   Future<void> onDatabaseBlocInitializeEvent(event, emit) async {
@@ -196,7 +206,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       final message = createLocalMessage(
           messageId: messageId,
           attachmentId: attachmentId,
-          userId: int.parse(userId),
+          userId: userId,
           dialogId: event.dialogId,
           messageText: event.messageText,
           filename: event.filename,
@@ -243,7 +253,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     print('UPDATMESSAGE:: start');
 
     final userId = await _storage.getUserId();
-    if (userId != null && int.parse(userId) == event.message.senderId) {
+    if (userId != null && userId == event.message.senderId) {
       final updated = await db.updateLocalMessageByContent(
           event.message.messageId, event.message.message);
       print('UPDATMESSAGE:: $updated');

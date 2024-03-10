@@ -8,6 +8,8 @@ class DatabaseBlocInitializeEvent extends DatabaseBlocEvent {}
 
 class DatabaseBlocInitializeInProgressEvent extends DatabaseBlocEvent {}
 
+class DatabaseBlocCheckAuthTokenEvent extends DatabaseBlocEvent {}
+
 class DatabaseBlocSendMessageEvent extends DatabaseBlocEvent {
   final String? messageText;
   final int dialogId;
