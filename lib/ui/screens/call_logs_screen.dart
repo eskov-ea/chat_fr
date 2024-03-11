@@ -93,25 +93,22 @@ class _CallsPageState extends State<CallsPage> {
                 height: 8,
               ),
               Expanded(
-                child: RefreshIndicator(
-                  onRefresh: _onRefresh,
-                  child: Scrollbar(
-                    controller: _controller,
-                    thumbVisibility: false,
-                    thickness: 5,
-                    trackVisibility: false,
-                    radius: const Radius.circular(7),
-                    scrollbarOrientation: ScrollbarOrientation.right,
-                    child: ListView.builder(
-                      itemCount: state.callLog.length,
-                      itemBuilder: (context, index) {
-                        return getCallInfo(
-                            _usersState is UsersViewCubitLoadedState ? (_usersState as UsersViewCubitLoadedState).usersDictionary : <int, UserModel>{},
-                          state.callLog[index],
-                          index
-                        );
-                      }),
-                  ),
+                child: Scrollbar(
+                  controller: _controller,
+                  thumbVisibility: false,
+                  thickness: 5,
+                  trackVisibility: false,
+                  radius: const Radius.circular(7),
+                  scrollbarOrientation: ScrollbarOrientation.right,
+                  child: ListView.builder(
+                    itemCount: state.callLog.length,
+                    itemBuilder: (context, index) {
+                      return getCallInfo(
+                          _usersState is UsersViewCubitLoadedState ? (_usersState as UsersViewCubitLoadedState).usersDictionary : <int, UserModel>{},
+                        state.callLog[index],
+                        index
+                      );
+                    }),
                 ),
               ),
             ],

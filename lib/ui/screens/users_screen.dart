@@ -43,38 +43,33 @@ class _ContactsPageState extends State<ContactsPage> {
                 SearchWidget(cubit: cubit),
                 const SizedBox(height: 10),
                 Expanded(
-                    child: RefreshIndicator(
-                      onRefresh: () async {
-                        _onRefresh();
-                      },
-                      child: Scrollbar(
-                        controller: _controller,
-                        thumbVisibility: false,
-                        thickness: 5,
-                        trackVisibility: false,
-                        radius: const Radius.circular(7),
-                        scrollbarOrientation: ScrollbarOrientation.right,
-                        child: ListView.separated(
-                            itemCount: state.users.length,
-                            separatorBuilder: (context, index) => const Divider(),
-                            itemBuilder: (context, index) {
-                              return state.users.isNotEmpty
-                                ? Container(
-                                    width: getWidthMaxWidthGuard(context),
-                                    padding: const EdgeInsets.only(
-                                      left: 14, right: 14, top: 0, bottom: 0),
-                                    child: Align(
-                                      child: UserItem(
-                                        user: state.users[index]
-                                      ),
-                                    // Text(state.users[index].username),
+                    child: Scrollbar(
+                      controller: _controller,
+                      thumbVisibility: false,
+                      thickness: 5,
+                      trackVisibility: false,
+                      radius: const Radius.circular(7),
+                      scrollbarOrientation: ScrollbarOrientation.right,
+                      child: ListView.separated(
+                          itemCount: state.users.length,
+                          separatorBuilder: (context, index) => const Divider(),
+                          itemBuilder: (context, index) {
+                            return state.users.isNotEmpty
+                              ? Container(
+                                  width: getWidthMaxWidthGuard(context),
+                                  padding: const EdgeInsets.only(
+                                    left: 14, right: 14, top: 0, bottom: 0),
+                                  child: Align(
+                                    child: UserItem(
+                                      user: state.users[index]
                                     ),
-                                  )
-                                : const Center(
-                                   child: Text('No contacts yet'),
-                                  );
-                            }),
-                      ),
+                                  // Text(state.users[index].username),
+                                  ),
+                                )
+                              : const Center(
+                                 child: Text('No contacts yet'),
+                                );
+                          }),
                     )
                 ),
               ],

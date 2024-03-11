@@ -117,60 +117,54 @@ class _MessagesPageState extends State<MessagesPage> {
             CustomSearchWidget(controller: searchController, searchCallback: searchDialog, focusNode: focusNode),
             const Divider(height: 1, thickness: 1, color: Colors.black12),
             Expanded(
-              child: RefreshIndicator(
-                key: UniqueKey(),
-                onRefresh: () async {
-                  refreshAllData();
-                },
-                child: Scrollbar(
-                  controller: _controller,
-                  thumbVisibility: false,
-                  thickness: 5,
-                  trackVisibility: false,
-                  radius: const Radius.circular(7),
-                  scrollbarOrientation: ScrollbarOrientation.right,
-                  child: CustomScrollView(
-                    // controller: _controller,
-                    slivers: [
-                      SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                              (context, index) =>
-                          !_isDialogActive(state.dialogs[index], userId!) ||
-                              state.dialogs[index].chatType.typeId == 3 && !(state.dialogs[index].messageCount > 0)
-                              ? const SizedBox.shrink()
-                              : Container(
-                            padding: const EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 0),
-                            child: Align(
-                              child: DialogItem(
-                                clearSearch: clearSearch,
-                                userId: userId,
-                                users: (BlocProvider.of<UsersViewCubit>(context).state as UsersViewCubitLoadedState).users,
-                                checkOnline: isMemberOnline,
-                                onlineMembers: onlineMembers,
-                                dialogData: DialogData(
-                                    dialogAuthorId: state.dialogs[index].dialogAuthorId,
-                                    dialogId: state.dialogs[index].dialogId,
-                                    chatType: state.dialogs[index].chatType,
-                                    lastMessage: state.dialogs[index].lastMessage,
-                                    name: state.dialogs[index].name,
-                                    description: state.dialogs[index].description,
-                                    users: state.dialogs[index].users,
-                                    messageCount: state.dialogs[index].messageCount,
-                                    picture: state.dialogs[index].picture,
-                                    isPublic: state.dialogs[index].isPublic,
-                                    isClosed: state.dialogs[index].isClosed,
-                                    createdAt: state.dialogs[index].createdAt,
-                                    lastPage: state.dialogs[index].lastPage,
-                                    chatUsers: state.dialogs[index].chatUsers
-                                ),
+              child: Scrollbar(
+                controller: _controller,
+                thumbVisibility: false,
+                thickness: 5,
+                trackVisibility: false,
+                radius: const Radius.circular(7),
+                scrollbarOrientation: ScrollbarOrientation.right,
+                child: CustomScrollView(
+                  // controller: _controller,
+                  slivers: [
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                            (context, index) =>
+                        !_isDialogActive(state.dialogs[index], userId!) ||
+                            state.dialogs[index].chatType.typeId == 3 && !(state.dialogs[index].messageCount > 0)
+                            ? const SizedBox.shrink()
+                            : Container(
+                          padding: const EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 0),
+                          child: Align(
+                            child: DialogItem(
+                              clearSearch: clearSearch,
+                              userId: userId,
+                              users: (BlocProvider.of<UsersViewCubit>(context).state as UsersViewCubitLoadedState).users,
+                              checkOnline: isMemberOnline,
+                              onlineMembers: onlineMembers,
+                              dialogData: DialogData(
+                                  dialogAuthorId: state.dialogs[index].dialogAuthorId,
+                                  dialogId: state.dialogs[index].dialogId,
+                                  chatType: state.dialogs[index].chatType,
+                                  lastMessage: state.dialogs[index].lastMessage,
+                                  name: state.dialogs[index].name,
+                                  description: state.dialogs[index].description,
+                                  users: state.dialogs[index].users,
+                                  messageCount: state.dialogs[index].messageCount,
+                                  picture: state.dialogs[index].picture,
+                                  isPublic: state.dialogs[index].isPublic,
+                                  isClosed: state.dialogs[index].isClosed,
+                                  createdAt: state.dialogs[index].createdAt,
+                                  lastPage: state.dialogs[index].lastPage,
+                                  chatUsers: state.dialogs[index].chatUsers
                               ),
                             ),
                           ),
-                          childCount: state.dialogs.length,
                         ),
-                      )
-                    ],
-                  ),
+                        childCount: state.dialogs.length,
+                      ),
+                    )
+                  ],
                 ),
               ),
             ),
