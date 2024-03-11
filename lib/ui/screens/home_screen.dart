@@ -4,6 +4,8 @@ import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_event.dart';
 import 'package:chat/bloc/calls_bloc/calls_bloc.dart';
 import 'package:chat/bloc/calls_bloc/calls_state.dart';
+import 'package:chat/bloc/database_bloc/database_bloc.dart';
+import 'package:chat/bloc/database_bloc/database_events.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_state.dart';
@@ -323,7 +325,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    // Future.delayed(Duration(milliseconds: 2500)).then((value) {
+    WidgetsBinding.instance?.addObserver(this);
+// Future.delayed(Duration(milliseconds: 2500)).then((value) {
     //   updateNotification(AppNotificationModel(key: GlobalKey(),fromName: "fromName", message: "message", type: AppNotificationType.message, callback: (){}));
     // });
     // Future.delayed(Duration(milliseconds: 3000)).then((value) {
@@ -339,7 +342,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!kIsWeb && Platform.isAndroid) {
       permissionMethodChannel.invokeMethod("CHECK_APP_PERMISSION");
     }
-    WidgetsBinding.instance?.addObserver(this);
     userProfileDataSubscription =  BlocProvider.of<ProfileBloc>(context).stream.listen(_onBlocProfileStateChanged);
     _subscribeToErrorsBlocStream();
     updateUserProfileData();
@@ -426,13 +428,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         }
       });
     }
+
     super.initState();
+
+    BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocGetUpdatesOnResume());
+    customToastMessage(context: context, message: 'Обновляем данные');
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     switch(state){
       case AppLifecycleState.resumed:
+        BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocGetUpdatesOnResume());
+        customToastMessage(context: context, message: 'Обновляем данные');
         _websocketRepo.reconnect();
       case AppLifecycleState.paused:
 

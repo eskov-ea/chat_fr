@@ -26,6 +26,12 @@ class ReceiveNewDialogEvent extends DialogsEvent{
   ReceiveNewDialogEvent({required this.dialog});
 }
 
+class ReceiveDialogsOnUpdateEvent extends DialogsEvent{
+  final List<DialogData> dialogs;
+
+  ReceiveDialogsOnUpdateEvent({required this.dialogs});
+}
+
 class DialogDeletedChatEvent extends DialogsEvent{
   final DialogData dialog;
 
@@ -36,6 +42,12 @@ class DialogStateNewMessageReceived extends DialogsEvent{
   final MessageData message;
 
   DialogStateNewMessageReceived({required this.message});
+}
+
+class DialogStateNewMessagesOnUpdate extends DialogsEvent{
+  final List<MessageData> messages;
+
+  DialogStateNewMessagesOnUpdate({required this.messages});
 }
 
 class DialogsSearchEvent extends DialogsEvent{

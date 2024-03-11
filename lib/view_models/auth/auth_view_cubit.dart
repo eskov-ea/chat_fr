@@ -15,7 +15,7 @@ class AuthViewCubit extends Cubit<AuthViewCubitState> {
   AuthViewCubit({
     required AuthViewCubitState initialState,
     required this.authBloc,
-  }) : super(initialState) {
+  }) : super(AuthViewCubitFormFillInProgressState()) {
     _onState(authBloc.state);
     authBlocSubscription = authBloc.stream.listen(_onState);
     // authBloc.add(AuthCheckStatusEvent());
@@ -46,6 +46,8 @@ class AuthViewCubit extends Cubit<AuthViewCubitState> {
       emit(AuthViewCubitErrorState(message));
     } else if (state is Authenticating) {
       emit(AuthViewCubitAuthProgressState());
+    } else if (state is AuthCheckStatusFillFormInProgressState) {
+      emit(AuthViewCubitFormFillInProgressState());
     } else if (state is AuthCheckStatusInProgressState) {
       emit(AuthViewCubitAuthProgressState());
     }

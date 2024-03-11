@@ -76,7 +76,7 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      await db.initializeChatTypeValues();
+                      await db.getDialogs();
                       print('Chat types initialized::');
                     },
                     child: Container(
@@ -85,7 +85,7 @@ class _DBScreenState extends State<DBScreen> {
                         padding: const EdgeInsets.all(5),
                         color: Colors.purple.shade200,
                         child: const Center(
-                            child: Text('Init chat types',
+                            child: Text('Get last message',
                               style: TextStyle(color: Colors.white),
                             )
                         )
@@ -94,8 +94,8 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      final res = await db.readChatTypes();
-                      print('Chat types::  $res');
+                      final res = await db.getMessagesByDialog(265);
+                      print('Messages for 265::  $res');
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width * 0.45,
@@ -103,7 +103,7 @@ class _DBScreenState extends State<DBScreen> {
                         padding: const EdgeInsets.all(5),
                         color: Colors.grey.shade500,
                         child: const Center(
-                            child: Text('Read chat types',
+                            child: Text('Read messages',
                               style: TextStyle(color: Colors.white),
                             )
                         )
@@ -117,17 +117,11 @@ class _DBScreenState extends State<DBScreen> {
                 children: [
                   GestureDetector(
                     onTap: () async {
-                      // final db = DBProvider.db;
-                      // final dialogs = await DialogsProvider().getDialogs();
-                      // List<DialogData> fiveDialogs = [];
-                      // for (var i=0; i<5; ++i) {
-                      //   for (var chatUser in dialogs[i].chatUsers) {
-                      //     await db.saveChatUsers(chatUserDB);
-                      //   }
-                      //   fiveDialogs.add(dialogs[i]);
-                      // }
-                      // await db.saveDialogs(fiveDialogs);
-                      // print('Dialogs saved to db::');
+                      final db = DBProvider.db;
+                      final dialogs = await DialogsProvider().getDialogs();
+
+                      await db.saveDialogs(dialogs);
+                      print('Dialogs saved to db:: $dialogs');
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width * 0.45,

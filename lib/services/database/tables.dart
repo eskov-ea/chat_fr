@@ -11,7 +11,7 @@ final Map<String, String> tables = {
       'is_public TINYINT(1) DEFAULT 0, '
       'message_count INTEGER, '
       'picture text, '
-      'last_page INTEGER DEFAULT NULL, '
+      'last_page INTEGER DEFAULT 0, '
       'created_at DATETIME DEFAULT CURRENT_TIMESTAMP, '
       'updated_at DATETIME DEFAULT CURRENT_TIMESTAMP );',
 
@@ -96,7 +96,7 @@ final Map<String, String> tables = {
       'user_id INTEGER DEFAULT NULL, '
       'auth_token varchar(255) DEFAULT NULL, '
       'last_update DATETIME DEFAULT CURRENT_TIMESTAMP, '
-      'first_initialize TINYINT(1) DEFAULT 1, '
+      'first_initialize TINYINT(1) DEFAULT 0, '
       'sip_contacts text DEFAULT NULL, '
       'created_at DATETIME DEFAULT CURRENT_TIMESTAMP );',
 

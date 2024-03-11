@@ -34,7 +34,6 @@ class LoaderViewCubit extends Cubit<LoaderViewCubitState> {
   }
 
   start() {
-    print('AUTHSTATE:::: step1 ${DateTime.now().millisecondsSinceEpoch}');
     authBloc.add(AuthCheckStatusEvent());
   }
 

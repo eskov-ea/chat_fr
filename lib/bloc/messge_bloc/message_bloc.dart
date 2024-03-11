@@ -30,6 +30,8 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
       print("newMessageSubscription::::   ${event}");
       if (event is DatabaseBlocNewMessageReceivedState) {
         add(MessageBlocReceivedMessageEvent(message: event.message));
+      } else if (event is DatabaseBlocNewMessagesOnUpdateReceivedState) {
+        add(MessageBlocReceivedMessagesOnUpdateEvent(messages: event.messages));
       } else if (event is DatabaseBlocUpdateMessageStatusesState) {
         add(MessageBlocNewMessageStatusesReceivedEvent(
             statuses: event.statuses));
@@ -40,6 +42,10 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
             messageId: event.messageId,
             statuses: event.statuses
         ));
+      } else if (event is DatabaseBlocFailedSendMessageState) {
+        add(MessageBlocFailedToSendMessageEvent(localMessageId: event.localMessageId, dialogId: event.dialogId));
+      } else if (event is DatabaseBlocUpdateErrorStatusOnResendState) {
+        add(MessageBlocUpdateErrorStatusOnResendEvent(localMessageId: event.localMessageId, dialogId: event.dialogId));
       }
     });
 
@@ -59,6 +65,12 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
         onMessageBlocNewMessageStatusesReceivedEvent(event, emit);
       } else if (event is MessageBlocUpdateLocalMessageEvent) {
         onMessageBlocUpdateLocalMessageEvent(event, emit);
+      } else if (event is MessageBlocReceivedMessagesOnUpdateEvent) {
+        onMessageBlocReceivedMessagesOnUpdateEvent(event, emit);
+      } else if (event is MessageBlocFailedToSendMessageEvent) {
+        onMessageBlocFailedToSendMessageEvent(event, emit);
+      } else if (event is MessageBlocUpdateErrorStatusOnResendEvent) {
+        onMessageBlocUpdateErrorStatusOnResendEvent(event, emit);
       }
 
 
@@ -140,20 +152,79 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
     }
   }
 
+  void onMessageBlocFailedToSendMessageEvent(
+      MessageBlocFailedToSendMessageEvent event,
+      emit
+  ) {
+    if (state is MessageBlocInitializationSuccessState) {
+      final messages = (state as MessageBlocInitializationSuccessState).messages;
+      final dialogId = (state as MessageBlocInitializationSuccessState).dialogId;
+      if (dialogId == event.dialogId) {
+        for (var message in messages) {
+          if(message.messageId == event.localMessageId) {
+            message.isError = 1;
+            break;
+          }
+        }
+      }
+      emit(MessageBlocInitializationSuccessState(
+          dialogId: event.dialogId, messages: messages)
+      );
+    }
+  }
+
+  void onMessageBlocUpdateErrorStatusOnResendEvent(
+      MessageBlocUpdateErrorStatusOnResendEvent event,
+      emit
+  ) {
+    if (state is MessageBlocInitializationSuccessState) {
+      final messages = (state as MessageBlocInitializationSuccessState).messages;
+      final dialogId = (state as MessageBlocInitializationSuccessState).dialogId;
+      if (dialogId == event.dialogId) {
+        for (var message in messages) {
+          if(message.messageId == event.localMessageId) {
+            message.isError = 0;
+            break;
+          }
+        }
+      }
+      emit(MessageBlocInitializationSuccessState(
+          dialogId: event.dialogId, messages: messages)
+      );
+    }
+  }
+
   void onMessageBlocFlushMessagesEvent(MessageBlocFlushMessagesEvent event,
       emit) {
     emit(MessageBlocInitialState());
   }
 
-  void onMessageBlocReceivedMessageEvent(MessageBlocReceivedMessageEvent event,
-      emit) {
+  void onMessageBlocReceivedMessageEvent(
+      MessageBlocReceivedMessageEvent event,
+      emit
+  ) {
     if (state is MessageBlocInitializationSuccessState) {
-      final messages = (state as MessageBlocInitializationSuccessState)
-          .messages;
-      final dialogId = (state as MessageBlocInitializationSuccessState)
-          .dialogId;
+      final messages = (state as MessageBlocInitializationSuccessState).messages;
+      final dialogId = (state as MessageBlocInitializationSuccessState).dialogId;
       if (dialogId != event.message.dialogId) return;
       messages.insert(0, event.message);
+      emit(MessageBlocInitializationSuccessState(
+          dialogId: dialogId, messages: messages));
+    }
+  }
+
+  void onMessageBlocReceivedMessagesOnUpdateEvent(
+      MessageBlocReceivedMessagesOnUpdateEvent event,
+      emit
+  ) {
+    if (state is MessageBlocInitializationSuccessState) {
+      final messages = (state as MessageBlocInitializationSuccessState).messages;
+      final dialogId = (state as MessageBlocInitializationSuccessState).dialogId;
+      final newMessages = <MessageData>[];
+      for (final message in event.messages) {
+        if (message.dialogId == dialogId) newMessages.add(message);
+      }
+      messages.insertAll(0, newMessages);
       emit(MessageBlocInitializationSuccessState(
           dialogId: dialogId, messages: messages));
     }

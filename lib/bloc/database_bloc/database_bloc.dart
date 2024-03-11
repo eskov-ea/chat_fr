@@ -53,6 +53,8 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         await onDatabaseBlocGetUpdatesOnResume(event, emit);
       } else if (event is DatabaseBlocCheckAuthTokenEvent) {
         await onDatabaseBlocCheckAuthTokenEvent(event, emit);
+      } else if (event is DatabaseBlocResendMessageEvent) {
+        await onDatabaseBlocResendMessageEvent(event, emit);
       }
     }, transformer: sequential());
   }
@@ -64,9 +66,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     } else if (payload.event == WebsocketEvent.status) {
       add(DatabaseBlocNewMessageStatusEvent(status: payload.data?["status"]));
     } else if (payload.event == WebsocketEvent.dialog) {
-      if (state is DatabaseBlocDBInitializedState) {
         add(DatabaseBlocNewDialogReceivedEvent(dialog: payload.data?["dialog"]));
-      }
     }
   }
 
@@ -75,6 +75,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       emit
   ) async {
     final token = await db.getToken();
+    print('onDatabaseBlocCheckAuthTokenEvent  $token');
     return token != null;
   }
 
@@ -88,6 +89,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       await db.database;
       await db.initDB();
       final bool isDatabaseEmpty = await db.checkIfDatabaseIsEmpty();
+      print('isDatabaseEmpty::  $isDatabaseEmpty');
       if (isDatabaseEmpty) {
         print('Initialize from server');
         final token = await _storage.getToken();
@@ -99,7 +101,6 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         ));
         final profile = await UserProfileProvider().getUserProfile(token);
         await DataProvider.storage.setUserId(profile.id);
-        print('Set user id:  ${profile.id}');
         final users = await UsersProvider().getUsers(token);
         users.add(UserModel(id: profile.id, firstname: profile.firstname, lastname: profile.lastname,
             middlename: profile.middlename, company: profile.company, position: profile.position, phone: profile.phone,
@@ -108,6 +109,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         await db.saveUsers(users);
 
         final dialogs = await DialogsProvider().getDialogs();
+        print('Dialogs:::  $dialogs');
 
         final chatUsers = <ChatUser>[];
         final dialogsLastMessages = <MessageData>[];
@@ -128,14 +130,12 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
             files.add(dialog.lastMessage!.file!);
           }
         }
-        print('Dialogs lm::: $chatUsers');
+        print('Dialogs lm::: $dialogsLastMessages');
         await db.saveMessages(dialogsLastMessages);
         await db.saveAttachments(files);
         await db.saveMessageStatuses(statuses);
         await db.saveChatUsers(chatUsers);
         await db.saveDialogs(dialogs);
-        await Future.delayed(const Duration(seconds: 2));
-        final calls = <CallModel>[];
 
         await db.updateAppSettingsTable(dbInitialized: 1);
       }
@@ -157,7 +157,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       final dbDialogs = await db.getDialogs();
       print('dbDialogs $dbDialogs');
       List<DialogData> dialogs = [];
-      print('init dialogs:  ${messages[6548]}');
+      print('init dialogs:  ${messages[6855]}');
       for (var d in dbDialogs) {
         final dd = DialogData(
             dialogId: d.dialogId,
@@ -176,12 +176,9 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
           message: 'Загружаем историю звонков',
           progress: 0.85
       ));
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(milliseconds: 200));
       final calls = <CallModel>[];
 
-      final DateTime finish = DateTime.now();
-      final time = (finish.millisecondsSinceEpoch - start.millisecondsSinceEpoch);
-      print('Job longitite:: $time');
       emit(DatabaseBlocDBInitializedState(
           users: users,
           dialogs: dialogs,
@@ -203,38 +200,62 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     final now = DateTime.now();
     final tRawDifference = (now.millisecondsSinceEpoch - DateTime.parse(lastUpdate).millisecondsSinceEpoch) / 1000;
     final diff = tRawDifference.ceil();
+    final updates = await MessagesRepository().getNewUpdatesOnResume(diff);
+    final List<DialogData> dialogs = updates!["chats"].map((json) => DialogData.fromJson(json)).whereType<DialogData>().toList();
+    final List<ChatUser> dialogUsers = updates["chat_users"].map((json) => ChatUser.fromJson(json)).whereType<ChatUser>().toList();
+    final List<MessageStatus> statuses = updates["chat_message_status_users"].map((json) => MessageStatus.fromJson(json)).whereType<MessageStatus>().toList();
+    final List<MessageData> messages = updates["chat_messages"].map((json) => MessageData.fromJson(json)).whereType<MessageData>().toList();
+
+    print('onDatabaseBlocGetUpdatesOnResume:: dialogs: $dialogs, messages: $messages');
+    if (dialogUsers.isNotEmpty) {
+      await db.saveChatUsers(dialogUsers);
+    }
+    if (statuses.isNotEmpty) {
+      await db.saveMessageStatuses(statuses);
+    }
+    if (messages.isNotEmpty) {
+      await db.saveMessages(messages);
+      emit(DatabaseBlocNewMessagesOnUpdateReceivedState(messages: messages));
+    }
+    if (dialogs.isNotEmpty) {
+      await db.saveDialogs(dialogs);
+      emit(DatabaseBlocNewDialogsOnUpdateState(dialogs: dialogs));
+    }
+
+
+    await db.setLastUpdateTime();
     print('last update was:: $lastUpdate   diff: $diff');
   }
 
   Future<void> onDatabaseBlocSendMessageEvent(DatabaseBlocSendMessageEvent event, emit) async {
     print("DBBloc send:: start");
+
+    final userId = await DataProvider.storage.getUserId();
+    if (userId == null) throw AppErrorException(AppErrorExceptionType.other);
+    int messageId = UUID();
+    while(await db.checkIfMessageExistWithThisId(messageId) == 0) {
+      messageId = UUID();
+    }
+    final attachmentId = event.content == null ? null : UUID();
+
+    final message = createLocalMessage(
+        messageId: messageId,
+        attachmentId: attachmentId,
+        userId: userId,
+        dialogId: event.dialogId,
+        messageText: event.messageText,
+        filename: event.filename,
+        filetype: event.filetype,
+        content: event.content,
+        parentMessage: event.parentMessage
+    );
+    emit(DatabaseBlocNewMessageReceivedState(message: message));
+
+    await db.saveLocalMessage(message);
+    await db.saveLocalMessageStatus(message.statuses.isEmpty ? null : message.statuses.first);
+    log('DBBloc send:: message: $message\r\n${message.statuses}');
+
     try {
-      final userId = await DataProvider.storage.getUserId();
-      if (userId == null) throw AppErrorException(AppErrorExceptionType.other);
-      int messageId = UUID();
-      while(await db.checkIfMessageExistWithThisId(messageId) == 0) {
-        messageId = UUID();
-      }
-      final attachmentId = event.content == null ? null : UUID();
-
-      final message = createLocalMessage(
-          messageId: messageId,
-          attachmentId: attachmentId,
-          userId: userId,
-          dialogId: event.dialogId,
-          messageText: event.messageText,
-          filename: event.filename,
-          filetype: event.filetype,
-          content: event.content,
-          parentMessage: event.parentMessage
-      );
-      emit(DatabaseBlocNewMessageReceivedState(message: message));
-
-      await db.saveLocalMessage(message);
-      await db.saveLocalMessageStatus(message.statuses.isEmpty ? null : message.statuses.first);
-      log('DBBloc send:: message: $message\r\n${message.statuses}');
-
-
       final sentMessageBody = await MessagesRepository().sendMessage(dialogId: event.dialogId,
           messageText: event.messageText, parentMessageId: event.parentMessage?.parentMessageId,
           filetype: event.filetype, bytes: event.bytes, filename: event.filename, content: event.content);
@@ -244,6 +265,8 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       // final updateRes = await db.updateMessageId(messageId, sentMessage.messageId);
       // print('update result  $updateRes');
     } catch (err, stackTrace) {
+      db.updateMessageWithSendFailed(messageId);
+      emit(DatabaseBlocFailedSendMessageState(localMessageId: messageId, dialogId: event.dialogId));
       log('DBBloc send:: error: $err\r\n$stackTrace');
     }
   }
@@ -294,10 +317,13 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       DatabaseBlocNewDialogReceivedEvent event,
       emit
   ) async {
+    print('new dialog received::  ${event.dialog}');
     await db.saveDialogs([event.dialog]);
     if (event.dialog.lastMessage != null) await db.saveMessages([event.dialog.lastMessage!]);
     if (event.dialog.lastMessage?.statuses != null) await db.saveMessageStatuses(event.dialog.lastMessage!.statuses);
     if (event.dialog.lastMessage?.file != null) await db.saveAttachments([event.dialog.lastMessage!.file!]);
+    await db.saveChatUsers(event.dialog.chatUsers);
+    print('new dialog received::  ${event.dialog.chatUsers}');
 
     emit(DatabaseBlocNewDialogReceivedState(dialog: event.dialog));
   }
@@ -308,5 +334,30 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
   ) async {
     await db.saveMessageStatus(event.status);
     emit(DatabaseBlocUpdateMessageStatusesState(statuses: [event.status]));
+  }
+
+  Future<void> onDatabaseBlocResendMessageEvent(
+    DatabaseBlocResendMessageEvent event,
+    emit
+  ) async {
+    final message = await db.getMessageById(event.localMessageId);
+    if (message != null) {
+      await db.updateMessageErrorStatusOnResend(event.localMessageId);
+      emit(DatabaseBlocUpdateErrorStatusOnResendState(localMessageId: event.localMessageId, dialogId: event.dialogId));
+      try {
+        final bytes = message.file?.content == null ? null : base64Decode(message.file!.content!);
+        final sentMessageBody = await MessagesRepository().sendMessage(dialogId: event.dialogId,
+            messageText: message.message, parentMessageId:  message.repliedMessage?.parentMessageId,
+            filetype: message.file?.filetype, bytes: bytes, filename:  message.file?.name, content:  message.file?.content);
+        final sentMessage = MessageData.fromJson(jsonDecode(sentMessageBody)["data"]);
+
+        await db.saveMessageStatuses(sentMessage.statuses);
+      } catch (err, stackTrace) {
+        db.updateMessageWithSendFailed(message.messageId);
+        emit(DatabaseBlocFailedSendMessageState(localMessageId: message.messageId, dialogId: event.dialogId));
+        log('DBBloc send:: error: $err\r\n$stackTrace');
+      }
+    }
+    print('onDatabaseBlocResendMessageEvent:: $json');
   }
 }

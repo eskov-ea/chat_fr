@@ -17,7 +17,7 @@ class AuthBloc
 
     AuthBloc({
        required this.authRepo
-    }) : super(AuthCheckStatusInProgressState()){
+    }) : super(AuthCheckStatusFillFormInProgressState()){
       on<AuthEvent>((event, emit) async {
         if(event is AuthLoginEvent) {
           await onAuthLoginEvent(event, emit);

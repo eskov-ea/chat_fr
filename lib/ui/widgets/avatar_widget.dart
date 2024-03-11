@@ -1,9 +1,6 @@
-import 'dart:developer';
 import 'dart:io';
-import 'package:chat/bloc/error_handler_bloc/error_types.dart';
-import 'package:chat/services/logger/logger_service.dart';
+import 'package:chat/services/global.dart';
 import 'package:flutter/material.dart';
-import '../../services/global.dart';
 
 class UserAvatarWidget extends StatefulWidget {
   const UserAvatarWidget({

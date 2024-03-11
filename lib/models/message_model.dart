@@ -36,7 +36,7 @@ class MessageData extends Equatable{
   final DateTime rawDate;
   final MessageAttachmentData? file;
   final List<MessageStatus> statuses;
-  bool isError;
+  int isError;
   bool isHandling;
 
   static MessageData fromJson(json) {
@@ -55,7 +55,7 @@ class MessageData extends Equatable{
           repliedMessage: json["parent"] == null
               ? null
               : RepliedMessage.fromJson(json["parent"]),
-          isError: json["isError"] ?? false,
+          isError: 0,
           isHandling: json["isHandling"] ?? false,
           forwarderFromUser: getForwardedMessageStatus(json["message"]),
           statuses: json["statuses"].map<MessageStatus>((status) => MessageStatus.fromJson(status)).toList()
@@ -82,7 +82,7 @@ class MessageData extends Equatable{
           repliedMessage: json["replied_message_id"] == null
               ? null
               : RepliedMessage.fromDBJson(json),
-          isError: json["isError"] ?? false,
+          isError: json["send_failed"] ?? 0,
           isHandling: json["isHandling"] ?? false,
           forwarderFromUser: getForwardedMessageStatus(json["message"]),
           statuses: <MessageStatus>[]

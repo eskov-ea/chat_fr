@@ -132,6 +132,9 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
   Widget build(BuildContext context) {
     return BlocBuilder<MessageBloc, MessagesBlocState>(
       builder: (context, state) {
+
+        BlocProvider.of<MessageBloc>(context).add(MessageBlocSendReadMessagesStatusEvent(dialogId: widget.dialogData.dialogId));
+
         if (state is MessageBlocInitializeInProgressState) {
           return const Center(child: CircularProgressIndicator(
             color: Colors.blueAccent,
@@ -306,7 +309,6 @@ class MessagesListWidget extends StatelessWidget {
                     repliedMsgSenderName: messages[index].repliedMessage != null ? getSenderName(users, messages[index].repliedMessage!.senderId) : null,
                     repliedMsgId: messages[index].repliedMessage?.parentMessageId,
                     dialogId: dialogData.dialogId,
-                    isErrorHandling: messages[index].isHandling,
                     deleteMessage: deleteMessage
                   )
                 ],

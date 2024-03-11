@@ -44,10 +44,36 @@ class DatabaseBlocNewMessageReceivedState extends DatabaseBlocState {
   DatabaseBlocNewMessageReceivedState({required this.message});
 }
 
+class DatabaseBlocFailedSendMessageState extends DatabaseBlocState {
+  final int localMessageId;
+  final int dialogId;
+
+  DatabaseBlocFailedSendMessageState({required this.localMessageId, required this.dialogId});
+}
+
+class DatabaseBlocUpdateErrorStatusOnResendState extends DatabaseBlocState {
+  final int localMessageId;
+  final int dialogId;
+
+  DatabaseBlocUpdateErrorStatusOnResendState({required this.localMessageId, required this.dialogId});
+}
+
+class DatabaseBlocNewMessagesOnUpdateReceivedState extends DatabaseBlocState {
+  final List<MessageData> messages;
+
+  DatabaseBlocNewMessagesOnUpdateReceivedState({required this.messages});
+}
+
 class DatabaseBlocNewDialogReceivedState extends DatabaseBlocState {
   final DialogData dialog;
 
   DatabaseBlocNewDialogReceivedState({required this.dialog});
+}
+
+class DatabaseBlocNewDialogsOnUpdateState extends DatabaseBlocState {
+  final List<DialogData> dialogs;
+
+  DatabaseBlocNewDialogsOnUpdateState({required this.dialogs});
 }
 
 class DatabaseBlocUpdateMessageStatusesState extends DatabaseBlocState {

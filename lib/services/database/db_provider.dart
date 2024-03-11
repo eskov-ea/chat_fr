@@ -87,11 +87,13 @@ class DBProvider {
   Future<List<MessageData>> getMessagesByDialog(int dialogId) async => MessageDBLayer().getMessagesByDialog(dialogId);
   Future<String> getMessageInfo() async => MessageDBLayer().getMessageInfo();
   Future<int> saveLocalMessage(MessageData message) async => MessageDBLayer().saveLocalMessage(message);
-  Future<int> updateMessageWithSendFailed(int messageId, int sendFailed) => MessageDBLayer().updateMessageWithSendFailed(messageId, sendFailed);
+  Future<int> updateMessageWithSendFailed(int localMessageId) => MessageDBLayer().updateMessageWithSendingFailure(localMessageId);
   Future<int> updateMessageId(int localMessageId, int messageId) async => MessageDBLayer().updateMessageId(localMessageId, messageId);
   Future<MessageData?> getMessageById(int messageId) async => MessageDBLayer().getMessageById(messageId);
   Future<List<int>?> updateLocalMessageByContent(int messageId, String message) async => MessageDBLayer().updateLocalMessageByContent(messageId, message);
   Future<int> checkIfMessageExistWithThisId(int id) async => MessageDBLayer().checkIfMessageExistWithThisId(id);
+  Future updateMessagesThatFailedToBeSent() async => MessageDBLayer().updateMessagesThatFailedToBeSent();
+  Future<int> updateMessageErrorStatusOnResend(int localMessageId) async => MessageDBLayer().updateMessageErrorStatusOnResend(localMessageId);
 
 
   ///   MESSAGE STATUS LAYER
@@ -159,7 +161,21 @@ class DBProvider {
       }
     });
   }
-
+  Future<bool> deleteAllDataOnLogout() async {
+    final db = await database;
+    try {
+      tables.forEach((tableName, _) async {
+        await db.rawDelete(
+          'DELETE FROM $tableName'
+        );
+        print('Tables cleared');
+      });
+      return true;
+    } catch (err) {
+      print("ERROR:DBProvider:73:: $err");
+      return false;
+    }
+  }
   Future<int> updateAppSettingsTable({int? dbInitialized, String? deviceId}) async {
     final db = await database;
     await db.transaction((txn) async {

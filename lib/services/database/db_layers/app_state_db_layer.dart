@@ -39,6 +39,8 @@ class AppStateDBLayer {
         List<Object> res = await txn.rawQuery(
             'SELECT auth_token FROM app_settings;'
         );
+        print('getToken:: $res');
+        if (res.isEmpty) return null;
         return (res.first as Map)["auth_token"];
       });
     } catch (err, stackTrace) {
@@ -50,9 +52,12 @@ class AppStateDBLayer {
   Future<int> setToken(String token) async {
     try {
       final db = await DBProvider.db.database;
+      print('set token:::  $token');
       return await db.transaction((txn) async {
         return await txn.rawInsert(
-            'UPDATE app_settings SET auth_token = "$token" WHERE id = 1; '
+          'INSERT INTO app_settings(id, auth_token) VALUES(?, ?) '
+          'ON CONFLICT(id) DO UPDATE SET auth_token = "$token"; ',
+          [1, token]
         );
       });
     } catch (err, stackTrace) {
@@ -69,6 +74,7 @@ class AppStateDBLayer {
             'SELECT user_id FROM app_settings;'
         );
         print('get userid:::  $res');
+        if (res.isEmpty) return null;
         return (res.first as Map)["user_id"];
       });
     } catch (err, stackTrace) {

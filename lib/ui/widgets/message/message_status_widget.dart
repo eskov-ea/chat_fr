@@ -3,10 +3,19 @@ import 'package:flutter/material.dart';
 Widget StatusWidget(int status) {
   switch (status) {
     case 0:
-      return const Icon(
-        Icons.sync,
-        color: Colors.grey,
-        size: 15.0,
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.only(bottom: 4),
+          child: SizedBox(
+            height: 10,
+            width: 10,
+            child: CircularProgressIndicator(
+              color: Colors.grey,
+              strokeCap: StrokeCap.round,
+              strokeWidth: 1.0,
+            ),
+          ),
+        ),
       );
     case 2:
       return const Icon(

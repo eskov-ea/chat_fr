@@ -1,18 +1,30 @@
+import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/view_models/loader/loader_view_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../navigation/main_navigation.dart';
 
 
-class LoaderWidget extends StatelessWidget {
+class LoaderWidget extends StatefulWidget {
   const LoaderWidget({Key? key}) : super(key: key);
 
+  @override
+  State<LoaderWidget> createState() => _LoaderWidgetState();
+}
+
+class _LoaderWidgetState extends State<LoaderWidget> {
+
+  @override
+  void initState() {
+    super.initState();
+    checkAuthentication();
+  }
   @override
   Widget build(BuildContext context) {
     return BlocListener<LoaderViewCubit, LoaderViewCubitState>(
       listenWhen: (prev, current) => current != LoaderViewCubitState.unknown,
       listener: onLoaderViewCubitStateChange,
-      bloc: BlocProvider.of<LoaderViewCubit>(context).start(),
+      // bloc: BlocProvider.of<LoaderViewCubit>(context).start(),
       child: Scaffold(
         body: Container(
           color: Colors.white,
@@ -24,7 +36,7 @@ class LoaderWidget extends StatelessWidget {
             width: 200,
             height: 200,
             padding: EdgeInsets.zero,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(8.0)),
                 color: Colors.black12,
                 boxShadow: [
@@ -84,6 +96,15 @@ class LoaderWidget extends StatelessWidget {
         )
       ),
     );
+  }
+
+  Future<void> checkAuthentication() async {
+    final db = DBProvider.db;
+    final token = await db.getToken();
+    final nextScreen = token != null
+      ? MainNavigationRouteNames.dbInitializationScreen
+      : MainNavigationRouteNames.auth;
+    Navigator.of(context).pushReplacementNamed(nextScreen);
   }
 
   void onLoaderViewCubitStateChange(

@@ -44,6 +44,15 @@ class MessageBlocReceivedMessageEvent extends MessageBlocEvent {
   List<Object?> get props => [message.messageId];
 }
 
+class MessageBlocReceivedMessagesOnUpdateEvent extends MessageBlocEvent {
+  final List<MessageData> messages;
+
+  MessageBlocReceivedMessagesOnUpdateEvent({required this.messages});
+
+  @override
+  List<Object?> get props => [];
+}
+
 class MessageBlocFlushMessagesEvent extends MessageBlocEvent {}
 
 class MessageBlocSendReadMessagesStatusEvent extends MessageBlocEvent {
@@ -66,4 +75,18 @@ class MessageBlocUpdateLocalMessageEvent extends MessageBlocEvent {
 
   MessageBlocUpdateLocalMessageEvent({required this.localId, required this.dialogId, required this.messageId, required this.statuses});
 
+}
+
+class MessageBlocFailedToSendMessageEvent extends MessageBlocEvent {
+  final int localMessageId;
+  final int dialogId;
+
+  MessageBlocFailedToSendMessageEvent({required this.localMessageId, required this.dialogId});
+}
+
+class MessageBlocUpdateErrorStatusOnResendEvent extends MessageBlocEvent {
+  final int localMessageId;
+  final int dialogId;
+
+  MessageBlocUpdateErrorStatusOnResendEvent({required this.localMessageId, required this.dialogId});
 }

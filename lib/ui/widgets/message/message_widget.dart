@@ -46,7 +46,6 @@ class MessageWidget extends StatefulWidget {
     required this.repliedMsgSenderName,
     required this.repliedMsgId,
     required this.isError,
-    required this.isErrorHandling,
     required this.dialogId,
     required this.openForwardMenu,
     required this.deleteMessage,
@@ -77,8 +76,7 @@ class MessageWidget extends StatefulWidget {
   final RepliedMessage? parentMessage;
   final String? repliedMsgSenderName;
   final int? repliedMsgId;
-  final bool isError;
-  final bool isErrorHandling;
+  final int isError;
 
   @override
   State<MessageWidget> createState() => _MessageWidgetState();
@@ -134,7 +132,6 @@ class _MessageWidgetState extends State<MessageWidget>  with SingleTickerProvide
       fileAttachment: localFileAttachment,
       dialogId: widget.dialogId,
       repliedMsgId: widget.repliedMsgId,
-      isErrorHandling: widget.isErrorHandling,
       openForwardMenu: widget.openForwardMenu,
       deleteMessage: widget.deleteMessage
     );
@@ -166,7 +163,6 @@ class _MessageTile extends StatelessWidget {
     required this.repliedMsgId,
     required this.fileAttachment,
     required this.isError,
-    required this.isErrorHandling,
     required this.dialogId,
     required this.openForwardMenu,
     required this.deleteMessage,
@@ -194,8 +190,7 @@ class _MessageTile extends StatelessWidget {
   final MessageAttachmentData? file;
   final RepliedMessage? parentMessage;
   final File? fileAttachment;
-  final bool isError;
-  final bool isErrorHandling;
+  final int isError;
   final int dialogId;
   final int? repliedMsgId;
 
@@ -360,6 +355,7 @@ class _MessageTile extends StatelessWidget {
                         child: MessageContentWidget(
                             isMe: isMe,
                             file: file,
+                            isError: isError,
                             setSelected: setSelected,
                             messageId: messageId,
                             message: message,
@@ -381,7 +377,6 @@ class _MessageTile extends StatelessWidget {
             ),
             MessageErrorWidget(
                 isError: isError,
-                isErrorHandling: isErrorHandling,
                 messageId: messageId,
                 dialogId: dialogId,
                 userId: userId,

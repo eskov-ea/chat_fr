@@ -1,3 +1,5 @@
+import 'package:chat/bloc/database_bloc/database_bloc.dart';
+import 'package:chat/bloc/database_bloc/database_events.dart';
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/services/helpers/message_sender_helper.dart';
@@ -5,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MessageErrorWidget extends StatelessWidget {
-  final bool isError;
-  final bool isErrorHandling;
+  final int isError;
   final int messageId;
   final int dialogId;
   final int userId;
@@ -15,8 +16,8 @@ class MessageErrorWidget extends StatelessWidget {
   final MessageAttachmentData? file;
   final RepliedMessage? parentMessage;
 
-  const MessageErrorWidget({required this.isError,
-    required this.isErrorHandling,
+  const MessageErrorWidget({
+    required this.isError,
     required this.messageId,
     required this.dialogId,
     required this.userId,
@@ -34,13 +35,13 @@ class MessageErrorWidget extends StatelessWidget {
       // BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderDeleteLocalMessageEvent(dialogId: dialogId, messageId: messageId));
     }
 
-    Widget mIcon = isErrorHandling
-        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(
-        strokeWidth: 3.0, color: Colors.green)
-    )
-        : const Icon(Icons.error, size: 30, color: Colors.red);
+    // Widget mIcon = isErrorHandling
+    //     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(
+    //     strokeWidth: 3.0, color: Colors.green)
+    // )
+    //     : const Icon(Icons.error, size: 30, color: Colors.red);
 
-    if ( isError ) {
+    if ( isError == 1 ) {
       return GestureDetector(
         onTap: (){
           showModalBottomSheet(
@@ -67,10 +68,11 @@ class MessageErrorWidget extends StatelessWidget {
                     GestureDetector(
                         onTap: (){
                           Navigator.of(context).pop();
-                          resendErrorMessage(
-                              messageId: messageId, dialogId: dialogId, bloc: BlocProvider.of<MessageBloc>(context), userId: userId,
-                              messageText: message, parentMessage: parentMessage, repliedMessageId: repliedMsgId,
-                              file: file );
+                          BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocResendMessageEvent(localMessageId: messageId, dialogId: dialogId));
+                          // resendErrorMessage(
+                          //     messageId: messageId, dialogId: dialogId, bloc: BlocProvider.of<MessageBloc>(context), userId: userId,
+                          //     messageText: message, parentMessage: parentMessage, repliedMessageId: repliedMsgId,
+                          //     file: file );
                         },
                         child: const SizedBox(
                           child: Text("Отправить снова",
@@ -99,7 +101,7 @@ class MessageErrorWidget extends StatelessWidget {
             alignment: Alignment.center,
             width: 40,
             padding: const EdgeInsets.only(left: 8),
-            child: mIcon
+            child: const Icon(Icons.error, size: 30, color: Colors.red)
         ),
       );
     } else {

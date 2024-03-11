@@ -32,6 +32,9 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
 
   void _onUserBlocState(UsersState state) {
     if (state is UsersLoadedState){
+      if (!state.isAuthenticated) {
+        emit(UsersViewCubitLogoutState());
+      }
       emit(UsersViewCubitLoadedState(
           users: state.users,
           searchQuery: '',

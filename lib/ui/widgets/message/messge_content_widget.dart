@@ -24,6 +24,7 @@ class MessageContentWidget extends StatelessWidget {
   final Function(SelectedMessage) setSelected;
   final int messageId;
   final int p2p;
+  final int isError;
   final int status;
   final String messageDate;
   final String messageTime;
@@ -37,6 +38,7 @@ class MessageContentWidget extends StatelessWidget {
   const MessageContentWidget({
     required this.isMe,
     required this.file,
+    required this.isError,
     required this.setSelected,
     required this.messageId,
     required this.message,
@@ -150,7 +152,7 @@ class MessageContentWidget extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 5, right: 5),
                     child: SizedBox(
                       width: isMe ? 25 : 0,
-                      child: isMe ? StatusWidget(status) : const SizedBox.shrink()
+                      child: isMe && isError == 0 ? StatusWidget(status) : const SizedBox.shrink()
                       ),
                     ),
                   const SizedBox(width: 5)

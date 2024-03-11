@@ -36,8 +36,12 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         add(DialogsLoadedEvent(dialogs: event.dialogs));
       } else if (event is DatabaseBlocNewDialogReceivedState) {
         add(ReceiveNewDialogEvent(dialog: event.dialog));
+      } else if (event is DatabaseBlocNewDialogsOnUpdateState) {
+        add(ReceiveDialogsOnUpdateEvent(dialogs: event.dialogs));
       } else if (event is DatabaseBlocNewMessageReceivedState) {
         add(DialogStateNewMessageReceived(message: event.message));
+      } else if (event is DatabaseBlocNewMessagesOnUpdateReceivedState) {
+        add(DialogStateNewMessagesOnUpdate(messages: event.messages));
       } else if (event is DatabaseBlocUpdateMessageStatusesState) {
         add(DialogStateNewMessageStatusesReceived(statuses: event.statuses));
       }
@@ -49,10 +53,14 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         await onDialogsLoadEvent(event, emit);
       } else if (event is ReceiveNewDialogEvent) {
         onReceiveNewDialogEvent(event, emit);
+      } else if (event is ReceiveDialogsOnUpdateEvent) {
+        onReceiveDialogsOnUpdateEvent(event, emit);
       } else if (event is DialogsLoadedEvent) {
         onDialogsLoadedEvent(event, emit);
       } else if (event is DialogStateNewMessageReceived) {
         onDialogStateNewMessageReceived(event, emit);
+      }  else if (event is DialogStateNewMessagesOnUpdate) {
+        onDialogStateNewMessagesOnUpdate(event, emit);
       } else if (event is DialogUserJoinChatEvent) {
         onDialogUserJoinChatEvent(event, emit);
       } else if (event is DialogUserExitChatEvent) {
@@ -133,13 +141,40 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       ReceiveNewDialogEvent event,
       Emitter<DialogsState> emit
   ) {
-    for (var dialog in state.dialogsContainer!.dialogs) {
+    for (var dialog in state.dialogsContainer.dialogs) {
       if (dialog.dialogId == event.dialog.dialogId) {
         return;
       }
     }
-    final newDialogs = [ event.dialog, ...state.dialogsContainer!.dialogs];
+    final newDialogs = [ event.dialog, ...state.dialogsContainer.dialogs];
     final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs));
+    emit(newState);
+  }
+
+  void onReceiveDialogsOnUpdateEvent(
+      ReceiveDialogsOnUpdateEvent event,
+      Emitter<DialogsState> emit
+  ) {
+    final newDialogs = <DialogData>[];
+    for (var newDialog in event.dialogs) {
+      if (newDialog.dialogId == 265) {
+        print('onReceiveDialogsOnUpdateEvent:: $newDialog');
+        print('onReceiveDialogsOnUpdateEvent:: ${newDialog.lastMessage}');
+      }
+      bool exist = false;
+      for (var dialog in state.dialogsContainer.dialogs) {
+        if (dialog.dialogId == newDialog.dialogId) {
+          dialog.lastMessage = newDialog.lastMessage;
+          exist = true;
+          break;
+        }
+      }
+      if (!exist) {
+        newDialogs.add(newDialog);
+      }
+    }
+    final updatedDialogs = [ ...newDialogs, ...state.dialogsContainer.dialogs];
+    final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: updatedDialogs));
     emit(newState);
   }
 
@@ -208,6 +243,25 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: sortDialogsByLastMessage(newDialogs)));
     emit(newState);
   }
+
+  void onDialogStateNewMessagesOnUpdate(
+      DialogStateNewMessagesOnUpdate event,
+      Emitter<DialogsState> emit
+      ) {
+    final newDialogs = state.dialogs;
+    for (var message in event.messages) {
+      for (var dialog in newDialogs) {
+        if (dialog.dialogId == message.dialogId) {
+          dialog.lastMessage = message;
+        }
+      }
+    }
+
+    print('onDialogStateNewMessageReceived  $newDialogs');
+    final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: sortDialogsByLastMessage(newDialogs)));
+    emit(newState);
+  }
+
 
   void onRefreshDialogsEvent(
       RefreshDialogsEvent event,

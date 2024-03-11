@@ -95,6 +95,8 @@ class MessagesProvider {
           'parent_id': parentMessageId
         }
       });
+      await Future.delayed(Duration(seconds: 1));
+      if (DateTime.now().millisecondsSinceEpoch % 3 == 0)       throw AppErrorException(AppErrorExceptionType.network);
       final response = await http.post(
           Uri.parse('https://erp.mcfef.com/api/chat/message/add/$dialogId'),
           headers: <String, String>{

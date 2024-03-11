@@ -9,6 +9,7 @@ import 'package:chat/bloc/profile_bloc/profile_bloc.dart';
 import 'package:chat/bloc/profile_bloc/profile_events.dart';
 import 'package:chat/bloc/user_bloc/user_bloc.dart';
 import 'package:chat/bloc/user_bloc/user_event.dart';
+import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/services/user_profile/user_profile_api_provider.dart';
 import 'package:chat/services/ws/ws_repository.dart';
@@ -86,19 +87,23 @@ import 'messages/messages_repository.dart';
     return result;
   }
 
-  void logoutHelper(BuildContext context) {
-    BlocProvider.of<DialogsViewCubit>(context).deleteAllDialogs();
-    //TODO: refacrot messageBloc
-    // BlocProvider.of<ChatsBuilderBloc>(context).add(DeleteAllChatsEvent());
-    BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLogoutEvent());
-    WebsocketRepository.instance.disconnect();
-    BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersDeleteUsersEvent());
-    BlocProvider.of<CallLogsBloc>(context).add(DeleteCallsOnLogoutEvent());
+  void logoutHelper(BuildContext context) async {
+    final db = DBProvider.db;
+    final res = await db.deleteAllDataOnLogout();
+    if (res) {
+      BlocProvider.of<DialogsViewCubit>(context).deleteAllDialogs();
+      BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLogoutEvent());
+      WebsocketRepository.instance.disconnect();
+      BlocProvider.of<UsersViewCubit>(context).usersBloc.add(UsersDeleteUsersEvent());
+      BlocProvider.of<CallLogsBloc>(context).add(DeleteCallsOnLogoutEvent());
+      const sipChannel = MethodChannel("com.application.chat/sip");
+      sipChannel.invokeMethod('SIP_LOGOUT');
 
-    const sipChannel = MethodChannel("com.application.chat/sip");
-    sipChannel.invokeMethod('SIP_LOGOUT');
+      BlocProvider.of<AuthViewCubit>(context).logout(context);
+    } else {
+      customToastMessage(context: context, message: 'Произошла ошибка при выходе из аккаунта, попробуйте еще раз');
+    }
 
-    BlocProvider.of<AuthViewCubit>(context).logout(context);
   }
 
   Duration getTZ() {
@@ -129,21 +134,23 @@ import 'messages/messages_repository.dart';
     SnackBarAction? action,
     Icon? icon
   }) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(text: message),
-              if (icon != null) WidgetSpan(
-                child: icon,
-              ),
-            ]
-          )
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: RichText(
+              text: TextSpan(
+                  children: [
+                    TextSpan(text: message),
+                    if (icon != null) WidgetSpan(
+                      child: icon,
+                    ),
+                  ]
+              )
+          ),
+          action: action,
         ),
-        action: action,
-      ),
-    );
+      );
+    });
   }
 
   ///TODO: refactor to use bytes?

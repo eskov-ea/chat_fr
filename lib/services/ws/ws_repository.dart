@@ -25,6 +25,9 @@ class WebsocketRepository extends IWebsocketRepository{
   StreamSubscription<ChannelReadEvent>? presenceChannelSubs;
   PusherChannelsClient? _socket;
   PresenceChannel? presenceChannel;
+  List<StreamSubscription> eventSubscriptions = [];
+  Map<String, Channel> channels = {};
+  StreamSubscription? generalEventSubscription;
 
 
   final options = const PusherChannelsOptions.fromHost(
@@ -40,14 +43,10 @@ class WebsocketRepository extends IWebsocketRepository{
     currentState = PusherChannelsClientLifeCycleState.pendingConnection;
     sinkState(currentState);
 
-    List<StreamSubscription> eventSubscriptions = [];
-    Map<String, Channel> channels = {};
-    StreamSubscription? generalEventSubscription;
-
     final token = await _secureStorage.getToken();
     final userId = await _secureStorage.getUserId();
     try {
-      final List<DialogData>? dialogs = await DialogRepository().getDialogs();
+      final List<DialogData> dialogs = await DialogRepository().getDialogs();
 
       _socket = PusherChannelsClient.websocket(
         options: options,
@@ -85,49 +84,17 @@ class WebsocketRepository extends IWebsocketRepository{
           print("Socket null::::");
           Future.delayed(const Duration(milliseconds: 300));
         }
-        final Channel channel = clientSubscribeToChannel(
-            authToken: token, client: _socket, channelName: 'private-chatinfo');
-        channels[channel.name] = channel;
-        generalEventSubscription = channel.bind('update').listen((event) {
-          // final DialogData newDialog = DialogData.fromJson(jsonDecode(event.data)["chat"]);
-          // print("CHATINFO   ->  $newDialog");
-          //TODO: refactor db      new dialog comes
-          // for (var user in newDialog.usersList) {
-          //   if (user.id == userId) {
-          //     add(WsEventNewDialogCreated(dialog: newDialog));
-          //     return;
-          //   }
-          // }
-        });
-        channel.subscribeIfNotUnsubscribed();
+        clientSubscribeToChatInfoChannel(
+            authToken: token, client: _socket, channelName: 'private-chatinfo'
+        );
 
-        final Channel userInfoChannel = clientSubscribeToChannel(
+
+        clientSubscribeToUserInfoChannel(
             authToken: token,
             client: _socket,
-            channelName: 'private-userinfo.$userId');
-        channels[userInfoChannel.name] = userInfoChannel;
-        generalEventSubscription = userInfoChannel.bind('update').listen((event) {
-              print("USERINFOCHANNEL  ${event.channelName}   ${jsonDecode(
-                  event.data)}");
-              final data = jsonDecode(event.data);
-              if (data["chat_join"] != null) {
-                // final DialogData newDialog = DialogData.fromJson(data["chat_join"]);
-                //TODO: refactor db
-                // for (var user in newDialog.usersList) {
-                //   if (user.id == userId) {
-                //     add(WsEventNewDialogCreated(dialog: newDialog));
-                //     return;
-                //   }
-                // }
-              } else if (data["chat_exit"] != null) {
-                //TODO: refactor db
-// final DialogData newDialog = DialogData.fromJson(data["chat_exit"]);
-                // print("UNSUBSCRIBE CHAT   -->   private-chat.${newDialog.dialogId}");
-                // add(WsEventDialogDeleted(dialog: newDialog, channelName: "private-chat.${newDialog.dialogId}"));
-                return;
-              }
-            });
-        userInfoChannel.subscribeIfNotUnsubscribed();
+            channelName: 'private-userinfo.$userId'
+        );
+
 
         presenceChannel = clientSubscribeToPresenceChannel(
             client: _socket,
@@ -141,42 +108,11 @@ class WebsocketRepository extends IWebsocketRepository{
 
         if (dialogs != null) {
           for (var dialog in dialogs) {
-            final Channel dialogChannel = clientSubscribeToChannel(
+            clientSubscribeToChannel(
                 authToken: token,
                 client: _socket,
-                channelName: 'private-chat.${dialog.dialogId}');
-            channels[dialogChannel.name] = dialogChannel;
-            StreamSubscription dialogEventSubscription =
-            dialogChannel.bind('update').listen((event) {
-              print("DialogChannel event:  $event");
-              final data = jsonDecode(event.data);
-              if (data["message"] != null) {
-                final message = MessageData.fromJson(data["message"]);
-                print("NEW MESSAGE   ${event.channelName}    ->  $message");
-                sinkEvent(WebsocketEventPayload(event: WebsocketEvent.message, data: {
-                  "message": message
-                }));
-              } else if (data["message_status"] != null) {
-                final status = MessageStatus.fromJson(data["message_status"]);
-                print("UPDATE STATUSES    -> ${status}");
-                sinkEvent(WebsocketEventPayload(event: WebsocketEvent.status, data: {
-                  "status": status
-                }));
-              } else if (data["join"] != null) {
-                print("EVENTJOIN  ${data["join"]}");
-                final user = ChatUser.fromJson(data["join"]);
-                sinkEvent(WebsocketEventPayload(event: WebsocketEvent.join, data: {
-                  "join": user
-                }));
-              } else if (data["exit"] != null) {
-                final user = ChatUser.fromJson(data["exit"]);
-                sinkEvent(WebsocketEventPayload(event: WebsocketEvent.exit, data: {
-                  "exit": user
-                }));
-              }
-            });
-            dialogChannel.subscribeIfNotUnsubscribed();
-            eventSubscriptions.add(dialogEventSubscription);
+                channelName: 'private-chat.${dialog.dialogId}'
+            );
           }
         }
       });
@@ -210,8 +146,7 @@ class WebsocketRepository extends IWebsocketRepository{
 
   void _onSocketEvent(PusherChannelsReadEvent event) {
     try {
-      if (event.rootObject["event"] ==
-          "pusher_internal:subscription_succeeded" &&
+      if (event.rootObject["event"] == "pusher_internal:subscription_succeeded" &&
           event.rootObject["data"] != null) {
         sinkEvent(WebsocketEventPayload(event: WebsocketEvent.onlineUsers, data: {
           "online_users": jsonDecode(event.rootObject["data"])["presence"]["ids"]
@@ -242,24 +177,135 @@ class WebsocketRepository extends IWebsocketRepository{
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, errorType: AppErrorExceptionType.socket.toString(), additionalInfo: "\r\nEvent was: ${event.rootObject}");
     }
   }
+
+  clientSubscribeToChatInfoChannel({
+    required client,
+    required String channelName,
+    required String? authToken
+  }) async {
+    final Channel channel = client.privateChannel(
+      channelName,
+      authorizationDelegate:
+      EndpointAuthorizableChannelTokenAuthorizationDelegate.forPrivateChannel(
+          authorizationEndpoint:
+          Uri.parse('https://erp.mcfef.com/broadcasting/auth'),
+          headers: {
+            'Authorization': 'Bearer $authToken',
+          }),
+    );
+
+    final token = await _secureStorage.getToken();
+    channels[channel.name] = channel;
+    generalEventSubscription = channel.bind('update').listen((event) {
+      final DialogData? newDialog = DialogData.fromJson(jsonDecode(event.data)["chat"]);
+      print("CHATINFO   ->  $newDialog");
+      if (newDialog != null) {
+        clientSubscribeToChannel(
+            authToken: token,
+            client: _socket,
+            channelName: 'private-chat.${newDialog.dialogId}'
+        );
+        sinkEvent(WebsocketEventPayload(event: WebsocketEvent.dialog, data: {
+          "dialog": newDialog
+        }));
+      }
+    });
+    channel.subscribeIfNotUnsubscribed();
+  }
+
+  clientSubscribeToUserInfoChannel({
+    required client,
+    required String channelName,
+    required String? authToken
+  }) {
+    final Channel userInfoChannel =  client.privateChannel(
+      channelName,
+      authorizationDelegate:
+      EndpointAuthorizableChannelTokenAuthorizationDelegate.forPrivateChannel(
+          authorizationEndpoint:
+          Uri.parse('https://erp.mcfef.com/broadcasting/auth'),
+          headers: {
+            'Authorization': 'Bearer $authToken',
+          }),
+    );
+
+    channels[userInfoChannel.name] = userInfoChannel;
+    generalEventSubscription = userInfoChannel.bind('update').listen((event) {
+      print("USERINFOCHANNEL  ${event.channelName}   ${jsonDecode(
+          event.data)}");
+      final data = jsonDecode(event.data);
+      if (data["chat_join"] != null) {
+        final DialogData? newDialog = DialogData.fromJson(data["chat_join"]);
+        if (newDialog != null) {
+          sinkEvent(WebsocketEventPayload(event: WebsocketEvent.dialog, data: {
+            "dialog": newDialog
+          }));
+        }
+        //TODO: refactor db
+      } else if (data["chat_exit"] != null) {
+        //TODO: refactor db
+// final DialogData newDialog = DialogData.fromJson(data["chat_exit"]);
+        // print("UNSUBSCRIBE CHAT   -->   private-chat.${newDialog.dialogId}");
+        // add(WsEventDialogDeleted(dialog: newDialog, channelName: "private-chat.${newDialog.dialogId}"));
+        return;
+      }
+    });
+    userInfoChannel.subscribeIfNotUnsubscribed();
+  }
+
+  clientSubscribeToChannel({
+    required client,
+    required String channelName,
+    required String? authToken
+  }) {
+    final Channel dialogChannel = client.privateChannel(
+      channelName,
+      authorizationDelegate:
+      EndpointAuthorizableChannelTokenAuthorizationDelegate.forPrivateChannel(
+          authorizationEndpoint:
+          Uri.parse('https://erp.mcfef.com/broadcasting/auth'),
+          headers: {
+            'Authorization': 'Bearer $authToken',
+          }),
+    );
+    channels[dialogChannel.name] = dialogChannel;
+    StreamSubscription dialogEventSubscription =
+    dialogChannel.bind('update').listen((event) {
+      print("DialogChannel event:  $event");
+      final data = jsonDecode(event.data);
+      if (data["message"] != null) {
+        final message = MessageData.fromJson(data["message"]);
+        print("NEW MESSAGE   ${event.channelName}    ->  $message");
+        sinkEvent(WebsocketEventPayload(event: WebsocketEvent.message, data: {
+          "message": message
+        }));
+      } else if (data["message_status"] != null) {
+        final status = MessageStatus.fromJson(data["message_status"]);
+        print("UPDATE STATUSES    -> ${status}");
+        sinkEvent(WebsocketEventPayload(event: WebsocketEvent.status, data: {
+          "status": status
+        }));
+      } else if (data["join"] != null) {
+        print("EVENTJOIN  ${data["join"]}");
+        final user = ChatUser.fromJson(data["join"]);
+        sinkEvent(WebsocketEventPayload(event: WebsocketEvent.join, data: {
+          "join": user
+        }));
+      } else if (data["exit"] != null) {
+        final user = ChatUser.fromJson(data["exit"]);
+        sinkEvent(WebsocketEventPayload(event: WebsocketEvent.exit, data: {
+          "exit": user
+        }));
+      }
+    });
+    dialogChannel.subscribeIfNotUnsubscribed();
+    eventSubscriptions.add(dialogEventSubscription);
+
+  }
 }
 
 
-clientSubscribeToChannel (
-    {required client,
-      required String channelName,
-      required String? authToken}) {
-  return client.privateChannel(
-    channelName,
-    authorizationDelegate:
-    EndpointAuthorizableChannelTokenAuthorizationDelegate.forPrivateChannel(
-        authorizationEndpoint:
-        Uri.parse('https://erp.mcfef.com/broadcasting/auth'),
-        headers: {
-          'Authorization': 'Bearer $authToken',
-        }),
-  );
-}
+
 
 clientSubscribeToPresenceChannel(
     {required client,

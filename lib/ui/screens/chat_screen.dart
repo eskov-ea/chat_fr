@@ -101,7 +101,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     if (widget.dialogData != null) {
       BlocProvider.of<MessageBloc>(context).add(MessageBlocLoadMessagesEvent(dialogId: widget.dialogData!.dialogId));
     }
-    BlocProvider.of<MessageBloc>(context).add(MessageBlocSendReadMessagesStatusEvent(dialogId: widget.dialogData!.dialogId));
     setState(() {
       isOnline = _userStatusManager.onlineUsers[widget.partnerId] == true;
     });

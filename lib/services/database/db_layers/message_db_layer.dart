@@ -186,12 +186,38 @@ class MessageDBLayer {
     }
   }
 
-  Future<int> updateMessageWithSendFailed(int localMessageId, int sendFailed) async {
+  Future<int> updateMessageWithSendingFailure(int localMessageId) async {
     try {
       final db = await DBProvider.db.database;
       return await db.transaction((txn) async {
         return await txn.rawUpdate(
-          'UPDATE message SET send_failed = 1 WHERE local_id = "$localMessageId"; '
+            'UPDATE message SET send_failed = 1 WHERE local_id = "$localMessageId"; '
+        );
+      });
+    } catch (err, stackTrace) {
+      rethrow;
+    }
+  }
+
+  Future<int> updateMessageErrorStatusOnResend(int localMessageId) async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        return await txn.rawUpdate(
+            'UPDATE message SET send_failed = 0 WHERE local_id = "$localMessageId"; '
+        );
+      });
+    } catch (err, stackTrace) {
+      rethrow;
+    }
+  }
+
+  Future updateMessagesThatFailedToBeSent() async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        return await txn.rawUpdate(
+            'UPDATE message SET send_failed = 1 WHERE local_id IS NOT NULL; '
         );
       });
     } catch (err, stackTrace) {
