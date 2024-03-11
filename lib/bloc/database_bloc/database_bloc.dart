@@ -55,6 +55,8 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         await onDatabaseBlocCheckAuthTokenEvent(event, emit);
       } else if (event is DatabaseBlocResendMessageEvent) {
         await onDatabaseBlocResendMessageEvent(event, emit);
+      } else if (event is DatabaseBlocDeleteMessagesEvent) {
+        await onDatabaseBlocDeleteMessagesEvent(event, emit);
       }
     }, transformer: sequential());
   }
@@ -148,6 +150,8 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
           progress: 0.5
       ));
       final users = await db.getUsers();
+
+      await db.updateMessagesThatFailedToBeSent();
       final messages = await db.getMessages();
       emit(DatabaseBlocInitializationInProgressState(
           message: 'Загружаем диалоги',
@@ -200,13 +204,14 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     final now = DateTime.now();
     final tRawDifference = (now.millisecondsSinceEpoch - DateTime.parse(lastUpdate).millisecondsSinceEpoch) / 1000;
     final diff = tRawDifference.ceil();
+    if (diff < 30) return;
     final updates = await MessagesRepository().getNewUpdatesOnResume(diff);
     final List<DialogData> dialogs = updates!["chats"].map((json) => DialogData.fromJson(json)).whereType<DialogData>().toList();
     final List<ChatUser> dialogUsers = updates["chat_users"].map((json) => ChatUser.fromJson(json)).whereType<ChatUser>().toList();
     final List<MessageStatus> statuses = updates["chat_message_status_users"].map((json) => MessageStatus.fromJson(json)).whereType<MessageStatus>().toList();
     final List<MessageData> messages = updates["chat_messages"].map((json) => MessageData.fromJson(json)).whereType<MessageData>().toList();
 
-    print('onDatabaseBlocGetUpdatesOnResume:: dialogs: $dialogs, messages: $messages');
+    print('onDatabaseBlocGetUpdatesOnResume:: time: $diff, last update: $lastUpdate,  dialogs ${dialogs.length}: $dialogs, messages: $messages');
     if (dialogUsers.isNotEmpty) {
       await db.saveChatUsers(dialogUsers);
     }
@@ -359,5 +364,18 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       }
     }
     print('onDatabaseBlocResendMessageEvent:: $json');
+  }
+
+  Future<void> onDatabaseBlocDeleteMessagesEvent(
+      DatabaseBlocDeleteMessagesEvent event,
+      emit
+  ) async {
+    print('DatabaseBlocDeleteMessagesEvent  ${event.ids}');
+    try {
+      await db.deleteMessages(event.ids);
+      emit(DatabaseBlocDeletedMessagesState(ids: event.ids, dialogId: event.dialogId));
+    } catch (err, stackTrace) {
+
+    }
   }
 }

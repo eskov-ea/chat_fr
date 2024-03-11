@@ -48,7 +48,7 @@ class MessagesListStatefullWidget extends StatefulWidget {
   final List<SelectedMessage> selected;
   final Function(SelectedMessage) setSelected;
   final Function(List<SelectedMessage>) openForwardMenu;
-  final Function(int) deleteMessage;
+  final Function(List<int>) deleteMessage;
   final ScrollController scrollController;
 
   @override
@@ -204,7 +204,7 @@ class MessagesListWidget extends StatelessWidget {
   final FocusNode focusNode;
   final String partnerName;
   final Function(String, int, int, String)  setReplyMessage;
-  final Function(int)  deleteMessage;
+  final Function(List<int>)  deleteMessage;
   final bool isSelectedMode;
   final List<UserModel> users;
   final Function setSelectedMode;

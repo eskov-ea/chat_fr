@@ -28,6 +28,7 @@ class CallLogService {
       List<dynamic> collection = jsonDecode(response.body)["data"];
       List<CallModel> callLog =
       collection.map((call) => CallModel.fromJson(call)).toList();
+      print('calls log:: ${callLog}');
       return callLog;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "

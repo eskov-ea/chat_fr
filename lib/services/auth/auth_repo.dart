@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
+import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/models/auth_user_model.dart';
 import 'package:http/http.dart' as http;
@@ -41,6 +42,8 @@ class AuthRepository {
       final UserProfileData profile = await _profileProvider.getUserProfile(authToken.token);
       final userId = profile.id;
       await _secureStorage.setUserId(userId);
+      final db = DBProvider.db;
+      await db.setLastUpdateTime();
       return authToken;
     } on SocketException catch(err, stackTrace) {
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error additional: [ message: ${err.message}, "

@@ -60,7 +60,7 @@ class MessageWidget extends StatefulWidget {
   final bool selectedMode;
   final Function setSelectedMode;
   final Function(List<SelectedMessage>) openForwardMenu;
-  final Function(int) deleteMessage;
+  final Function(List<int>) deleteMessage;
   final Function(SelectedMessage) setSelected;
   final String message;
   final int messageId;
@@ -179,7 +179,7 @@ class _MessageTile extends StatelessWidget {
   final Function(SelectedMessage) setSelected;
   final Function setSelectedMode;
   final Function(List<SelectedMessage>) openForwardMenu;
-  final Function(int) deleteMessage;
+  final Function(List<int>) deleteMessage;
   final List selected;
   final bool selectedMode;
   final int userId;
@@ -337,7 +337,7 @@ class _MessageTile extends StatelessWidget {
                               title: const Text('Удалить',
                                   style: TextStyle(color: Colors.red)),
                               onPressed: () {
-                                deleteMessage(messageId);
+                                deleteMessage([messageId]);
                               },
                               trailingIcon:
                               const Icon(Icons.delete, color: Colors.red)),

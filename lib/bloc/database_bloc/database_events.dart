@@ -69,5 +69,12 @@ class DatabaseBlocResendMessageEvent extends DatabaseBlocEvent {
   DatabaseBlocResendMessageEvent({required this.localMessageId, required this.dialogId});
 }
 
+class DatabaseBlocDeleteMessagesEvent extends DatabaseBlocEvent {
+  final List<int> ids;
+  final int dialogId;
+
+  DatabaseBlocDeleteMessagesEvent({required this.ids, required this.dialogId});
+}
+
 
 

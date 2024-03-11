@@ -94,6 +94,7 @@ class DBProvider {
   Future<int> checkIfMessageExistWithThisId(int id) async => MessageDBLayer().checkIfMessageExistWithThisId(id);
   Future updateMessagesThatFailedToBeSent() async => MessageDBLayer().updateMessagesThatFailedToBeSent();
   Future<int> updateMessageErrorStatusOnResend(int localMessageId) async => MessageDBLayer().updateMessageErrorStatusOnResend(localMessageId);
+  Future<int> deleteMessages(List<int> ids) async => MessageDBLayer().deleteMessages(ids);
 
 
   ///   MESSAGE STATUS LAYER

@@ -33,7 +33,7 @@ class MessageDBLayer {
       return await db.transaction((txn) async {
         List<Object> res = await txn.rawQuery(
             'SELECT m.id message_id, m.chat_id, m.user_id, m.message, m.created_at message_created_at, m.updated_at, '
-            'm.replied_message_id, m.replied_message_author, m.replied_message_text, '
+            'm.replied_message_id, m.replied_message_author, m.replied_message_text, m.send_failed, '
             's.id message_status_id, s.user_id message_status_user_id, '
             's.chat_message_id, s.chat_message_status_id, s.created_at message_status_created_at, s.updated_at message_status_updated_at, '
             'f.id file_id, f.name file_name, f.preview file_preview, f.path file_path, f.ext file_ext, f.created_at file_created_at '
@@ -72,7 +72,7 @@ class MessageDBLayer {
         List<Object> res = await txn.rawQuery(
             'SELECT m.id message_id, m.chat_id, m.user_id, m.message, m.created_at message_created_at, m.updated_at, '
                 'm.replied_message_id, m.replied_message_author, m.replied_message_text, '
-                's.id message_status_id, s.user_id message_status_user_id, '
+                's.id message_status_id, s.user_id message_status_user_id, m.send_failed, '
                 's.chat_message_id, s.chat_message_status_id, s.created_at message_status_created_at, s.updated_at message_status_updated_at, '
                 'f.id file_id, f.name file_name, f.preview file_preview, f.path file_path, f.ext file_ext, f.created_at file_created_at '
                 'FROM message m '
@@ -110,7 +110,7 @@ class MessageDBLayer {
         List<Object> res = await txn.rawQuery(
             'SELECT m.id message_id, m.chat_id, m.user_id, m.message, m.created_at message_created_at, m.updated_at, '
                 'm.replied_message_id, m.replied_message_author, m.replied_message_text, '
-                's.id message_status_id, s.user_id message_status_user_id, '
+                's.id message_status_id, s.user_id message_status_user_id, m.send_failed, '
                 's.chat_message_id, s.chat_message_status_id, s.created_at message_status_created_at, s.updated_at message_status_updated_at, '
                 'f.id file_id, f.name file_name, f.preview file_preview, f.path file_path, f.ext file_ext, f.created_at file_created_at '
                 'FROM message m '
@@ -171,6 +171,17 @@ class MessageDBLayer {
     } catch (err, stackTrace) {
       rethrow;
     }
+  }
+
+  Future<int> deleteMessages(List<int> ids) async {
+    final db = await DBProvider.db.database;
+    return await db.transaction((txn) async {
+      final res = await txn.rawDelete(
+        'DELETE FROM message WHERE id IN (${ids.join(', ')}); '
+      );
+      print('deleteMessages  $res');
+      return res;
+    });
   }
 
   Future<int> updateMessageId(int localMessageId, int messageId) async {

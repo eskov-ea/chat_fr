@@ -90,3 +90,10 @@ class MessageBlocUpdateErrorStatusOnResendEvent extends MessageBlocEvent {
 
   MessageBlocUpdateErrorStatusOnResendEvent({required this.localMessageId, required this.dialogId});
 }
+
+class MessageBlocDeleteMessagesEvent extends MessageBlocEvent {
+  final List<int> ids;
+  final int dialogId;
+
+  MessageBlocDeleteMessagesEvent({required this.ids, required this.dialogId});
+}

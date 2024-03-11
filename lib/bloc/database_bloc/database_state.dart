@@ -92,3 +92,10 @@ class DatabaseBlocUpdateLocalMessageState extends DatabaseBlocState {
 
 }
 
+class DatabaseBlocDeletedMessagesState extends DatabaseBlocState {
+  final List<int> ids;
+  final int dialogId;
+
+  DatabaseBlocDeletedMessagesState({required this.ids, required this.dialogId});
+}
+

@@ -46,6 +46,8 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
         add(MessageBlocFailedToSendMessageEvent(localMessageId: event.localMessageId, dialogId: event.dialogId));
       } else if (event is DatabaseBlocUpdateErrorStatusOnResendState) {
         add(MessageBlocUpdateErrorStatusOnResendEvent(localMessageId: event.localMessageId, dialogId: event.dialogId));
+      } else if (event is DatabaseBlocDeletedMessagesState) {
+        add(MessageBlocDeleteMessagesEvent(ids: event.ids, dialogId: event.dialogId));
       }
     });
 
@@ -71,6 +73,8 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
         onMessageBlocFailedToSendMessageEvent(event, emit);
       } else if (event is MessageBlocUpdateErrorStatusOnResendEvent) {
         onMessageBlocUpdateErrorStatusOnResendEvent(event, emit);
+      } else if (event is MessageBlocDeleteMessagesEvent) {
+        onMessageBlocDeleteMessagesEvent(event, emit);
       }
 
 
@@ -263,10 +267,8 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
       emit) {
     print('we update locals');
     if (state is MessageBlocInitializationSuccessState) {
-      final dialogId = (state as MessageBlocInitializationSuccessState)
-          .dialogId;
-      final messages = (state as MessageBlocInitializationSuccessState)
-          .messages;
+      final dialogId = (state as MessageBlocInitializationSuccessState).dialogId;
+      final messages = (state as MessageBlocInitializationSuccessState).messages;
       if (dialogId == event.dialogId) {
         for (var message in messages) {
           if (message.messageId == event.localId) {
@@ -279,6 +281,22 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
         }
       }
     }
+  }
+
+  void onMessageBlocDeleteMessagesEvent(
+      MessageBlocDeleteMessagesEvent event,
+      emit
+  ) {
+    if (state is MessageBlocInitializationSuccessState) {
+      final dialogId = (state as MessageBlocInitializationSuccessState).dialogId;
+      final messages = (state as MessageBlocInitializationSuccessState).messages;
+      if (dialogId == event.dialogId) {
+        messages.removeWhere((element) => event.ids.contains(element.messageId));
+        emit(MessageBlocInitializationSuccessState(
+            dialogId: dialogId, messages: messages));
+      }
+    }
+  }
 
     // Future<void> onChatsBuilderLoadMessagesEvent (
     //     ChatsBuilderLoadMessagesEvent event, Emitter<MessagesBlocState> emit
@@ -499,7 +517,6 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
     //     emit(state.copyWith(updatedChats: newState, updatedMessagesDictionary: state.messagesDictionary));
     //   }
     // }
-  }
 
 }
 

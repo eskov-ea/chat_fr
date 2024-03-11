@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:chat/bloc/database_bloc/database_bloc.dart';
+import 'package:chat/bloc/database_bloc/database_events.dart';
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/bloc/messge_bloc/message_event.dart';
 import 'package:chat/bloc/user_bloc/online_users_manager.dart';
@@ -211,44 +213,17 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   void deleteMessages() async {
-    try {
       isSelectedMode = false;
       setState(() {});
       List<int> ids = [];
       for (final message in selected) {
         ids.add(message.id);
       }
-      final bool response = await MessagesProvider().deleteMessage(messageId: ids);
-      if (response) {
-        //TODO: refacrot messageBloc
-        // BlocProvider.of<MessageBloc>(context).add(
-        //     ChatsBuilderDeleteMessagesEvent(
-        //         messagesId: ids, dialogId: widget.dialogData!.dialogId));
-      } else {
-        customToastMessage(context: context, message: 'Не получилось удалить сообщения. Попробуйте еще раз');
-      }
-      closeSelectedOptionsMenu();
-    } catch (err) {
-      closeSelectedOptionsMenu();
-      customToastMessage(context: context, message: 'Не получилось удалить сообщения. Попробуйте еще раз');
-    }
+      BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocDeleteMessagesEvent(ids: ids, dialogId: widget.dialogData!.dialogId));
   }
 
-  void deleteMessage(int id) async {
-    print("Trying delete message $selected");
-    try {
-      final bool response = await MessagesProvider().deleteMessage(messageId: [id]);
-      if (response) {
-        //TODO: refacrot messageBloc
-        // BlocProvider.of<MessageBloc>(context).add(
-        //     ChatsBuilderDeleteMessagesEvent(
-        //         messagesId: [id], dialogId: widget.dialogData!.dialogId));
-      } else {
-        customToastMessage(context: context, message: 'Не получилось удалить сообщения. Попробуйте еще раз');
-      }
-    } catch (err) {
-      customToastMessage(context: context, message: 'Ошибка. Не получилось удалить сообщения. Попробуйте еще раз');
-    }
+  void deleteMessage(List<int> ids) async {
+    BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocDeleteMessagesEvent(ids: ids, dialogId: widget.dialogData!.dialogId));
   }
 
   void setSelected(SelectedMessage message) {

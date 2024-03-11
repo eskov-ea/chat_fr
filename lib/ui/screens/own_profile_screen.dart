@@ -112,26 +112,26 @@ class ProfilePage extends StatelessWidget {
                               )
                             )
                           : SizedBox.shrink(),
-                      OutlinedButton(
-                          onPressed: () async {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (context) {
-                                return const DBScreen();
-                              })
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isUpdateAvailable ? LightColors.profilePageButton : Colors.white10,
-                            minimumSize: const Size.fromHeight(50),
-                            shape: RoundedRectangleBorder(
-                                side: BorderSide(color:isUpdateAvailable ? Colors.black54 : Colors.black12, width: 2, style: BorderStyle.solid),
-                                borderRadius: BorderRadius.zero),
-                          ),
-                          child: Text(
-                            'Db Screen',
-                            style: TextStyle(color: isUpdateAvailable ? Colors.black54 : Colors.black26, fontSize: 20, fontWeight: FontWeight.w300),
-                          )
-                      ),
+                      // OutlinedButton(
+                      //     onPressed: () async {
+                      //       Navigator.of(context).push(
+                      //         MaterialPageRoute(builder: (context) {
+                      //           return const DBScreen();
+                      //         })
+                      //       );
+                      //     },
+                      //     style: ElevatedButton.styleFrom(
+                      //       backgroundColor: isUpdateAvailable ? LightColors.profilePageButton : Colors.white10,
+                      //       minimumSize: const Size.fromHeight(50),
+                      //       shape: RoundedRectangleBorder(
+                      //           side: BorderSide(color:isUpdateAvailable ? Colors.black54 : Colors.black12, width: 2, style: BorderStyle.solid),
+                      //           borderRadius: BorderRadius.zero),
+                      //     ),
+                      //     child: Text(
+                      //       'Очистить хранилище',
+                      //       style: TextStyle(color: isUpdateAvailable ? Colors.black54 : Colors.black26, fontSize: 20, fontWeight: FontWeight.w300),
+                      //     )
+                      // ),
                       OutlinedButton(
                           onPressed: () async {
                             logoutHelper(context);
@@ -175,6 +175,9 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
+Future<void> deleteBD(BuildContext context) async {
+  // final db = DBP
+}
 void downLoadNewAppVersion(String? url, BuildContext context) async {
   if(url == null) return;
   final uri = Uri.parse(url);
