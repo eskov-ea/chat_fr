@@ -65,16 +65,16 @@ class _SipConnectionStateScreenState extends State<SipConnectionStateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          foregroundColor: Colors.black,
-          backgroundColor: Colors.white,
-          title: const Text('Статус SIP-сервиса'),
+    return Scaffold(
+      appBar: AppBar(
+        foregroundColor: Colors.black,
+        backgroundColor: Colors.white,
+        title: const Text('Статус SIP-сервиса'),
 
-        ),
-        body: Material(
-          color: Colors.white,
+      ),
+      body: Material(
+        color: Colors.white,
+        child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [

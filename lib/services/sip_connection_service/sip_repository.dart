@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:chat/bloc/calls_bloc/calls_bloc.dart';
 import 'package:chat/models/user_profile_model.dart';
 import 'package:chat/services/global.dart';
@@ -24,12 +25,11 @@ class SipRepository extends ISipRepository {
 
   SipConnectionState get state => _currentState;
   connect(UserProfileAsteriskSettings settings, int userId, String? displayName) async {
-    print('Connect to:::');
-    _currentState = SipConnectionState(status: ConnectionStatus.progress, message: null);
-    sink(_currentState);
     _sipEventSubscription = sipConnectionStateEventChannel
         .receiveBroadcastStream()
         .listen((dynamic event)  {
+          print('sip connection subscription event: $event');
+
       final connectionEvent = SipConnectionEvent.fromJson(event);
       print('sip connection subscription event:  $connectionEvent  ${connectionEvent.event}');
       if (connectionEvent.event == "REGISTRATION_SUCCESS") {
@@ -101,10 +101,14 @@ class SipConnectionEvent {
 
   SipConnectionEvent({required this.event, required this.message});
 
-  static SipConnectionEvent fromJson(json) =>
-    SipConnectionEvent(
-      event: json["event"],
-      message: json["message"]
-    );
+  static SipConnectionEvent fromJson(data) {
+    var json;
+    if (data.runtimeType == String) {
+      json = jsonDecode(data);
+    } else {
+      json = data;
+    }
 
+    return SipConnectionEvent(event: json["event"], message: json["message"]);
+  }
 }

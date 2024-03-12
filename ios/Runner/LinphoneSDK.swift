@@ -15,7 +15,7 @@ class LinphoneSDK : ObservableObject
         
         var eventSink: FlutterEventSink?
         var audioDeviceSink: FlutterEventSink?
-        var connectionStateSink: FlutterEventSink?
+        var connectionEventSink: FlutterEventSink?
         
         var mAccount: Account?
         var mCoreDelegate : CoreDelegate!
@@ -44,14 +44,16 @@ class LinphoneSDK : ObservableObject
         var outgoingNumber = ""
         var isOutgoingCallInited: Bool = false
         var sm: StorageManager!
+        private var currentConnectionState: RegistrationState = RegistrationState.None
 
 
     
-    init(calleventSinc: FlutterEventSink?, audioDeviceEventSinc: FlutterEventSink?, connectionStateSink: FlutterEventSink?)
+    init()
     {
-        eventSink = calleventSinc
-        audioDeviceSink = audioDeviceEventSinc
-        connectionStateSink = connectionStateSink
+        
+//        eventSink = calleventSinc
+//        audioDeviceSink = audioDeviceEventSinc
+//        self.connectionStateSink = connectionStateSink
         sm = StorageManager()
         let factory = Factory.Instance
         let configDir = factory.getConfigDir(context: nil)
@@ -109,12 +111,14 @@ class LinphoneSDK : ObservableObject
                     self.isCallRunning = false
                     self.remoteAddress = "Nobody yet"
                 } else if (state == .End) {
+                    print("End call reason: \(call.callLog?.errorInfo)")
                     let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
                     let payload = makeCallEventPayload(event: "ENDED", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                     self.mProviderDelegate.stopCall()
                     self.isCallRunning = false
                 } else if (state == .Error) {
+                    print("End call reason err: \(call.callLog?.errorInfo.unsafelyUnwrapped)")
                     let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
                     let payload = makeCallEventPayload(event: "ERROR", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
@@ -166,28 +170,29 @@ class LinphoneSDK : ObservableObject
             }, onAudioDevicesListUpdated: { (core: Core) in
                 self.getAudioDeviceList()
             }, onAccountRegistrationStateChanged: { (core: Core, account: Account, state: RegistrationState, message: String) in
-//                NSLog("New registration state is \(state) for user id \( String(describing: account.params?.identityAddress?.asString()))\n")
-                NSLog("New registration state \(state) \(self.audioDeviceSink)")
+                if (self.currentConnectionState == state) {return}
+                self.currentConnectionState = state
+                NSLog("New registration state \(state) \(self.currentConnectionState) \(message)")
                 if (state == .Ok) {
                     self.loggedIn = true
                     let payload = makeSipConnectionEventPayload(event: "REGISTRATION_SUCCESS", message: message)
-                    self.connectionStateSink?(payload)
+                    self.connectionEventSink?(payload)
                 } else if (state == .Cleared) {
                     self.loggedIn = false
                     let payload = makeSipConnectionEventPayload(event: "REGISTRATION_CLEARED", message: message)
-                    self.connectionStateSink?(payload)
+                    self.connectionEventSink?(payload)
                 } else if (state == .Failed) {
                     self.loggedIn = false
                     let payload = makeSipConnectionEventPayload(event: "REGISTRATION_FAILED", message: message)
-                    self.connectionStateSink?(payload)
+                    self.connectionEventSink?(payload)
                 } else if (state == .None) {
                     self.loggedIn = false
                     let payload = makeSipConnectionEventPayload(event: "REGISTRATION_NONE", message: message)
-                    self.connectionStateSink?(payload)
+                    self.connectionEventSink?(payload)
                 } else if (state == .Progress) {
-//                    self.loggedIn = false
-//                    let payload = makeSipConnectionEventPayload(event: "REGISTRATION_PROGRESS", message: message)
-//                    self.connectionStateSink?(payload)
+                    self.loggedIn = false
+                    let payload = makeSipConnectionEventPayload(event: "REGISTRATION_PROGRESS", message: message)
+                    self.connectionEventSink?(payload)
                 }
         })
 
@@ -485,7 +490,7 @@ func makeSipConnectionEventPayload(event: String, message: String?) -> String? {
         let jsonEventPayloadString = String(data: jsonEventPayload, encoding: .utf8)!
         return jsonEventPayloadString
     } catch {
-        print(error)
+        print("JSON errro \(error)")
         return nil
     }
 }
