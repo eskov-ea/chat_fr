@@ -9,17 +9,17 @@ import 'package:chat/view_models/user/users_view_cubit_state.dart';
 
 import 'group_chat/group_chat_preview_page.dart';
 
-class NewMessagePage extends StatefulWidget {
-  const NewMessagePage({required this.bloc, Key? key}) : super(key: key);
+class CreateNewDialogPage extends StatefulWidget {
+  const CreateNewDialogPage({required this.bloc, Key? key}) : super(key: key);
 
   final UsersViewCubit bloc;
 
 
   @override
-  State<NewMessagePage> createState() => _NewMessagePageState();
+  State<CreateNewDialogPage> createState() => _CreateNewDialogPageState();
 }
 
-class _NewMessagePageState extends State<NewMessagePage> {
+class _CreateNewDialogPageState extends State<CreateNewDialogPage> {
 
   late final StreamSubscription userViewCubitStateSubscription;
   bool selectedMode = false;

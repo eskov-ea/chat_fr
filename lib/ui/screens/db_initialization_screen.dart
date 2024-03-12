@@ -1,10 +1,10 @@
 import 'dart:async';
-
 import 'package:chat/bloc/database_bloc/database_bloc.dart';
 import 'package:chat/bloc/database_bloc/database_events.dart';
 import 'package:chat/bloc/database_bloc/database_state.dart';
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
+import 'package:chat/services/global.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
-import 'package:chat/ui/screens/db_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -20,6 +20,7 @@ class _DatabaseInitializationScreenState extends State<DatabaseInitializationScr
   late final StreamSubscription<DatabaseBlocState> _databaseStateSubscription;
   String message = 'Загружаем \r\n базу данных';
   double stepProgress = 0.55;
+  AppErrorException? error;
 
   @override
   void initState() {
@@ -31,12 +32,16 @@ class _DatabaseInitializationScreenState extends State<DatabaseInitializationScr
           message = event.message;
           stepProgress = event.progress;
         });
-      }else if (event is DatabaseBlocDBInitializedState) {
+      } else if (event is DatabaseBlocDBInitializedState) {
         setState(() {
           message = 'Загрузка завершена';
           stepProgress = 1;
         });
         Navigator.pushReplacementNamed(context, MainNavigationRouteNames.homeScreen);
+      } else if (event is DatabaseBlocDBFailedInitializeState) {
+        setState(() {
+          error = event.exception;
+        });
       }
     });
     BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocInitializeEvent());
@@ -50,6 +55,78 @@ class _DatabaseInitializationScreenState extends State<DatabaseInitializationScr
 
   @override
   Widget build(BuildContext context) {
+    if (error != null) {
+      return Scaffold(
+          body: Container(
+            color: Colors.red.shade50,
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            padding: EdgeInsets.zero,
+            alignment: Alignment.center,
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.8,
+              height: 250,
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+                  color: Colors.red.shade100,
+                  boxShadow: [
+                    BoxShadow(
+                        spreadRadius: 0.0,
+                        blurRadius: 20.0,
+                        blurStyle: BlurStyle.outer,
+                        color: Colors.red.shade400
+                    )
+                  ]
+              ),
+              child: SingleChildScrollView(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      const SizedBox(height: 20,),
+                      Text(mapErrorToMessage(error!),
+                        style: TextStyle(fontSize: 16),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 20),
+                      Material(
+                        color: Colors.transparent,
+                        child: Ink(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade300,
+                            borderRadius: const BorderRadius.all(Radius.circular(6))
+                          ),
+                          child: InkWell(
+                            onTap: () {
+                              BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocInitializeEvent());
+                              setState(() {
+                                error = null;
+                              });
+                            },
+                            customBorder: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6)
+                            ),
+                            splashColor: Colors.white70,
+                            child: const Center(
+                              child: Text('Обновить',
+                                style: TextStyle(fontSize: 16, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20)
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          )
+      );
+    }
     return Scaffold(
       body: Container(
         color: Colors.white,
@@ -61,7 +138,7 @@ class _DatabaseInitializationScreenState extends State<DatabaseInitializationScr
           width: 200,
           height: 200,
           padding: EdgeInsets.zero,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(8.0)),
               color: Colors.black12,
               boxShadow: [
@@ -133,7 +210,7 @@ class _DatabaseInitializationScreenState extends State<DatabaseInitializationScr
         width: 200,
         height: 200,
         padding: EdgeInsets.zero,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(8.0)),
             color: Colors.black12,
             boxShadow: [

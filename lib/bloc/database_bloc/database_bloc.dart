@@ -22,6 +22,7 @@ import 'package:chat/services/user_profile/user_profile_api_provider.dart';
 import 'package:chat/services/users/users_api_provider.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 
 class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
@@ -90,54 +91,85 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       final DateTime start = DateTime.now();
       await db.database;
       await db.initDB();
-      final bool isDatabaseEmpty = await db.checkIfDatabaseIsEmpty();
-      print('isDatabaseEmpty::  $isDatabaseEmpty');
-      if (isDatabaseEmpty) {
+      await db.initAppSettings();
+
+      final appSettings = await db.getAppSettings();
+
+      if (appSettings.firstInitialized != 1) {
         print('Initialize from server');
         final token = await _storage.getToken();
         await db.initializeChatTypeValues();
 
+
+        /// Load and save profile
         emit(DatabaseBlocInitializationInProgressState(
           message: 'Синхронизируем данные с сервера',
           progress: 0.12
         ));
         final profile = await UserProfileProvider().getUserProfile(token);
         await DataProvider.storage.setUserId(profile.id);
-        final users = await UsersProvider().getUsers(token);
-        users.add(UserModel(id: profile.id, firstname: profile.firstname, lastname: profile.lastname,
-            middlename: profile.middlename, company: profile.company, position: profile.position, phone: profile.phone,
-            dept: profile.dept, email: profile.email, birthdate: profile.birthdate, avatar: profile.avatar, banned: 0,
-            lastAccess: null));
-        await db.saveUsers(users);
 
-        final dialogs = await DialogsProvider().getDialogs();
-        print('Dialogs:::  $dialogs');
 
-        final chatUsers = <ChatUser>[];
-        final dialogsLastMessages = <MessageData>[];
-        final statuses = <MessageStatus>[];
-        final files = <MessageAttachmentData>[];
+        /// Load and save users
+        if (appSettings.usersLoaded == 0) {
+          final users = await UsersProvider().getUsers(token);
+          users.add(UserModel(
+              id: profile.id,
+              firstname: profile.firstname,
+              lastname: profile.lastname,
+              middlename: profile.middlename,
+              company: profile.company,
+              position: profile.position,
+              phone: profile.phone,
+              dept: profile.dept,
+              email: profile.email,
+              birthdate: profile.birthdate,
+              avatar: profile.avatar,
+              banned: 0,
+              lastAccess: null));
+          await db.saveUsers(users);
+          await db.updateBooleanAppSettingByFieldAndValue('users_loaded', 1);
+        }
 
-        for(var dialog in dialogs) {
-          for (var chatUser in dialog.chatUsers!) {
-            chatUsers.add(ChatUser(chatId: dialog.dialogId, userId: chatUser.userId, chatUserRole: chatUser.chatUserRole, active: chatUser.active, id: chatUser.id, user: chatUser.user));
-          }
-          if (dialog.lastMessage != null) {
-            dialogsLastMessages.add(dialog.lastMessage!);
-            for(var status in dialog.lastMessage!.statuses) {
-              statuses.add(status);
+
+        /// Load and save dialogs
+        if (appSettings.dialogsLoaded == 0) {
+          final dialogs = await DialogsProvider().getDialogs();
+          print('Dialogs:::  $dialogs');
+
+          final chatUsers = <ChatUser>[];
+          final dialogsLastMessages = <MessageData>[];
+          final statuses = <MessageStatus>[];
+          final files = <MessageAttachmentData>[];
+
+          for (var dialog in dialogs) {
+            for (var chatUser in dialog.chatUsers!) {
+              chatUsers.add(ChatUser(
+                  chatId: dialog.dialogId,
+                  userId: chatUser.userId,
+                  chatUserRole: chatUser.chatUserRole,
+                  active: chatUser.active,
+                  id: chatUser.id,
+                  user: chatUser.user));
+            }
+            if (dialog.lastMessage != null) {
+              dialogsLastMessages.add(dialog.lastMessage!);
+              for (var status in dialog.lastMessage!.statuses) {
+                statuses.add(status);
+              }
+            }
+            if (dialog.lastMessage?.file != null) {
+              files.add(dialog.lastMessage!.file!);
             }
           }
-          if (dialog.lastMessage?.file != null) {
-            files.add(dialog.lastMessage!.file!);
-          }
+          print('Dialogs lm::: $dialogsLastMessages');
+          await db.saveMessages(dialogsLastMessages);
+          await db.saveAttachments(files);
+          await db.saveMessageStatuses(statuses);
+          await db.saveChatUsers(chatUsers);
+          await db.saveDialogs(dialogs);
+          await db.updateBooleanAppSettingByFieldAndValue('dialogs_loaded', 1);
         }
-        print('Dialogs lm::: $dialogsLastMessages');
-        await db.saveMessages(dialogsLastMessages);
-        await db.saveAttachments(files);
-        await db.saveMessageStatuses(statuses);
-        await db.saveChatUsers(chatUsers);
-        await db.saveDialogs(dialogs);
 
         await db.updateAppSettingsTable(dbInitialized: 1);
       }
@@ -189,9 +221,13 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
           calls: calls
       ));
 
-    } on Exception catch(err, stackTrace) {
-      log('DB error:  $err \r\n  $stackTrace');
-      emit(DatabaseBlocDBFailedInitializeState());
+    } on AppErrorException catch (exception) {
+      emit(DatabaseBlocDBFailedInitializeState(exception: exception));
+    } on DatabaseException catch (err, stacktrace) {
+      print('DatabaseException::  $err');
+      emit(DatabaseBlocDBFailedInitializeState(exception: AppErrorException(AppErrorExceptionType.db)));
+    } catch (err, stackTrace) {
+      emit(DatabaseBlocDBFailedInitializeState(exception: AppErrorException(AppErrorExceptionType.other)));
     }
   }
 

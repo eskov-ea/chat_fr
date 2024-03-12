@@ -1,4 +1,5 @@
 import 'package:chat/services/database/db_provider.dart';
+import 'package:sqflite/sqflite.dart';
 
 class ChatTypeDBLayer {
 

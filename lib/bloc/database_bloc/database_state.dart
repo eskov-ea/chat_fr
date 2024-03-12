@@ -1,3 +1,4 @@
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/call_model.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
@@ -36,7 +37,11 @@ class DatabaseBlocInitializationInProgressState extends DatabaseBlocState {
   DatabaseBlocInitializationInProgressState({required this.message, required this.progress});
 }
 
-class DatabaseBlocDBFailedInitializeState extends DatabaseBlocState {}
+class DatabaseBlocDBFailedInitializeState extends DatabaseBlocState {
+  final AppErrorException exception;
+
+  DatabaseBlocDBFailedInitializeState({required this.exception});
+}
 
 class DatabaseBlocNewMessageReceivedState extends DatabaseBlocState {
   final MessageData message;

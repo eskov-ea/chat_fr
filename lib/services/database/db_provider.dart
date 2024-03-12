@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:chat/models/app_settings_model.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/from_db_models.dart';
@@ -132,6 +133,9 @@ class DBProvider {
   Future<String> getSipContacts() async => AppStateDBLayer().getSipContacts();
   Future<int> setSipContacts(String contacts) async => AppStateDBLayer().setSipContacts(contacts);
   Future<int> setDeviceId(String deviceId) async => AppStateDBLayer().setDeviceId(deviceId);
+  Future<AppSettings> getAppSettings() async => AppStateDBLayer().getAppSettings();
+  Future<int> initAppSettings() async => AppStateDBLayer().initAppSettings();
+  Future<int> updateBooleanAppSettingByFieldAndValue(String field, int value) async => AppStateDBLayer().updateBooleanAppSettingByFieldAndValue(field, value);
 
 
   ///   DB DEVELOPER SERVICE
@@ -153,7 +157,7 @@ class DBProvider {
   Future<bool> checkIfDatabaseIsEmpty() async {
     final db = await database;
     return db.transaction((txn) async {
-      final res = await txn.rawQuery('SELECT * FROM app_settings ');
+      final res = await txn.rawQuery('SELECT first_initialize FROM app_settings ');
       print('checkIfDatabaseIsNotEmpty  $res');
       if (res.isEmpty) {
         return true;

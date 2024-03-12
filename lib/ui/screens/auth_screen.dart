@@ -190,7 +190,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
               : const Text(
-                'Логин',
+                'Войти',
                 style: TextStyle(fontSize: 20),
             ),
             style: ElevatedButton.styleFrom(

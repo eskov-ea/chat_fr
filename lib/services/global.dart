@@ -332,3 +332,36 @@ bool isOnline(int id, Map<int, bool> onlineMembers) {
   if (onlineMembers[id] != null) return true;
   return false;
 }
+
+String mapErrorToMessage(Object error) {
+  print("CATCH ERROR  $error");
+  if (error is! AppErrorException) {
+    return 'Неизвестная ошибка, поторите попытку';
+  }
+  switch (error.type) {
+    case AppErrorExceptionType.network:
+      return 'Сервер не доступен. Проверьте подключение к интернету';
+    case AppErrorExceptionType.auth:
+      return 'Не получилось загрузить данные, нужна повторная авторизация';
+    case AppErrorExceptionType.access:
+      return 'Недостаточно прав доступа для получения данных, свяжитесь с администратором!';
+    case AppErrorExceptionType.sessionExpired:
+      return 'Сессия устарела, обновите КЕШ';
+    case AppErrorExceptionType.other:
+      return 'Произошла ошибка. Попробуйте еще раз';
+    case AppErrorExceptionType.parsing:
+      return 'Произошла ошибка при обработки данных. Попробуйте еще раз';
+    case AppErrorExceptionType.socket:
+      return 'Произошла ошибка при получении данных по сети';
+    case AppErrorExceptionType.render:
+      return 'Произошла ошибка при создании виджета';
+    case AppErrorExceptionType.getData:
+      return 'Произошла ошибка при загрузке данных. Попробуйте еще раз';
+    case AppErrorExceptionType.secureStorage:
+      return 'Произошла ошибка при обращении к хранилищу данных. Попробуйте еще раз';
+    case AppErrorExceptionType.requestError:
+      return 'При отправке на сервер запрос не прошел валидацию - введены неверные данные';
+    case AppErrorExceptionType.db:
+      return 'Произошла ошибка при чтении/записи данных в базу данных. Попробуйте еще раз. При возникновении ошибки более 5 раз подряд - попробуйте удалить БД на странице Профиль и перезапустить приложение';
+  }
+}

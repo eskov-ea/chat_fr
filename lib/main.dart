@@ -36,6 +36,8 @@ import 'firebase_options.dart';
 import 'services/auth/auth_repo.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 
+import 'services/sip_connection_service/sip_repository.dart';
+
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -46,15 +48,6 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-// errorHandler(FlutterErrorDetails error) async {
-//
-//   print("Catched error:::: ${error.stack}");
-//   final Directory directory = await getApplicationDocumentsDirectory();
-//   final File file = File('${directory.path}/logs.txt');
-//   await file.writeAsString("\r\n" + DateTime.now().toString(), mode: FileMode.writeOnlyAppend);
-//   await file.writeAsString(error.stack.toString(), mode: FileMode.writeOnlyAppend);
-//   throw error;
-// }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,32 +55,33 @@ void main() async {
   WebsocketRepository.instance;
   UserOnlineStatusManager.instance;
   ErrorHandlingRepository.instance;
+  SipRepository.instance;
 
-  // if (!kIsWeb) {
-  //   await Firebase.initializeApp(
-  //     options: DefaultFirebaseOptions.currentPlatform,
-  //   );
-  // }
-  // FlutterError.onError = (errorDetails) async {
-  //   if (!kIsWeb) {
-  //     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-  //
-  //     final userId = await DataProvider.storage.getUserId();
-  //     FirebaseCrashlytics.instance.recordError(
-  //         errorDetails.exception,
-  //         errorDetails.stack,
-  //         information: ["[ USER ID ]: $userId"]
-  //     );
-  //   }
-  //
-  // };
-  // PlatformDispatcher.instance.onError = (error, stack) {
-  //   if (!kIsWeb) {
-  //     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-  //     return true;
-  //   }
-  //   return false;
-  // };
+  if (!kIsWeb) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+  FlutterError.onError = (errorDetails) async {
+    if (!kIsWeb) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+
+      final userId = await DataProvider.storage.getUserId();
+      FirebaseCrashlytics.instance.recordError(
+          errorDetails.exception,
+          errorDetails.stack,
+          information: ["[ USER ID ]: $userId"]
+      );
+    }
+
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    if (!kIsWeb) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    }
+    return false;
+  };
   runApp(const MyApp());
 }
 

@@ -9,6 +9,7 @@ import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver
 import com.cashalot.MCFEF.calls_manager.Data
 import com.cashalot.MCFEF.makeCallDataPayload
 import com.cashalot.MCFEF.makePlatformEventPayload
+import com.cashalot.MCFEF.makePlatformSipConnectionEventPayload
 import io.flutter.Log
 import org.linphone.core.*
 
@@ -197,15 +198,28 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
     private val coreListener = object: CoreListenerStub() {
         override fun onAccountRegistrationStateChanged(core: Core, account: Account, state: RegistrationState?, message: String) {
+            Log.w("SIP state::", "$state \r\n $message")
 
-            if (state == RegistrationState.Failed || state == RegistrationState.Cleared) {
-                Log.w("SIP RegistrationState status", "true")
-                val args = makePlatformEventPayload("REGISTRATION_FAILED", null, null)
-                MainActivity.callServiceEventSink?.success(args)
+            if (state == RegistrationState.Failed) {
+                Log.w("SIP RegistrationState status", state.toString())
+                val args = makePlatformSipConnectionEventPayload("REGISTRATION_FAILED", message)
+                MainActivity.sipConnectionStateEventSink?.success(args)
+            } else if (state == RegistrationState.Cleared) {
+                val args = makePlatformSipConnectionEventPayload("REGISTRATION_CLEARED", message)
+                MainActivity.sipConnectionStateEventSink?.success(args)
+                CoreContext.isLoggedIn = false
+            } else if (state == RegistrationState.None) {
+                val args = makePlatformSipConnectionEventPayload("REGISTRATION_NONE", message)
+                MainActivity.sipConnectionStateEventSink?.success(args)
+                CoreContext.isLoggedIn = false
+            } else if (state == RegistrationState.Progress) {
+                val args = makePlatformSipConnectionEventPayload("REGISTRATION_PROGRESS", message)
+                MainActivity.sipConnectionStateEventSink?.success(args)
+                CoreContext.isLoggedIn = false
             } else if (state == RegistrationState.Ok) {
                 Log.w("SIP RegistrationState status", "false")
-                val args = makePlatformEventPayload("REGISTRATION_SUCCESS", null, null)
-                MainActivity.callServiceEventSink?.success(args)
+                val args = makePlatformSipConnectionEventPayload("REGISTRATION_SUCCESS", message)
+                MainActivity.sipConnectionStateEventSink?.success(args)
                 CoreContext.core = core
                 CoreContext.isLoggedIn = true
             }

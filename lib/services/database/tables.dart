@@ -96,6 +96,10 @@ final Map<String, String> tables = {
       'user_id INTEGER DEFAULT NULL, '
       'auth_token varchar(255) DEFAULT NULL, '
       'last_update DATETIME DEFAULT CURRENT_TIMESTAMP, '
+      'dialogs_loaded TINYINT(1) DEFAULT 0, '
+      'users_loaded TINYINT(1) DEFAULT 0, '
+      'profile_loaded TINYINT(1) DEFAULT 0, '
+      'calls_loaded TINYINT(1) DEFAULT 0, '
       'first_initialize TINYINT(1) DEFAULT 0, '
       'sip_contacts text DEFAULT NULL, '
       'created_at DATETIME DEFAULT CURRENT_TIMESTAMP );',

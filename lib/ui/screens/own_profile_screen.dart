@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:chat/bloc/profile_bloc/profile_bloc.dart';
 import 'package:chat/bloc/profile_bloc/profile_state.dart';
+import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/global.dart';
+import 'package:chat/services/popup_manager.dart';
 import 'package:chat/theme.dart';
 import 'package:chat/ui/screens/db_screen.dart';
 import 'package:chat/ui/widgets/unauthenticated_widget.dart';
@@ -112,26 +114,22 @@ class ProfilePage extends StatelessWidget {
                               )
                             )
                           : SizedBox.shrink(),
-                      // OutlinedButton(
-                      //     onPressed: () async {
-                      //       Navigator.of(context).push(
-                      //         MaterialPageRoute(builder: (context) {
-                      //           return const DBScreen();
-                      //         })
-                      //       );
-                      //     },
-                      //     style: ElevatedButton.styleFrom(
-                      //       backgroundColor: isUpdateAvailable ? LightColors.profilePageButton : Colors.white10,
-                      //       minimumSize: const Size.fromHeight(50),
-                      //       shape: RoundedRectangleBorder(
-                      //           side: BorderSide(color:isUpdateAvailable ? Colors.black54 : Colors.black12, width: 2, style: BorderStyle.solid),
-                      //           borderRadius: BorderRadius.zero),
-                      //     ),
-                      //     child: Text(
-                      //       'Очистить хранилище',
-                      //       style: TextStyle(color: isUpdateAvailable ? Colors.black54 : Colors.black26, fontSize: 20, fontWeight: FontWeight.w300),
-                      //     )
-                      // ),
+                      OutlinedButton(
+                          onPressed: () async {
+                            await deleteAllDataAndCloseApp(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isUpdateAvailable ? LightColors.profilePageButton : Colors.white10,
+                            minimumSize: const Size.fromHeight(50),
+                            shape: RoundedRectangleBorder(
+                                side: BorderSide(color:isUpdateAvailable ? Colors.black54 : Colors.black12, width: 2, style: BorderStyle.solid),
+                                borderRadius: BorderRadius.zero),
+                          ),
+                          child: Text(
+                            'Удалить все данные',
+                            style: TextStyle(color: isUpdateAvailable ? Colors.black54 : Colors.black26, fontSize: 20, fontWeight: FontWeight.w300),
+                          )
+                      ),
                       OutlinedButton(
                           onPressed: () async {
                             logoutHelper(context);
@@ -186,4 +184,42 @@ void downLoadNewAppVersion(String? url, BuildContext context) async {
   } else {
     customToastMessage(context: context, message: "Не удалось обработать ссылку");
   }
+}
+
+Future<void> deleteAllDataAndCloseApp(BuildContext context) {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Вы уверены, что хотите удалить все данные?'),
+        content: const Text(
+          'Все ранее загруженные данные будут удалены и приложение закрыто. При следующем запуске данные будут загружены по сети. Это может быть полезно, если синхронизация приложения с сервером была нарушена и часть данных утеряна или недополучена.',
+        ),
+        actions: <Widget>[
+          TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text('Удалить'),
+            onPressed: () async {
+              PopupManager.showLoadingPopup(context);
+              final db = DBProvider.db;
+              await db.deleteDBFile();
+              Navigator.of(context).pop();
+              exit(0);
+            },
+          ),TextButton(
+            style: TextButton.styleFrom(
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
+            child: const Text('Назад'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
+  );
 }

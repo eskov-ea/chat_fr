@@ -40,6 +40,7 @@ class MainActivity : FlutterActivity() {
     private val METHOD_CHANNEL_SIP = "com.application.chat/sip"
     private val METHOD_CHANNEL_AUDIO_DEVICES = "com.application.chat/audio_devices"
     private val CALL_SERVICE_EVENT_CHANNEL = "event.channel/call_service"
+    private val SIP_CONNECTION_STATE_EVENT_CHANNEL = "event.channel/sip_connection_state"
     private val AUDIO_DEVICE_EVENT_CHANNEL = "event.channel/audio_device_channel"
     val CREATE_FILE = 0
     var arrayBytesToWrite: String? = null
@@ -57,8 +58,8 @@ class MainActivity : FlutterActivity() {
 
     companion object {
 
-        var eventSink: EventChannel.EventSink? = null
         var callServiceEventSink: EventChannel.EventSink? = null
+        var sipConnectionStateEventSink: EventChannel.EventSink? = null
         var audioDeviceEventSink: EventChannel.EventSink? = null
         var deviceToken: String? = null
     }
@@ -145,7 +146,8 @@ class MainActivity : FlutterActivity() {
                 }
             } else if (call.method.equals("DESTROY_SIP")) {
                 Log.w("DESTROY_SIP", "DESTROY_SIP event")
-                linphoneCore.core.stop()
+                linphoneCore.logout()
+//                linphoneCore.core.stop()
             } else if (call.method.equals("DECLINE_CALL")) {
                 Log.w("CALL", "DECLINE_CALL action")
 //                linphoneCore.core.currentCall?.terminate()
@@ -194,6 +196,19 @@ class MainActivity : FlutterActivity() {
 
                     override fun onCancel(arguments: Any?) {
                         callServiceEventSink = null
+                    }
+                }
+        )
+
+        EventChannel(flutterEngine.dartExecutor.binaryMessenger, SIP_CONNECTION_STATE_EVENT_CHANNEL)
+            .setStreamHandler(
+                object : EventChannel.StreamHandler {
+                    override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                        sipConnectionStateEventSink = events
+                    }
+
+                    override fun onCancel(arguments: Any?) {
+                        sipConnectionStateEventSink = null
                     }
                 }
         )
@@ -314,6 +329,13 @@ fun makePlatformEventPayload(event: String, callerId: String? = null, callData: 
             "event" to event,
             "callerId" to callerId,
             "callData" to callData
+    )
+}
+
+fun makePlatformSipConnectionEventPayload(event: String, message: String?): Map<String, Any?> {
+    return mapOf(
+        "event" to event,
+        "message" to message
     )
 }
 

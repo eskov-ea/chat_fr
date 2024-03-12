@@ -36,6 +36,8 @@ class ClientErrorHandler {
           PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.error, message: "Произошла ошибка в приложении при рендеринге компонента. Пожалуйста, перезагрузите приложение и попробуйте снова. При возникновении повторной ошибки - свяжитесь с разработчиками.");
         case AppErrorExceptionType.requestError:
           PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.error, message: "При выполнении запроса произошла ошибка. Попробуйте еще раз.");
+        case AppErrorExceptionType.db:
+          PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.error, message: "Произошла ошибка при чтении/записи данных в базу данных. Попробуйте еще раз. При возникновении ошибки более 5 раз подряд - попробуйте удалить БД на странице Профиль и перезапустить приложение");
       }
     }
   }

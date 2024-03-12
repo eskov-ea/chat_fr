@@ -27,6 +27,7 @@ abstract class MainNavigationRouteNames {
   static const callInfoPage = '/home_screen/call_info_page';
   static const resetPasswordScreen = '/auth/reset_password_screen';
   static const dbInitializationScreen = '/initialization';
+  static const sipConnectionScreen = '/sip_service_screen';
 }
 
 
@@ -138,6 +139,12 @@ class MainNavigation {
         return MaterialPageRoute(
             settings: const RouteSettings(name: name),
             builder: (BuildContext context) => _screenFactory.makeDatabaseInitializationScreen()
+        );
+      case MainNavigationRouteNames.sipConnectionScreen:
+        const String name = MainNavigationRouteNames.sipConnectionScreen;
+        return MaterialPageRoute(
+            settings: const RouteSettings(name: name),
+            builder: (BuildContext context) => _screenFactory.makeSipConnectionScreen()
         );
       default:
         const widget = Center(child: Text('Ошибка навигации между страницами приложения', style: TextStyle(color: Colors.black87, fontSize: 16),));

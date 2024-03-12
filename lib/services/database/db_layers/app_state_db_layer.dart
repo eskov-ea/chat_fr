@@ -1,8 +1,55 @@
 import 'dart:developer';
+import 'package:chat/models/app_settings_model.dart';
 import 'package:chat/services/database/db_provider.dart';
 
 
 class AppStateDBLayer {
+
+  Future<int> initAppSettings() async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        return await txn.rawInsert(
+            'INSERT OR IGNORE INTO app_settings(id) VALUES(?); ',
+          [1]
+        );
+      });
+    } catch (err, stackTrace) {
+      log('DB operation error:  $stackTrace');
+      rethrow;
+    }
+  }
+
+  Future<AppSettings> getAppSettings() async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        List<Object> res = await txn.rawQuery(
+            'SELECT * FROM app_settings;'
+        );
+        return AppSettings.fromJson(res.first);
+      });
+    } catch (err, stackTrace) {
+      log('DB operation error: $err  $stackTrace');
+      rethrow;
+    }
+  }
+
+  Future<int> updateBooleanAppSettingByFieldAndValue(String field, int value) async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        return await txn.rawUpdate(
+          'UPDATE app_settings SET "$field" = "$value"; '
+        );
+      });
+    } catch (err, stackTrace) {
+      log('DB operation error:  $stackTrace');
+      rethrow;
+    }
+  }
+
+
   Future<String> getLastUpdateTime() async {
     try {
       final db = await DBProvider.db.database;
