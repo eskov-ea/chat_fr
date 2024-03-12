@@ -15,6 +15,7 @@ class LinphoneSDK : ObservableObject
         
         var eventSink: FlutterEventSink?
         var audioDeviceSink: FlutterEventSink?
+        var connectionStateSink: FlutterEventSink?
         
         var mAccount: Account?
         var mCoreDelegate : CoreDelegate!
@@ -46,11 +47,11 @@ class LinphoneSDK : ObservableObject
 
 
     
-    init(sink: FlutterEventSink?, audioSink: FlutterEventSink?)
+    init(calleventSinc: FlutterEventSink?, audioDeviceEventSinc: FlutterEventSink?, connectionStateSink: FlutterEventSink?)
     {
-//        LoggingService.Instance.logLevel = LogLevel.Debug
-        eventSink = sink
-        audioDeviceSink = audioSink
+        eventSink = calleventSinc
+        audioDeviceSink = audioDeviceEventSinc
+        connectionStateSink = connectionStateSink
         sm = StorageManager()
         let factory = Factory.Instance
         let configDir = factory.getConfigDir(context: nil)
@@ -165,15 +166,28 @@ class LinphoneSDK : ObservableObject
             }, onAudioDevicesListUpdated: { (core: Core) in
                 self.getAudioDeviceList()
             }, onAccountRegistrationStateChanged: { (core: Core, account: Account, state: RegistrationState, message: String) in
-                NSLog("New registration state is \(state) for user id \( String(describing: account.params?.identityAddress?.asString()))\n")
+//                NSLog("New registration state is \(state) for user id \( String(describing: account.params?.identityAddress?.asString()))\n")
+                NSLog("New registration state \(state) \(self.audioDeviceSink)")
                 if (state == .Ok) {
                     self.loggedIn = true
-                    let payload = makeCallEventPayload(event: "REGISTRATION_SUCCESS", callerId: nil, callData: nil)
-                    self.eventSink?(payload)
+                    let payload = makeSipConnectionEventPayload(event: "REGISTRATION_SUCCESS", message: message)
+                    self.connectionStateSink?(payload)
                 } else if (state == .Cleared) {
                     self.loggedIn = false
-                    let payload = makeCallEventPayload(event: "REGISTRATION_FAILED", callerId: nil, callData: nil)
-                    self.eventSink?(payload)
+                    let payload = makeSipConnectionEventPayload(event: "REGISTRATION_CLEARED", message: message)
+                    self.connectionStateSink?(payload)
+                } else if (state == .Failed) {
+                    self.loggedIn = false
+                    let payload = makeSipConnectionEventPayload(event: "REGISTRATION_FAILED", message: message)
+                    self.connectionStateSink?(payload)
+                } else if (state == .None) {
+                    self.loggedIn = false
+                    let payload = makeSipConnectionEventPayload(event: "REGISTRATION_NONE", message: message)
+                    self.connectionStateSink?(payload)
+                } else if (state == .Progress) {
+//                    self.loggedIn = false
+//                    let payload = makeSipConnectionEventPayload(event: "REGISTRATION_PROGRESS", message: message)
+//                    self.connectionStateSink?(payload)
                 }
         })
 
@@ -464,6 +478,18 @@ func makeCallEventPayload(event: String, callerId: String?, callData: CallData?)
     }
 }
 
+func makeSipConnectionEventPayload(event: String, message: String?) -> String? {
+    do {
+        let payload = SipConnectionState(event: event, message: message)
+        let jsonEventPayload = try JSONEncoder().encode(payload)
+        let jsonEventPayloadString = String(data: jsonEventPayload, encoding: .utf8)!
+        return jsonEventPayloadString
+    } catch {
+        print(error)
+        return nil
+    }
+}
+
 func makeAudioDeviceEventPayload(event: String, data: String?) -> String? {
     do {
         let eventPayload = AudioDeviceEventPayload(event: event, data: data)
@@ -497,6 +523,17 @@ struct CallEventPayload: Codable {
         self.event = event
         self.callerId = callerId
         self.callData = callData
+    }
+}
+
+struct SipConnectionState: Codable {
+    
+    let event: String
+    let message: String?
+    
+    init(event: String, message: String?) {
+        self.event = event
+        self.message = message
     }
 }
 

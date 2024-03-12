@@ -9,6 +9,7 @@ import PushKit
     private let sipMethodChannel = "com.application.chat/sip"
     private let audioDeviceMethodChannelName = "com.application.chat/audio_devices"
     private let writeFilesMethodChannel = "com.application.chat/permission_method_channel"
+    var sipConnectionStateEventChannelName = "event.channel/sip_connection_state"
     var callServiceEventChannelName = "event.channel/call_service"
     let audioDeviceEventChannelName = "event.channel/audio_device_channel"
     var deviceIdResultCallback: FlutterResult? = nil
@@ -16,7 +17,8 @@ import PushKit
     var audioDeviceResultCallback: FlutterResult? = nil
     private var eventSink: FlutterEventSink?
     private var audioDeviceSink: FlutterEventSink?
-    let linphoneSDK = LinphoneSDK(sink: nil, audioSink: nil)
+    private var sipConnectionStateSink: FlutterEventSink?
+    let linphoneSDK = LinphoneSDK(calleventSinc: nil, audioDeviceEventSinc: nil, connectionStateSink: nil)
     
     
     override func application(
@@ -37,9 +39,12 @@ import PushKit
                                                           binaryMessenger: controller.binaryMessenger)
         let audioDeviceEventChannel = FlutterEventChannel(name: audioDeviceEventChannelName,
                                                           binaryMessenger: controller.binaryMessenger)
+        let sipConnectionStateEventChannel = FlutterEventChannel(name: sipConnectionStateEventChannelName,
+                                                         binaryMessenger: controller.binaryMessenger)
         
         callServiceEventChannel.setStreamHandler(SwiftStreamHandlerSip(linphoneSDK: self.linphoneSDK))
         audioDeviceEventChannel.setStreamHandler(SwiftStreamHandlerAudioDevice(linphoneSDK: self.linphoneSDK))
+        sipConnectionStateEventChannel.setStreamHandler(SwiftStreamHandlerSipConnectionState(linphoneSDK: self.linphoneSDK))
         
         deviceIdChannel.setMethodCallHandler({
             [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
@@ -176,18 +181,7 @@ import PushKit
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
     
-    
-//    public func onListen(withArguments arguments: Any?,
-//                         eventSink: @escaping FlutterEventSink) -> FlutterError? {
-//        self.eventSink = eventSink
-//        self.linphoneSDK.eventSink = eventSink
-//        return nil
-//    }
-//    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-//        eventSink = nil
-//        self.linphoneSDK.eventSink = eventSink
-//        return nil
-//    }
+
     
     func registerForPushNotifications( ) {
         UNUserNotificationCenter.current()
@@ -250,6 +244,27 @@ class SwiftStreamHandlerSip: NSObject, FlutterStreamHandler {
 
     public func onCancel(withArguments arguments: Any?) -> FlutterError? {
         self.linphoneSDK.eventSink = nil
+        return nil
+    }
+}
+
+
+
+class SwiftStreamHandlerSipConnectionState: NSObject, FlutterStreamHandler {
+    
+    var linphoneSDK: LinphoneSDK
+    
+    init(linphoneSDK: LinphoneSDK) {
+        self.linphoneSDK = linphoneSDK
+    }
+    
+    public func onListen(withArguments arguments: Any?, eventSink: @escaping FlutterEventSink) -> FlutterError? {
+        self.linphoneSDK.connectionStateSink = eventSink
+        return nil
+    }
+
+    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        self.linphoneSDK.connectionStateSink = nil
         return nil
     }
 }

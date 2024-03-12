@@ -30,8 +30,8 @@ class SipRepository extends ISipRepository {
     _sipEventSubscription = sipConnectionStateEventChannel
         .receiveBroadcastStream()
         .listen((dynamic event)  {
-      print('sip connection subscription event:  $state');
       final connectionEvent = SipConnectionEvent.fromJson(event);
+      print('sip connection subscription event:  $connectionEvent  ${connectionEvent.event}');
       if (connectionEvent.event == "REGISTRATION_SUCCESS") {
         if (_currentState.status == ConnectionStatus.connected) return;
         _currentState = SipConnectionState(status: ConnectionStatus.connected, message: connectionEvent.message);
