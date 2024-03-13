@@ -4,9 +4,9 @@ import 'package:chat/models/call_model.dart';
 abstract class CallsEvent{}
 
 class IncomingCallEvent extends CallsEvent {
-  final CallModel callData;
+  final String callerId;
 
-  IncomingCallEvent({required this.callData});
+  IncomingCallEvent({required this.callerId});
 }
 
 class MissedCallEvent extends CallsEvent {}

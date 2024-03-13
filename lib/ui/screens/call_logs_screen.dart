@@ -192,12 +192,12 @@ class _CallsPageState extends State<CallsPage> {
 
 
   Widget getCallInfo(Map<int, UserModel>  users, CallModel call, int index) {
-    // try {
+    try {
       CallRenderData? data;
       final toCaller = int.parse(call.toCaller.replaceAll(RegExp(r'[^0-9]'), '').substring(1));
       final fromCaller = int.parse(call.fromCaller.replaceAll(RegExp(r'[^0-9]'), '').substring(1));
       if (toCaller == userId) {
-        final user = users[toCaller]!;
+        final user = users[fromCaller]!;
         print('call status:  ${call.callStatus}');
         data = CallRenderData(
             userId: userId!,
@@ -271,12 +271,12 @@ class _CallsPageState extends State<CallsPage> {
           ]),
         ),
       );
-    // }
-    // catch (err) {
-    //   return Container(
-    //     child: Text(err.toString()),
-    //   );
-    // }
+    }
+    catch (err) {
+      return Container(
+        child: Text(err.toString()),
+      );
+    }
   }
 
 }

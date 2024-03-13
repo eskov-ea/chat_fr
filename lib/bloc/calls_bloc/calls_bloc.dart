@@ -24,6 +24,7 @@ class CallsBloc
       print("CALL_SERVICE_EVENT    ${event}") ;
       final callEvent = CallServiceEventModel.fromJson(event);
       if (callEvent.event == "CONNECTED") {
+        print("Connected calldata:  ${callEvent.callData}");
         final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
         print("Connected calldata:  $callData");
         add(ConnectedCallEvent(callData: callData));
@@ -48,8 +49,8 @@ class CallsBloc
           final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
           add(EndedCallEvent(callData: callData));
       } else if (callEvent.event == "INCOMING") {
-        final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
-        add(IncomingCallEvent(callData: callData));
+        print('INCOMING::: ${callEvent.callData} ${callEvent.callerId}');
+        add(IncomingCallEvent(callerId: callEvent.callerId!));
       } else if (callEvent.event == "OUTGOING") {
         final callData = CallModel.fromJsonOnOutgoingCall(callEvent.callData);
         add(OutgoingCallEvent(callData: callData));
@@ -63,7 +64,7 @@ class CallsBloc
     });
       on<CallsEvent>((event, emit) async {
         if (event is IncomingCallEvent) {
-          emit(IncomingCallState(callData: event.callData));
+          emit(IncomingCallState(callerId: event.callerId));
         } else if (event is EndedCallEvent) {
           timer.stop();
           emit(EndedCallState(callData: event.callData));
@@ -127,6 +128,7 @@ class CallServiceEventModel {
 }
 
 makeCallDataMap(string) {
+  print('makeCallDataMap:: $string');
   if (string == null) return null;
   final json = jsonDecode(jsonEncode(string));
   return json;

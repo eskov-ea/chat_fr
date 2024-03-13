@@ -74,7 +74,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
 
   void _onCallStateChanged(CallState state) {
     if (state is IncomingCallState) {
-      setUsername(state.callData.fromCaller);
+      setUsername(state.callerId);
       setState(() {
         isCallingIncoming = true;
         isCallingOutgoing = false;

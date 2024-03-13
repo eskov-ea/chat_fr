@@ -155,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       final List<String> currentVersionArray = currentVersion!.split(".");
       final List<String> availableVersionArray = availableVersion.split(".");
       for(var i=0; i<currentVersionArray.length; ++i) {
+        if(int.parse(currentVersionArray[i]) > int.parse(availableVersionArray[i])) return;
         if(int.parse(currentVersionArray[i]) < int.parse(availableVersionArray[i])) {
           isUpdateAvailable = true;
           if(!Platform.isIOS) {
@@ -298,11 +299,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.loaderWidget);
       }
       BlocProvider.of<CallLogsBloc>(context).add(AddCallToLogEvent(call: state.callData));
-      if (isOutgoingCall && (state.callData.callStatus != 0 || state.callData.callStatus != 5)) {
-        print('Sending push::::');
-
-        _pushNotificationService.sendMissCallPush(
-            userId: state.callData.fromCaller.substring(1, state.callData.toCaller.length), userName: myUserName);
+      print('Sending push:::: status  ${state.callData.fromCaller}');
+      if (isOutgoingCall && (state.callData.callStatus != 0 || state.callData.callStatus != 5 || state.callData.callStatus != 3)) {
+        try {
+          _pushNotificationService.sendMissCallPush(
+              userId: state.callData.toCaller
+                  .substring(1, state.callData.toCaller.length),
+              userName: myUserName);
+        } catch (err) {
+          print('Sending push:::: error $err');
+        }
       }
       setState(() {
         isActiveCall = false;

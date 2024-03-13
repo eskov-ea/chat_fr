@@ -98,11 +98,11 @@ class LinphoneSDK : ObservableObject
                     self.isCallRunning = true
                     self.getAudioDeviceList()
                     self.getCurrentAudioDevice()
-                    let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
+                    let callData = CallData(duration: call.callLog?.duration.description, disposition: call.callLog?.status.rawValue, dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
                     let payload = makeCallEventPayload(event: "CONNECTED", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                 } else if ( state == .Released ) {
-                    let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId   )
+                    let callData = CallData(duration: call.callLog?.duration.description, disposition: call.callLog?.status.rawValue, dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId   )
                         print("CALL_STATUS  \(callData)")
                     let payload = makeCallEventPayload(event: "RELEASED", callerId: call.remoteAddress?.username, callData: callData)
                     print("CALL_ENDED IOS  \(callData)")
@@ -112,20 +112,20 @@ class LinphoneSDK : ObservableObject
                     self.remoteAddress = "Nobody yet"
                 } else if (state == .End) {
                     print("End call reason: \(call.callLog?.errorInfo)")
-                    let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
+                    let callData = CallData(duration: call.callLog?.duration.description, disposition: call.callLog?.status.rawValue, dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
                     let payload = makeCallEventPayload(event: "ENDED", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                     self.mProviderDelegate.stopCall()
                     self.isCallRunning = false
                 } else if (state == .Error) {
                     print("End call reason err: \(call.callLog?.errorInfo.unsafelyUnwrapped)")
-                    let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
+                    let callData = CallData(duration: call.callLog?.duration.description, disposition: call.callLog?.status.rawValue, dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
                     let payload = makeCallEventPayload(event: "ERROR", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                     self.mProviderDelegate.stopCall()
                     self.isCallRunning = false
                 }  else if (state == .OutgoingInit) {
-                    let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
+                    let callData = CallData(duration: call.callLog?.duration.description, disposition: call.callLog?.status.rawValue, dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
                     let payload = makeCallEventPayload(event: "OUTGOING", callerId: call.remoteAddress?.username, callData: callData)
                     self.isCallRunning = true
                     self.eventSink?(payload)
@@ -136,11 +136,11 @@ class LinphoneSDK : ObservableObject
                     // Right after outgoing init
                 } else if (state == .OutgoingRinging) {
                     self.isCallRunning = true
-                    let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
+                    let callData = CallData(duration: call.callLog?.duration.description, disposition: call.callLog?.status.rawValue, dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
                     let payload = makeCallEventPayload(event: "OUTGOING_RINGING", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                 } else if (state == .StreamsRunning) {
-                    let callData = CallData(duration: call.callLog?.duration.description, disposition: self.getCallStatus(code: call.callLog?.status.rawValue), dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
+                    let callData = CallData(duration: call.callLog?.duration.description, disposition: call.callLog?.status.rawValue, dst: call.callLog?.toAddress?.username, src: call.callLog?.fromAddress?.username, calldate: call.callLog?.startDate.description, uniqueid: call.callLog?.callId)
                     let payload = makeCallEventPayload(event: "STREAM_RUNNING", callerId: call.remoteAddress?.username, callData: callData)
                     self.eventSink?(payload)
                     // This state indicates the call is active.
@@ -450,25 +450,7 @@ class LinphoneSDK : ObservableObject
             return false
         }
     
-    func getCallStatus(code: Int?) -> String {
-        if (code == 0) {
-            return "ANSWERED"
-        } else if (code == 1) {
-            return "DECLINED"
-        } else if (code == 2) {
-            return "NO ANSWER"
-        } else if (code == 3) {
-            return "DECLINED"
-        } else if (code == 4) {
-            return "NO ANSWER"
-        } else if (code == 5) {
-            return "ANSWERED"
-        } else if (code == 6) {
-            return "DECLINED"
-        } else {
-            return "ANSWERED"
-        }
-    }
+    
 }
 
 func makeCallEventPayload(event: String, callerId: String?, callData: CallData?) -> String? {
@@ -544,13 +526,13 @@ struct SipConnectionState: Codable {
 
 struct CallData: Codable {
     let duration: String?
-    let disposition: String?
+    let disposition: Int?
     let dst: String?
     let src: String?
     let calldate: String?
     let uniqueid: String?
     
-    init(duration: String?, disposition: String?, dst: String?, src: String?,
+    init(duration: String?, disposition: Int?, dst: String?, src: String?,
          calldate: String?, uniqueid: String?) {
         self.duration = duration
         self.disposition = disposition

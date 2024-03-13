@@ -39,14 +39,14 @@ class OutgoingRingingCallState extends CallState{
 
 class IncomingCallState extends CallState {
 
-  final CallModel callData;
+  final String callerId;
 
   const IncomingCallState({
-    required this.callData
+    required this.callerId
   });
 
   @override
-  List<Object?> get props => [runtimeType, callData];
+  List<Object?> get props => [runtimeType, callerId];
 
 }
 
