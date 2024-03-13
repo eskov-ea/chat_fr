@@ -115,7 +115,7 @@ class ActionBarState extends State<ActionBar> {
     stopRecorder(_mRecorder);
     cancelRecorderSubscriptions();
     _mRecorder.closeRecorder();
-    if (widget.dialogId != null && _messageController.text.isNotEmpty) {
+    if (widget.dialogId != null) {
       DataProvider.storage.setMessageText(widget.dialogId!, _messageController.text);
     }
     super.dispose();

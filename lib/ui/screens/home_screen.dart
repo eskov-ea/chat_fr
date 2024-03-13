@@ -263,22 +263,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  void _sendMissCallNotification({required int? dialogId, required String caller, required String? userId}) async {
-    print("SEND MISCALL MESSAGE  $dialogId   //   $caller   //   $userId");
-    _isPushSent = true;
-    final chatsBuilderBloc = BlocProvider.of<MessageBloc>(context);
-    dialogId ??= await createDialog(chatsBuilderBloc: chatsBuilderBloc, partnerId: int.parse(caller));
-    _pushNotificationService.sendMissCallPush(
-        userId: caller, userName: myUserName);
-    sendMessageUnix(
-      userId: int.parse(userId!),
-      dialogId: dialogId!,
-      bloc: chatsBuilderBloc,
-      messageText: "Пропущенный звонок",
-      file: null,
-      parentMessage: null,
-    );
-  }
 
   void _onCallStateChanged(CallState state) async {
 

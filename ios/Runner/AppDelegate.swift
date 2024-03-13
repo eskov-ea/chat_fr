@@ -131,7 +131,7 @@ import PushKit
                     print("No data to login into SIP account")
                 }
             case "DESTROY_SIP":
-                self?.linphoneSDK.mCore?.stop()
+                self?.linphoneSDK.logout()
             case "DECLINE_CALL":
                 print("DECLINE_CALL")
                 print("Service State: decline request")
@@ -224,6 +224,10 @@ import PushKit
         didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
         print("Failed to register: \(error)")
+    }
+    
+    override func applicationDidBecomeActive(_ application: UIApplication) {
+      application.applicationIconBadgeNumber = 0;
     }
 }
 

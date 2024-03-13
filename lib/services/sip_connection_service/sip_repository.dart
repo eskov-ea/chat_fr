@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:chat/bloc/calls_bloc/calls_bloc.dart';
 import 'package:chat/models/user_profile_model.dart';
 import 'package:chat/services/global.dart';
 import 'package:flutter/services.dart';
@@ -54,7 +53,6 @@ class SipRepository extends ISipRepository {
         sink(_currentState);
       }
     });
-    _resume();
     SipConfig.sipDomain = settings.userDomain;
     SipConfig.sipPrefix = settings.sipPrefix;
 
@@ -71,11 +69,6 @@ class SipRepository extends ISipRepository {
     });
   }
 
-  _resume() {
-    // if (_sipEventSubscription.isPaused) {
-    //   _sipEventSubscription.resume();
-    // }
-  }
 
   disconnect() async {
     if (_currentState.status == ConnectionStatus.connected || _currentState.status == ConnectionStatus.progress) {
