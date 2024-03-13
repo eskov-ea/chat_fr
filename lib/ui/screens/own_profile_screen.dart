@@ -116,10 +116,10 @@ class ProfilePage extends StatelessWidget {
                           : SizedBox.shrink(),
                       OutlinedButton(
                           onPressed: () async {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(builder: (context) => DBScreen())
-                            );
-                            // await deleteAllDataAndCloseApp(context);
+                            // Navigator.of(context).push(
+                            //   MaterialPageRoute(builder: (context) => DBScreen())
+                            // );
+                            await deleteAllDataAndCloseApp(context);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: isUpdateAvailable ? LightColors.profilePageButton : Colors.white10,
