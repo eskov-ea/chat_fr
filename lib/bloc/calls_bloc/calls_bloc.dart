@@ -17,17 +17,13 @@ class CallsBloc
   final timer = CallTimer.getInstance();
 
 
-  CallsBloc() : super(UnconnectedCallServiceState()) {
+  CallsBloc() : super(const ReleasedCallState()) {
     callServiceEventChannelSubscription = callServiceEventChannel
         .receiveBroadcastStream()
         .listen((dynamic event)  {
       print("CALL_SERVICE_EVENT    ${event}") ;
       final callEvent = CallServiceEventModel.fromJson(event);
-      if (callEvent.event == "REGISTRATION_SUCCESS") {
-        add(ConnectingCallServiceEvent());
-      } else if (callEvent.event == "REGISTRATION_FAILED") {
-        add(ConnectionFailedCallEvent());
-      } else if (callEvent.event == "CONNECTED") {
+      if (callEvent.event == "CONNECTED") {
         final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
         print("Connected calldata:  $callData");
         add(ConnectedCallEvent(callData: callData));
@@ -41,6 +37,7 @@ class CallsBloc
           return;
         }
         final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
+        print('Call ended with data:: $callData');
         add(EndedCallEvent(callData: callData));
       } else if (callEvent.event == "RELEASED") {
         print("CALL_RELEASED event:    ${callEvent.callData} ${callEvent.callData!["uniqueid"]} ${callEvent.callData!["call_id"]}");
@@ -65,16 +62,11 @@ class CallsBloc
       }
     });
       on<CallsEvent>((event, emit) async {
-        if (event is ConnectingCallServiceEvent) {
-          emit(ConnectedCallServiceState());
-        } else if (event is ConnectionFailedCallEvent) {
-          emit(UnconnectedCallServiceState());
-        } else if (event is IncomingCallEvent) {
+        if (event is IncomingCallEvent) {
           emit(IncomingCallState(callData: event.callData));
         } else if (event is EndedCallEvent) {
           timer.stop();
           emit(EndedCallState(callData: event.callData));
-          add(ConnectingCallServiceEvent());
         } else if (event is OutgoingCallEvent) {
           emit(OutgoingCallState(callData: event.callData));
         } else if (event is ConnectedCallEvent) {

@@ -3,8 +3,10 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:chat/bloc/database_bloc/database_bloc.dart';
 import 'package:chat/bloc/database_bloc/database_state.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
+import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/services/database/db_provider.dart';
+import 'package:chat/services/messages/message_loading_state_stream.dart';
 import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,6 +22,7 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
   final DataProvider dataProvider;
   final DBProvider db = DBProvider.db;
   late final StreamSubscription newMessageSubscription;
+  final _messageLoadingsStateStreamer = MessageLoadingStateStreamer.instance;
 
   MessageBloc({
     required this.databaseBloc,
@@ -137,22 +140,34 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
   Future onMessageBlocLoadNextPortionMessagesEvent(
       MessageBlocLoadNextPortionMessagesEvent event,
       emit) async {
-    final userId = await dataProvider.getUserId();
-    final lastDialogPage = await db.getLastDialogPage(event.dialogId);
-    final currentDialogPage = lastDialogPage! + 1;
-    final newMessages = await MessagesRepository().getMessages(
-        userId, event.dialogId, currentDialogPage);
-    if (newMessages.isNotEmpty) {
-      await db.saveMessages(newMessages);
-      await db.updateDialogLastPage(event.dialogId, currentDialogPage);
-      final messages = (state as MessageBlocInitializationSuccessState)
-          .messages;
+    try {
+      _messageLoadingsStateStreamer.sink(MessageLoadingState(dialogId: event.dialogId, status: true, error: null));
+      final userId = await dataProvider.getUserId();
+      final lastDialogPage = await db.getLastDialogPage(event.dialogId);
+      final currentDialogPage = lastDialogPage! + 1;
+      final newMessages = await MessagesRepository().getMessages(
+          userId, event.dialogId, currentDialogPage);
+      if (newMessages.isNotEmpty) {
+        final statuses = <MessageStatus>[];
+        for (var message in newMessages) {
+          statuses.addAll(message.statuses);
+        }
+        await db.saveMessages(newMessages);
+        await db.saveMessageStatuses(statuses);
+        await db.updateDialogLastPage(event.dialogId, currentDialogPage);
+        final messages = (state as MessageBlocInitializationSuccessState)
+            .messages;
 
-      messages.addAll(newMessages);
+        messages.addAll(newMessages);
 
-      emit(MessageBlocInitializationSuccessState(
-          dialogId: event.dialogId, messages: messages)
-      );
+        emit(MessageBlocInitializationSuccessState(
+            dialogId: event.dialogId, messages: messages)
+        );
+      }
+      _messageLoadingsStateStreamer.sink(MessageLoadingState(dialogId: event.dialogId, status: false, error: null));
+    } catch (err) {
+      err as AppErrorException;
+      _messageLoadingsStateStreamer.sink(MessageLoadingState(dialogId: event.dialogId, status: false, error: err));
     }
   }
 

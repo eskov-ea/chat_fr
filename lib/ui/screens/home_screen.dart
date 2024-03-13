@@ -18,6 +18,7 @@ import 'package:chat/factories/screen_factory.dart';
 import 'package:chat/models/app_notification_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/user_profile_model.dart';
+import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/dialogs/dialogs_api_provider.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/message_sender_helper.dart';
@@ -59,7 +60,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   final permissionMethodChannel = const MethodChannel("com.application.chat/permission_method_channel");
   late final StreamSubscription callServiceBlocSubscription;
-  late final StreamSubscription sipServiceConnectionSubscription;
   late final StreamSubscription userProfileDataSubscription;
   final PushNotificationService _pushNotificationService = PushNotificationService();
   bool _isPushSent = false;
@@ -209,7 +209,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Future<void> _onBlocProfileStateChanged(UserProfileState state) async {
     if (state is UserProfileLoadedState) {
-      myUserName = "${state.user?.firstname} ${state.user?.lastname}";
+      myUserName = "${state.user?.lastname} ${state.user?.firstname}";
       if (kIsWeb) return;
       if (!await isCallRunning()){
         if (state.user != null && state.user?.userProfileSettings != null
@@ -280,19 +280,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  void _onSipConnectionStateChanged(SipConnectionState state) {
-    if (state.status == ConnectionStatus.failed) {
-      customToastMessage(context: context, message: "Произошла ошибка при подключении к SIP-серверу",
-          icon: const Icon(Icons.error, color: Color(0xFFC7112A), size: 14));
-    } else if (state.status == ConnectionStatus.connected) {
-      customToastMessage(context: context, message: "Подключение к SIP-серверу",
-          icon: const Icon(Icons.done_outline, color: Color(0xFF11C751), size: 14));
-    } else if (state.status == ConnectionStatus.cleared) {
-      customToastMessage(context: context, message: "Подключение к SIP-серверу отключено",
-          icon: const Icon(Icons.warning, color: Color(0xFFFA9E1F), size: 14));
-    }
-  }
-
   void _onCallStateChanged(CallState state) async {
 
     print("callServiceBlocSubscription   $state");
@@ -320,12 +307,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       });
     } else if(state is EndedCallState) {
       callPlayer.stopPlayConnectingSound();
-      setState(() {
-        isActiveCall = false;
-        isIncomingCall = false;
-        isOutgoingCall = false;
-        callerName = null;
-      });
       try {
         Navigator.of(context).popUntil((route) =>
         route.settings.name == MainNavigationRouteNames.homeScreen);
@@ -333,25 +314,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.loaderWidget);
       }
       BlocProvider.of<CallLogsBloc>(context).add(AddCallToLogEvent(call: state.callData));
-      if (_isPushSent == false && !isCallBeenAnswered && isOutgoingCall) {
-        int? dialogId;
-        String caller = '';
-        final List<DialogData>? dialogs = BlocProvider.of<DialogsViewCubit>(context).dialogsBloc.state.dialogsContainer?.dialogs;
-        if (dialogs != null && dialogs.isNotEmpty) {
-          caller = state.callData.toCaller.substring(1, state.callData.toCaller.length);
-          for (var dialog in dialogs) {
-            if (dialog.chatType.typeId == 1) {
-              for (var userId in dialog.users) {
-                if (userId.toString() == caller) {
-                  dialogId = dialog.dialogId;
-                  break;
-                }
-              }
-            }
-          }
-        }
-        _sendMissCallNotification(dialogId: dialogId, caller: caller, userId: userId.toString());
+      if (isOutgoingCall && (state.callData.callStatus != 0 || state.callData.callStatus != 5)) {
+        print('Sending push::::');
+
+        _pushNotificationService.sendMissCallPush(
+            userId: state.callData.fromCaller.substring(1, state.callData.toCaller.length), userName: myUserName);
       }
+      setState(() {
+        isActiveCall = false;
+        isIncomingCall = false;
+        isOutgoingCall = false;
+        callerName = null;
+      });
     } else if (state is StreamRunningCallState) {
       callPlayer.stopPlayConnectingSound();
     } else if (state is ErrorCallState) {
@@ -395,7 +369,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!kIsWeb) {
       callServiceBlocSubscription = BlocProvider.of<CallsBloc>(context).stream.listen(_onCallStateChanged);
     }
-    sipServiceConnectionSubscription = SipRepository.instance.stream.listen(_onSipConnectionStateChanged);
 
     super.initState();
 
@@ -411,7 +384,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         customToastMessage(context: context, message: 'Обновляем данные');
         _websocketRepo.reconnect();
       case AppLifecycleState.paused:
-
+        DBProvider.db.setLastUpdateTime();
       default:
     }
   }
@@ -428,7 +401,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance?.removeObserver(this);
-    sipServiceConnectionSubscription.cancel();
     callServiceBlocSubscription.cancel();
     userProfileDataSubscription.cancel();
     _errorHandlerBlocSubscription.cancel();

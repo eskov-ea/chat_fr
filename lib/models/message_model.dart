@@ -113,7 +113,7 @@ class MessageData extends Equatable{
         "${messageId.runtimeType}, ${senderId.runtimeType}, ${dialogId.runtimeType} "
         "repliedId: ${repliedMessage?.parentMessageId}, ${message.runtimeType}, ${file.runtimeType}, "
         "${file?.attachmentId.runtimeType}, statuses: ${statuses}"
-        "";
+        "\r\n";
   }
 }
 

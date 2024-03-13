@@ -16,6 +16,7 @@ class CallLogsBloc extends Bloc<CallLogsEvent, CallLogsBlocState> {
     required this.errorHandlerBloc,
   }) : super(initialState) {
     on<CallLogsEvent>((event, emit) async {
+      print('CallLogsEvent  $event');
       if(event is LoadCallLogsEvent) {
         emit(CallLogInitialState());
         try {

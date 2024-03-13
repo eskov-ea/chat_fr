@@ -159,6 +159,9 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
             ],
           );
         } else if (state is MessageBlocInitializationSuccessState) {
+
+          if (state.messages.length < 10) loadNextMessages();
+
           if (state.messages.isEmpty) {
             return const Center(child: Text('Нет сообщений'),);
           } else {

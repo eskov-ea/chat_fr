@@ -1,6 +1,5 @@
-import 'package:equatable/equatable.dart';
+import 'package:chat/models/call_model.dart';
 
-import '../../models/call_model.dart';
 
 abstract class CallsEvent{}
 
@@ -26,7 +25,6 @@ class StreamRunningCallEvent extends CallsEvent {
 
 class StreamStopCallEvent extends CallsEvent {}
 
-class ConnectionFailedCallEvent extends CallsEvent {}
 
 class OutgoingCallEvent extends CallsEvent {
   final CallModel callData;
@@ -45,8 +43,6 @@ class ErrorCallEvent extends CallsEvent {
 
   ErrorCallEvent({required this.callData});
 }
-
-class ConnectingCallServiceEvent extends CallsEvent {}
 
 class EndedCallEvent extends CallsEvent {
   final CallModel callData;

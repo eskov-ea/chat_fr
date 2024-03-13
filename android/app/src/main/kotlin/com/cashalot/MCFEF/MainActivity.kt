@@ -359,7 +359,7 @@ class EventHandlerSip: EventChannel.StreamHandler{
 
 }
 
-fun makeCallDataPayload(duration: String?, callStatus: String?, fromCaller: String?, toCaller: String?,
+fun makeCallDataPayload(duration: String?, callStatus: Int?, fromCaller: String?, toCaller: String?,
                         date: String?, callId: String?): Map<String, Any?> {
     return mapOf(
             "duration" to duration,

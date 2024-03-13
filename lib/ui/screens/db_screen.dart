@@ -35,7 +35,8 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      await db.initDB();
+                      final res = await db.getDialogById(256);
+                      print('256 dialogs::: ${res.length}');
                     },
                     child: Container(
                       width: MediaQuery.of(context).size.width * 0.45,
@@ -43,7 +44,7 @@ class _DBScreenState extends State<DBScreen> {
                       padding: EdgeInsets.all(5),
                       color: Colors.blueAccent.shade200,
                         child: Center(
-                          child: Text('Initialize DB',
+                          child: Text('get 265 dialog',
                             style: TextStyle(color: Colors.white),
                           )
                         )
@@ -52,8 +53,10 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      final result = await db.checkExistingTables();
-                      log('DB result:: $result');
+                      final dialogs = await DialogsProvider().getDialogs();
+                      final dialog256 = dialogs.firstWhere((element) => element.dialogId == 256);
+                      final result = await db.saveDialogs([dialog256]);
+                      log('dialog 256 finish');
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width * 0.45,
@@ -61,7 +64,7 @@ class _DBScreenState extends State<DBScreen> {
                         padding: EdgeInsets.all(5),
                         color: Colors.redAccent.shade100,
                         child: Center(
-                          child: Text('Check tables',
+                          child: Text('add 256 dialog',
                             style: TextStyle(color: Colors.white),
                           )
                         )
@@ -94,8 +97,8 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      final res = await db.getMessagesByDialog(265);
-                      print('Messages for 265::  $res');
+                      final res = await db.getMessagesByDialog(349);
+                      log('Messages for 349::  $res');
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width * 0.45,
@@ -103,235 +106,12 @@ class _DBScreenState extends State<DBScreen> {
                         padding: const EdgeInsets.all(5),
                         color: Colors.grey.shade500,
                         child: const Center(
-                            child: Text('Read messages',
+                            child: Text('Read messages 349',
                               style: TextStyle(color: Colors.white),
                             )
                         )
                     ),
                   )
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      final db = DBProvider.db;
-                      final dialogs = await DialogsProvider().getDialogs();
-
-                      await db.saveDialogs(dialogs);
-                      print('Dialogs saved to db:: $dialogs');
-                    },
-                    child: Container(
-                        width: MediaQuery.of(context).size.width * 0.45,
-                        height: 70,
-                        padding: const EdgeInsets.all(5),
-                        color: Colors.green.shade200,
-                        child: const Center(
-                            child: Text('Save dialogs',
-                              style: TextStyle(color: Colors.white),
-                            )
-                        )
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      final db = DBProvider.db;
-                      final result = await db.getDialogs();
-                      print('DB result:: $result');
-                    },
-                    child: Container(
-                        width: MediaQuery.of(context).size.width * 0.45,
-                        height: 70,
-                        padding: const EdgeInsets.all(5),
-                        color: Colors.orange.shade200,
-                        child: const Center(
-                            child: Text('Read dialogs',
-                              style: TextStyle(color: Colors.white),
-                            )
-                        )
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      final db = DBProvider.db;
-                      final token = await DataProvider.storage.getToken();
-                      final users = await UsersProvider().getUsers(token);
-                      await db.saveUsers(users);
-                      print('Users saved');
-                    },
-                    child: Container(
-                        width: MediaQuery.of(context).size.width * 0.45,
-                        height: 70,
-                        padding: const EdgeInsets.all(5),
-                        color: Colors.redAccent.shade200,
-                        child: const Center(
-                            child: Text('Save users',
-                              style: TextStyle(color: Colors.white),
-                            )
-                        )
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      final db = DBProvider.db;
-                      final res = await db.getUsers();
-                      print('DB result:: $res');
-                    },
-                    child: Container(
-                        width: MediaQuery.of(context).size.width * 0.45,
-                        height: 70,
-                        padding: const EdgeInsets.all(5),
-                        color: Colors.blueAccent.shade200,
-                        child: const Center(
-                            child: Text('Read users',
-                              style: TextStyle(color: Colors.white),
-                            )
-                        )
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      final db = await DBProvider.db.database;
-                      return db.transaction((txn) async {
-                      await txn.rawUpdate(
-                      'DROP TABLE IF EXISTS app_settings;'
-                      );
-                      print('table dropped');
-                      });
-                    },
-                    child: Container(
-                        width: MediaQuery.of(context).size.width * 0.45,
-                        height: 70,
-                        padding: const EdgeInsets.all(5),
-                        color: Colors.grey.shade500,
-                        child: const Center(
-                            child: Text('Drop app settings',
-                              style: TextStyle(color: Colors.white),
-                            )
-                        )
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      final db = DBProvider.db;
-                      final res = await db.getChatUsers();
-                      log('DB result:: $res\r\n\r\n');
-                    },
-                    child: Container(
-                        width: MediaQuery.of(context).size.width * 0.45,
-                        height: 70,
-                        padding: const EdgeInsets.all(5),
-                        color: Colors.purple.shade400,
-                        child: const Center(
-                            child: Text('Read chat users',
-                              style: TextStyle(color: Colors.white),
-                            )
-                        )
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      final db = DBProvider.db;
-                      await db.setUserId(1010);
-                    },
-                    child: Container(
-                        width: MediaQuery.of(context).size.width * 0.45,
-                        height: 70,
-                        padding: const EdgeInsets.all(5),
-                        color: Colors.orange.shade500,
-                        child: const Center(
-                            child: Text('set user',
-                              style: TextStyle(color: Colors.white),
-                            )
-                        )
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      final db = DBProvider.db;
-                      final res = await db.getUserId();
-                      print('::::::::::::::::::   $res');
-                    },
-                    child: Container(
-                        width: MediaQuery.of(context).size.width * 0.45,
-                        height: 70,
-                        padding: const EdgeInsets.all(5),
-                        color: Colors.green.shade400,
-                        child: const Center(
-                            child: Text('get user id',
-                              style: TextStyle(color: Colors.white),
-                            )
-                        )
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      final db = DBProvider.db;
-                      final res = await db.getToken();
-                      print('jkhjk:::::  $res');
-                    },
-                    child: Container(
-                        width: MediaQuery.of(context).size.width * 0.45,
-                        height: 70,
-                        padding: const EdgeInsets.all(5),
-                        color: Colors.blueAccent.shade200,
-                        child: const Center(
-                            child: Text('get token',
-                              style: TextStyle(color: Colors.white),
-                            )
-                        )
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      final db = DBProvider.db;
-                      final res = await db.getLastUpdateTime();
-                      final now = DateTime.now();
-                      final tRawDifference = (now.millisecondsSinceEpoch - DateTime.parse(res).millisecondsSinceEpoch) / 1000;
-
-                      final Map<String, dynamic>? newUpdates =
-                      await MessagesProvider().getNewUpdatesOnResume(tRawDifference.ceil() + 250000);
-
-                      print('jkhjk:::::  ${newUpdates}');
-                    },
-                    child: Container(
-                        width: MediaQuery.of(context).size.width * 0.45,
-                        height: 70,
-                        padding: const EdgeInsets.all(5),
-                        color: Colors.redAccent.shade100,
-                        child: const Center(
-                            child: Text('last update',
-                              style: TextStyle(color: Colors.white),
-                            )
-                        )
-                    ),
-                  ),
                 ],
               ),
               const SizedBox(height: 40),

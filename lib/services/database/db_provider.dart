@@ -81,6 +81,8 @@ class DBProvider {
   Future<int> updateDialogLastPage(int dialogId, int page) async => DialogDBLayer().updateDialogLastPage(dialogId, page);
   Future<int?> getLastDialogPage(int dialogId) async => DialogDBLayer().getLastDialogPage(dialogId);
   Future<int> updateDialogLastMessage(MessageData message) async => DialogDBLayer().updateDialogLastMessage(message);
+  Future<List<DialogData>> getDialogById(int id) async => await DialogDBLayer().getDialogById(id);
+
 
   ///   MESSAGES LAYER
   Future<List<Object?>> saveMessages(List<MessageData> messages) async => MessageDBLayer().saveMessages(messages);

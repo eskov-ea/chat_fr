@@ -254,16 +254,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                             data
                         )
                     )
-                    val callStatus: String = when (call.callLog.status.name) {
-                        "Success" -> "ANSWERED"
-                        "Aborted" -> "DECLINED"
-                        "Missed" -> "NO ANSWER"
-                        "Declined" -> "DECLINED"
-                        "EarlyAborted" -> "NO ANSWER"
-                        "AcceptedElsewhere" -> "ANSWERED"
-                        "DeclinedElsewhere" -> "DECLINED"
-                        else -> "ERRORED"
-                    }
+                    val callStatus: Int = call.callLog.status.toInt()
                     val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
                         callStatus = callStatus,
                         fromCaller = call.callLog.fromAddress.username,
@@ -284,16 +275,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     } else {
                         call.remoteAddress.username.toString()
                     }
-                    val callStatus: String = when (call.callLog.status.name) {
-                        "Success" -> "ANSWERED"
-                        "Aborted" -> "DECLINED"
-                        "Missed" -> "NO ANSWER"
-                        "Declined" -> "DECLINED"
-                        "EarlyAborted" -> "NO ANSWER"
-                        "AcceptedElsewhere" -> "ANSWERED"
-                        "DeclinedElsewhere" -> "DECLINED"
-                        else -> "ERRORED"
-                    }
+                    val callStatus: Int = call.callLog.status.toInt()
                     val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
                         callStatus = callStatus,
                         fromCaller = call.callLog.fromAddress.username,
@@ -318,6 +300,8 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                 }
                 Call.State.End -> {
                     Log.w("ACTIVE_CALL", "Ended   ${call.remoteAddress.username}")
+                    Log.w("[ Finish call ]", "end ${call.callLog.errorInfo}")
+                    Log.w("[ Finish call ]", "end ${call.callLog.status.toInt()}")
                     val caller = if(call.remoteAddress.displayName != null) {
                         call.remoteAddress.displayName!!
                     } else {
@@ -336,16 +320,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                             )
                     )
 
-                    val callStatus: String = when (call.callLog.status.name) {
-                        "Success" -> "ANSWERED"
-                        "Aborted" -> "DECLINED"
-                        "Missed" -> "NO ANSWER"
-                        "Declined" -> "DECLINED"
-                        "EarlyAborted" -> "NO ANSWER"
-                        "AcceptedElsewhere" -> "ANSWERED"
-                        "DeclinedElsewhere" -> "DECLINED"
-                        else -> "ERRORED"
-                    }
+                    val callStatus: Int = call.callLog.status.toInt()
                     val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
                             callStatus = callStatus,
                             fromCaller = call.callLog.fromAddress.username,
@@ -360,16 +335,8 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     activateWakeLockListener()
                     Log.w("OUTGOING_CALL", "${call.remoteAddress.username}")
 
-                    val callStatus: String = when (call.callLog.status.name) {
-                        "Success" -> "ANSWERED"
-                        "Aborted" -> "DECLINED"
-                        "Missed" -> "NO ANSWER"
-                        "Declined" -> "DECLINED"
-                        "EarlyAborted" -> "NO ANSWER"
-                        "AcceptedElsewhere" -> "ANSWERED"
-                        "DeclinedElsewhere" -> "DECLINED"
-                        else -> "ERRORED"
-                    }
+                    val callStatus: Int = call.callLog.status.toInt()
+
                     val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
                         callStatus = callStatus,
                         fromCaller = call.callLog.fromAddress.username,
@@ -386,16 +353,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     getAudioDeviceList()
                     checkForHeadphoneDevicesAvailable(call)
                     Log.w("OUTGOING_CALL", "OutgoingRinging")
-                    val callStatus: String = when (call.callLog.status.name) {
-                        "Success" -> "ANSWERED"
-                        "Aborted" -> "DECLINED"
-                        "Missed" -> "NO ANSWER"
-                        "Declined" -> "DECLINED"
-                        "EarlyAborted" -> "NO ANSWER"
-                        "AcceptedElsewhere" -> "ANSWERED"
-                        "DeclinedElsewhere" -> "DECLINED"
-                        else -> "ERRORED"
-                    }
+                    val callStatus: Int = call.callLog.status.toInt()
                     val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
                         callStatus = callStatus,
                         fromCaller = call.callLog.fromAddress.username,
@@ -417,16 +375,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                 Call.State.StreamsRunning -> {
                     Log.w("ACTIVE_CALL", "StreamsRunning")
 
-                    val callStatus: String = when (call.callLog.status.name) {
-                        "Success" -> "ANSWERED"
-                        "Aborted" -> "DECLINED"
-                        "Missed" -> "NO ANSWER"
-                        "Declined" -> "DECLINED"
-                        "EarlyAborted" -> "NO ANSWER"
-                        "AcceptedElsewhere" -> "ANSWERED"
-                        "DeclinedElsewhere" -> "DECLINED"
-                        else -> "ERRORED"
-                    }
+                    val callStatus: Int = call.callLog.status.toInt()
                     val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
                         callStatus = callStatus,
                         fromCaller = call.callLog.fromAddress.username,
@@ -450,6 +399,8 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
                 }
                 Call.State.Error -> {
+                    Log.w("[ Finish call ]", "end ${call.callLog.errorInfo}")
+                    Log.w("[ Finish call ]", "end ${call.callLog.status.toInt()}")
                     deactivateWakeLockListener()
                     val caller = if(call.remoteAddress.displayName != null) {
                         call.remoteAddress.displayName!!
@@ -458,16 +409,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     }
                     Log.v("CALLS FIND ERROR", call.remoteAddress.username.toString())
 
-                    val callStatus: String = when (call.callLog.status.name) {
-                        "Success" -> "ANSWERED"
-                        "Aborted" -> "DECLINED"
-                        "Missed" -> "NO ANSWER"
-                        "Declined" -> "DECLINED"
-                        "EarlyAborted" -> "NO ANSWER"
-                        "AcceptedElsewhere" -> "ANSWERED"
-                        "DeclinedElsewhere" -> "DECLINED"
-                        else -> "ERRORED"
-                    }
+                    val callStatus: Int = call.callLog.status.toInt()
                     val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
                         callStatus = callStatus,
                         fromCaller = call.callLog.fromAddress.username,
@@ -510,16 +452,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                             data
                         )
                     )
-                    val callStatus: String = when (call.callLog.status.name) {
-                        "Success" -> "ANSWERED"
-                        "Aborted" -> "DECLINED"
-                        "Missed" -> "NO ANSWER"
-                        "Declined" -> "DECLINED"
-                        "EarlyAborted" -> "NO ANSWER"
-                        "AcceptedElsewhere" -> "ANSWERED"
-                        "DeclinedElsewhere" -> "DECLINED"
-                        else -> "ERRORED"
-                    }
+                    val callStatus: Int = call.callLog.status.toInt()
                     val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
                         callStatus = callStatus,
                         fromCaller = call.callLog.fromAddress.username,

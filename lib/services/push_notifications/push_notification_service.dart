@@ -28,6 +28,7 @@ class PushNotificationService {
           },
           body: postData
       );
+      print('Sending push:::: response $userId  ${response.body}');
       if (response.statusCode == 200 || response.statusCode == 302) {
         return;
       } else if (response.statusCode == 401) {

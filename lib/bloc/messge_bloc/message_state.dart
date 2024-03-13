@@ -1,13 +1,11 @@
 import 'package:chat/models/message_model.dart';
-import 'package:equatable/equatable.dart';
 
 enum MessageBlocError {db, network}
 
-class MessagesBlocState {
-
-}
+class MessagesBlocState {}
 
 class MessageBlocInitialState extends MessagesBlocState {}
+
 class MessageBlocInitializeInProgressState extends MessagesBlocState {}
 
 class MessageBlocInitializationSuccessState extends MessagesBlocState {

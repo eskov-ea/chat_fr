@@ -18,6 +18,7 @@ class DataProvider {
   final _db = DBProvider.db;
 
   final _cache = <String, String?>{};
+  final _typedChatMessageTextCache = <int, String>{};
 
   Future<String?> getToken() async {
     if (_cache.containsKey(_Keys.token)) {
@@ -78,5 +79,17 @@ class DataProvider {
   // Future<void> deleteSipContacts() async {
   //   await _db.deleteSipContacts();
   // }
+
+  void setMessageText(int dialogId, String message) {
+    _typedChatMessageTextCache[dialogId] = message;
+  }
+
+  String? getMessageText(int dialogId) {
+    if (_typedChatMessageTextCache.containsKey(dialogId)) {
+      return _typedChatMessageTextCache[dialogId];
+    } else {
+      return null;
+    }
+  }
 
 }

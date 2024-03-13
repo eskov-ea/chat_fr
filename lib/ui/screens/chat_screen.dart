@@ -10,12 +10,11 @@ import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/navigation_helpers.dart';
-import 'package:chat/services/messages/messages_api_provider.dart';
-import 'package:chat/services/ws/ws_repository.dart';
 import 'package:chat/theme.dart';
 import 'package:chat/ui/widgets/action_bar/action_bar.dart';
 import 'package:chat/ui/widgets/action_bar/forward_message_alert_dialog.dart';
 import 'package:chat/ui/widgets/chat_screen_call_button.dart';
+import 'package:chat/ui/widgets/message/loading_messages_status_widget.dart';
 import 'package:chat/ui/widgets/message/mesasges_list.dart';
 import 'package:chat/ui/widgets/message/reply_message_bar_widget.dart';
 import 'package:chat/ui/widgets/web_container_wrapper.dart';
@@ -351,6 +350,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                   : ReadOnlyChannelMode(context),
                 ],
               ),
+              LoadingMessagesStatusWidget(dialogId: widget.dialogData?.dialogId),
               ForwardMessageAlertDialog(userId: widget.userId, animationController: _forwardMenuAnimationController, animation: _forwardMenuAnimation, close: closeForwardMenu,
                 forwardingMessages: forwardingMessages, closeSelectedOptionsMenu: closeSelectedOptionsMenu,
               )

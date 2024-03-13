@@ -194,25 +194,26 @@ class _CallsPageState extends State<CallsPage> {
   Widget getCallInfo(Map<int, UserModel>  users, CallModel call, int index) {
     // try {
       CallRenderData? data;
-      final toCaller = call.toCaller.replaceAll(new RegExp(r'[^0-9]'), '').substring(1);
-      final fromCaller = call.fromCaller.replaceAll(new RegExp(r'[^0-9]'), '').substring(1);
+      final toCaller = int.parse(call.toCaller.replaceAll(RegExp(r'[^0-9]'), '').substring(1));
+      final fromCaller = int.parse(call.fromCaller.replaceAll(RegExp(r'[^0-9]'), '').substring(1));
       if (toCaller == userId) {
-        final user = users[int.parse(toCaller)]!;
+        final user = users[toCaller]!;
+        print('call status:  ${call.callStatus}');
         data = CallRenderData(
             userId: userId!,
             callName:
-                call.callStatus == "ANSWERED" ? "Входящий" : "Пропущенный",
+                call.callStatus == 0 ? "Входящий" : "Пропущенный",
             callerName: "${user.lastname} ${user.firstname}",
-            callerNumber: (fromCaller),
+            callerNumber: fromCaller.toString(),
             callDate: DateTime.parse(call.date),
             callDuration: call.duration);
       } else {
-        final user = users[int.parse(toCaller)]!;
+        final user = users[toCaller]!;
         data = CallRenderData(
             userId: userId!,
             callName: "Исходящий",
             callerName: "${user.lastname} ${user.firstname}",
-            callerNumber: toCaller,
+            callerNumber: toCaller.toString(),
             callDate: DateTime.parse(call.date),
             callDuration: call.duration);
       }

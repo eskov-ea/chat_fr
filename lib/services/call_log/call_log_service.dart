@@ -40,6 +40,7 @@ class CallLogService {
     } on AppErrorException {
       rethrow;
     } catch (err, stackTrace) {
+      print('Load calls error:  $err\r\n$stackTrace');
       Logger.getInstance().sendErrorTrace(stackTrace: stackTrace);
       throw AppErrorException(AppErrorExceptionType.other);
     }

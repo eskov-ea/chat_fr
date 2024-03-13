@@ -9,6 +9,7 @@ import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/services/popup_manager.dart';
+import 'package:chat/storage/data_storage.dart';
 import 'package:chat/ui/screens/chat_screen.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/cupertino.dart';
@@ -103,6 +104,10 @@ class ActionBarState extends State<ActionBar> {
         _mRecorderIsInited = true;
       });
     });
+    if (widget.dialogId != null) {
+      final earlierTypedText = DataProvider.storage.getMessageText(widget.dialogId!);
+      if (earlierTypedText != null) _messageController.text = earlierTypedText;
+    }
     super.initState();
   }
   @override
@@ -110,6 +115,9 @@ class ActionBarState extends State<ActionBar> {
     stopRecorder(_mRecorder);
     cancelRecorderSubscriptions();
     _mRecorder.closeRecorder();
+    if (widget.dialogId != null && _messageController.text.isNotEmpty) {
+      DataProvider.storage.setMessageText(widget.dialogId!, _messageController.text);
+    }
     super.dispose();
   }
   void cancelRecorderSubscriptions() {

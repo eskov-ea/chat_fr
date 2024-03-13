@@ -84,18 +84,22 @@ class _WebsocketStatusWidgetState extends State<WebsocketStatusWidget> {
     } else if (state == PusherChannelsClientLifeCycleState.inactive) {
       return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Text('Не подключен',
-            style: textStyle,
-            softWrap: true,
+          child: Flexible(
+            child: Text('Не подключен',
+              style: textStyle,
+              softWrap: true,
+            ),
           )
       );
     } else if (state == PusherChannelsClientLifeCycleState.pendingConnection) {
       return Row(
         children: [
-          Text(
-            'Подключение...',
-            style: textStyle,
-            softWrap: true,
+          Flexible(
+            child: Text(
+              'Подключение',
+              style: textStyle,
+              softWrap: true,
+            ),
           ),
           const SizedBox(width: 20),
           const SizedBox(
@@ -111,9 +115,11 @@ class _WebsocketStatusWidgetState extends State<WebsocketStatusWidget> {
     } else  {
       return Row(
         children: [
-          Text('Ошибка подключения',
-            style: textStyle,
-            softWrap: true,
+          Flexible(
+            child: Text('Ошибка подключения',
+              style: textStyle,
+              softWrap: true,
+            ),
           ),
           const SizedBox(width: 20),
           GestureDetector(

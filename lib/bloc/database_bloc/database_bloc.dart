@@ -240,6 +240,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     final now = DateTime.now();
     final tRawDifference = (now.millisecondsSinceEpoch - DateTime.parse(lastUpdate).millisecondsSinceEpoch) / 1000;
     final diff = tRawDifference.ceil();
+    print('onDatabaseBlocGetUpdatesOnResume:: time: $diff, last update: $lastUpdate');
     if (diff < 30) return;
     final updates = await MessagesRepository().getNewUpdatesOnResume(diff);
     final List<DialogData> dialogs = updates!["chats"].map((json) => DialogData.fromJson(json)).whereType<DialogData>().toList();
@@ -247,7 +248,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     final List<MessageStatus> statuses = updates["chat_message_status_users"].map((json) => MessageStatus.fromJson(json)).whereType<MessageStatus>().toList();
     final List<MessageData> messages = updates["chat_messages"].map((json) => MessageData.fromJson(json)).whereType<MessageData>().toList();
 
-    print('onDatabaseBlocGetUpdatesOnResume:: time: $diff, last update: $lastUpdate,  dialogs ${dialogs.length}: $dialogs, messages: $messages');
+    print('onDatabaseBlocGetUpdatesOnResume:: dialogs ${dialogs.length}: $dialogs, messages: $messages');
     if (dialogUsers.isNotEmpty) {
       await db.saveChatUsers(dialogUsers);
     }

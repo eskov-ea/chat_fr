@@ -1,23 +1,9 @@
 import 'package:equatable/equatable.dart';
-import '../../models/call_model.dart';
-
+import 'package:chat/models/call_model.dart';
 
 abstract class CallState extends Equatable {
   const CallState();
 
-}
-
-class UnconnectedCallServiceState extends CallState{
-
-  @override
-  List<Object?> get props => [runtimeType];
-}
-
-class ConnectedCallServiceState extends CallState{
-
-
-  @override
-  List<Object?> get props => [runtimeType];
 }
 
 class EndedCallState extends CallState{
@@ -101,6 +87,15 @@ class StreamStopCallState extends CallState{
 class EndCallWithNoLogState extends CallState{
 
   const EndCallWithNoLogState();
+
+  @override
+  List<Object?> get props => [runtimeType];
+
+}
+
+class ReleasedCallState extends CallState{
+
+  const ReleasedCallState();
 
   @override
   List<Object?> get props => [runtimeType];

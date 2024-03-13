@@ -1,4 +1,4 @@
-import '../services/global.dart';
+import 'package:chat/services/global.dart';
 
 
 class CallModel {
@@ -6,7 +6,7 @@ class CallModel {
   final String fromCaller;
   final String toCaller;
   final String duration;
-  final String callStatus;
+  final int callStatus;
   final String id;
 
 
@@ -24,7 +24,7 @@ class CallModel {
       fromCaller: json["sip_from"],
       toCaller: json["sip_to"],
       duration: json["duration"] ?? "00:00:00",
-      callStatus: gerCallReason(json["reason"]),
+      callStatus: mapCallReasonToStatusCode(json["reason"]),
       id: json["call_id"],
   );
 
@@ -38,12 +38,12 @@ class CallModel {
   );
 
   static CallModel fromJsonOnOutgoingCall(json) => CallModel(
-      date: getDateFromUnix(json["calldate"] ?? json["date"]),
-      fromCaller: json["src"] ?? json["sip_from"],
-      toCaller: json["dst"] ?? json["sip_to"],
-      duration: json["duration"] ?? "00:00:00",
-      callStatus: json["disposition"] ?? json["reason"],
-      id: "unspecified"
+    date: getDateFromUnix(json["calldate"] ?? json["date"]),
+    fromCaller: json["src"] ?? json["sip_from"],
+    toCaller: json["dst"] ?? json["sip_to"],
+    duration: json["duration"] ?? "00:00:00",
+    callStatus: json["disposition"] ?? json["reason"],
+    id: "unspecified"
   );
 
   @override
@@ -72,7 +72,7 @@ class CallModel {
 
 }
 
-String gerCallReason(String reason) {
+String getCallReason(String reason) {
   // Ok, Decline, Request Timeout, Busy here, Ringing
   return reason == "Ok" ? "ANSWERED" : "NO ANSWER";
 }
@@ -92,3 +92,24 @@ String getDate(json) {
   final date = DateTime.parse(json);
   return date.toString();
 }
+
+int mapCallReasonToStatusCode(String name) {
+  print('call name:  $name');
+  switch(name) {
+    case "Ok": return 0;
+    case "Decline": return 3;
+    case "Request Timeout": return 1;
+    case "Busy here": return 1;
+    case "Ringing": return 1;
+    default: return 1;
+  }
+}
+
+
+// 0 "Success" -> "ANSWERED"
+// 1 "Aborted" -> "DECLINED"
+// 2 "Missed" -> "NO ANSWER"
+// 3 "Declined" -> "DECLINED"
+// 4 "EarlyAborted" -> "NO ANSWER"
+// 5 "AcceptedElsewhere" -> "ANSWERED"
+// 6 "DeclinedElsewhere" -> "DECLINED"
