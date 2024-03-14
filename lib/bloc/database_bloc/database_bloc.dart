@@ -106,27 +106,19 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
           message: 'Синхронизируем данные с сервера',
           progress: 0.12
         ));
-        final profile = await UserProfileProvider().getUserProfile(token);
-        await DataProvider.storage.setUserId(profile.id);
+        if (appSettings.profileLoaded == 0) {
+          final profile = await UserProfileProvider().getUserProfile(token);
+          await db.saveUsers([profile.user]);
+          await db.saveUserProfile(profile);
+          await DataProvider.storage.setUserId(profile.user.id);
+          await db.updateBooleanAppSettingByFieldAndValue('users_loaded', 1);
+          await db.updateBooleanAppSettingByFieldAndValue('profile_loaded', 1);
+        }
 
 
         /// Load and save users
         if (appSettings.usersLoaded == 0) {
           final users = await UsersProvider().getUsers(token);
-          users.add(UserModel(
-              id: profile.id,
-              firstname: profile.firstname,
-              lastname: profile.lastname,
-              middlename: profile.middlename,
-              company: profile.company,
-              position: profile.position,
-              phone: profile.phone,
-              dept: profile.dept,
-              email: profile.email,
-              birthdate: profile.birthdate,
-              avatar: profile.avatar,
-              banned: 0,
-              lastAccess: null));
           await db.saveUsers(users);
           await db.updateBooleanAppSettingByFieldAndValue('users_loaded', 1);
         }
@@ -178,6 +170,12 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       print('Initialize from db');
 
       emit(DatabaseBlocInitializationInProgressState(
+          message: 'Загружаем профиль',
+          progress: 0.4
+      ));
+      final profile = await db.getProfile();
+
+      emit(DatabaseBlocInitializationInProgressState(
           message: 'Загружаем пользователей',
           progress: 0.5
       ));
@@ -217,6 +215,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
 
       emit(DatabaseBlocDBInitializedState(
           users: users,
+          profile: profile,
           dialogs: dialogs,
           calls: calls
       ));

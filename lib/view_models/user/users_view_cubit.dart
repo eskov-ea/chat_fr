@@ -6,6 +6,7 @@ import 'package:chat/bloc/user_bloc/user_event.dart';
 import 'package:chat/bloc/user_bloc/user_state.dart';
 import 'package:chat/services/ws/ws_repositor_interface.dart';
 import 'package:chat/services/ws/ws_repository.dart';
+import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'users_view_cubit_state.dart';
 
@@ -47,10 +48,13 @@ class UsersViewCubit extends Cubit<UsersViewCubitState> {
     }
   }
 
-  void _onDatabaseState(DatabaseBlocState state) {
+  void _onDatabaseState(DatabaseBlocState state) async {
     print("DatabaseState  ${state}");
     if (state is DatabaseBlocDBInitializedState) {
-      usersBloc.add(UsersLoadedEvent(users: state.users));
+      final userId = await DataProvider.storage.getUserId();
+      final users = state.users;
+      users.removeWhere((key, value) => key == userId);
+      usersBloc.add(UsersLoadedEvent(users: users));
     }
   }
 

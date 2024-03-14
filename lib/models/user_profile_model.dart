@@ -1,73 +1,41 @@
+import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:equatable/equatable.dart';
 
 class UserProfileData extends Equatable{
 
-  final int id;
-  final String firstname;
-  final String lastname;
-  final String middlename;
-  final String company;
-  final String dept;
-  final String position;
-  final String phone;
-  final String email;
-  final String birthdate;
-  final String? avatar;
-  final UserProfileAsteriskSettings? userProfileSettings;
-  final AppSettings? appSettings;
+  final UserModel user;
+  final UserProfileAsteriskSettings sipSettings;
+  final VersionSettings appSettings;
   final ChatSettings? chatSettings;
 
   const UserProfileData({
-    required this.id,
-    required this.firstname,
-    required this.lastname,
-    required this.middlename,
-    required this.company,
-    required this.position,
-    required this.phone,
-    required this.dept,
-    required this.avatar,
-    required this.birthdate,
-    required this.email,
-    required this.userProfileSettings,
+    required this.user,
+    required this.sipSettings,
     required this.appSettings,
     required this.chatSettings
   });
 
   static UserProfileData fromJson(json) => UserProfileData(
-          id: json['user']['id'],
-          firstname: json['user']['staff']['firstname'] ?? "",
-          lastname: json['user']['staff']['lastname'] ?? "",
-          middlename: json['user']['staff']['middlename'] ?? "",
-          company: json['user']['staff']['company'] ?? "",
-          position: json['user']['staff']['position'] ?? "",
-          phone: json['user']['staff']['phone'] ?? "",
-          dept: json['user']['staff']['dept'] ?? "",
-          email: json['user']['email'] ?? "",
-          avatar: json['user']['staff']["avatar"],
-          birthdate: json['user']['staff']['birthdate'],
-          userProfileSettings: UserProfileAsteriskSettings.fromJson(json['settings']),
-          appSettings: AppSettings.fromJson(json['settings']),
+          user: UserModel.fromJsonAPI(json['user']),
+          sipSettings: UserProfileAsteriskSettings.fromJson(json['settings']),
+          appSettings: VersionSettings.fromJson(json['settings']),
           chatSettings: ChatSettings.fromJson(json['settings'])
-      );
+  );
 
-
-  Map<String, dynamic> toMap() => {
-    "id": id,
-    "firstname": firstname,
-    "lastname": lastname,
-    "middlename": middlename,
-    "company": company,
-    "position": position,
-    "phone": phone,
-    "avatar": avatar,
-    "dept": dept,
-    "email": email
-  };
+  static UserProfileData fromJsonDB(json) => UserProfileData(
+          user: UserModel.fromJsonDB(json),
+          sipSettings: UserProfileAsteriskSettings.fromJsonDB(json),
+          appSettings: VersionSettings.fromJsonDB(json),
+          chatSettings: ChatSettings.fromJsonDB(json)
+  );
 
   @override
-  List<Object?> get props => [id, firstname, lastname, middlename, company, position, phone, dept, email, avatar, appSettings, userProfileSettings];
+  List<Object?> get props => [];
+
+  @override
+  String toString() => "'Instance of UserProfileData' sipSettings: $sipSettings\r\n"
+  "autoLoin chats: ${chatSettings?.autoJoinChats}";
 
 }
 
@@ -94,10 +62,8 @@ class UserProfileAsteriskSettings extends Equatable{
     required this.asteriskCert
   });
 
-  static UserProfileAsteriskSettings? fromJson(json) {
-    return json == null
-        ? null
-        : UserProfileAsteriskSettings(
+  static UserProfileAsteriskSettings fromJson(json) {
+    return UserProfileAsteriskSettings(
           userDomain: json["asterisk"]["asterisk_domain"],
           asteriskPort: json["asterisk"]["asterisk_port"],
           stunHost: json["asterisk"]["stun_host"],
@@ -110,41 +76,62 @@ class UserProfileAsteriskSettings extends Equatable{
         );
   }
 
+  static UserProfileAsteriskSettings fromJsonDB(json) {
+    return UserProfileAsteriskSettings(
+          userDomain: json["user_domain"],
+          asteriskPort: json["sip_port"],
+          stunHost: json["stun_host"],
+          stunPort: json["stun_port"],
+          asteriskUserLogin: json["sip_user_login"],
+          asteriskUserPassword: json["sip_user_password"],
+          sipPrefix: json["sip_prefix"],
+          asteriskHost: json["sip_host"],
+          asteriskCert: json["sip_cert"]
+        );
+  }
+
 
   @override
   List<Object?> get props => [asteriskHost, asteriskPort, stunHost, stunPort];
 
 }
-class AppSettings extends Equatable{
-  final String? version;
+class VersionSettings extends Equatable{
   final String? versionIos;
   final String? versionAndroid;
   final String downloadUrlAndroid;
+  final String downloadUrlIos;
 
-  const AppSettings({
-    required this.version,
+  const VersionSettings({
     required this.versionIos,
     required this.versionAndroid,
+    required this.downloadUrlIos,
     required this.downloadUrlAndroid
   });
 
-  static AppSettings? fromJson(json) {
-    return json == null
-        ? null
-        : AppSettings(
-          version: json['app']["version"],
+  static VersionSettings fromJson(json) {
+    return VersionSettings(
           versionAndroid: json['app']["version_android"],
           versionIos: json['app']["version_ios"],
-          downloadUrlAndroid: json['app']["download_url_android"]
+          downloadUrlAndroid: json['app']["download_url_android"],
+          downloadUrlIos: json['app']["download_url_ios"]
+        );
+  }
+
+  static VersionSettings fromJsonDB(json) {
+    return VersionSettings(
+          versionAndroid: json['version_android'],
+          versionIos: json['version_ios'],
+          downloadUrlAndroid: json['android_download_link'],
+          downloadUrlIos: json['ios_download_link']
         );
   }
 
   @override
-  List<Object?> get props => [version, versionAndroid, versionIos, downloadUrlAndroid];
+  List<Object?> get props => [downloadUrlIos, versionAndroid];
 
 }
 class ChatSettings extends Equatable{
-  final List<DialogData> autoJoinChats;
+  final List<int> autoJoinChats;
 
   const ChatSettings({
     required this.autoJoinChats
@@ -155,10 +142,23 @@ class ChatSettings extends Equatable{
         ? null
         : ChatSettings(
           autoJoinChats: json['chat']["autojoin"]
-              .map<DialogData?>((dialog) => DialogData.fromJson(dialog))
-              .whereType<DialogData>()
+              .map<int?>((dialog) => DialogData.fromJson(dialog)?.dialogId)
+              .whereType<int>()
               .toList()
         );
+  }
+
+  static ChatSettings? fromJsonDB(json) {
+    if (json == null) return null;
+    final array = json['autojoin_chats'].split(',');
+    final List<int> dialogsIds = array.map((e) => int.tryParse(e))
+        .whereType<int>()
+        .toList();
+    print('_autoJoinChats  ${dialogsIds}');
+    return ChatSettings(
+      autoJoinChats: dialogsIds
+    );
+
   }
 
   @override

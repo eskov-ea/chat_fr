@@ -40,7 +40,7 @@ class AuthRepository {
       final AuthToken authToken = AuthToken.fromJson(json.decode(response.body));
       await _secureStorage.setToken(authToken.token);
       final UserProfileData profile = await _profileProvider.getUserProfile(authToken.token);
-      final userId = profile.id;
+      final userId = profile.user.id;
       await _secureStorage.setUserId(userId);
       final db = DBProvider.db;
       await db.setLastUpdateTime();

@@ -59,30 +59,30 @@ class ProfilePage extends StatelessWidget {
                           ListView(
                             children: [
                               const SizedBox(height: 20,),
-                              UserAvatarWidget(userId: state.user?.id, size: 70,),
+                              UserAvatarWidget(userId: state.profile?.user.id, size: 70,),
                               const SizedBox(height: 20,),
-                              Text(state.user!.lastname + " " + state.user!.firstname + " " + state.user!.middlename,
+                              Text(state.profile!.user.lastname + " " + state.profile!.user.firstname + " " + state.profile!.user.middlename,
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(fontSize: 25,)
                               ),
                               const SizedBox(height: 5,),
-                              Text(state.user!.company + ", " + state.user!.dept,
+                              Text(state.profile!.user.company + ", " + state.profile!.user.dept,
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(fontSize: 18,)
                               ),
-                              Text(state.user!.position,
+                              Text(state.profile!.user.position,
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(fontSize: 18,)
                               ),
                               const SizedBox(height: 5,),
                               SelectableText(
-                                state.user!.phone,
+                                state.profile!.user.phone,
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(fontSize: 18,),
                               ),
                               const SizedBox(height: 5,),
                               SelectableText(
-                                state.user!.email,
+                                state.profile!.user.email,
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(fontSize: 18,),
                               ),
@@ -99,7 +99,7 @@ class ProfilePage extends StatelessWidget {
                         !kIsWeb && Platform.isAndroid
                           ? OutlinedButton(
                               onPressed: () async {
-                                isUpdateAvailable ? downLoadNewAppVersion(state.user?.appSettings?.downloadUrlAndroid, context) : (){};
+                                isUpdateAvailable ? downLoadNewAppVersion(state.profile?.appSettings?.downloadUrlAndroid, context) : (){};
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: isUpdateAvailable ? LightColors.profilePageButton : Colors.white10,

@@ -1,7 +1,7 @@
 class AppSettings {
-  final String deviceId;
-  final int userId;
-  final String authToken;
+  final String? deviceId;
+  final int? userId;
+  final String? authToken;
   final String lastUpdate;
   final int dialogsLoaded;
   final int usersLoaded;

@@ -24,6 +24,8 @@ import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/message_sender_helper.dart';
 import 'package:chat/services/push_notifications/push_notification_service.dart';
 import 'package:chat/services/sip_connection_service/sip_repository.dart';
+import 'package:chat/services/user_profile/user_profile_api_provider.dart';
+import 'package:chat/services/user_profile/user_profile_repository.dart';
 import 'package:chat/services/ws/ws_repository.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/storage/data_storage.dart';
@@ -143,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     BlocProvider.of<ProfileBloc>(context).add(ProfileBlocLoadingEvent());
   }
 
-  void checkAppVersion(AppSettings settings) async {
+  void checkAppVersion(VersionSettings settings) async {
     if (kIsWeb) return;
     try {
       PackageInfo packageInfo = await PackageInfo.fromPlatform();
@@ -184,12 +186,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (settings.autoJoinChats.isNotEmpty) {
       try {
         bool isJoined = false;
-        // final String? userId = await _dataProvider.getUserId();
+        final int? userId = await _dataProvider.getUserId();
         final publicDialogs = await DialogsProvider().getPublicDialogs();
         if (publicDialogs.isNotEmpty) {
           for (var requiredChat in settings.autoJoinChats){
             for (var publicDialog in publicDialogs) {
-              if (requiredChat.dialogId == publicDialog.dialogId){
+              if (requiredChat == publicDialog.dialogId){
                 await DialogsProvider()
                     .joinDialog(userId, publicDialog.dialogId);
                 isJoined = true;
@@ -197,9 +199,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             }
           }
           if(isJoined == true) {
-            BlocProvider.of<DialogsViewCubit>(context).refreshAllDialogs();
             //TODO: refacrot messageBloc
-            // BlocProvider.of<ChatsBuilderBloc>(context).add(RefreshChatsBuilderEvent());
           }
         }
       } catch (err) {
@@ -210,23 +210,31 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Future<void> _onBlocProfileStateChanged(UserProfileState state) async {
     if (state is UserProfileLoadedState) {
-      myUserName = "${state.user?.lastname} ${state.user?.firstname}";
+    print('_autoJoinChats   ${state.profile?.chatSettings}');
+      myUserName = "${state.profile?.user.lastname} ${state.profile?.user.firstname}";
       if (kIsWeb) return;
       if (!await isCallRunning()){
-        if (state.user != null && state.user?.userProfileSettings != null
-            && state.user!.userProfileSettings!.asteriskUserPassword != null
-            && state.user!.userProfileSettings!.asteriskHost != null) {
-          sipRegistration(state.user!.userProfileSettings!, myUserName);
+        if (state.profile != null && state.profile?.sipSettings != null
+            && state.profile!.sipSettings!.asteriskUserPassword != null
+            && state.profile!.sipSettings!.asteriskHost != null) {
+          sipRegistration(state.profile!.sipSettings!, myUserName);
         }
-        getUserCallLog(state.user!.userProfileSettings!);
+        getUserCallLog(state.profile!.sipSettings!);
       }
-      if (state.user?.appSettings != null){
-        checkAppVersion(state.user!.appSettings!);
-        _autoJoinChats(state.user!.chatSettings!);
+      if (state.profile?.appSettings != null){
+        checkAppVersion(state.profile!.appSettings!);
+        _autoJoinChats(state.profile!.chatSettings!);
       } else {
         customToastMessage(context: context, message: "Не удалось получить настройки для Asterisk с сервера. Пожалуйста, сообщите об этой ошибке разработчикам");
       }
     }
+  }
+
+  Future<void> _checkUserUpdates() async {
+    final token = await DataProvider.storage.getToken();
+    final UserProfileData profile = await UserProfileProvider().getUserProfile(token);
+
+    BlocProvider.of<ProfileBloc>(context).add(ProfileBlocUpdateEvent(profile: profile));
   }
 
   void shouldDownloadData() async {
@@ -359,6 +367,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!kIsWeb) {
       callServiceBlocSubscription = BlocProvider.of<CallsBloc>(context).stream.listen(_onCallStateChanged);
     }
+    _checkUserUpdates();
 
     super.initState();
 

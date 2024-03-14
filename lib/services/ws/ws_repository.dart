@@ -241,9 +241,9 @@ class WebsocketRepository extends IWebsocketRepository{
             "dialog": newDialog
           }));
         }
-        //TODO: refactor db
+        // TODO: refactor db
       } else if (data["chat_exit"] != null) {
-        //TODO: refactor db
+        // TODO: refactor db
 // final DialogData newDialog = DialogData.fromJson(data["chat_exit"]);
         // print("UNSUBSCRIBE CHAT   -->   private-chat.${newDialog.dialogId}");
         // add(WsEventDialogDeleted(dialog: newDialog, channelName: "private-chat.${newDialog.dialogId}"));

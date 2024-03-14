@@ -102,6 +102,26 @@ final Map<String, String> tables = {
       'calls_loaded TINYINT(1) DEFAULT 0, '
       'first_initialize TINYINT(1) DEFAULT 0, '
       'sip_contacts text DEFAULT NULL, '
+      'autojoin_chats TEXT DEFAULT NULL, '
+      'version_android varchar(50) DEFAULT "1.0.0", '
+      'version_ios varchar(50) DEFAULT "1.0.0", '
+      'android_download_link varchar(255) DEFAULT "https://chat.mcfef.com/apk/app-release.apk", '
+      'ios_download_link varchar(255) DEFAULT "https://chat.mcfef.com/ios/mcfef.ipa", '
+      'created_at DATETIME DEFAULT CURRENT_TIMESTAMP );',
+
+
+  'sip_settings' :
+  'CREATE TABLE sip_settings ('
+      'id INTEGER PRIMARY KEY, '
+      'user_domain varchar(255) DEFAULT NULL, '
+      'sip_port varchar(10) DEFAULT "5060", '
+      'stun_host varchar(10) DEFAULT NULL, '
+      'stun_port varchar(10) DEFAULT NULL, '
+      'sip_user_login varchar(255) DEFAULT NULL, '
+      'sip_user_password varchar(255) DEFAULT NULL, '
+      'sip_prefix varchar(10) DEFAULT "7", '
+      'sip_host varchar(255) DEFAULT NULL, '
+      'sip_cert TEXT DEFAULT NULL, '
       'created_at DATETIME DEFAULT CURRENT_TIMESTAMP );',
 
 };

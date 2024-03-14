@@ -114,6 +114,48 @@ class _DBScreenState extends State<DBScreen> {
                   )
                 ],
               ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  GestureDetector(
+                    onTap: () async {
+                      final db = DBProvider.db;
+                      await db.getDialogs();
+                      print('Chat types initialized::');
+                    },
+                    child: Container(
+                        width: MediaQuery.of(context).size.width * 0.45,
+                        height: 70,
+                        padding: const EdgeInsets.all(5),
+                        color: Colors.purple.shade200,
+                        child: const Center(
+                            child: Text('Get last message',
+                              style: TextStyle(color: Colors.white),
+                            )
+                        )
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      final db = DBProvider.db;
+                      final res = await db.getProfile();
+                      log('Profile::  $res');
+                    },
+                    child: Container(
+                        width: MediaQuery.of(context).size.width * 0.45,
+                        height: 70,
+                        padding: const EdgeInsets.all(5),
+                        color: Colors.grey.shade500,
+                        child: const Center(
+                            child: Text('Read profile',
+                              style: TextStyle(color: Colors.white),
+                            )
+                        )
+                    ),
+                  )
+                ],
+              ),
               const SizedBox(height: 40),
               GestureDetector(
                 onTap: () async {

@@ -146,6 +146,7 @@ class MyApp extends StatelessWidget{
         ),
         BlocProvider(
           create: (_) => ProfileBloc(
+            databaseBloc: databaseBloc,
             errorHandlerBloc: errorHandlerBloc,
           ),
         ),

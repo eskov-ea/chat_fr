@@ -3,6 +3,7 @@ import 'package:chat/models/call_model.dart';
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/message_model.dart';
+import 'package:chat/models/user_profile_model.dart';
 
 
 abstract class DatabaseBlocState {}
@@ -10,19 +11,22 @@ abstract class DatabaseBlocState {}
 class DatabaseBlocDBInitializedState extends DatabaseBlocState {
   final List<DialogData> dialogs;
   final Map<int, UserModel> users;
+  final UserProfileData profile;
   final List<CallModel> calls;
 
   DatabaseBlocDBInitializedState({required this.dialogs, required this.users,
-    required this.calls});
+    required this.calls, required this.profile});
 
   DatabaseBlocDBInitializedState copyWith({
       List<DialogData>? dialogs,
+      UserProfileData? profile,
       Map<int, UserModel>? users,
       List<CallModel>? calls
   }) {
     return DatabaseBlocDBInitializedState(
         dialogs: dialogs ?? this.dialogs,
         users: users ?? this.users,
+        profile: profile ?? this.profile,
         calls: calls ?? this.calls
     );
   }

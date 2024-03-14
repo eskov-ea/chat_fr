@@ -6,6 +6,7 @@ import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/from_db_models.dart';
 import 'package:chat/models/message_model.dart';
+import 'package:chat/models/user_profile_model.dart';
 import 'package:chat/services/database/db_layers/app_state_db_layer.dart';
 import 'package:chat/services/database/db_layers/attachment_db_layer.dart';
 import 'package:chat/services/database/db_layers/chat_type_layer.dart';
@@ -13,6 +14,7 @@ import 'package:chat/services/database/db_layers/chat_user_db_layer.dart';
 import 'package:chat/services/database/db_layers/dialog_db_layer.dart';
 import 'package:chat/services/database/db_layers/message_db_layer.dart';
 import 'package:chat/services/database/db_layers/message_status_db_layer.dart';
+import 'package:chat/services/database/db_layers/user_profile_db_layer.dart';
 import 'package:chat/services/database/db_layers/users_db_layer.dart';
 import 'package:chat/services/database/developers.dart';
 import 'package:chat/services/database/tables.dart';
@@ -124,6 +126,11 @@ class DBProvider {
   Future<Map<int, List<ChatUser>>> getChatUsers() async => await ChatUsersDBLayer().getChatUsers();
 
 
+  ///   USER PROFILELAYER
+  Future<bool> saveUserProfile(UserProfileData profile) async => await UserProfileDBLayer().saveUserProfile(profile);
+  Future<UserProfileData> getProfile() async => await UserProfileDBLayer().getProfile();
+
+
   /// APP STATE DB LAYER
   Future<String> getLastUpdateTime() async => await AppStateDBLayer().getLastUpdateTime();
   Future<int> setLastUpdateTime() async => await AppStateDBLayer().setLastUpdateTime();
@@ -150,7 +157,7 @@ class DBProvider {
     try {
       tables.forEach((key, sql) async {
         await db.execute(sql);
-        print('Tables initialized');
+        print('Table initialized $key');
       });
     } catch (err) {
       print("ERROR:DBProvider:73:: $err");
@@ -160,7 +167,6 @@ class DBProvider {
     final db = await database;
     return db.transaction((txn) async {
       final res = await txn.rawQuery('SELECT first_initialize FROM app_settings ');
-      print('checkIfDatabaseIsNotEmpty  $res');
       if (res.isEmpty) {
         return true;
       } else {
@@ -235,6 +241,11 @@ class DBTable {
   final String name;
   const DBTable({required this.name});
   static DBTable fromJson(json) => DBTable(name: json["name"]);
+
+  @override
+  String toString() {
+    return "'Instance of 'DBTable' name: $name\r\n";
+  }
 }
 
 

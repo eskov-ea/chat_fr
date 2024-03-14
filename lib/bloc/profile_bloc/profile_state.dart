@@ -1,21 +1,21 @@
 import '../../models/user_profile_model.dart';
 abstract class UserProfileState {
-  final UserProfileData? user = null;
+  final UserProfileData? profile = null;
 }
 
 class UserProfileInitialState extends UserProfileState {
-  final UserProfileData? user;
+  final UserProfileData? profile;
 
   UserProfileInitialState({
-    required this.user
+    required this.profile
   });
 }
 
 class UserProfileLoadedState extends UserProfileState{
-  final UserProfileData? user;
+  final UserProfileData? profile;
 
   UserProfileLoadedState({
-    required this.user
+    required this.profile
   });
 
   @override
@@ -23,23 +23,23 @@ class UserProfileLoadedState extends UserProfileState{
       identical(this, other) ||
           other is UserProfileLoadedState &&
               runtimeType == other.runtimeType &&
-              user == other.user;
+              profile == other.profile;
 
   @override
-  int get hashCode => user.hashCode;
+  int get hashCode => profile.hashCode;
 
   UserProfileLoadedState copyWith({
     UserProfileData? user,
   }) {
     return UserProfileLoadedState(
-      user: user ?? this.user,
+      profile: user ?? this.profile,
     );
   }
 
 }
 
 class UserProfileLoggedOutState extends UserProfileState {
-  final UserProfileData? user = null;
+  final UserProfileData? profile = null;
 }
 
 class UserProfileErrorState extends UserProfileState {}

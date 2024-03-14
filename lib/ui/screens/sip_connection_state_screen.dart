@@ -198,8 +198,8 @@ class _SipConnectionStateScreenState extends State<SipConnectionStateScreen> {
         });
         return;
       }
-      final settings = profileState.user!.userProfileSettings;
-      final displayName = "${profileState.user!.lastname} ${profileState.user!.firstname}";
+      final settings = profileState.profile!.sipSettings;
+      final displayName = "${profileState.profile!.user.lastname} ${profileState.profile!.user.firstname}";
       if (settings == null || userId == null ) {
         setState(() {
           _connectErrorMessage = 'Данные для подключения либо не получены, либо их не удалось прочитать, попробуйте еще раз.';

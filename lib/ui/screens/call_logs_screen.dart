@@ -55,7 +55,7 @@ class _CallsPageState extends State<CallsPage> {
   }
 
   Future<void> _onRefresh() async {
-    final asterPass = BlocProvider.of<ProfileBloc>(context).state.user?.userProfileSettings?.asteriskUserPassword;
+    final asterPass = BlocProvider.of<ProfileBloc>(context).state.profile?.sipSettings?.asteriskUserPassword;
     if (asterPass == null) {
       PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.warning, message: "Произошла ошибка при получении данных пользователя");
     } else {
