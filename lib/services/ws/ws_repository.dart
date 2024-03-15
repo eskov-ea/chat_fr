@@ -292,6 +292,7 @@ class WebsocketRepository extends IWebsocketRepository{
           "join": user
         }));
       } else if (data["exit"] != null) {
+        print("EVENTEXIT ${data["exit"]}");
         final user = ChatUser.fromJson(data["exit"]);
         sinkEvent(WebsocketEventPayload(event: WebsocketEvent.exit, data: {
           "exit": user

@@ -12,6 +12,7 @@ import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/from_db_models.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/models/message_model.dart' as messageModel;
+import 'package:chat/services/messages/messages_api_provider.dart';
 import 'package:chat/services/ws/ws_repositor_interface.dart';
 import 'package:chat/services/ws/ws_repository.dart';
 import 'package:chat/services/database/db_provider.dart';
@@ -36,10 +37,10 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     required this.websocketRepository,
     required this.errorHandlerBloc
   }): super( DatabaseBlocDBNotInitializedState()){
-    websocketEventSubscription = websocketRepository.events.listen(_onWebsocketEvent);
     on<DatabaseBlocEvent>((event, emit) async {
       if (event is DatabaseBlocInitializeEvent) {
         await onDatabaseBlocInitializeEvent(event, emit);
+        websocketEventSubscription = websocketRepository.events.listen(_onWebsocketEvent);
       } else if (event is DatabaseBlocSendMessageEvent) {
         await onDatabaseBlocSendMessageEvent(event, emit);
       } else if (event is DatabaseBlocNewMessageReceivedEvent) {
@@ -58,6 +59,10 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         await onDatabaseBlocResendMessageEvent(event, emit);
       } else if (event is DatabaseBlocDeleteMessagesEvent) {
         await onDatabaseBlocDeleteMessagesEvent(event, emit);
+      } else if (event is DatabaseBlocUserExitChatEvent) {
+        await onDatabaseBlocUserExitChatEvent(event, emit);
+      } else if (event is DatabaseBlocUserJoinChatEvent) {
+        await onDatabaseBlocUserJoinChatEvent(event, emit);
       }
     }, transformer: sequential());
   }
@@ -70,6 +75,10 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       add(DatabaseBlocNewMessageStatusEvent(status: payload.data?["status"]));
     } else if (payload.event == WebsocketEvent.dialog) {
         add(DatabaseBlocNewDialogReceivedEvent(dialog: payload.data?["dialog"]));
+    } else if (payload.event == WebsocketEvent.exit) {
+      add(DatabaseBlocUserExitChatEvent(chatUser: payload.data?["exit"]));
+    } else if (payload.event == WebsocketEvent.join) {
+      add(DatabaseBlocUserJoinChatEvent(chatUser: payload.data?["join"]));
     }
   }
 
@@ -311,6 +320,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       log('DBBloc send:: error: $err\r\n$stackTrace');
     }
   }
+
   List<MessageData> updateLocalMessage(List<MessageData> messages, int localMessageId, MessageData sentMessage) {
     final range = messages.length > 10 ? 10 : messages.length;
     for (var i = 0; i < range; i++ ) {
@@ -408,10 +418,32 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
   ) async {
     print('DatabaseBlocDeleteMessagesEvent  ${event.ids}');
     try {
+      await MessagesProvider().deleteMessage(messageId: event.ids);
       await db.deleteMessages(event.ids);
       emit(DatabaseBlocDeletedMessagesState(ids: event.ids, dialogId: event.dialogId));
     } catch (err, stackTrace) {
 
+    }
+  }
+
+  Future<void> onDatabaseBlocUserExitChatEvent(DatabaseBlocUserExitChatEvent event, emit) async {
+    try {
+      await db.deleteChatUser(event.chatUser);
+      print('streamer:: exit');
+      emit(DatabaseBlocUserExitChatState(chatUser: event.chatUser));
+    } catch (err) {
+
+    }
+  }
+
+  Future<void> onDatabaseBlocUserJoinChatEvent(DatabaseBlocUserJoinChatEvent event, emit) async {
+    try {
+      await db.addUserToChat(event.chatUser);
+      print('streamer:: join');
+      emit(DatabaseBlocUserJoinChatState(chatUser: event.chatUser));
+    }
+    catch (err) {
+      print('Failed to save joined user:  $err');
     }
   }
 }

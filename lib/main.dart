@@ -3,6 +3,7 @@ import 'package:chat/bloc/auth_bloc/auth_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
 import 'package:chat/bloc/call_logs_bloc/call_logs_state.dart';
 import 'package:chat/bloc/database_bloc/database_bloc.dart';
+import 'package:chat/bloc/dialogs_bloc/group_dialog_members_streamer.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/bloc/user_bloc/online_users_manager.dart';
@@ -35,7 +36,6 @@ import 'bloc/user_bloc/user_bloc.dart';
 import 'firebase_options.dart';
 import 'services/auth/auth_repo.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-
 import 'services/sip_connection_service/sip_repository.dart';
 
 
@@ -56,6 +56,7 @@ void main() async {
   UserOnlineStatusManager.instance;
   ErrorHandlingRepository.instance;
   SipRepository.instance;
+  GroupDialogsMemberStateStreamer.instance;
 
   if (!kIsWeb) {
     await Firebase.initializeApp(

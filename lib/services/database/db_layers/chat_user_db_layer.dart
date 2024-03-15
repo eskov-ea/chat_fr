@@ -57,4 +57,54 @@ class ChatUsersDBLayer {
       rethrow;
     }
   }
+
+  Future<int> deleteChatUser(ChatUser chatUser) async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        return await txn.rawDelete(
+          'DELETE FROM chat_user WHERE id = "${chatUser.id}"; '
+        );
+      });
+    } catch (err, stackTrace) {
+      log('DB operation error:  $stackTrace');
+      rethrow;
+    }
+  }
+
+  Future<int> addUserToChat(ChatUser chatUser) async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        return await txn.rawInsert(
+            'INSERT OR IGNORE INTO chat_user(id, chat_id, chat_user_role_id, active, user_id) '
+            'VALUES(?, ?, ?, ?, ?); ',
+            [chatUser.id, chatUser.chatId, chatUser.chatUserRole, chatUser.active, chatUser.userId]
+        );
+      });
+    } catch (err, stackTrace) {
+      log('DB operation error:  $stackTrace');
+      rethrow;
+    }
+  }
+
+  Future<List<ChatUser>> getChatUsersByDialogId(int dialogId) async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        List<Object> res = await txn.rawQuery(
+            'SELECT cu.id, cu.chat_id, cu.chat_user_role_id, cu.active, cu.user_id, '
+                'u.firstname, u.lastname, u.middlename, u.company, u.dept, u.position, u.phone, u.email, u.birthdate, u.avatar, u.banned, u.last_access '
+                'FROM chat_user cu '
+                'JOIN user u ON (cu.user_id = u.id) '
+                'WHERE cu.chat_id = "$dialogId" AND cu.active = 1; '
+        );
+        return res.map((json) => ChatUser.fromDBJson(json)).toList();
+      });
+    } catch (err, stackTrace) {
+      log('DB operation error:  $stackTrace');
+      rethrow;
+    }
+  }
+
 }

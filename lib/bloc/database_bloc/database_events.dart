@@ -76,5 +76,19 @@ class DatabaseBlocDeleteMessagesEvent extends DatabaseBlocEvent {
   DatabaseBlocDeleteMessagesEvent({required this.ids, required this.dialogId});
 }
 
+class DatabaseBlocUserExitChatEvent extends DatabaseBlocEvent {
+  final ChatUser chatUser;
+  final event = "exit";
+
+  DatabaseBlocUserExitChatEvent({required this.chatUser});
+}
+
+class DatabaseBlocUserJoinChatEvent extends DatabaseBlocEvent {
+  final ChatUser chatUser;
+  final event = "join";
+
+  DatabaseBlocUserJoinChatEvent({required this.chatUser});
+}
+
 
 

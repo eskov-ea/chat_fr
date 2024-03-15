@@ -128,7 +128,7 @@ class _CreateNewDialogPageState extends State<CreateNewDialogPage> {
                 Padding(
                     padding:
                     const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                    child: SearchWidget(cubit: widget.bloc)
+                    child: SearchWidget()
                 ),
                 if (!selectedMode)
                   OutlinedButton(

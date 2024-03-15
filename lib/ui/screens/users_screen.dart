@@ -40,7 +40,7 @@ class _ContactsPageState extends State<ContactsPage> {
           if (state is UsersViewCubitLoadedState) {
             return Column(
               children: [
-                SearchWidget(cubit: cubit),
+                const SearchWidget(),
                 const SizedBox(height: 10),
                 Expanded(
                     child: Scrollbar(

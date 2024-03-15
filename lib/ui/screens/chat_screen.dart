@@ -384,7 +384,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             if (widget.dialogData == null || widget.dialogData?.chatType.p2p == 1) {
               openUserProfileInfoPage(context: context, user: findPartnerUserProfile(usersCubit, widget.partnerId), partnerId: widget.partnerId);
             } else {
-              openGroupChatInfoPage(context: context, users: widget.users, dialogData: widget.dialogData, userId: null, dialogCubit: widget.dialogCubit, username: widget.username, partnerId: widget.partnerId, );
+              openGroupChatInfoPage(context: context, users: widget.users, dialogData: widget.dialogData, userId: widget.userId, dialogCubit: widget.dialogCubit, username: widget.username, partnerId: widget.partnerId, );
             }
           },
           child: getDialogName(widget.dialogData, widget.username),

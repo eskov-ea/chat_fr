@@ -58,11 +58,9 @@ class DialogsSearchEvent extends DialogsEvent{
 
 class DialogUserJoinChatEvent extends DialogsEvent{
   final ChatUser user;
-  final int dialogId;
 
   DialogUserJoinChatEvent({
-    required this.user,
-    required this.dialogId
+    required this.user
   });
 }
 
@@ -74,11 +72,9 @@ class DialogStateNewMessageStatusesReceived extends DialogsEvent {
 
 class DialogUserExitChatEvent extends DialogsEvent{
   final ChatUser user;
-  final int dialogId;
 
   DialogUserExitChatEvent({
-    required this.user,
-    required this.dialogId
+    required this.user
   });
 }
 

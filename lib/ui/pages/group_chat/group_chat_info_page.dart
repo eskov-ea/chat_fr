@@ -1,9 +1,15 @@
 import 'dart:async';
+import 'package:chat/bloc/database_bloc/database_bloc.dart';
+import 'package:chat/bloc/database_bloc/database_events.dart';
+import 'package:chat/bloc/dialogs_bloc/group_dialog_members_streamer.dart';
 import 'package:chat/models/dialog_model.dart';
+import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
+import 'package:chat/services/popup_manager.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
+import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,7 +23,7 @@ import 'add_user_to_group_chat_page.dart';
 
 class GroupChatInfoPage extends StatefulWidget {
   const GroupChatInfoPage({
-    // required this.users,
+    required this.userId,
     required this.chatUsers,
     required this.dialogData,
     required this.users,
@@ -26,7 +32,7 @@ class GroupChatInfoPage extends StatefulWidget {
   }) : super(key: key);
 
   //TODO: refactor db
-  // final List<UserModel> users;
+  final int? userId;
   final List<int>? chatUsers;
   final DialogData dialogData;
   final List<UserModel> users;
@@ -41,68 +47,49 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
   List<ChatUser> stateUsers = [];
   //TODO: higt this functionality up to bloc
   final DialogsProvider _dialogsProvider = DialogsProvider();
-  StreamSubscription? _dialogStateSubscription;
+  StreamSubscription? _groupChatEventSubscription;
   bool isDeleteUserMode = false;
   bool isAdmin = false;
   String? userId;
+  Map<int, UserModel> _users = {};
 
   @override
   void initState() {
-    print("DIALOGSBLOC    ${BlocProvider.of<DialogsViewCubit>(context)}");
+    if (BlocProvider.of<UsersViewCubit>(context).state is UsersViewCubitLoadedState) {
+      _users = (BlocProvider.of<UsersViewCubit>(context).state as UsersViewCubitLoadedState).usersDictionary;
+    }
+
     getInitialUsers();
-    _dialogStateSubscription = widget.dialogsViewCubit.dialogsBloc.stream.listen((state) {
-      getUpdatedUserList(state.dialogs);
+    _groupChatEventSubscription = GroupDialogsMemberStateStreamer.instance.stream.listen((ChatUserEvent event) {
+      print('adding user:   ${event.event} ${event.chatUser}');
+      if (event.event == "exit") {
+        setState(() {
+          stateUsers.remove(event.chatUser);
+        });
+      } else if (event.event == "join") {
+        setState(() {
+          stateUsers.add(event.chatUser);
+        });
+      }
     });
     super.initState();
   }
 
   @override
   void dispose() {
-    _dialogStateSubscription?.cancel();
+    _groupChatEventSubscription?.cancel();
     super.dispose();
   }
 
-  addUserCallback(ChatUser user){
-    if (!stateUsers.contains(user)) {
-      setState(() {
-        stateUsers.add(user);
-      });
-    }
-  }
+
 
   getInitialUsers() async {
-    int? userId = await DataProvider.storage.getUserId();
-    stateUsers = [];
-    for (var user in widget.dialogData.chatUsers) {
-      if (user.active == 1) {
-        stateUsers.add(user);
-      }
-      if (user.userId == userId && user.chatUserRole == 1) {
-        isAdmin = true;
-      }
-    }
+    stateUsers = await DBProvider.db.getChatUsersByDialogId(widget.dialogData.dialogId);
+    isAdmin = stateUsers.firstWhere((user) => user.userId == widget.userId).chatUserRole == 1;
     setState(() {});
   }
-  void getUpdatedUserList(List<DialogData>? dialogs) {
-    if(dialogs == null) return;
-    for( var dialog in dialogs) {
-      if (dialog.dialogId == widget.dialogData.dialogId) {
-        stateUsers = [];
-        for (var user in dialog.chatUsers) {
-          if (user.active == 1) {
-            stateUsers.add(user);
-          }
-          if (user.userId.toString() == userId && user.chatUserRole == 1) {
-            isAdmin = true;
-          }
-        }
-        setState(() {});
-        return;
-      }
-    }
-  }
 
-  deleteUserFromChat(ChatUser user) {
+  deleteUserFromChat(ChatUser user) async {
     if (!isAdmin) {
       return customToastMessage(context: context, message: 'Только администратор может удалить пользователя из чата');
     }
@@ -110,10 +97,15 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
       return customToastMessage(context: context, message: 'Вы не можете удалиться из чата, тк вы его создатель');
     }
 
-    setState(() {
-      stateUsers.remove(user);
-    });
-    _dialogsProvider.exitDialog(user.userId, widget.dialogData.dialogId);
+    try {
+      PopupManager.showLoadingPopup(context);
+      await _dialogsProvider.exitDialog(user.userId, widget.dialogData.dialogId);
+      BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocUserExitChatEvent(chatUser: user));
+      PopupManager.closePopup(context);
+    } catch (err) {
+      PopupManager.closePopup(context);
+      PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.error, message: 'Произошла ошибка при удалении участника чата. Попробуйте еще раз');
+    }
 
   }
 
@@ -190,37 +182,19 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                   child: ListView.builder(
                       itemCount: stateUsers.length,
                       itemBuilder: (context, index) {
+                        final itemName = stateUsers[index].userId == widget.userId ? "Вы" : "${_users[stateUsers[index].userId]?.lastname} ${_users[stateUsers[index].userId]?.firstname}";
+
                         return Padding(
                           padding: EdgeInsets.only(bottom: 5, left: 10, right: 10, top: 10),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               UserAvatarWidget(userId: stateUsers[index].userId, size: 20),
-                              // CircleAvatar(
-                              //   radius: 20,
-                              //   backgroundColor: Colors.grey,
-                              //   child: Padding(
-                              //     padding: const EdgeInsets.all(4), // Border radius
-                              //     child: ClipOval(
-                              //         child: false
-                              //             ? Image.network("")
-                              //             : Image.asset('assets/images/no_avatar.png')
-                              //     ),
-                              //   ),
-                              // ),
                               const SizedBox(width: 20,),
                               Expanded(
                                 child: Container(
                                   padding: EdgeInsets.only(bottom: 10),
-                                  decoration: BoxDecoration(
-                                    //TODO: refactor db
-                                    // border: Border(
-                                    //     bottom: index == widget.users.length - 1
-                                    //     ? BorderSide(width: 0, color: Colors.transparent)
-                                    //     : BorderSide(width: 1, color: Colors.black26)
-                                    // )
-                                  ),
-                                  child: Text("${stateUsers[index].user?.lastname ?? 'Удален'} ${stateUsers[index].user?.firstname ?? 'Удален'}",
+                                  child: Text(itemName,
                                     style: TextStyle(fontSize: 20),
                                   ),
                                 ),
@@ -245,7 +219,7 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                                                   mainAxisAlignment: MainAxisAlignment.end,
                                                   crossAxisAlignment: CrossAxisAlignment.end,
                                                   children: [
-                                                    Text('Удалить ${stateUsers[index].user?.lastname ?? 'Удален'} ${stateUsers[index].user?.firstname  ?? 'Удален'} из списка участников?',
+                                                    Text('Удалить $itemName из списка участников?',
                                                       style: TextStyle(fontSize: 18, color: Colors.black),
                                                     ),
                                                     SizedBox(
@@ -299,12 +273,10 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
                     OutlinedButton(
                         onPressed: () async {
                           try {
-                            // openUsersListToAddToChat(
-                            //   context: context,
-                            //   usersViewCubit: widget.usersViewCubit,
-                            //   dialogId:  widget.dialogData.dialogId,
-                            //   addUserCallback: addUserCallback
-                            // );
+                            openUsersListToAddToChat(
+                              context: context,
+                              dialogId:  widget.dialogData.dialogId
+                            );
                           } catch (err) {
                             ClientErrorHandler.informErrorHappened(context, "Произошла непредвиденная ошибка. Попробуйте еще раз.");
                           }
@@ -389,16 +361,13 @@ class _GroupChatInfoPageState extends State<GroupChatInfoPage> {
 
 openUsersListToAddToChat({
   required context,
-  required usersViewCubit,
-  required dialogId,
-  required addUserCallback
+  required dialogId
 }){
   Navigator.of(context).push(
       MaterialPageRoute(builder: (BuildContext context) =>
           AddingUserToGroupChatPage(
-            dialogId: dialogId,
-            usersViewCubit: usersViewCubit,
-            addUserCallback: addUserCallback
-          ))
+            dialogId: dialogId
+          )
+      )
   );
 }

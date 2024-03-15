@@ -152,6 +152,7 @@ class DialogsProvider {
           'Authorization': 'Bearer $token',
         },
       );
+      print('exitDialog:::   ${response.body}');
       final error = handleHttpResponse(response);
       if (error != null) throw error;
     } on SocketException catch(err, stackTrace) {

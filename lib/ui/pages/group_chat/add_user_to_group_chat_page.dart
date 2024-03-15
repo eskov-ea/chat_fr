@@ -1,25 +1,23 @@
-import 'dart:async';
+import 'package:chat/bloc/database_bloc/database_bloc.dart';
+import 'package:chat/bloc/database_bloc/database_events.dart';
+import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
+import 'package:chat/services/dialogs/dialogs_api_provider.dart';
+import 'package:chat/services/popup_manager.dart';
+import 'package:chat/ui/widgets/avatar_widget.dart';
+import 'package:chat/ui/widgets/search_widget.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../models/contact_model.dart';
-import '../../../services/dialogs/dialogs_api_provider.dart';
-import '../../widgets/avatar_widget.dart';
-import '../../widgets/search_widget.dart';
 
 class AddingUserToGroupChatPage extends StatefulWidget {
   const AddingUserToGroupChatPage({
     required this.dialogId,
-    required this.usersViewCubit,
-    required this.addUserCallback,
     Key? key
   }) : super(key: key);
 
-  final UsersViewCubit usersViewCubit;
   final int dialogId;
-  final Function addUserCallback;
 
   @override
   State<AddingUserToGroupChatPage> createState() => _AddingUserToGroupChatPageState();
@@ -28,25 +26,21 @@ class AddingUserToGroupChatPage extends StatefulWidget {
 class _AddingUserToGroupChatPageState extends State<AddingUserToGroupChatPage> {
 
   List<UserModel> selected = [];
-  // List<UserModel> users = [];
-  late final StreamSubscription userListSubscription;
   final DialogsProvider _dialogsProvider = DialogsProvider();
-  addUsersToDialog() async {
-    for (var user in selected) {
-      final ChatUser chatUser = await _dialogsProvider.joinDialog(user.id, widget.dialogId);
-      widget.addUserCallback(chatUser);
-    }
-  }
 
-  @override
-  void initState() {
-    super.initState();
-    // users = widget.usersViewCubit.state.users;
-    // userListSubscription = widget.usersViewCubit.stream.listen((event) {
-    //   setState(() {
-    //     users = event.users;
-    //   });
-    // });
+  addUsersToDialog() async {
+    PopupManager.showLoadingPopup(context);
+    try {
+      for (var user in selected) {
+        final ChatUser chatUser = await _dialogsProvider.joinDialog(user.id, widget.dialogId);
+        BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocUserJoinChatEvent(chatUser: chatUser));
+      }
+      PopupManager.closePopup(context);
+      Navigator.of(context).maybePop();
+    } catch (err) {
+      PopupManager.closePopup(context);
+      PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.error, message: 'Произошла ошибка добавления участников в групповой чат. Попробуйте еще раз.');
+    }
   }
 
   void _setSelected(UserModel user) {
@@ -59,113 +53,201 @@ class _AddingUserToGroupChatPageState extends State<AddingUserToGroupChatPage> {
     });
   }
 
-  @override
-  void dispose() {
-    userListSubscription.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder(
-        builder: (context, state) {
-          if (state is UsersViewCubitLoadedState) {
-            return Column(
-              children: [
-                SizedBox(height: 50,),
-                Padding(
-                    padding:
-                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                    child: SearchWidget(cubit: widget.usersViewCubit)
-                ),
-                Expanded(
-                  child: ListView.builder(
-                      itemCount: state.users.length,
+      body: SafeArea(
+        child: BlocBuilder<UsersViewCubit, UsersViewCubitState>(
+          builder: (context, state) {
+            if (state is UsersViewCubitLoadedState) {
+              return Column(
+                children: [
+                  const SizedBox(height: 10),
+                  const SearchWidget(),
+                  const SizedBox(height: 10),
+                  selected.isNotEmpty ? Container(
+                    height: 30,
+                    padding: const EdgeInsets.only(left: 24),
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: selected.length,
                       itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: (){
-                            _setSelected(state.users[index]);
-                          },
-                          child: Container(
-                            color:  selected.contains(state.users[index].id)
-                                ? Colors.white24
-                                : Colors.transparent,
-                            padding: const EdgeInsets.only(
-                                left: 14, right: 14, top: 10, bottom: 10),
-                            child: Align(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  UserAvatarWidget(userId: state.users[index].id, size: 20),
-                                  const SizedBox(width: 20,),
-                                  Expanded(
-                                    child: Container(
-                                      padding: EdgeInsets.only(bottom: 10),
-                                      decoration: BoxDecoration(
-                                          border: Border(
-                                              bottom: index == state.users.length - 1
-                                                  ? BorderSide(width: 0, color: Colors.transparent)
-                                                  : BorderSide(width: 1, color: Colors.black26)
-                                          )
-                                      ),
-                                      child: Text("${state.users[index].lastname} ${state.users[index].firstname} ",
-                                        style: TextStyle(fontSize: 20),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10,),
-                                  selected.contains(state.users[index])
-                                      ? IconButton(
-                                      onPressed: (){},
-                                      icon: const Icon(Icons.close)
-                                  )
-                                      : SizedBox.shrink()
-                                ],
+                        return Container(
+                          height: 30,
+                          margin: const EdgeInsets.only(right: 10),
+                          decoration: BoxDecoration(
+                              borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+                              color: Colors.grey.shade400
+                          ),
+                          child: Row(
+                            children: [
+                              const SizedBox(width: 5),
+                              Text(
+                                selected[index].lastname
                               ),
-                            ),
+                              const SizedBox(width: 5),
+                              SizedBox(
+                                width: 20,
+                                child: IconButton(
+                                  onPressed: () {
+                                    selected.remove(selected[index]);
+                                    setState(() {});
+                                  },
+                                  padding: EdgeInsets.zero,
+                                  icon: Icon(Icons.close, color: Colors.white, size: 20,)
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                            ],
                           ),
                         );
                       }
-                  ),
-                ),
-                Container(
-                  width: MediaQuery
-                      .of(context)
-                      .size
-                      .width,
-                  height: 60,
-                  color: Colors.blue,
-                  child: GestureDetector(
-                    onTap: () {
-                      addUsersToDialog();
-                      Navigator.of(context).pop();
-                    },
-                    child: const Center(
-                        child: Text(
-                          "Готово",
-                          style: TextStyle(fontSize: 26,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold),
-                        )
+                    ),
+                  ) : Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      height: 30,
+                      margin: const EdgeInsets.symmetric(horizontal: 24),
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+                          color: Colors.grey.shade200
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Выберите участников для вступления',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: Colors.grey.shade600),
+                      )
                     ),
                   ),
-                )
-              ],
-            );
-          } else {
-            return const Center(
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 10.0,
-                  strokeCap: StrokeCap.round,
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: Material(
+                      color: Colors.white,
+                      child: ListView.separated(
+                          itemCount: state.users.length,
+                          separatorBuilder: (context, index) {
+                            return Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 24),
+                              child: Divider(
+                                thickness: 1.0,
+                                color: Colors.grey.shade300,
+                                height: 1,
+                              ),
+                            );
+                          },
+                          itemBuilder: (context, index) {
+                            return Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 24),
+                              child: Ink(
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color:  selected.contains(state.users[index])
+                                      ? Colors.blue.shade50
+                                      : Colors.white,
+                                  borderRadius: const BorderRadius.all(Radius.circular(5.0))
+                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                child: InkWell(
+                                  onTap: (){
+                                    _setSelected(state.users[index]);
+                                  },
+                                  splashColor: Colors.white54,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      const SizedBox(width: 10),
+                                      SizedBox(
+                                        width: 30,
+                                        height: 30,
+                                        child: UserAvatarWidget(userId: state.users[index].id, size: 20)),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Container(
+                                          alignment: Alignment.centerLeft,
+                                          child: Text("${state.users[index].lastname} ${state.users[index].firstname} ",
+                                            style: TextStyle(fontSize: 19, height: 1.0),
+                                            softWrap: true,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10,),
+                                      SizedBox(
+                                        width: 30,
+                                        height: 30,
+                                        // child: selected.contains(state.users[index])
+                                        //     ?
+                                        //     : const SizedBox.shrink(),
+                                        child: Transform.rotate(
+                                          angle: selected.contains(state.users[index]) ? 15 : 0,
+                                          child: IconButton(
+                                            splashColor: Colors.white24,
+                                            alignment: Alignment.centerRight,
+                                            padding: EdgeInsets.zero,
+                                            onPressed: (){
+                                              _setSelected(state.users[index]);
+                                            },
+                                            icon: Icon(
+                                                Icons.add,
+                                                color: selected.contains(state.users[index]) ? Colors.blue.shade300 : Colors.grey.shade400,
+                                                size: 30
+                                            )
+                                          ),
+                                        )
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: 40,
+                    margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                    decoration: BoxDecoration(
+                        color:  selected.isNotEmpty
+                            ? Colors.greenAccent.shade200
+                            : Colors.grey.shade400,
+                        borderRadius: BorderRadius.all(Radius.circular(5.0))
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        addUsersToDialog();
+                      },
+                      child: const Center(
+                          child: Text(
+                            "Добавить",
+                            style: TextStyle(fontSize: 19,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          )
+                      ),
+                    ),
+                  )
+                ],
+              );
+            } else {
+              return const Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 10.0,
+                    strokeCap: StrokeCap.round,
+                  ),
                 ),
-              ),
-            );
+              );
+            }
           }
-        }
+        ),
       )
     );
   }

@@ -124,9 +124,12 @@ class DBProvider {
   ///   CHAT USERS LAYER
   Future<void> saveChatUsers(List<ChatUser> chatUsers) async => await ChatUsersDBLayer().saveChatUsers(chatUsers);
   Future<Map<int, List<ChatUser>>> getChatUsers() async => await ChatUsersDBLayer().getChatUsers();
+  Future<int> deleteChatUser(ChatUser chatUser) async => await ChatUsersDBLayer().deleteChatUser(chatUser);
+  Future<int> addUserToChat(ChatUser chatUser) async => await ChatUsersDBLayer().addUserToChat(chatUser);
+  Future<List<ChatUser>> getChatUsersByDialogId(int dialogId) async => await ChatUsersDBLayer().getChatUsersByDialogId(dialogId);
 
 
-  ///   USER PROFILELAYER
+  ///   USER PROFILE LAYER
   Future<bool> saveUserProfile(UserProfileData profile) async => await UserProfileDBLayer().saveUserProfile(profile);
   Future<UserProfileData> getProfile() async => await UserProfileDBLayer().getProfile();
 

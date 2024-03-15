@@ -108,3 +108,16 @@ class DatabaseBlocDeletedMessagesState extends DatabaseBlocState {
   DatabaseBlocDeletedMessagesState({required this.ids, required this.dialogId});
 }
 
+class DatabaseBlocUserExitChatState extends DatabaseBlocState {
+  final ChatUser chatUser;
+  final event = "exit";
+
+  DatabaseBlocUserExitChatState({required this.chatUser});
+}
+
+class DatabaseBlocUserJoinChatState extends DatabaseBlocState {
+  final ChatUser chatUser;
+  final event = "join";
+
+  DatabaseBlocUserJoinChatState({required this.chatUser});
+}

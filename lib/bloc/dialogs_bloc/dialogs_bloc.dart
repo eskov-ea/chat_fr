@@ -4,6 +4,7 @@ import 'package:chat/bloc/database_bloc/database_state.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_list_container.dart';
 import 'package:chat/bloc/dialogs_bloc/dialogs_state.dart';
+import 'package:chat/bloc/dialogs_bloc/group_dialog_members_streamer.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_events.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
@@ -22,6 +23,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   final DatabaseBloc databaseBloc;
   final _storage = DataProvider.storage;
   late final StreamSubscription<DatabaseBlocState> databaseDialogEventSubscription;
+  final GroupDialogsMemberStateStreamer _groupDialogsMemberStateStreamer = GroupDialogsMemberStateStreamer.instance;
 
   DialogsBloc({
     required DialogsState initialState,
@@ -29,23 +31,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     required this.errorHandlerBloc,
     required this.dialogRepository
   }) : super(initialState) {
-    databaseDialogEventSubscription = databaseBloc.stream.listen((event) {
-      print("Database state change   ${event}");
-      if (event is DatabaseBlocDBInitializedState) {
-        print('initialized:: ${event.dialogs}');
-        add(DialogsLoadedEvent(dialogs: event.dialogs));
-      } else if (event is DatabaseBlocNewDialogReceivedState) {
-        add(ReceiveNewDialogEvent(dialog: event.dialog));
-      } else if (event is DatabaseBlocNewDialogsOnUpdateState) {
-        add(ReceiveDialogsOnUpdateEvent(dialogs: event.dialogs));
-      } else if (event is DatabaseBlocNewMessageReceivedState) {
-        add(DialogStateNewMessageReceived(message: event.message));
-      } else if (event is DatabaseBlocNewMessagesOnUpdateReceivedState) {
-        add(DialogStateNewMessagesOnUpdate(messages: event.messages));
-      } else if (event is DatabaseBlocUpdateMessageStatusesState) {
-        add(DialogStateNewMessageStatusesReceived(statuses: event.statuses));
-      }
-    });
+    databaseDialogEventSubscription = databaseBloc.stream.listen(_onDatabaseEvent);
 
     on<DialogsEvent>((event, emit) async {
       print("DialogsEvent   ${event}  ${state.dialogsContainer}");
@@ -77,6 +63,30 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         await onDialogStateNewMessageStatusesReceived(event, emit);
       }
     });
+  }
+
+  void _onDatabaseEvent(DatabaseBlocState event) {
+    print("Database state change   ${event}");
+    if (event is DatabaseBlocDBInitializedState) {
+      print('initialized:: ${event.dialogs}');
+      add(DialogsLoadedEvent(dialogs: event.dialogs));
+    } else if (event is DatabaseBlocNewDialogReceivedState) {
+      add(ReceiveNewDialogEvent(dialog: event.dialog));
+    } else if (event is DatabaseBlocNewDialogsOnUpdateState) {
+      add(ReceiveDialogsOnUpdateEvent(dialogs: event.dialogs));
+    } else if (event is DatabaseBlocNewMessageReceivedState) {
+      add(DialogStateNewMessageReceived(message: event.message));
+    } else if (event is DatabaseBlocNewMessagesOnUpdateReceivedState) {
+      add(DialogStateNewMessagesOnUpdate(messages: event.messages));
+    } else if (event is DatabaseBlocUpdateMessageStatusesState) {
+      add(DialogStateNewMessageStatusesReceived(statuses: event.statuses));
+    } else if (event is DatabaseBlocUpdateMessageStatusesState) {
+      add(DialogStateNewMessageStatusesReceived(statuses: event.statuses));
+    }  else if (event is DatabaseBlocUserExitChatState) {
+      _groupDialogsMemberStateStreamer.add(ChatUserEvent(chatUser: event.chatUser, event: event.event));
+    }   else if (event is DatabaseBlocUserJoinChatState) {
+      _groupDialogsMemberStateStreamer.add(ChatUserEvent(chatUser: event.chatUser, event: event.event));
+    }
   }
 
   Future<void> onDialogsLoadEvent (

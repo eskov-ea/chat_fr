@@ -1,11 +1,10 @@
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 class SearchWidget extends StatefulWidget {
-  const SearchWidget({required this.cubit ,Key? key}) : super(key: key);
-
-  final UsersViewCubit cubit;
+  const SearchWidget({Key? key}) : super(key: key);
 
   @override
   State<SearchWidget> createState() => _SearchWidgetState();
@@ -16,7 +15,7 @@ class _SearchWidgetState extends State<SearchWidget> {
   final FocusNode _searchFocus = FocusNode();
   @override
   Widget build(BuildContext context) {
-    // final cubit = context.read<UsersViewCubit>();
+    final cubit = context.read<UsersViewCubit>();
     return Padding(
       padding: const EdgeInsets.only(left: 24, right: 24, top: 10),
       child: TextField(
@@ -24,7 +23,7 @@ class _SearchWidgetState extends State<SearchWidget> {
         focusNode: _searchFocus,
         style: const TextStyle(fontSize: 18),
         onChanged: (string){
-          widget.cubit.searchContact(string);
+         cubit.searchContact(string);
         },
         decoration: InputDecoration(
           contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -37,7 +36,7 @@ class _SearchWidgetState extends State<SearchWidget> {
             onPressed: (){
               _controller.clear();
               _searchFocus.unfocus();
-              widget.cubit.resetSearchQuery();
+              cubit.resetSearchQuery();
 
             },
           )
