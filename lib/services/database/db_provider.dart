@@ -95,7 +95,7 @@ class DBProvider {
   Future<int> updateMessageWithSendFailed(int localMessageId) => MessageDBLayer().updateMessageWithSendingFailure(localMessageId);
   Future<int> updateMessageId(int localMessageId, int messageId) async => MessageDBLayer().updateMessageId(localMessageId, messageId);
   Future<MessageData?> getMessageById(int messageId) async => MessageDBLayer().getMessageById(messageId);
-  Future<List<int>?> updateLocalMessageByContent(int messageId, String message) async => MessageDBLayer().updateLocalMessageByContent(messageId, message);
+  Future<List<int>?> updateLocalMessageByContent(int messageId, String message, int? fileId) async => MessageDBLayer().updateLocalMessageByContent(messageId, message, fileId);
   Future<int> checkIfMessageExistWithThisId(int id) async => MessageDBLayer().checkIfMessageExistWithThisId(id);
   Future updateMessagesThatFailedToBeSent() async => MessageDBLayer().updateMessagesThatFailedToBeSent();
   Future<int> updateMessageErrorStatusOnResend(int localMessageId) async => MessageDBLayer().updateMessageErrorStatusOnResend(localMessageId);
@@ -114,6 +114,7 @@ class DBProvider {
   Future saveAttachments(List<MessageAttachmentData> files) async => AttachmentDBLayer().saveAttachment(files);
   Future<List<MessageAttachmentData>> getAttachments() async => AttachmentDBLayer().getAttachments();
   Future<MessageAttachmentData> getAttachmentById(int id) async => AttachmentDBLayer().getAttachmentById(id);
+  Future<int> updateFilePath(int id, String path) async => await AttachmentDBLayer().updateFilePath(id, path);
 
 
   ///   USERS LAYER

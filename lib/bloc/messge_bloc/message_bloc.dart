@@ -149,15 +149,27 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
           userId, event.dialogId, currentDialogPage);
       if (newMessages.isNotEmpty) {
         final statuses = <MessageStatus>[];
+        final files = <MessageAttachmentData>[];
         for (var message in newMessages) {
           statuses.addAll(message.statuses);
+          if (message.file != null) files.add(message.file!);
         }
         await db.saveMessages(newMessages);
+        await db.saveAttachments(files);
         await db.saveMessageStatuses(statuses);
         await db.updateDialogLastPage(event.dialogId, currentDialogPage);
         final messages = (state as MessageBlocInitializationSuccessState)
             .messages;
 
+        /// guerd to keep UI health
+        /// when dialogs loads it loads last message and when we load first portion of messages
+        /// we also load the same first message, db okay with that
+        /// but UI gets two instances of first message
+        if (currentDialogPage == 1) {
+          if (messages.first.messageId == newMessages.first.messageId) {
+            newMessages.removeAt(0);
+          }
+        }
         messages.addAll(newMessages);
 
         emit(MessageBlocInitializationSuccessState(

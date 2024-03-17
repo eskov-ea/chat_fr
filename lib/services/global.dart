@@ -155,9 +155,13 @@ import 'messages/messages_repository.dart';
 
   ///TODO: refactor to use bytes?
   Future<File?> loadFileAndSaveLocally({required String fileName, required attachmentId}) async {
-    final Directory documentDirectory = await getApplicationDocumentsDirectory();
-    final String path = documentDirectory.path;
-    final File file = File('$path/$fileName');
+    final Directory documentDirectory =
+    await getApplicationDocumentsDirectory();
+    final String dirPath = documentDirectory.path;
+    final imageDir = "cache/images";
+
+
+    final File file = File('$dirPath/$imageDir/$fileName');
 
     if (await file.exists()) {
       return file;
@@ -169,6 +173,8 @@ import 'messages/messages_repository.dart';
       }
       final bytes = base64Decode(fileData.content!);
       await file.writeAsBytes(bytes);
+      print('loading file:: path: ${file.path}');
+      print('loading file:: size: ${file.readAsBytesSync().lengthInBytes}');
       return file;
     }
   }

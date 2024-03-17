@@ -35,12 +35,14 @@ class MessagesListStatefullWidget extends StatefulWidget {
     required this.openForwardMenu,
     required this.deleteMessage,
     required this.scrollController,
+    required this.dirPath,
   }) : super(key: key);
 
   final int userId;
   final DialogData dialogData;
   final FocusNode focusNode;
   final String partnerName;
+  final String dirPath;
   final Function(String, int, int, String)  setReplyMessage;
   final List<UserModel> users;
   final bool isSelectedMode;
@@ -181,6 +183,7 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
                     selected: widget.selected,
                     setSelected: widget.setSelected,
                     openForwardMenu: widget.openForwardMenu,
+                    dirPath: widget.dirPath,
                     deleteMessage: widget.deleteMessage
                 )
               ],
@@ -206,6 +209,7 @@ class MessagesListWidget extends StatelessWidget {
   final DialogData dialogData;
   final FocusNode focusNode;
   final String partnerName;
+  final String dirPath;
   final Function(String, int, int, String)  setReplyMessage;
   final Function(List<int>)  deleteMessage;
   final bool isSelectedMode;
@@ -229,6 +233,7 @@ class MessagesListWidget extends StatelessWidget {
     required this.users,
     required this.openForwardMenu,
     required this.deleteMessage,
+    required this.dirPath,
     super.key
   });
 
@@ -253,6 +258,7 @@ class MessagesListWidget extends StatelessWidget {
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
           child: ListView.builder(
+            shrinkWrap: true,
             controller: scrollController,
             itemCount: messages.length,
             reverse: true,
@@ -312,7 +318,8 @@ class MessagesListWidget extends StatelessWidget {
                     repliedMsgSenderName: messages[index].repliedMessage != null ? getSenderName(users, messages[index].repliedMessage!.senderId) : null,
                     repliedMsgId: messages[index].repliedMessage?.parentMessageId,
                     dialogId: dialogData.dialogId,
-                    deleteMessage: deleteMessage
+                    deleteMessage: deleteMessage,
+                    dirPath: dirPath
                   )
                 ],
               );

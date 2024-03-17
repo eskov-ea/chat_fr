@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:chat/models/dialog_model.dart';
-
 import 'models/message_model.dart';
 
 abstract class Helpers {

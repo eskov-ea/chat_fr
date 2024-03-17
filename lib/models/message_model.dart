@@ -281,6 +281,9 @@ class MessageAttachmentData  extends Equatable{
 
   @override
   List<Object?> get props => [attachmentId];
+
+  @override
+  String toString() => "Instance of MessageAttachmentData(id: $attachmentId, message: $chatMessageId, path: $path)";
 }
 
 String getDate (DateTime? rawDate) {

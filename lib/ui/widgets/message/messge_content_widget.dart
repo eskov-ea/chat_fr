@@ -35,6 +35,7 @@ class MessageContentWidget extends StatelessWidget {
   final File? fileAttachment;
   final String? forwardFrom;
   final RepliedMessage? parentMessage;
+  final String dirPath;
   const MessageContentWidget({
     required this.isMe,
     required this.file,
@@ -52,6 +53,7 @@ class MessageContentWidget extends StatelessWidget {
     required this.fileAttachment,
     required this.parentMessage,
     required this.borderRadius,
+    required this.dirPath,
     super.key
   });
 
@@ -59,6 +61,7 @@ class MessageContentWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        print('Messages taped $messageId $file');
         setSelected(SelectedMessage(id: messageId, message: message, author: senderName, file: file));
       },
       child: Align(
@@ -84,6 +87,7 @@ class MessageContentWidget extends StatelessWidget {
               if (file != null && GraphicTypes.contains(file!.filetype))
               ImagePreviewWidget(
                 key: ValueKey<int>(file!.attachmentId),
+                dirPath: dirPath,
                 p2p: p2p,
                 isMe: isMe,
                 senderName: senderName,

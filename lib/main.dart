@@ -48,6 +48,14 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
+Future<void> configureCacheFolder() async {
+  final Directory documentDirectory = await getApplicationDocumentsDirectory();
+  final String dirPath = documentDirectory.path;
+  final imageDir = "$dirPath/cache/media";
+
+  if (!await Directory(imageDir).exists()) await Directory(imageDir).create(recursive: true);
+}
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,6 +65,7 @@ void main() async {
   ErrorHandlingRepository.instance;
   SipRepository.instance;
   GroupDialogsMemberStateStreamer.instance;
+  await configureCacheFolder();
 
   if (!kIsWeb) {
     await Firebase.initializeApp(

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:flutter/foundation.dart';
@@ -19,16 +21,11 @@ class DatabaseBlocSendMessageEvent extends DatabaseBlocEvent {
   final String? messageText;
   final int dialogId;
   final RepliedMessage? parentMessage;
-  final String? filetype;
-  final Uint8List? bytes;
-  final String? filename;
-  final String? content;
+  final File? file;
 
   DatabaseBlocSendMessageEvent({
     required this.dialogId, required this.messageText,
-    required this.filetype, required this.parentMessage,
-    required this.bytes, required this.filename,
-    required this.content
+    required this.parentMessage, required this.file
   });
 }
 
@@ -88,6 +85,13 @@ class DatabaseBlocUserJoinChatEvent extends DatabaseBlocEvent {
   final event = "join";
 
   DatabaseBlocUserJoinChatEvent({required this.chatUser});
+}
+
+class DatabaseBlocUpdateAttachmentPathEvent extends DatabaseBlocEvent {
+  final int id;
+  final String path;
+
+  DatabaseBlocUpdateAttachmentPathEvent({required this.id, required this.path});
 }
 
 

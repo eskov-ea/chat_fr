@@ -59,6 +59,7 @@ class ScreenFactory {
       username: arguments.username,
       userId: arguments.userId!,
       partnerId: arguments.partnerId,
+      dirPath: arguments.dirPath
     );
   }
 
@@ -72,10 +73,7 @@ class ScreenFactory {
   Widget makeGroupChatInfoPage(ChatPageArguments arguments) {
     return GroupChatInfoPage(
       userId: arguments.userId,
-      chatUsers: arguments.dialogData!.users,
       dialogData: arguments.dialogData!,
-      users: arguments.users,
-      dialogsViewCubit: arguments.dialogCubit,
     );
   }
 

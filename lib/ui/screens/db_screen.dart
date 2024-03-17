@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/services/database/db_provider.dart';
@@ -8,6 +9,7 @@ import 'package:chat/services/messages/messages_api_provider.dart';
 import 'package:chat/services/users/users_api_provider.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 class DBScreen extends StatefulWidget {
   const DBScreen({Key? key}) : super(key: key);
@@ -138,9 +140,13 @@ class _DBScreenState extends State<DBScreen> {
                   ),
                   GestureDetector(
                     onTap: () async {
+                      final Directory documentDirectory = await getApplicationDocumentsDirectory();
+                      final String dirPath = documentDirectory.path;
+                      // final path = '/var/mobile/Containers/Data/Application/97129959-3781-4898-9545-CB6B46E55DDE/Documents/cache/images/image_picker_3B5A7186-D3B1-44AC-BE09-47546C92B456-76519-0000284372488131.jpg';
+                      // File? file = File(path) ;
                       final db = DBProvider.db;
-                      final res = await db.getProfile();
-                      log('Profile::  $res');
+                      final res = await db.getMessageById(6986);
+                      print('fileee::  ${res}');
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width * 0.45,
@@ -148,7 +154,7 @@ class _DBScreenState extends State<DBScreen> {
                         padding: const EdgeInsets.all(5),
                         color: Colors.grey.shade500,
                         child: const Center(
-                            child: Text('Read profile',
+                            child: Text('Check file',
                               style: TextStyle(color: Colors.white),
                             )
                         )

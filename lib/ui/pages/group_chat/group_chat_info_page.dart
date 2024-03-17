@@ -24,19 +24,13 @@ import 'add_user_to_group_chat_page.dart';
 class GroupChatInfoPage extends StatefulWidget {
   const GroupChatInfoPage({
     required this.userId,
-    required this.chatUsers,
     required this.dialogData,
-    required this.users,
-    required this.dialogsViewCubit,
     Key? key
   }) : super(key: key);
 
   //TODO: refactor db
   final int? userId;
-  final List<int>? chatUsers;
   final DialogData dialogData;
-  final List<UserModel> users;
-  final DialogsViewCubit dialogsViewCubit;
 
   @override
   State<GroupChatInfoPage> createState() => _GroupChatInfoPageState();

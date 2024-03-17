@@ -47,6 +47,7 @@ class MessageWidget extends StatefulWidget {
     required this.repliedMsgId,
     required this.isError,
     required this.dialogId,
+    required this.dirPath,
     required this.openForwardMenu,
     required this.deleteMessage,
     Key? key
@@ -63,6 +64,7 @@ class MessageWidget extends StatefulWidget {
   final Function(List<int>) deleteMessage;
   final Function(SelectedMessage) setSelected;
   final String message;
+  final String dirPath;
   final int messageId;
   final String? forwardFrom;
   final String messageDate;
@@ -133,7 +135,8 @@ class _MessageWidgetState extends State<MessageWidget>  with SingleTickerProvide
       dialogId: widget.dialogId,
       repliedMsgId: widget.repliedMsgId,
       openForwardMenu: widget.openForwardMenu,
-      deleteMessage: widget.deleteMessage
+      deleteMessage: widget.deleteMessage,
+      dirPath: widget.dirPath
     );
   }
 }
@@ -166,6 +169,7 @@ class _MessageTile extends StatelessWidget {
     required this.dialogId,
     required this.openForwardMenu,
     required this.deleteMessage,
+    required this.dirPath,
   }) : super(key: key);
 
   final int index;
@@ -175,6 +179,7 @@ class _MessageTile extends StatelessWidget {
   final String messageDate;
   final String messageTime;
   final String senderName;
+  final String dirPath;
   final String? repliedMsgSenderName;
   final Function(SelectedMessage) setSelected;
   final Function setSelectedMode;
@@ -353,6 +358,7 @@ class _MessageTile extends StatelessWidget {
                               trailingIcon: const Icon(Icons.control_point)),
                         ],
                         child: MessageContentWidget(
+                            dirPath: dirPath,
                             isMe: isMe,
                             file: file,
                             isError: isError,

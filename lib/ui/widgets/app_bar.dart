@@ -72,7 +72,6 @@ class _WebsocketStatusWidgetState extends State<WebsocketStatusWidget> {
 
   @override
   Widget build(BuildContext context) {
-    print('curstate::::::  $state');
     if (state == PusherChannelsClientLifeCycleState.establishedConnection) {
       return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),

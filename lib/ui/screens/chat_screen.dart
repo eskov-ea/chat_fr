@@ -36,6 +36,7 @@ class ChatScreen extends StatefulWidget {
           required dialogData,
           required username,
           required dialogCubit,
+          required dirPath,
           required users
           }) =>
       MaterialPageRoute(
@@ -45,6 +46,7 @@ class ChatScreen extends StatefulWidget {
             partnerId: partnerId,
             username: username,
             dialogCubit: dialogCubit,
+            dirPath: dirPath,
             users: users
         ),
       );
@@ -57,6 +59,7 @@ class ChatScreen extends StatefulWidget {
     required this.username,
     required this.userId,
     required this.partnerId,
+    required this.dirPath,
   }) : super(key: key);
 
   DialogsViewCubit dialogCubit;
@@ -64,6 +67,7 @@ class ChatScreen extends StatefulWidget {
   final int userId;
   final int partnerId;
   final String username;
+  final String dirPath;
   DialogData? dialogData;
 
 
@@ -324,7 +328,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                                 setSelected: setSelected,
                                 openForwardMenu: openForwardMenu,
                                 deleteMessage: deleteMessage,
-                                scrollController: scrollController
+                                scrollController: scrollController,
+                                dirPath: widget.dirPath
                             )
                                 : const Center(child: Text('Нет сообщений'),)
                         ),
@@ -346,7 +351,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                       focusNode: focusNode, setRecording: setRecording, isRecording: isRecording, dialogData: widget.dialogData,
                       dialogCubit: widget.dialogCubit, cancelReplyMessage: cancelReplyMessage, parentMessage: replyedParentMsg, isSelectedMode: isSelectedMode,
                       selected: selected, deleteMessages: deleteMessages, animation: _selectedMessagesOptionsMenuAnimation, animationController: _selectedMessagesOptionsMenuAnimationController,
-                      openForwardMessageMenu: openForwardMenu)
+                      openForwardMessageMenu: openForwardMenu, dirPath: widget.dirPath,)
                   : ReadOnlyChannelMode(context),
                 ],
               ),
@@ -468,11 +473,19 @@ class ChatPageArguments {
   final int partnerId;
   final DialogData? dialogData;
   final String username;
+  final String dirPath;
   DialogsViewCubit dialogCubit;
   List<UserModel> users;
 
-  ChatPageArguments({required this.userId, required this.partnerId,
+  ChatPageArguments({required this.userId, required this.partnerId, required this.dirPath,
     required this.dialogData, required this.username, required this.dialogCubit, required this.users});
+}
+
+class GroupChatPageArguments {
+  final int? userId;
+  final DialogData? dialogData;
+
+  GroupChatPageArguments({required this.userId, required this.dialogData});
 }
 
 

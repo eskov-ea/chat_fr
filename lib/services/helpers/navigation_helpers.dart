@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:chat/models/contact_model.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/services/popup_manager.dart';
 import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../ui/navigation/main_navigation.dart';
 import '../../ui/pages/user_profile_info_page.dart';
 import '../../ui/screens/chat_screen.dart';
@@ -11,13 +14,15 @@ import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 
 import '../../view_models/user/users_view_cubit.dart';
 
-void openChatScreen({
+Future<void> openChatScreen({
   required BuildContext context,
   required userId,
   required partnerId,
   required dialogData,
   required username
-}) {
+}) async {
+  final Directory documentDirectory = await getApplicationDocumentsDirectory();
+  final String dirPath = documentDirectory.path;
   Navigator.of(context).pushNamed(
     MainNavigationRouteNames.chatPage,
     arguments: ChatPageArguments(
@@ -26,6 +31,7 @@ void openChatScreen({
       partnerId: partnerId,
       dialogData: dialogData,
       username: username,
+      dirPath: dirPath,
       users: (BlocProvider.of<UsersViewCubit>(context).state as UsersViewCubitLoadedState).users
     ),
   );
@@ -57,13 +63,9 @@ void openGroupChatInfoPage({
 }) {
   Navigator.of(context).pushNamed(
       MainNavigationRouteNames.groupChatInfoPage,
-      arguments: ChatPageArguments(
-        users: users,
-        username: username,
+      arguments: GroupChatPageArguments(
         dialogData: dialogData,
-        partnerId: partnerId,
         userId: userId,
-        dialogCubit: dialogCubit,
       )
   );
 }

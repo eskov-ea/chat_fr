@@ -127,7 +127,8 @@ Widget SendingObjectOptionsPage({
     } on PlatformException {
       Navigator.pop(context);
       PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.warning, message: "Произошла ошибка чтения данных с устройства. Это может быть связано с проблемой доступа приложения к данным устройства. Проверьте права приложения в настройках или повторите попытку");
-    } catch (err) {
+    } catch (err, stack) {
+      print('send image err:  $err\r\n$stack');
       Navigator.pop(context);
       ClientErrorHandler.informErrorHappened(context,
           "Произошла ошибка при отправке сообщения. Попробуйте еще раз.");

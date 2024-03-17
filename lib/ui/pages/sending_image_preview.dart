@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:chat/bloc/database_bloc/database_bloc.dart';
+import 'package:chat/bloc/database_bloc/database_events.dart';
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:flutter/foundation.dart';
@@ -108,17 +110,19 @@ class SendingImagePreview extends StatelessWidget {
                       )
                     ],
                 ));
-                final messageText = controller.text;
                 controller.clear();
                 if(dialogId == null) await createDialogFn();
-                sendMessageUnix(
-                    bloc: BlocProvider.of<MessageBloc>(context),
-                    messageText: messageText,
-                    file: file,
-                    dialogId: dialogId!,
-                    userId: userId,
-                    parentMessage: parentMessage
-                );
+                print('local file path:  ${file.path}');
+                BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocSendMessageEvent(dialogId: dialogId!, messageText: controller.text,
+                    file: file, parentMessage: parentMessage));
+                // sendMessageUnix(
+                //     bloc: BlocProvider.of<MessageBloc>(context),
+                //     messageText: messageText,
+                //     file: file,
+                //     dialogId: dialogId!,
+                //     userId: userId,
+                //     parentMessage: parentMessage
+                // );
                 Navigator.popUntil(context, (route) => route.settings.name == MainNavigationRouteNames.chatPage);
               },
               style: ElevatedButton.styleFrom(

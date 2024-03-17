@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:chat/bloc/database_bloc/database_events.dart';
 import 'package:chat/bloc/database_bloc/database_state.dart';
@@ -22,7 +23,9 @@ import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/services/user_profile/user_profile_api_provider.dart';
 import 'package:chat/services/users/users_api_provider.dart';
 import 'package:chat/storage/data_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 
@@ -63,6 +66,8 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         await onDatabaseBlocUserExitChatEvent(event, emit);
       } else if (event is DatabaseBlocUserJoinChatEvent) {
         await onDatabaseBlocUserJoinChatEvent(event, emit);
+      } else if (event is DatabaseBlocUpdateAttachmentPathEvent) {
+        await onDatabaseBlocUpdateAttachmentPathEvent(event, emit);
       }
     }, transformer: sequential());
   }
@@ -282,11 +287,38 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
 
     final userId = await DataProvider.storage.getUserId();
     if (userId == null) throw AppErrorException(AppErrorExceptionType.other);
+
+    Uint8List? bytes;
+    String? filename;
+    String? filetype;
+    String? fileContent;
+    String? path;
+
     int messageId = UUID();
     while(await db.checkIfMessageExistWithThisId(messageId) == 0) {
       messageId = UUID();
     }
-    final attachmentId = event.content == null ? null : UUID();
+    if (event.file != null) {
+      try {
+        final Directory documentDirectory = await getApplicationDocumentsDirectory();
+        final String dirPath = documentDirectory.path;
+        final mediaDir = "cache/media";
+
+        filename = DateTime.now().microsecondsSinceEpoch.toString();
+        bytes = event.file!.readAsBytesSync();
+        filetype = event.file!.path.split('.').last;
+        fileContent = base64Encode(bytes);
+        path = '$mediaDir/$filename.$filetype';
+
+        final File file = File('$dirPath/$path');
+        await file.writeAsBytes(bytes);
+        print('local file path: $path');
+        await event.file!.delete();
+      } catch (err, stack) {
+        print('local file path err: $err\r\n $stack');
+      }
+    }
+    final attachmentId = fileContent == null ? null : UUID();
 
     final message = createLocalMessage(
         messageId: messageId,
@@ -294,21 +326,23 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         userId: userId,
         dialogId: event.dialogId,
         messageText: event.messageText,
-        filename: event.filename,
-        filetype: event.filetype,
-        content: event.content,
+        filename: filename,
+        filetype: filetype,
+        content: fileContent,
+        path: path,
         parentMessage: event.parentMessage
     );
     emit(DatabaseBlocNewMessageReceivedState(message: message));
 
     await db.saveLocalMessage(message);
     await db.saveLocalMessageStatus(message.statuses.isEmpty ? null : message.statuses.first);
+    if (message.file != null) await db.saveAttachments([message.file!]);
     log('DBBloc send:: message: $message\r\n${message.statuses}');
 
     try {
       final sentMessageBody = await MessagesRepository().sendMessage(dialogId: event.dialogId,
           messageText: event.messageText, parentMessageId: event.parentMessage?.parentMessageId,
-          filetype: event.filetype, bytes: event.bytes, filename: event.filename, content: event.content);
+          filetype: filetype, bytes: bytes, filename: filename, content: fileContent);
       final sentMessage = MessageData.fromJson(jsonDecode(sentMessageBody)["data"]);
 
       await db.saveMessageStatuses(sentMessage.statuses);
@@ -343,7 +377,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     final userId = await _storage.getUserId();
     if (userId != null && userId == event.message.senderId) {
       final updated = await db.updateLocalMessageByContent(
-          event.message.messageId, event.message.message);
+          event.message.messageId, event.message.message, event.message.file?.attachmentId);
       print('UPDATMESSAGE:: $updated');
       if (updated != null) {
         await db.saveMessageStatuses(event.message.statuses);
@@ -445,5 +479,11 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     catch (err) {
       print('Failed to save joined user:  $err');
     }
+  }
+
+  Future<void> onDatabaseBlocUpdateAttachmentPathEvent(DatabaseBlocUpdateAttachmentPathEvent event, emit) async {
+    final path = event.path.substring(event.path.indexOf('cache'), event.path.length);
+    print('updated path:  ${event.id}  $path  --  ${event.path}');
+    db.updateFilePath(event.id, path);
   }
 }

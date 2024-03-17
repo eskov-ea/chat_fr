@@ -54,6 +54,7 @@ class ActionBar extends StatefulWidget {
   final Function(List<SelectedMessage>) openForwardMessageMenu;
   final AnimationController animationController;
   final Animation animation;
+  final String dirPath;
 
   ActionBar({
     required this.userId,
@@ -75,6 +76,7 @@ class ActionBar extends StatefulWidget {
     required this.openForwardMessageMenu,
     required this.animationController,
     required this.animation,
+    required this.dirPath,
     Key? key,})
       : super(key: key);
 
@@ -311,15 +313,7 @@ class ActionBarState extends State<ActionBar> {
                       final recordedAudioPath = await _stop(_mRecorder);
                       widget.setRecording(false);
                       final File record = File(recordedAudioPath!);
-                      final Directory documentDirectory = await getApplicationDocumentsDirectory();
-                      final String path = documentDirectory.path;
-                      final String filetype = _mPath.split('.').last;
-                      final int r = Random().nextInt(100000);
-                      final String uniq = DateTime.now().microsecondsSinceEpoch.toString();
-                      final String filename = "voice_m_$r$uniq.$filetype";
-                      final File file = File("$path/$filename");
-                      file.writeAsBytesSync(await record.readAsBytes());
-                      _sendAudioMessage(file, widget.userId, widget.dialogId);
+                      _sendAudioMessage(record, widget.parentMessage);
                     } catch (err, stackTrace) {
                       ClientErrorHandler.informErrorHappened(context, "Произошла ошибка при отправке голосового файла. Попробуйте еще раз. ");
                       _logger.sendErrorTrace(stackTrace: stackTrace);
@@ -337,13 +331,13 @@ class ActionBarState extends State<ActionBar> {
                         }
                         if (_messageController.text.trim() == "" || !sendButton) return;
                         if (widget.dialogId != null) {
-                        _sendMessage(context, widget.parentMessage);
+                        _sendMessage(widget.parentMessage);
                         widget.cancelReplyMessage();
                       } else {
                         try {
                           await createDialogAndSendMessage(
                               context, widget.rootWidget);
-                          _sendMessage(context, widget.parentMessage);
+                          _sendMessage(widget.parentMessage);
                         } catch (err, stackTrace) {
                           ClientErrorHandler.informErrorHappened(context, "Произошла ошибка при создании диалога и отправке сообщения. Попробуйте еще раз. ");
                           _logger.sendErrorTrace(stackTrace: stackTrace);
@@ -482,29 +476,23 @@ class ActionBarState extends State<ActionBar> {
     );
   }
 
-  _sendMessage(context, RepliedMessage? parentMessage) async {
+  _sendMessage(RepliedMessage? parentMessage) async {
     BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocSendMessageEvent(dialogId: widget.dialogId!, messageText: _messageController.text,
-        filetype: null, parentMessage: parentMessage, bytes: null, filename: null, content: null));
-    // sendMessageUnix(
-    //     bloc: BlocProvider.of<ChatsBuilderBloc>(context),
-    //     messageText: _messageController.text,
-    //     dialogId: widget.dialogId!,
-    //     userId: widget.userId,
-    //     parentMessage: parentMessage,
-    //     file: null
-    // );
+        parentMessage: parentMessage, file: null));
     _messageController.clear();
   }
 
-  _sendAudioMessage(File file, userId, dialogId) {
-    sendMessageUnix(
-        bloc: BlocProvider.of<MessageBloc>(context),
-        messageText: _messageController.text,
-        file: file,
-        dialogId: widget.dialogId!,
-        userId: widget.userId,
-        parentMessage: widget.parentMessage
-    );
+  _sendAudioMessage(File file, RepliedMessage? parentMessage) {
+    BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocSendMessageEvent(dialogId: widget.dialogId!, messageText: _messageController.text,
+        parentMessage: parentMessage, file: file));
+    // sendMessageUnix(
+    //     bloc: BlocProvider.of<MessageBloc>(context),
+    //     messageText: _messageController.text,
+    //     file: file,
+    //     dialogId: widget.dialogId!,
+    //     userId: widget.userId,
+    //     parentMessage: widget.parentMessage
+    // );
   }
 
 

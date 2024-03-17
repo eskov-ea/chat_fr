@@ -14,8 +14,9 @@ class MessageDBLayer {
       for (var message in messages) {
         lastObject = message.toString();
         batch.execute(
-            'INSERT OR IGNORE INTO message(id, chat_id, user_id, message, created_at, '
-            'updated_at, replied_message_id, replied_message_author, replied_message_text) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?) ',
+            'INSERT INTO message(id, chat_id, user_id, message, created_at, '
+            'updated_at, replied_message_id, replied_message_author, replied_message_text) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?) '
+            'ON CONFLICT(id) DO NOTHING; ',
             [message.messageId, message.dialogId, message.senderId, message.message, message.rawDate.toString(),
             message.rawDate.toString(), message.repliedMessage?.parentMessageId, message.repliedMessage?.senderId, message.repliedMessage?.parentMessageText]
         );
@@ -120,7 +121,7 @@ class MessageDBLayer {
                 'WHERE m.id = "$messageId" '
                 'ORDER BY m.id DESC; '
         );
-        print('jkhjk:::::  $res');
+        log('jkhjk:::::  $res');
         MessageData? message;
         for (var messageObj  in res) {
           messageObj as Map;
@@ -161,6 +162,13 @@ class MessageDBLayer {
     try {
       final db = await DBProvider.db.database;
       return await db.transaction((txn) async {
+        if (message.file != null) {
+          await txn.rawInsert(
+            'INSERT INTO attachments(id, chat_message_id, name, ext, preview, path) VALUES(?, ?, ?, ?, ?, ?) ',
+            [message.file!.attachmentId, message.file!.chatMessageId, message.file!.name,
+              message.file!.filetype, message.file!.preview, message.file!.path]
+          );
+        }
         return await txn.rawInsert(
             'INSERT INTO message(id, local_id, chat_id, user_id, message, created_at, '
                 'updated_at, replied_message_id, replied_message_author, replied_message_text) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ',
@@ -251,7 +259,7 @@ class MessageDBLayer {
     }
   }
 
-  Future<List<int>?> updateLocalMessageByContent(int messageId, String message) async {
+  Future<List<int>?> updateLocalMessageByContent(int messageId, String message, int? fileId) async {
     try {
       final db = await DBProvider.db.database;
       return await db.transaction((txn) async {
@@ -265,6 +273,11 @@ class MessageDBLayer {
           await txn.rawUpdate(
             'UPDATE message SET id = "$messageId", local_id = NULL WHERE id = "$localId"; '
           );
+          if (fileId != null) {
+            await txn.rawUpdate(
+                'UPDATE attachments SET id="$fileId", chat_message_id = "$messageId" WHERE id = "$localId"; '
+            );
+          }
           return [localId as int, messageId];
         }
         return null;

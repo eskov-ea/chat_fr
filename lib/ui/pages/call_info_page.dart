@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'dart:io';
 import 'package:chat/services/global.dart';
 import 'package:chat/services/sip_connection_service/sip_repository.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
@@ -12,6 +12,7 @@ import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 
 class CallInfoPage extends StatefulWidget {
   
@@ -143,12 +144,15 @@ class _CallInfoPageState extends State<CallInfoPage> {
                   ),
                   const SizedBox(width: 20,),
                   GestureDetector(
-                    onTap: (){
+                    onTap: () async {
+                      final Directory documentDirectory = await getApplicationDocumentsDirectory();
+                      final String dirPath = documentDirectory.path;
                       final dialogData= findDialog(context, widget.callData.userId, int.parse(widget.callData.callerNumber));
                       final ChatPageArguments chatArgs = ChatPageArguments(
                         userId: widget.callData.userId,
                         partnerId: int.parse(widget.callData.callerNumber),
                         dialogData: dialogData,
+                        dirPath: dirPath,
                         username: widget.callData.callerName,
                         dialogCubit: BlocProvider.of<DialogsViewCubit>(context),
                         users: (BlocProvider.of<UsersViewCubit>(context).state as UsersViewCubitLoadedState).users,

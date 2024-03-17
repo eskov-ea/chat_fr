@@ -69,6 +69,7 @@ class WebsocketRepository extends IWebsocketRepository{
       );
 
       _socket!.lifecycleStream.listen((event) {
+        if (currentState == event) return;
         currentState = event;
         sinkState(event);
       });

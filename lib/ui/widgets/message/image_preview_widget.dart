@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:chat/bloc/database_bloc/database_bloc.dart';
+import 'package:chat/bloc/database_bloc/database_events.dart';
 import 'package:chat/models/message_model.dart';
+import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/services/popup_manager.dart';
@@ -10,6 +13,7 @@ import 'package:chat/ui/navigation/main_navigation.dart';
 import 'package:chat/ui/screens/image_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 
 
@@ -23,6 +27,7 @@ class ImagePreviewWidget extends StatefulWidget {
       required this.localFileAttachment,
       required this.messageTime,
       required this.status,
+      required this.dirPath,
       Key? key})
       : super(key: key);
 
@@ -30,6 +35,7 @@ class ImagePreviewWidget extends StatefulWidget {
   final bool isMe;
   final String? senderName;
   final String messageTime;
+  final String dirPath;
   final double borderRadius;
   final MessageAttachmentData? file;
   final File? localFileAttachment;
@@ -46,9 +52,9 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
 
   @override
   void initState() {
-    checkIfAttachmentLoaded();
-
     super.initState();
+
+    checkIfAttachmentLoaded();
   }
 
   _startDownloadingImage() async {
@@ -59,15 +65,24 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
     }
   }
 
+  _errorCallback() {
+    setState(() {
+      imageFile = null;
+    });
+  }
+
   getImageData() async {
     setState(() {
       isDownloading = true;
     });
+
     try {
       final rawFile = await loadFileAndSaveLocally(
           attachmentId: widget.file?.attachmentId,
           fileName: widget.file!.name);
       if (rawFile != null) {
+
+        BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocUpdateAttachmentPathEvent(id: widget.file!.attachmentId, path: rawFile.path));
         setState(() {
           imageFile = rawFile;
           isDownloading = false;
@@ -83,12 +98,22 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
       });
       customToastMessage(context: context, message: "Произошла ошибка при загрузке данных");
     }
+
   }
 
   checkIfAttachmentLoaded() async {
     if (kIsWeb) return null;
-    if (widget.file != null) {
-      imageFile = await isLocalFileExist(fileName: widget.file!.name);
+    print('File path: id: ${widget.file?.attachmentId}  ${widget.file?.path}');
+    final dbFile = await DBProvider.db.getAttachmentById(widget.file!.attachmentId);
+    if (dbFile.path != null) {
+      if (widget.file!.attachmentId == 503) {
+        print('File size:::  ${widget.file!.path} ${File("${widget.dirPath}/${widget.file!.path!}").readAsBytesSync().lengthInBytes}');
+      }
+      print('File path: id: ${widget.file?.attachmentId}  ${widget.file?.path}');
+      // imageFile = await isLocalFileExist(fileName: widget.file!.name);
+      setState(() {
+        imageFile = File("${widget.dirPath}/${dbFile.path}");
+      });
     }
   }
 
@@ -169,6 +194,7 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
               saveImageFunction: _safeImageToDevice,
               messageTime: widget.messageTime,
               status: widget.status,
+              errorCallback: _errorCallback,
               isMe: widget.isMe),
         ),
       ),
@@ -186,9 +212,11 @@ Widget? getImagePreview({
     required Function saveImageFunction,
     required String messageTime,
     required Widget status,
+    required Function() errorCallback,
     required bool isMe
   }) {
   if (localFileAttachment != null || fileBytesRepresentation != null) {
+    print('render image::: case 1');
     return GestureDetector(
         onTap: () {
           if (localFileAttachment == null && !kIsWeb || fileBytesRepresentation == null && kIsWeb) {
@@ -213,12 +241,41 @@ Widget? getImagePreview({
                     height: 202,
                     fit: BoxFit.cover,
                   )
-                : Image.file(
-                      localFileAttachment!,
-                      width: 186,
-                      height: 232,
-                      fit: BoxFit.cover
-                  ),
+                : Image(
+                    image: FileImage(localFileAttachment!),
+                    width: 186,
+                    height: 232,
+                    fit: BoxFit.cover,
+                    frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                        if (frame == null) {
+                          return Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.greenAccent.shade400,
+                              ));
+                        } else {
+                          return child;
+                        }
+                    },
+                    errorBuilder: (context, err, stacktrace) {
+                       print('error build::: $err\r\n $stacktrace');
+                       return GestureDetector(
+                         onTap: errorCallback,
+                         child: Column(
+                           mainAxisAlignment: MainAxisAlignment.center,
+                           crossAxisAlignment: CrossAxisAlignment.center,
+                           children: [
+                             Icon(Icons.error, color: Colors.orangeAccent, size: 30),
+                             SizedBox(height: 10, width: MediaQuery.of(context).size.width),
+                             Text('Упс.. Загрузить повторно',
+                                style: TextStyle(color: Colors.grey.shade600, fontSize: 12, height: 1),
+                                overflow: TextOverflow.ellipsis,
+                             )
+                           ],
+                         ),
+                       );
+                    },
+                    gaplessPlayback: true
+            ),
             Positioned(
               right: 0,
               bottom: 0,
@@ -254,6 +311,7 @@ Widget? getImagePreview({
     );
   }
   if (file != null) {
+    print('render image::: case 2 $localFileAttachment');
     try {
       return Stack(
         alignment: Alignment.center,
@@ -324,6 +382,7 @@ Widget? getImagePreview({
         ],
       );
     } catch (err) {
+      print('render image::: case 3');
       return Stack(
         alignment: Alignment.center,
         children: [

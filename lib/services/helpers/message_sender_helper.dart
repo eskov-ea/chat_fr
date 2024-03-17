@@ -27,6 +27,7 @@ sendMessageUnix({
   String? filetype;
   String? base64FileString;
   MessageData? localMessage;
+  String? path;
   try {
     if (file != null) {
     bytes = file.readAsBytesSync();
@@ -35,7 +36,7 @@ sendMessageUnix({
     base64FileString = base64Encode(bytes);
   }
 // 1. Create local message
-    localMessage = createLocalMessage(dialogId: dialogId, userId: userId,
+    localMessage = createLocalMessage(dialogId: dialogId, userId: userId, path: path,
       messageText: messageText, parentMessage: parentMessage, filename: filename, filetype: filetype, content: base64FileString, messageId: 12345, attachmentId: null);
 // 2. Add local message to tray
     //TODO: refacrot messageBloc
@@ -82,6 +83,7 @@ sendForwardMessage({
   String? filetype;
   String? base64FileString;
   MessageData? localMessage;
+  String? path;
   if (attachment != null) {
     filename = attachment.name.split('.').first;
     filetype = attachment.name.split('.').last;
@@ -93,7 +95,7 @@ sendForwardMessage({
   }
   try {
 // 1. Create local message
-    localMessage = createLocalMessage(dialogId: dialogId, userId: userId,
+    localMessage = createLocalMessage(dialogId: dialogId, userId: userId, path: path,
         messageText: messageText, parentMessage: null, filename: filename, filetype: attachment?.filetype, content: base64FileString, messageId: 12345, attachmentId: null);
 // 2. Add local message to tray
     //TODO: refacrot messageBloc
@@ -138,6 +140,7 @@ MessageData createLocalMessage({
   required String? messageText,
   required String? filename,
   required String? filetype,
+  required String? path,
   required String? content
 }) {
   MessageAttachmentData? file;
@@ -149,7 +152,7 @@ MessageData createLocalMessage({
         filetype: filetype,
         preview: "",
         createdAt: DateTime.now().toString(),
-        path: null,
+        path: path,
         content: content
     );
   }
