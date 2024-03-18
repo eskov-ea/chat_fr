@@ -335,15 +335,14 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     emit(DatabaseBlocNewMessageReceivedState(message: message));
 
     await db.saveLocalMessage(message);
-    await db.saveLocalMessageStatus(message.statuses.isEmpty ? null : message.statuses.first);
     if (message.file != null) await db.saveAttachments([message.file!]);
-    log('DBBloc send:: message: $message\r\n${message.statuses}');
 
     try {
       final sentMessageBody = await MessagesRepository().sendMessage(dialogId: event.dialogId,
-          messageText: event.messageText, parentMessageId: event.parentMessage?.parentMessageId,
+          messageText: event.messageText, uuid: message.localId, parentMessageId: event.parentMessage?.parentMessageId,
           filetype: filetype, bytes: bytes, filename: filename, content: fileContent);
       final sentMessage = MessageData.fromJson(jsonDecode(sentMessageBody)["data"]);
+      log('DBBloc send:: message: $sentMessage\r\n${sentMessage.statuses}');
 
       await db.saveMessageStatuses(sentMessage.statuses);
       // final updateRes = await db.updateMessageId(messageId, sentMessage.messageId);
@@ -376,8 +375,8 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
 
     final userId = await _storage.getUserId();
     if (userId != null && userId == event.message.senderId) {
-      final updated = await db.updateLocalMessageByContent(
-          event.message.messageId, event.message.message, event.message.file?.attachmentId);
+      final updated = await db.updateLocalMessage(
+          event.message);
       print('UPDATMESSAGE:: $updated');
       if (updated != null) {
         await db.saveMessageStatuses(event.message.statuses);
@@ -425,14 +424,14 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     DatabaseBlocResendMessageEvent event,
     emit
   ) async {
-    final message = await db.getMessageById(event.localMessageId);
+    final message = await db.getMessageByLocalId(event.localMessageId);
     if (message != null) {
       await db.updateMessageErrorStatusOnResend(event.localMessageId);
       emit(DatabaseBlocUpdateErrorStatusOnResendState(localMessageId: event.localMessageId, dialogId: event.dialogId));
       try {
         final bytes = message.file?.content == null ? null : base64Decode(message.file!.content!);
         final sentMessageBody = await MessagesRepository().sendMessage(dialogId: event.dialogId,
-            messageText: message.message, parentMessageId:  message.repliedMessage?.parentMessageId,
+            messageText: message.message, uuid: event.localMessageId, parentMessageId:  message.repliedMessage?.parentMessageId,
             filetype: message.file?.filetype, bytes: bytes, filename:  message.file?.name, content:  message.file?.content);
         final sentMessage = MessageData.fromJson(jsonDecode(sentMessageBody)["data"]);
 

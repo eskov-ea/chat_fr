@@ -15,6 +15,7 @@ import 'package:chat/models/message_model.dart' as parseTime;
 sendMessageUnix({
   required MessageBloc bloc,
   required String? messageText,
+  required String? uuid,
   required File? file,
   required int dialogId,
   required int userId,
@@ -46,6 +47,7 @@ sendMessageUnix({
       final response = await MessagesRepository().sendMessage(
         dialogId: dialogId,
         messageText: messageText,
+        uuid: uuid,
         parentMessageId: parentMessage?.parentMessageId,
         filetype: filetype,
         bytes: bytes,
@@ -168,16 +170,8 @@ MessageData createLocalMessage({
     rawDate: DateTime.now(),
     file: file,
     isError: 0,
-    statuses: [
-      // MessageStatus(
-      //     id: 0,
-      //     userId: userId,
-      //     statusId: 0,
-      //     messageId: 0,
-      //     dialogId: dialogId!,
-      //     updatedAt: DateTime.now().toString(),
-      //     createdAt: DateTime.now().toString())
-    ],
+    localId: generateUUID(),
+    statuses: [],
     forwarderFromUser: getForwardedMessageStatus(messageText ?? ''),
   );
 }
@@ -209,6 +203,7 @@ void resendErrorMessage({
   required int dialogId,
   required int userId,
   required MessageBloc bloc,
+  required String? uuid,
   required MessageAttachmentData? file,
   required String messageText,
   required RepliedMessage? parentMessage,
@@ -220,6 +215,7 @@ void resendErrorMessage({
     await Future.delayed(Duration(seconds: 2));
     final sentMessage = await MessagesRepository().sendMessage(
         dialogId: dialogId,
+        uuid: uuid,
         messageText: messageText,
         parentMessageId: repliedMessageId,
         filetype: file?.filetype,

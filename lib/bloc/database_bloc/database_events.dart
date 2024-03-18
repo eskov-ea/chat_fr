@@ -60,7 +60,7 @@ class DatabaseBlocNewMessageStatusEvent extends DatabaseBlocEvent {
 class DatabaseBlocGetUpdatesOnResume extends DatabaseBlocEvent {}
 
 class DatabaseBlocResendMessageEvent extends DatabaseBlocEvent {
-  final int localMessageId;
+  final String localMessageId;
   final int dialogId;
 
   DatabaseBlocResendMessageEvent({required this.localMessageId, required this.dialogId});

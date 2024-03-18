@@ -68,7 +68,7 @@ class MessageBlocNewMessageStatusesReceivedEvent extends MessageBlocEvent {
 }
 
 class MessageBlocUpdateLocalMessageEvent extends MessageBlocEvent {
-  final int localId;
+  final String localId;
   final int messageId;
   final int dialogId;
   final List<MessageStatus> statuses;
@@ -85,7 +85,7 @@ class MessageBlocFailedToSendMessageEvent extends MessageBlocEvent {
 }
 
 class MessageBlocUpdateErrorStatusOnResendEvent extends MessageBlocEvent {
-  final int localMessageId;
+  final String localMessageId;
   final int dialogId;
 
   MessageBlocUpdateErrorStatusOnResendEvent({required this.localMessageId, required this.dialogId});

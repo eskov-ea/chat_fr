@@ -1,7 +1,12 @@
+import 'package:chat/models/contact_model.dart';
+import 'package:chat/services/global.dart';
 import 'package:chat/ui/widgets/call_audio_device_widget.dart';
+import 'package:chat/view_models/user/users_view_cubit.dart';
+import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 class CallControlsWidget extends StatelessWidget {
@@ -52,38 +57,44 @@ class CallControlsWidget extends StatelessWidget {
                    const MuteButton(),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: GestureDetector(
-                        onTap: toggleAudioOptionsPanel,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: () async {
+                              customToastMessage(context: context, message: 'Функционал находится в разработке');
+                              // if (!isCallRunning) return;
+                              // await _openAddPersonOnCallDialog(context);
+                            },
+                            child: Container(
                               // margin: EdgeInsets.symmetric(horizontal: 20),
                               width: 80,
                               height: 80,
-                              decoration: const BoxDecoration(
-                                  color: Color(0xFF626262),
-                                  borderRadius:
-                                  BorderRadius.all(Radius.circular(50))),
+                              decoration: BoxDecoration(
+                                color: const Color(0x809d9d9d),
+                                  // color: isCallRunning
+                                  //     ? const Color(0x80ffffff)
+                                  //     : const Color(0x809d9d9d),
+                                  borderRadius: const BorderRadius.all(Radius.circular(50))),
                               child: Padding(
                                 padding: const EdgeInsets.all(25),
                                 child: Image.asset(
-                                  'assets/call_controls/message_icon.png',
+                                  'assets/call_controls/add.png',
                                   fit: BoxFit.fill,
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 5,),
-                            const SizedBox(
-                              width: 80,
-                              child: Text("Сообщение",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white, fontSize: 14)
-                              ),
+                          ),
+                          const SizedBox(height: 5,),
+                          const SizedBox(
+                            width: 80,
+                            child: Text("Добавить",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white, fontSize: 14)
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                     AudioOutputDeviceWidget(
@@ -173,6 +184,95 @@ class CallControlsWidget extends StatelessWidget {
       )
     );
   }
+}
+
+
+Future<void> _openAddPersonOnCallDialog(BuildContext context) {
+  final users = (BlocProvider.of<UsersViewCubit>(context).state as UsersViewCubitLoadedState).users;
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: true,
+    builder: (BuildContext context) {
+      return AlertDialog(
+          insetPadding: EdgeInsets.symmetric(horizontal: 30),
+          title: const Text('Добавить к звонку'),
+        content: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          color: Colors.white,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: ListView.separated(
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () async {
+                        await _confirmAddingUserToCall(context, users[index]);
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 5),
+                        child: Text('${users[index].lastname} ${users[index].firstname}'),
+                      ),
+                    );
+                  },
+                  separatorBuilder: (context, index) {
+                    return Divider(
+                      height: 1,
+                      color: Colors.grey.shade300,
+                    );
+                  },
+                  itemCount: users.length
+                ),
+              ),
+              const SizedBox(height: 20)
+            ],
+          ),
+        )
+      );
+    },
+  );
+}
+
+Future<void> _confirmAddingUserToCall(BuildContext context, UserModel user) async {
+  return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          insetPadding: EdgeInsets.symmetric(horizontal: 60, vertical: MediaQuery.of(context).size.height * 0.35),
+          alignment: Alignment.center,
+          content: Container(
+            width: MediaQuery.of(context).size.width * 0.7,
+            height: 200,
+            color: Colors.white,
+            child: Center(child: Text('Добавить ${user.lastname} ${user.firstname} к звонку?')),
+          ),
+          actions: [
+            OutlinedButton(
+                onPressed: () {
+                  Navigator.of(context).maybePop();
+                },
+                style: ButtonStyle(
+                  foregroundColor: MaterialStatePropertyAll<Color>(Colors.black),
+                  backgroundColor: MaterialStatePropertyAll<Color>(Colors.grey.shade400),
+                ),
+                child: Text('Назад')
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  startConference(user.id.toString());
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStatePropertyAll<Color>(Colors.purple.shade300),
+                ),
+                child: Text('Добавить')
+            ),
+          ],
+        );
+      });
 }
 
 class MuteButton extends StatefulWidget {

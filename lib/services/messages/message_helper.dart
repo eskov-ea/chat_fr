@@ -14,6 +14,7 @@ class MessageHelper {
   Future<String> sendMessage({
     required Uint8List? bytes,
     required String? messageText,
+    required String? uuid,
     required String? filename,
     required int? parentMessageId,
     required int dialogId,
@@ -22,13 +23,13 @@ class MessageHelper {
   }) {
     if (AudioTypes.contains(filetype)) {
       /** send audio message  */
-      return messagesProvider.sendAudioMessage(dialogId: dialogId, filetype: filetype, parentMessageId: parentMessageId, filename: filename, messageText: messageText, content: content);
+      return messagesProvider.sendAudioMessage(dialogId: dialogId, uuid: uuid, filetype: filetype, parentMessageId: parentMessageId, filename: filename, messageText: messageText, content: content);
     } else if (filetype != null && content != null) {
       /** we assume that message contains a file and the app does not process this type and we aim to save it to the device's disk */
-      return messagesProvider.sendMessageWithFileBase64(dialogId: dialogId, messageText: messageText, filetype: filetype, parentMessageId: parentMessageId, filename: filename, bytes: bytes, content: content);
+      return messagesProvider.sendMessageWithFileBase64(dialogId: dialogId, messageText: messageText, uuid: uuid, filetype: filetype, parentMessageId: parentMessageId, filename: filename, bytes: bytes, content: content);
     } else {
       /** by default we send plain text message */
-      return messagesProvider.sendTextMessage(dialogId: dialogId, messageText: messageText, parentMessageId: parentMessageId);
+      return messagesProvider.sendTextMessage(dialogId: dialogId, messageText: messageText, uuid: uuid, parentMessageId: parentMessageId);
     }
   }
 

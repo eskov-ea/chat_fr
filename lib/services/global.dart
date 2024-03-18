@@ -22,26 +22,31 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 import '../models/dialog_model.dart';
 import '../ui/navigation/main_navigation.dart';
 import 'package:chat/view_models/auth/auth_view_cubit.dart';
 import 'messages/messages_repository.dart';
 
-  AudioPlayer _player = AudioPlayer();
-  Duration? TZ;
-  const MAX_WIDTH = 700.0;
+AudioPlayer _player = AudioPlayer();
+Duration? TZ;
+const MAX_WIDTH = 700.0;
 
-  class SipConfig {
-    static String? sipDomain = null;
-    static String? sipPrefix = null;
+class SipConfig {
+  static String? sipDomain = null;
+  static String? sipPrefix = null;
 
-    static final String defaultSipPrefix = "7";
-    static final String defaultSipDomain = "sip.mcfef.com";
+  static final String defaultSipPrefix = "7";
+  static final String defaultSipDomain = "sip.mcfef.com";
 
 
-    static String getDomain() =>  sipDomain ?? defaultSipDomain;
-    static String getPrefix() =>  sipPrefix ?? defaultSipPrefix;
-  }
+  static String getDomain() =>  sipDomain ?? defaultSipDomain;
+  static String getPrefix() =>  sipPrefix ?? defaultSipPrefix;
+}
+
+String generateUUID() {
+  return const Uuid().v5(Uuid.NAMESPACE_URL, 'mcfef.${DateTime.now().millisecondsSinceEpoch}');
+}
 
   Future<void> playAudio(
       {required AudioPlayer player, required AudioSource source}) async {
@@ -63,9 +68,14 @@ import 'messages/messages_repository.dart';
       "Нет приложения, чтобы отрыть данный файл. Установите приложение и попробуйте снова";
 
   const sipChannel = MethodChannel("com.application.chat/sip");
-  Future<void> callNumber(BuildContext context, String userId) async {
-    await sipChannel.invokeMethod(
+  void callNumber(String userId) {
+    sipChannel.invokeMethod(
         "OUTGOING_CALL", {"number": "sip:${SipConfig.getPrefix()}${userId}@${SipConfig.getDomain()}"});
+  }
+
+  void startConference(String userId) {
+    sipChannel.invokeMethod(
+        "MAKE_CONFERENCE", {"number": "sip:${SipConfig.getPrefix()}${userId}@${SipConfig.getDomain()}"});
   }
 
   void declineCall()  {
@@ -158,7 +168,7 @@ import 'messages/messages_repository.dart';
     final Directory documentDirectory =
     await getApplicationDocumentsDirectory();
     final String dirPath = documentDirectory.path;
-    final imageDir = "cache/images";
+    final imageDir = "cache/media";
 
 
     final File file = File('$dirPath/$imageDir/$fileName');

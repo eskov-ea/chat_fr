@@ -94,11 +94,11 @@ class DBProvider {
   Future<int> saveLocalMessage(MessageData message) async => MessageDBLayer().saveLocalMessage(message);
   Future<int> updateMessageWithSendFailed(int localMessageId) => MessageDBLayer().updateMessageWithSendingFailure(localMessageId);
   Future<int> updateMessageId(int localMessageId, int messageId) async => MessageDBLayer().updateMessageId(localMessageId, messageId);
-  Future<MessageData?> getMessageById(int messageId) async => MessageDBLayer().getMessageById(messageId);
-  Future<List<int>?> updateLocalMessageByContent(int messageId, String message, int? fileId) async => MessageDBLayer().updateLocalMessageByContent(messageId, message, fileId);
+  Future<MessageData?> getMessageByLocalId(String localId) async => MessageDBLayer().getMessageByLocalId(localId);
+  Future<List?> updateLocalMessage(MessageData message) async => MessageDBLayer().updateLocalMessage(message);
   Future<int> checkIfMessageExistWithThisId(int id) async => MessageDBLayer().checkIfMessageExistWithThisId(id);
   Future updateMessagesThatFailedToBeSent() async => MessageDBLayer().updateMessagesThatFailedToBeSent();
-  Future<int> updateMessageErrorStatusOnResend(int localMessageId) async => MessageDBLayer().updateMessageErrorStatusOnResend(localMessageId);
+  Future<int> updateMessageErrorStatusOnResend(String localMessageId) async => MessageDBLayer().updateMessageErrorStatusOnResend(localMessageId);
   Future<int> deleteMessages(List<int> ids) async => MessageDBLayer().deleteMessages(ids);
 
 

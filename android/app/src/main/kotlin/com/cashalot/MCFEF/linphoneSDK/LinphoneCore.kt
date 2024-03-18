@@ -275,6 +275,12 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     } else {
                         call.remoteAddress.username.toString()
                     }
+
+                    Log.w("CONFERENCE", "calls length ${core.calls.size }")
+                    if (core.calls.size > 1) {
+                        core.addAllToConference()
+                    }
+
                     val callStatus: Int = call.callLog.status.toInt()
                     val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
                         callStatus = callStatus,
@@ -495,6 +501,34 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         Log.w("OUTGOING", "$remoteAddress, $params")
 
         core.inviteAddressWithParams(remoteAddress, params)
+    }
+
+    fun makeConference(remoteSipUri: String, context: Context) {
+        try {
+            val remoteAddress = Factory.instance().createAddress(remoteSipUri)
+            remoteAddress ?: return
+
+            val params = core.createCallParams(null)
+            params ?: return
+
+            params.mediaEncryption = MediaEncryption.None
+            core.inviteAddressWithParams(remoteAddress, params)
+
+//            val params = core.createConferenceParams()
+            core.inviteAddressWithParams(remoteAddress, params)
+            params ?: return
+
+//            Log.w("CONFERENCE", "$remoteAddress, $params")
+
+//            core.createConferenceWithParams(params)
+
+//            for (call in core.calls) {
+//                Log.w("CONFERENCE", "calls loop: $call  ${call.userData}")
+//                core.addToConference(call)
+//            }
+        } catch (err: Error) {
+            Log.w("CONFERENCE", "Error:   $err")
+        }
     }
 
     fun hangUp() {

@@ -51,7 +51,7 @@ class _CallButtonState extends State<CallButton> {
       ),
       onPressed: () {
         if (_connectionState.status == ConnectionStatus.connected) {
-          callNumber(context, widget.partnerId.toString());
+          callNumber(widget.partnerId.toString());
         } else {
           sipConnectionServiceInfoWidget(context, _connectionState);
         }

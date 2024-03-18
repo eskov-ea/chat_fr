@@ -298,8 +298,8 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
       final messages = (state as MessageBlocInitializationSuccessState).messages;
       if (dialogId == event.dialogId) {
         for (var message in messages) {
-          if (message.messageId == event.localId) {
-            message.messageId = event.localId;
+          if (message.localId == event.localId) {
+            message.messageId = event.messageId;
             message.statuses.addAll(event.statuses);
             emit(MessageBlocInitializationSuccessState(
                 dialogId: dialogId, messages: messages));

@@ -19,7 +19,6 @@ import './icon_base64.dart';
 
 
 
-
 class MessagesProvider {
   final _secureStorage = DataProvider.storage;
 
@@ -85,6 +84,7 @@ class MessagesProvider {
   Future<String> sendTextMessage({
     required dialogId,
     required messageText,
+    required String? uuid,
     required parentMessageId
   }) async {
     try {
@@ -92,7 +92,8 @@ class MessagesProvider {
       final postData = jsonEncode(<String, Object>{
         'data': {
           'message': '$messageText',
-          'parent_id': parentMessageId
+          'parent_id': parentMessageId,
+          'guid': uuid
         }
       });
       final response = await http.post(
@@ -219,6 +220,7 @@ class MessagesProvider {
     required String? filename,
     required int dialogId,
     required String? messageText,
+    required String? uuid,
     required String? filetype,
     required int? parentMessageId,
     required String? content
@@ -229,6 +231,7 @@ class MessagesProvider {
         'data': {
           'message': '',
           'parent_id': parentMessageId,
+          'guid': uuid,
           'file': {
             'name': '$filename.$filetype',
             'preview': base64icon,
@@ -265,6 +268,7 @@ class MessagesProvider {
     required String? filename,
     required int dialogId,
     required String? messageText,
+    required String? uuid,
     required String? filetype,
     required int? parentMessageId,
     required Uint8List? bytes,
@@ -282,6 +286,7 @@ class MessagesProvider {
         'data': {
           'message': '$messageText',
           'parent_id': parentMessageId,
+          'guid': uuid,
           'file': {
             'name': '$filename.$filetype',
             'preview': preview ?? '',

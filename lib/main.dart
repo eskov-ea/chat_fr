@@ -67,31 +67,31 @@ void main() async {
   GroupDialogsMemberStateStreamer.instance;
   await configureCacheFolder();
 
-  if (!kIsWeb) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  }
-  FlutterError.onError = (errorDetails) async {
-    if (!kIsWeb) {
-      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-
-      final userId = await DataProvider.storage.getUserId();
-      FirebaseCrashlytics.instance.recordError(
-          errorDetails.exception,
-          errorDetails.stack,
-          information: ["[ USER ID ]: $userId"]
-      );
-    }
-
-  };
-  PlatformDispatcher.instance.onError = (error, stack) {
-    if (!kIsWeb) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    }
-    return false;
-  };
+  // if (!kIsWeb) {
+  //   await Firebase.initializeApp(
+  //     options: DefaultFirebaseOptions.currentPlatform,
+  //   );
+  // }
+  // FlutterError.onError = (errorDetails) async {
+  //   if (!kIsWeb) {
+  //     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  //
+  //     final userId = await DataProvider.storage.getUserId();
+  //     FirebaseCrashlytics.instance.recordError(
+  //         errorDetails.exception,
+  //         errorDetails.stack,
+  //         information: ["[ USER ID ]: $userId"]
+  //     );
+  //   }
+  //
+  // };
+  // PlatformDispatcher.instance.onError = (error, stack) {
+  //   if (!kIsWeb) {
+  //     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+  //     return true;
+  //   }
+  //   return false;
+  // };
   runApp(const MyApp());
 }
 

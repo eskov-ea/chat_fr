@@ -168,7 +168,9 @@ class _SendingFilePreviewState extends State<SendingFilePreview> {
                 final messageText = widget.controller.text;
                 final String filetype = widget.file.path.split('.').last;
                 widget.controller.clear();
+                //TODO: refactor db
                 sendMessageUnix(
+                    uuid: null,
                     bloc: BlocProvider.of<MessageBloc>(context),
                     messageText: messageText,
                     file: widget.file,

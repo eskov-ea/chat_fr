@@ -32,6 +32,7 @@ class MessageWidget extends StatefulWidget {
     required this.setSelected,
     required this.message,
     required this.messageId,
+    required this.localMessageId,
     required this.messageDate,
     required this.messageTime,
     required this.senderId,
@@ -67,6 +68,7 @@ class MessageWidget extends StatefulWidget {
   final String dirPath;
   final int messageId;
   final String? forwardFrom;
+  final String? localMessageId;
   final String messageDate;
   final String messageTime;
   final int senderId;
@@ -118,6 +120,7 @@ class _MessageWidgetState extends State<MessageWidget>  with SingleTickerProvide
       setSelectedMode: widget.setSelectedMode,
       message: widget.message,
       messageId: widget.messageId,
+      localMessageId: widget.localMessageId,
       messageDate: widget.messageDate,
       messageTime: widget.messageTime,
       setSelected: widget.setSelected,
@@ -147,6 +150,7 @@ class _MessageTile extends StatelessWidget {
     required this.index,
     required this.message,
     required this.messageId,
+    required this.localMessageId,
     required this.messageDate,
     required this.messageTime,
     required this.setSelected,
@@ -175,6 +179,7 @@ class _MessageTile extends StatelessWidget {
   final int index;
   final int p2p;
   final String message;
+  final String? localMessageId;
   final int messageId;
   final String messageDate;
   final String messageTime;
@@ -387,6 +392,7 @@ class _MessageTile extends StatelessWidget {
                 dialogId: dialogId,
                 userId: userId,
                 repliedMsgId: repliedMsgId,
+                localMessageId: localMessageId,
                 message: message,
                 parentMessage: parentMessage
             )

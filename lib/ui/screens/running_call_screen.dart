@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:chat/bloc/calls_bloc/calls_state.dart';
+import 'package:chat/ui/navigation/main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +10,6 @@ import '../../bloc/calls_bloc/calls_bloc.dart';
 import '../../services/global.dart';
 import '../../services/helpers/call_timer.dart';
 import '../../view_models/user/users_view_cubit.dart';
-import '../navigation/main_navigation.dart';
 import '../widgets/call_controls_widget.dart';
 
 class RunningCallScreen extends StatefulWidget {
@@ -34,9 +34,9 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   late final StreamSubscription _streamSubscription;
   String? callDuration;
   bool isSipServiceActive = true;
-  late bool isCallingIncoming;
-  late bool isCallingOutgoing;
-  late bool isCallInProgress;
+  bool isCallingIncoming = false;
+  bool isCallingOutgoing = false;
+  bool isCallInProgress = true;
   double isAudioOptionPanelVisible = 0;
   Map<int, List<String>> availableAudioDevices = {};
   int? currentDeviceId;
@@ -124,6 +124,10 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
       isAudioOptionPanelVisible = isAudioOptionPanelVisible == 0 ? 1 : 0;
     });
   }
+
+  void startConference() {
+
+  }
   
   @override
   void initState() {
@@ -147,6 +151,70 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (isCallingIncoming == false && isCallingOutgoing == false && isCallInProgress == false) {
+      return Scaffold(
+        backgroundColor: const Color(0xFF474747),
+        body: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          padding: EdgeInsets.zero,
+          alignment: Alignment.center,
+          decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/calls_wallpaper.jpg"),
+                fit: BoxFit.cover,
+              ),
+            ),
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.8,
+              height: 210,
+              padding: const EdgeInsets.symmetric(horizontal: 15),
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+                color: Colors.white,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Нет активного звонка',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  const SizedBox(height: 20),
+                  const Text('Такое могло произойти, например, при попытке перейти на экран звонка, который завершился.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  Material(
+                    color: Colors.transparent,
+                    child: Ink(
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      height: 50,
+                      decoration: const BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                        color: Colors.black87,
+                      ),
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.homeScreen);
+                        },
+                        splashColor: Colors.white24,
+                        customBorder: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6)
+                        ),
+                        child: const Center(
+                          child: Text('Домой',
+                            style: TextStyle(color: Colors.white, fontSize: 20),
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              )
+            ),
+        ),
+      );
+    }
     return Scaffold(
       backgroundColor: const Color(0xFF474747),
       body: GestureDetector(

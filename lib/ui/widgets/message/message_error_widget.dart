@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class MessageErrorWidget extends StatelessWidget {
   final int isError;
   final int messageId;
+  final String? localMessageId;
   final int dialogId;
   final int userId;
   final int? repliedMsgId;
@@ -19,6 +20,7 @@ class MessageErrorWidget extends StatelessWidget {
   const MessageErrorWidget({
     required this.isError,
     required this.messageId,
+    required this.localMessageId,
     required this.dialogId,
     required this.userId,
     required this.repliedMsgId,
@@ -68,11 +70,10 @@ class MessageErrorWidget extends StatelessWidget {
                     GestureDetector(
                         onTap: (){
                           Navigator.of(context).pop();
-                          BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocResendMessageEvent(localMessageId: messageId, dialogId: dialogId));
-                          // resendErrorMessage(
-                          //     messageId: messageId, dialogId: dialogId, bloc: BlocProvider.of<MessageBloc>(context), userId: userId,
-                          //     messageText: message, parentMessage: parentMessage, repliedMessageId: repliedMsgId,
-                          //     file: file );
+                          //TODO: refactor db
+                          if (localMessageId != null) {
+                            BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocResendMessageEvent(localMessageId: localMessageId!, dialogId: dialogId));
+                          }
                         },
                         child: const SizedBox(
                           child: Text("Отправить снова",

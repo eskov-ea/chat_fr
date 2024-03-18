@@ -144,6 +144,12 @@ class MainActivity : FlutterActivity() {
                 if (number != null) {
                     linphoneCore.outgoingCall(number, context)
                 }
+            } else if (call.method.equals("MAKE_CONFERENCE")) {
+                val number = call.argument<String?>("number")
+                Log.w("MAKE_CONFERENCE", "Start event  $number")
+                if (number != null) {
+                    linphoneCore.makeConference(number, context)
+                }
             } else if (call.method.equals("DESTROY_SIP")) {
                 Log.w("DESTROY_SIP", "DESTROY_SIP event")
                 linphoneCore.logout()

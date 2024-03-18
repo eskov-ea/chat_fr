@@ -298,6 +298,7 @@ class MessagesListWidget extends StatelessWidget {
                     senderId: messages[index].senderId,
                     userId: userId,
                     selected: selected,
+                    localMessageId: messages[index].localId,
                     selectedMode: isSelectedMode,
                     setSelectedMode: setSelectedMode,
                     setSelected: setSelected,

@@ -61,7 +61,7 @@ class DatabaseBlocFailedSendMessageState extends DatabaseBlocState {
 }
 
 class DatabaseBlocUpdateErrorStatusOnResendState extends DatabaseBlocState {
-  final int localMessageId;
+  final String localMessageId;
   final int dialogId;
 
   DatabaseBlocUpdateErrorStatusOnResendState({required this.localMessageId, required this.dialogId});
@@ -92,7 +92,7 @@ class DatabaseBlocUpdateMessageStatusesState extends DatabaseBlocState {
 }
 
 class DatabaseBlocUpdateLocalMessageState extends DatabaseBlocState {
-  final int localId;
+  final String localId;
   final int messageId;
   final int dialogId;
   final List<MessageStatus> statuses;

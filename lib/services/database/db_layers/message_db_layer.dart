@@ -104,7 +104,7 @@ class MessageDBLayer {
     }
   }
 
-  Future<MessageData?> getMessageById(int messageId) async {
+  Future<MessageData?> getMessageByLocalId(String localId) async {
     try {
       final db = await DBProvider.db.database;
       return await db.transaction((txn) async {
@@ -118,7 +118,7 @@ class MessageDBLayer {
                 ''
                 'LEFT JOIN message_status s ON (m.id = s.chat_message_id) '
                 'LEFT JOIN attachments f ON (m.id = f.chat_message_id) '
-                'WHERE m.id = "$messageId" '
+                'WHERE m.local_id = "$localId" '
                 'ORDER BY m.id DESC; '
         );
         log('jkhjk:::::  $res');
@@ -172,7 +172,7 @@ class MessageDBLayer {
         return await txn.rawInsert(
             'INSERT INTO message(id, local_id, chat_id, user_id, message, created_at, '
                 'updated_at, replied_message_id, replied_message_author, replied_message_text) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ',
-            [message.messageId, message.messageId, message.dialogId, message.senderId, message.message, message.rawDate.toString(),
+            [message.messageId, message.localId, message.dialogId, message.senderId, message.message, message.rawDate.toString(),
                message.rawDate.toString(), message.repliedMessage?.parentMessageId, message.repliedMessage?.senderId, message.repliedMessage?.parentMessageText]
         );
       });
@@ -218,7 +218,7 @@ class MessageDBLayer {
     }
   }
 
-  Future<int> updateMessageErrorStatusOnResend(int localMessageId) async {
+  Future<int> updateMessageErrorStatusOnResend(String localMessageId) async {
     try {
       final db = await DBProvider.db.database;
       return await db.transaction((txn) async {
@@ -259,28 +259,26 @@ class MessageDBLayer {
     }
   }
 
-  Future<List<int>?> updateLocalMessageByContent(int messageId, String message, int? fileId) async {
+  Future<List?> updateLocalMessage(MessageData message) async {
     try {
       final db = await DBProvider.db.database;
       return await db.transaction((txn) async {
-        final res = await txn.rawQuery(
-            'SELECT id FROM message '
-            'WHERE message = "$message" AND local_id IS NOT NULL; '
+        final updatingMessage = await txn.rawQuery(
+          'SELECT id FROM message WHERE local_id = "${message.localId}"; '
         );
-        print('updated result  $res  where $messageId, $message');
-        if (res.isNotEmpty) {
-          final localId = res.first["id"];
+        print('UPDATMESSAGE::  updatingMessage  $updatingMessage');
+        if (updatingMessage.isEmpty) return null;
+        final oldId = updatingMessage.first["id"];
+        await txn.rawUpdate(
+          'UPDATE message SET id = "${message.messageId}" WHERE local_id = "${message.localId}"; '
+        );
+        if (message.file != null) {
           await txn.rawUpdate(
-            'UPDATE message SET id = "$messageId", local_id = NULL WHERE id = "$localId"; '
+              'UPDATE attachments SET id="${message.file!.attachmentId}", '
+                  'chat_message_id = "${message.messageId}" WHERE id = "$oldId"; '
           );
-          if (fileId != null) {
-            await txn.rawUpdate(
-                'UPDATE attachments SET id="$fileId", chat_message_id = "$messageId" WHERE id = "$localId"; '
-            );
-          }
-          return [localId as int, messageId];
         }
-        return null;
+        return [message.localId, message.messageId];
       });
     } catch (err, stackTrace) {
       rethrow;

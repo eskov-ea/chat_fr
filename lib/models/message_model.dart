@@ -23,6 +23,7 @@ class MessageData extends Equatable{
     required this.isError,
     required this.repliedMessage,
     required this.statuses,
+    required this.localId,
     this.isHandling = false,
   });
   int messageId;
@@ -32,6 +33,7 @@ class MessageData extends Equatable{
   final String message;
   final String messageDate;
   final String messageTime;
+  final String? localId;
   final String? forwarderFromUser;
   final DateTime rawDate;
   final MessageAttachmentData? file;
@@ -49,6 +51,7 @@ class MessageData extends Equatable{
           messageDate: getDate(DateTime.tryParse(json["created_at"])?.add(getTZ())),
           messageTime: getTime(DateTime.tryParse(json["created_at"])?.add(getTZ())),
           rawDate: DateTime.tryParse(json["created_at"])!,
+          localId: json["guid"],
           file: json["file"] != null
               ? MessageAttachmentData.fromJson(json["file"])
               : null,
@@ -76,6 +79,7 @@ class MessageData extends Equatable{
           messageDate: getDate(DateTime.tryParse(json["message_created_at"])?.add(getTZ())),
           messageTime: getTime(DateTime.tryParse(json["message_created_at"])?.add(getTZ())),
           rawDate: DateTime.tryParse(json["message_created_at"])!,
+          localId: json["local_id"],
           file: json["file_id"] == null
               ? null
               : MessageAttachmentData.fromDBJson(json),
@@ -109,7 +113,7 @@ class MessageData extends Equatable{
   String toString() {
     return "Inctance of MessageData[ id: $messageId, author: $senderId, chat_id: $dialogId, "
         "message: $message, created_at: $rawDate} "
-        "file: {id: ${file?.attachmentId}, name: ${file?.name} ]"
+        "file: {id: ${file?.attachmentId}, local_id: $localId, name: ${file?.name} ]"
         "${messageId.runtimeType}, ${senderId.runtimeType}, ${dialogId.runtimeType} "
         "repliedId: ${repliedMessage?.parentMessageId}, ${message.runtimeType}, ${file.runtimeType}, "
         "${file?.attachmentId.runtimeType}, statuses: ${statuses}"

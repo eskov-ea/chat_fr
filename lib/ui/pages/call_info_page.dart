@@ -116,7 +116,7 @@ class _CallInfoPageState extends State<CallInfoPage> {
                   GestureDetector(
                     onTap: (){
                       if (_connectionState.status == ConnectionStatus.connected) {
-                        callNumber(context, widget.callData.callerNumber);
+                        callNumber(widget.callData.callerNumber);
                       } else {
                         sipConnectionServiceInfoWidget(context, _connectionState);
                       }
