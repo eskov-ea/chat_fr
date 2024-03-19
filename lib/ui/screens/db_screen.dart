@@ -140,13 +140,14 @@ class _DBScreenState extends State<DBScreen> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      final Directory documentDirectory = await getApplicationDocumentsDirectory();
-                      final String dirPath = documentDirectory.path;
+                      // final Directory documentDirectory = await getApplicationDocumentsDirectory();
+                      // final String dirPath = documentDirectory.path;
                       // final path = '/var/mobile/Containers/Data/Application/97129959-3781-4898-9545-CB6B46E55DDE/Documents/cache/images/image_picker_3B5A7186-D3B1-44AC-BE09-47546C92B456-76519-0000284372488131.jpg';
                       // File? file = File(path) ;
                       final db = DBProvider.db;
+                      final res = await db.getAttachmentById(511);
                       // final res = await db.getMessageByLocalId(6986);
-                      // print('fileee::  ${res}');
+                      print('fileee::  ${res}');
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width * 0.45,

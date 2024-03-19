@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
+import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/helpers/message_forwarding_util.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import '../../models/message_model.dart';
@@ -12,126 +13,66 @@ import '../messages/messages_repository.dart';
 import 'package:chat/models/message_model.dart' as parseTime;
 
 
-sendMessageUnix({
-  required MessageBloc bloc,
-  required String? messageText,
-  required String? uuid,
-  required File? file,
-  required int dialogId,
-  required int userId,
-  required RepliedMessage? parentMessage
-}) async {
 
-// 0. Process file if it is
-  Uint8List? bytes;
-  String? filename;
-  String? filetype;
-  String? base64FileString;
-  MessageData? localMessage;
-  String? path;
-  try {
-    if (file != null) {
-    bytes = file.readAsBytesSync();
-    filename = file.path.split('/').last.split('.').first;
-    filetype = file.path.split('.').last;
-    base64FileString = base64Encode(bytes);
-  }
-// 1. Create local message
-    localMessage = createLocalMessage(dialogId: dialogId, userId: userId, path: path,
-      messageText: messageText, parentMessage: parentMessage, filename: filename, filetype: filetype, content: base64FileString, messageId: 12345, attachmentId: null);
-// 2. Add local message to tray
-    //TODO: refacrot messageBloc
-    // bloc.add(
-    //   ChatsBuilderAddMessageEvent(message: localMessage, dialogId: dialogId));
-// 3. Send message
-      final response = await MessagesRepository().sendMessage(
-        dialogId: dialogId,
-        messageText: messageText,
-        uuid: uuid,
-        parentMessageId: parentMessage?.parentMessageId,
-        filetype: filetype,
-        bytes: bytes,
-        filename: filename,
-        content: base64FileString
-      );
-// 4. If no error - update last dialog message
-    final message = MessageData.fromJson(jsonDecode(response)["data"]);
-    //TODO: refacrot messageBloc
-    // bloc.add(
-    //   ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: dialogId, localMessageId: localMessage.messageId)
-    // );
-  } catch (err, stackTrace) {
-// 5. Handle error - update last message with error
-    Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Failed send a message");
-    if (localMessage != null) {
-      //TODO: refacrot messageBloc
-      // bloc.add(ChatsBuilderUpdateMessageWithErrorEvent(messageId: localMessage.messageId, dialog: dialogId));
-    }
-  }
-// 6. Update message statuses
-  //TODO: refacrot messageBloc
-  // bloc.add(MessageBlocUpdateStatusMessagesEvent(dialogId: dialogId));
-}
-
-sendForwardMessage({
-  required MessageBloc bloc,
-  required String? messageText,
-  required MessageAttachmentData? attachment,
-  required int dialogId,
-  required int userId
-}) async {
-
-  String? filename;
-  String? filetype;
-  String? base64FileString;
-  MessageData? localMessage;
-  String? path;
-  if (attachment != null) {
-    filename = attachment.name.split('.').first;
-    filetype = attachment.name.split('.').last;
-    final file = await loadFileAndSaveLocally(fileName: attachment.name, attachmentId: attachment.attachmentId);
-    if (file != null) {
-      final bytes = file.readAsBytesSync();
-      base64FileString = base64Encode(bytes);
-    }
-  }
-  try {
-// 1. Create local message
-    localMessage = createLocalMessage(dialogId: dialogId, userId: userId, path: path,
-        messageText: messageText, parentMessage: null, filename: filename, filetype: attachment?.filetype, content: base64FileString, messageId: 12345, attachmentId: null);
-// 2. Add local message to tray
-    //TODO: refacrot messageBloc
-    // bloc.add(
-    //     ChatsBuilderAddMessageEvent(message: localMessage, dialogId: dialogId));
-// 3. Send message
-    final response = await MessagesRepository().forwardMessage(
-        dialogId: dialogId,
-        messageText: messageText,
-        filetype: filetype,
-        filename: filename,
-        preview: attachment?.preview,
-        content: base64FileString
-    );
-    print("FORWARD:: forwardMessage 3 ${response}");
-
-// 4. If no error - update last dialog message
-    final message = MessageData.fromJson(jsonDecode(response)["data"]);
-    //TODO: refacrot messageBloc
-    // bloc.add(
-    //     ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: dialogId, localMessageId: localMessage.messageId)
-    // );
-  } catch (err, stackTrace) {
-// 5. Handle error - update last message with error
-    Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Failed send a message");
-    if (localMessage != null) {
-      //TODO: refacrot messageBloc
-      // bloc.add(ChatsBuilderUpdateMessageWithErrorEvent(messageId: localMessage.messageId, dialog: dialogId));
-    }
-  }
-// 6. Update message statuses
-  //TODO: refacrot messageBloc
-  // bloc.add(MessageBlocUpdateStatusMessagesEvent(dialogId: dialogId));
-}
+// sendForwardMessage({
+//   required MessageBloc bloc,
+//   required String? messageText,
+//   required MessageAttachmentData? attachment,
+//   required int dialogId,
+//   required int userId
+// }) async {
+//
+//   String? filename;
+//   String? filetype;
+//   String? base64FileString;
+//   MessageData? localMessage;
+//   String? path;
+//   if (attachment != null) {
+//     filename = attachment.name.split('.').first;
+//     filetype = attachment.name.split('.').last;
+//     final file = await loadFileAndSaveLocally(fileName: attachment.name, attachmentId: attachment.attachmentId);
+//     if (file != null) {
+//       final bytes = file.readAsBytesSync();
+//       base64FileString = base64Encode(bytes);
+//     }
+//   }
+//   try {
+// // 1. Create local message
+//     localMessage = createLocalMessage(dialogId: dialogId, userId: userId, path: path,
+//         messageText: messageText, parentMessage: null, filename: filename, filetype: attachment?.filetype, content: base64FileString, messageId: 12345, attachmentId: null);
+// // 2. Add local message to tray
+//     //TODO: refacrot messageBloc
+//     // bloc.add(
+//     //     ChatsBuilderAddMessageEvent(message: localMessage, dialogId: dialogId));
+// // 3. Send message
+//     final response = await MessagesRepository().forwardMessage(
+//         dialogId: dialogId,
+//         messageText: messageText,
+//         filetype: filetype,
+//         filename: filename,
+//         preview: attachment?.preview,
+//         content: base64FileString
+//     );
+//     print("FORWARD:: forwardMessage 3 ${response}");
+//
+// // 4. If no error - update last dialog message
+//     final message = MessageData.fromJson(jsonDecode(response)["data"]);
+//     //TODO: refacrot messageBloc
+//     // bloc.add(
+//     //     ChatsBuilderUpdateLocalMessageEvent(message: message, dialogId: dialogId, localMessageId: localMessage.messageId)
+//     // );
+//   } catch (err, stackTrace) {
+// // 5. Handle error - update last message with error
+//     Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Failed send a message");
+//     if (localMessage != null) {
+//       //TODO: refacrot messageBloc
+//       // bloc.add(ChatsBuilderUpdateMessageWithErrorEvent(messageId: localMessage.messageId, dialog: dialogId));
+//     }
+//   }
+// // 6. Update message statuses
+//   //TODO: refacrot messageBloc
+//   // bloc.add(MessageBlocUpdateStatusMessagesEvent(dialogId: dialogId));
+// }
 
 MessageData createLocalMessage({
   required RepliedMessage? parentMessage,
@@ -239,9 +180,10 @@ void resendErrorMessage({
   }
 }
 
-int UUID() {
-  final r = Random().nextInt(10000000);
-  return int.parse("00${r}0");
+Future<int> UUID() async {
+  final lastId = await DBProvider.db.getLastId();
+  final r = Random().nextInt(20000000);
+  return lastId + r;
 }
 
 

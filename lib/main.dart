@@ -102,12 +102,14 @@ class MyApp extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
+    final db = DBProvider.db;
     final websocketRepo = WebsocketRepository.instance;
     final errorHandlerBloc =  ErrorHandlerBloc();
     final authBloc = AuthBloc(authRepo: AuthRepository());
     final databaseBloc = DatabaseBloc(
       websocketRepository: websocketRepo,
-      errorHandlerBloc: errorHandlerBloc
+      errorHandlerBloc: errorHandlerBloc,
+      db: db
     );
     //TODO: refactor bloc=to-bloc dependency with representation layer
     /// https://stackoverflow.com/questions/59137180/flutter-listen-bloc-state-from-other-bloc/72496719#72496719

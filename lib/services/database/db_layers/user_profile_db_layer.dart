@@ -11,10 +11,10 @@ class UserProfileDBLayer {
       final appSettingsSql =
           'UPDATE app_settings SET '
           'autojoin_chats = "${profile.chatSettings?.autoJoinChats.toString().replaceAll('[', '').replaceAll(']', '').replaceAll(' ', '')}", '
-          'version_android = "${profile.appSettings.versionAndroid}", '
-          'version_ios = "${profile.appSettings.versionIos}", '
-          'android_download_link = "${profile.appSettings.downloadUrlAndroid}", '
-          'ios_download_link = "${profile.appSettings.downloadUrlIos}"'
+          // 'version_android = "${profile.appSettings.versionAndroid}", '
+          // 'version_ios = "${profile.appSettings.versionIos}", '
+          // 'android_download_link = "${profile.appSettings.downloadUrlAndroid}", '
+          // 'ios_download_link = "${profile.appSettings.downloadUrlIos}"'
           'WHERE id = 1 ';
       final sipSettingsSql =
           'INSERT INTO sip_settings(id, user_domain, sip_port, stun_host, stun_port, '

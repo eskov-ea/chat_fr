@@ -1,13 +1,13 @@
-import 'dart:convert';
 import 'dart:io';
-import 'package:chat/bloc/messge_bloc/message_bloc.dart';
+import 'package:chat/bloc/database_bloc/database_bloc.dart';
+import 'package:chat/bloc/database_bloc/database_events.dart';
+import 'package:chat/models/message_model.dart';
+import 'package:chat/services/global.dart';
+import 'package:chat/services/popup_manager.dart';
+import 'package:chat/ui/navigation/main_navigation.dart';
 import 'package:easy_pdf_viewer/easy_pdf_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../models/message_model.dart';
-import '../../services/global.dart';
-import '../../services/helpers/message_sender_helper.dart';
-import '../navigation/main_navigation.dart';
 
 class SendingFilePreview extends StatefulWidget {
   const SendingFilePreview({
@@ -94,10 +94,10 @@ class _SendingFilePreviewState extends State<SendingFilePreview> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Image.asset("assets/file_icon.png", height: 80,),
-                          SizedBox(height: 20,),
-                          Text("Просмотреть файл",
+                          const SizedBox(height: 20,),
+                          const Text("Просмотреть файл",
                             style: TextStyle(fontSize: 18),),
-                          SizedBox(height: 20,),
+                          const SizedBox(height: 20,),
                           isNoAppToOpenFile
                             ? const Text(noAppToOpenFileMessage,
                                 style: TextStyle(color: Colors.red, fontSize: 16),
@@ -119,7 +119,7 @@ class _SendingFilePreviewState extends State<SendingFilePreview> {
                   helperStyle: TextStyle(),
                   contentPadding: const EdgeInsets.only(left: 25.0, right: 4.0, bottom: 4.0),
                   enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(90.0)),
+                      borderRadius: const BorderRadius.all(Radius.circular(90.0)),
                       borderSide: BorderSide(color: Colors.grey.withOpacity(0.3))
                   ),
                 ),
@@ -147,38 +147,12 @@ class _SendingFilePreviewState extends State<SendingFilePreview> {
             ),
             ElevatedButton(
               onPressed: () {
-                showModalBottomSheet(
-                  isDismissible: false,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.black54,
-                  context: context,
-                  builder: (BuildContext context) => Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      CircularProgressIndicator(),
-                      SizedBox(
-                        height: 30,
-                      ),
-                      Text(
-                        "Отправка",
-                        style: TextStyle(color: Colors.white, fontSize: 24),
-                      )
-                    ],
-                ));
-                final messageText = widget.controller.text;
-                final String filetype = widget.file.path.split('.').last;
+                PopupManager.showLoadingPopup(context);
+                BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocSendMessageEvent(dialogId: widget.dialogId!, messageText: widget.controller.text,
+                    parentMessage: widget.parentMessage, file: widget.file));
                 widget.controller.clear();
-                //TODO: refactor db
-                sendMessageUnix(
-                    uuid: null,
-                    bloc: BlocProvider.of<MessageBloc>(context),
-                    messageText: messageText,
-                    file: widget.file,
-                    dialogId: widget.dialogId!,
-                    userId: widget.userId,
-                    parentMessage: widget.parentMessage
-                );
                 Navigator.popUntil(context, (route) => route.settings.name == MainNavigationRouteNames.chatPage);
+                PopupManager.closePopup(context);
               },
               style: ElevatedButton.styleFrom(
                 shape: const CircleBorder(),

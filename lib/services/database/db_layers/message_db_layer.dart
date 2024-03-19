@@ -270,15 +270,45 @@ class MessageDBLayer {
         if (updatingMessage.isEmpty) return null;
         final oldId = updatingMessage.first["id"];
         await txn.rawUpdate(
-          'UPDATE message SET id = "${message.messageId}" WHERE local_id = "${message.localId}"; '
+          'UPDATE message SET id = "${message.messageId}", local_id = NULL WHERE local_id = "${message.localId}"; '
         );
         if (message.file != null) {
+          print('UPDATMESSAGE::  file  old id: $oldId, new id: ${message.file!.attachmentId}, message: ${message.messageId}');
           await txn.rawUpdate(
               'UPDATE attachments SET id="${message.file!.attachmentId}", '
                   'chat_message_id = "${message.messageId}" WHERE id = "$oldId"; '
           );
         }
         return [message.localId, message.messageId];
+      });
+    } catch (err, stackTrace) {
+      rethrow;
+    }
+  }
+
+  Future<int> getLastId() async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        final res = await txn.rawQuery(
+            'SELECT id FROM message ORDER BY id DESC LIMIT 1; '
+        );
+        if (res.isEmpty) return 1;
+        return res.last["id"] as int;
+      });
+    } catch (err, stackTrace) {
+      rethrow;
+    }
+  }
+
+  Future<int> deleteNotSentMessagesOlder5days() async {
+    try {
+      final db = await DBProvider.db.database;
+      return await db.transaction((txn) async {
+        return await txn.rawDelete(
+            'DELETE FROM message WHERE send_failed = 1 AND '
+            'created_at > datetime("now", "-1 day"); '
+        );
       });
     } catch (err, stackTrace) {
       rethrow;

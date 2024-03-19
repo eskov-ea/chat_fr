@@ -1,6 +1,6 @@
 import 'dart:io';
-
 import 'package:chat/models/message_model.dart';
+import 'package:chat/services/helpers/file_types_helper.dart';
 import 'package:chat/theme.dart';
 import 'package:chat/ui/screens/chat_screen.dart';
 import 'package:chat/ui/widgets/message/audioplayer_widget.dart';
@@ -9,13 +9,9 @@ import 'package:chat/ui/widgets/message/forward_message_prefix_widget.dart';
 import 'package:chat/ui/widgets/message/group_chat_sender_name_widget.dart';
 import 'package:chat/ui/widgets/message/message_attachment_icon_preview.dart';
 import 'package:chat/ui/widgets/message/message_status_widget.dart';
-import 'package:chat/ui/widgets/message/replied_message_body.dart';
 import 'package:chat/ui/widgets/message/text_body_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../../../services/helpers/file_types_helper.dart';
 
 
 class MessageContentWidget extends StatelessWidget {
@@ -94,6 +90,7 @@ class MessageContentWidget extends StatelessWidget {
                 borderRadius: 10.0,
                 file: file,
                 localFileAttachment: fileAttachment,
+                messageText: message,
                 messageTime: messageTime,
                 status: StatusWidget(status),
               ),
@@ -135,7 +132,7 @@ class MessageContentWidget extends StatelessWidget {
                 repliedMsgSenderName: repliedMsgSenderName
               ),
 
-              if (file == null || !GraphicTypes.contains(file!.filetype))
+              if (file == null || (file != null && message.trim() != "") || AudioTypes.contains(file!.filetype))
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.end,

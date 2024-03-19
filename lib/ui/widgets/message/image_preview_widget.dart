@@ -26,6 +26,7 @@ class ImagePreviewWidget extends StatefulWidget {
       required this.file,
       required this.localFileAttachment,
       required this.messageTime,
+      required this.messageText,
       required this.status,
       required this.dirPath,
       Key? key})
@@ -35,6 +36,7 @@ class ImagePreviewWidget extends StatefulWidget {
   final bool isMe;
   final String? senderName;
   final String messageTime;
+  final String messageText;
   final String dirPath;
   final double borderRadius;
   final MessageAttachmentData? file;
@@ -49,6 +51,7 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
   bool isDownloading = false;
   File? imageFile;
   Uint8List? fileBytesRepresentation;
+  bool isInitialized = false;
 
   @override
   void initState() {
@@ -104,17 +107,26 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
   checkIfAttachmentLoaded() async {
     if (kIsWeb) return null;
     print('File path: id: ${widget.file?.attachmentId}  ${widget.file?.path}');
-    final dbFile = await DBProvider.db.getAttachmentById(widget.file!.attachmentId);
-    if (dbFile.path != null) {
-      if (widget.file!.attachmentId == 503) {
-        print('File size:::  ${widget.file!.path} ${File("${widget.dirPath}/${widget.file!.path!}").readAsBytesSync().lengthInBytes}');
+    try {
+      final dbFile =
+          await DBProvider.db.getAttachmentById(widget.file!.attachmentId);
+      if (dbFile.path != null) {
+        if (widget.file!.attachmentId == 503) {
+          print(
+              'File size:::  ${widget.file!.path} ${File("${widget.dirPath}/${widget.file!.path!}").readAsBytesSync().lengthInBytes}');
+        }
+        print(
+            'File path: id: ${widget.file?.attachmentId}  ${widget.file?.path}');
+        setState(() {
+          imageFile = File("${widget.dirPath}/${dbFile.path}");
+        });
       }
-      print('File path: id: ${widget.file?.attachmentId}  ${widget.file?.path}');
-      // imageFile = await isLocalFileExist(fileName: widget.file!.name);
-      setState(() {
-        imageFile = File("${widget.dirPath}/${dbFile.path}");
-      });
+    } catch (err) {
+
     }
+    setState(() {
+      isInitialized = true;
+    });
   }
 
   void getImageDataWeb() async {
@@ -193,7 +205,9 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
               fileBytesRepresentation: fileBytesRepresentation,
               saveImageFunction: _safeImageToDevice,
               messageTime: widget.messageTime,
+              messageText: widget.messageText,
               status: widget.status,
+              isInitialized: isInitialized,
               errorCallback: _errorCallback,
               isMe: widget.isMe),
         ),
@@ -211,10 +225,18 @@ Widget? getImagePreview({
     required Uint8List? fileBytesRepresentation,
     required Function saveImageFunction,
     required String messageTime,
+    required String messageText,
     required Widget status,
+    required bool isInitialized,
     required Function() errorCallback,
     required bool isMe
   }) {
+  if (!isInitialized) {
+    return Center(
+      child: CircularProgressIndicator(
+        color: Colors.greenAccent.shade400,
+      ));
+  }
   if (localFileAttachment != null || fileBytesRepresentation != null) {
     print('render image::: case 1');
     return GestureDetector(
@@ -276,7 +298,7 @@ Widget? getImagePreview({
                     },
                     gaplessPlayback: true
             ),
-            Positioned(
+            if (messageText.trim() == "") Positioned(
               right: 0,
               bottom: 0,
               child: Container(

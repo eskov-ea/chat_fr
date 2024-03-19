@@ -1,9 +1,7 @@
 import 'dart:developer';
-
 import 'package:chat/services/helpers/message_forwarding_util.dart';
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
-import 'package:meta/meta.dart';
 import '../services/global.dart';
 
 final DateFormat _timeFormatter = DateFormat.Hm();

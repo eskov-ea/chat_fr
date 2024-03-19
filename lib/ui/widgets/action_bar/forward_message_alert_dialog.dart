@@ -1,3 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:chat/bloc/database_bloc/database_bloc.dart';
+import 'package:chat/bloc/database_bloc/database_events.dart';
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/message_forwarding_util.dart';
@@ -11,8 +16,10 @@ import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit_state.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:chat/view_models/user/users_view_cubit_state.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 
 
 class ForwardAddress {
@@ -100,14 +107,21 @@ class _ForwardMessageAlertDialogState extends State<ForwardMessageAlertDialog>{
           Navigator.of(context).pop();
           return PopupManager.showInfoPopup(context, dismissible: false, type: PopupType.error, message: 'Произошла ошибка при отправке сообщения, попробуйте еще раз');
         }
+        File? file;
+        if (message.file != null) {
+          final Directory documentDirectory = await getApplicationDocumentsDirectory();
+          final String dirPath = documentDirectory.path;
+          final mediaDir = "cache/media";
+          Uint8List bytes = base64.decode(message.file!.content!);
+          final filename = DateTime.now().microsecondsSinceEpoch.toString();
+          final path = '$mediaDir/$filename.${message.file!.filetype}';
+          file = File('$dirPath/$path');
+          await file.writeAsBytes(bytes);
+        }
 
-        sendForwardMessage(
-            bloc: BlocProvider.of<MessageBloc>(context),
-            messageText: forwardMessage(message.message, message.author),
-            attachment: message.file,
-            dialogId: dialogId,
-            userId: widget.userId
-        );
+        BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocSendMessageEvent(dialogId: dialogId, messageText: forwardMessage(message.message, message.author),
+            parentMessage: null, file: file));
+
       }
 
     }

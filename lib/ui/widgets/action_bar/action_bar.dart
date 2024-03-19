@@ -232,7 +232,7 @@ class ActionBarState extends State<ActionBar> {
                   padding: const EdgeInsets.only(left: 16.0, right: 3.0),
                   child: GestureDetector(
                     onTap: (){
-                      openCameraOptions(createDialogAndSendMessage);
+                      openCameraOptions();
                     },
                     child: widget.isRecording
                         ? Text(
@@ -453,7 +453,7 @@ class ActionBarState extends State<ActionBar> {
     );
   }
 
-  void openCameraOptions(createDialogFn) {
+  void openCameraOptions() {
     showModalBottomSheet(
       isScrollControlled: true,
       context: context,
@@ -463,7 +463,7 @@ class ActionBarState extends State<ActionBar> {
         messageController: _messageController,
         username: widget.username,
         userId: widget.userId,
-        createDialogFn: createDialogFn,
+        createDialogFn: createDialogAndSendMessage,
         parentMessage: widget.parentMessage
       ),
     );
@@ -485,19 +485,11 @@ class ActionBarState extends State<ActionBar> {
   _sendAudioMessage(File file, RepliedMessage? parentMessage) {
     BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocSendMessageEvent(dialogId: widget.dialogId!, messageText: _messageController.text,
         parentMessage: parentMessage, file: file));
-    // sendMessageUnix(
-    //     bloc: BlocProvider.of<MessageBloc>(context),
-    //     messageText: _messageController.text,
-    //     file: file,
-    //     dialogId: widget.dialogId!,
-    //     userId: widget.userId,
-    //     parentMessage: widget.parentMessage
-    // );
   }
 
 
   createDialogAndSendMessage(context, rootWidget) async {
-    //TODO: optimize two sending message and create dialog-sending message methods  ---- first need to create dialog and then send message
+    /// we disable send button, create dialog and set it fot current session chat screen
     setState(() {
       isSendButtonDisabled = true;
     });
@@ -505,18 +497,6 @@ class ActionBarState extends State<ActionBar> {
     setState(() {
       widget.dialogId = newDialog.dialogId;
     });
-    //TODO: refacrot messageBloc
-    // final chatsBuilderBloc = BlocProvider.of<ChatsBuilderBloc>(context);
-// final initLength = chatsBuilderBloc.state.chats.length;
-    // whenFinishAddingDialog(Stream<MessagesBlocState> source) async {
-    //   chatsBuilderBloc.add(ChatsBuilderLoadMessagesEvent(dialogId: widget.dialogId!));
-    //   await for (var value in source) {
-    //     if (value.chats.length > initLength) {
-    //       return;
-    //     }
-    //   }
-    // }
-    // await whenFinishAddingDialog(chatsBuilderBloc.stream);
     if (newDialog != null) {
       widget.setDialogData(widget.rootWidget, newDialog);
     }

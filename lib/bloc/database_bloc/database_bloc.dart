@@ -13,6 +13,7 @@ import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/from_db_models.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/models/message_model.dart' as messageModel;
+import 'package:chat/services/database/db_provider_interface.dart';
 import 'package:chat/services/messages/messages_api_provider.dart';
 import 'package:chat/services/ws/ws_repositor_interface.dart';
 import 'package:chat/services/ws/ws_repository.dart';
@@ -32,13 +33,14 @@ import 'package:sqflite/sqlite_api.dart';
 class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
   final ErrorHandlerBloc errorHandlerBloc;
   final WebsocketRepository websocketRepository;
-  final DBProvider db = DBProvider.db;
+  final IDBProvider db;
   final _storage = DataProvider.storage;
   late final StreamSubscription websocketEventSubscription;
 
   DatabaseBloc({
     required this.websocketRepository,
-    required this.errorHandlerBloc
+    required this.errorHandlerBloc,
+    required this.db,
   }): super( DatabaseBlocDBNotInitializedState()){
     on<DatabaseBlocEvent>((event, emit) async {
       if (event is DatabaseBlocInitializeEvent) {
@@ -195,7 +197,11 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       ));
       final users = await db.getUsers();
 
+      /// update messages that has been failed to send in the previous runtime
+      /// delete messages that has not been resend for 5 days to release id in db
       await db.updateMessagesThatFailedToBeSent();
+      await db.deleteNotSentMessagesOlder5days();
+
       final messages = await db.getMessages();
       emit(DatabaseBlocInitializationInProgressState(
           message: 'Загружаем диалоги',
@@ -294,9 +300,9 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     String? fileContent;
     String? path;
 
-    int messageId = UUID();
+    int messageId = await UUID();
     while(await db.checkIfMessageExistWithThisId(messageId) == 0) {
-      messageId = UUID();
+      messageId = await UUID();
     }
     if (event.file != null) {
       try {
@@ -318,7 +324,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
         print('local file path err: $err\r\n $stack');
       }
     }
-    final attachmentId = fileContent == null ? null : UUID();
+    final attachmentId = fileContent == null ? null : messageId;
 
     final message = createLocalMessage(
         messageId: messageId,

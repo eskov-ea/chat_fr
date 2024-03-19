@@ -16,18 +16,20 @@ import 'package:chat/services/database/db_layers/message_db_layer.dart';
 import 'package:chat/services/database/db_layers/message_status_db_layer.dart';
 import 'package:chat/services/database/db_layers/user_profile_db_layer.dart';
 import 'package:chat/services/database/db_layers/users_db_layer.dart';
+import 'package:chat/services/database/db_provider_interface.dart';
 import 'package:chat/services/database/developers.dart';
 import 'package:chat/services/database/tables.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 
-class DBProvider {
+class DBProvider implements IDBProvider {
   DBProvider._();
 
   static final DBProvider db = DBProvider._();
   static Database? _database;
 
+  @override
   Future<Database> get database async {
     if (_database != null) {
       return _database!;
@@ -40,6 +42,7 @@ class DBProvider {
 
   /// DB INITIALIZE
 
+  @override
   Future<Database> initDB() async {
     try {
       final databasesPath = await getDatabasesPath();
@@ -100,6 +103,8 @@ class DBProvider {
   Future updateMessagesThatFailedToBeSent() async => MessageDBLayer().updateMessagesThatFailedToBeSent();
   Future<int> updateMessageErrorStatusOnResend(String localMessageId) async => MessageDBLayer().updateMessageErrorStatusOnResend(localMessageId);
   Future<int> deleteMessages(List<int> ids) async => MessageDBLayer().deleteMessages(ids);
+  Future<int> getLastId() async => await MessageDBLayer().getLastId();
+  Future<int> deleteNotSentMessagesOlder5days() async => await MessageDBLayer().deleteNotSentMessagesOlder5days();
 
 
   ///   MESSAGE STATUS LAYER

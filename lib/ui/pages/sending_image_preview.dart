@@ -3,6 +3,7 @@ import 'package:chat/bloc/database_bloc/database_bloc.dart';
 import 'package:chat/bloc/database_bloc/database_events.dart';
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/models/message_model.dart';
+import 'package:chat/services/popup_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -110,19 +111,18 @@ class SendingImagePreview extends StatelessWidget {
                       )
                     ],
                 ));
-                controller.clear();
-                if(dialogId == null) await createDialogFn();
-                print('local file path:  ${file.path}');
+                if(dialogId == null) {
+                  PopupManager.showInfoPopup(context, dismissible: false, type: PopupType.general, message: 'Создаем диалог');
+                  try {
+                    await createDialogFn();
+                  } catch (_) {
+                    PopupManager.closePopup(context);
+                    PopupManager.showInfoPopup(context, dismissible: true, type: PopupType.error, message: 'Не удалось создать диалог');
+                  }
+                }
                 BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocSendMessageEvent(dialogId: dialogId!, messageText: controller.text,
                     file: file, parentMessage: parentMessage));
-                // sendMessageUnix(
-                //     bloc: BlocProvider.of<MessageBloc>(context),
-                //     messageText: messageText,
-                //     file: file,
-                //     dialogId: dialogId!,
-                //     userId: userId,
-                //     parentMessage: parentMessage
-                // );
+                controller.clear();
                 Navigator.popUntil(context, (route) => route.settings.name == MainNavigationRouteNames.chatPage);
               },
               style: ElevatedButton.styleFrom(
