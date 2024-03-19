@@ -5,6 +5,7 @@ import 'package:chat/bloc/database_bloc/database_state.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
+import 'package:chat/ui/screens/own_profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -112,6 +113,31 @@ class _DatabaseInitializationScreenState extends State<DatabaseInitializationScr
                             splashColor: Colors.white70,
                             child: const Center(
                               child: Text('Обновить',
+                                style: TextStyle(fontSize: 16, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (error != null && error!.type == AppErrorExceptionType.db) const SizedBox(height: 20),
+                      if (error != null && error!.type == AppErrorExceptionType.db) Material(
+                        color: Colors.transparent,
+                        child: Ink(
+                          height: 50,
+                          decoration: BoxDecoration(
+                              color: Colors.blue.shade300,
+                              borderRadius: const BorderRadius.all(Radius.circular(6))
+                          ),
+                          child: InkWell(
+                            onTap: () async {
+                              await deleteAllDataAndCloseApp(context);
+                            },
+                            customBorder: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6)
+                            ),
+                            splashColor: Colors.white70,
+                            child: const Center(
+                              child: Text('Удалить базу данных',
                                 style: TextStyle(fontSize: 16, color: Colors.white),
                               ),
                             ),

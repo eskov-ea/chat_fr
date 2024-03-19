@@ -123,7 +123,7 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      await db.getDialogs();
+                      await db.getMessageInfo();
                       print('Chat types initialized::');
                     },
                     child: Container(

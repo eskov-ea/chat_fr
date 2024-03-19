@@ -136,7 +136,7 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
     file = await loadFileAndSaveLocally(
         attachmentId: widget.attachmentId, fileName: widget.fileName);
     if (file != null) {
-      await audioPlayer.setSourceUrl(file!.path);
+      await audioPlayer.setSourceDeviceFile(file!.path);
       final d = await audioPlayer.getDuration();
       setState(() {
         duration = d!;

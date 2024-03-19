@@ -106,7 +106,7 @@ class _ImagePreviewWidgetState extends State<ImagePreviewWidget> {
 
   checkIfAttachmentLoaded() async {
     if (kIsWeb) return null;
-    print('File path: id: ${widget.file?.attachmentId}  ${widget.file?.path}');
+    print('File path: id: ${widget.file?.attachmentId}  ${widget.file?.path}  fileType: ${widget.file?.name}');
     try {
       final dbFile =
           await DBProvider.db.getAttachmentById(widget.file!.attachmentId);

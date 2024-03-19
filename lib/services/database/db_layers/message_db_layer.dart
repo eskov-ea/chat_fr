@@ -147,7 +147,7 @@ class MessageDBLayer {
       final db = await DBProvider.db.database;
       return await db.transaction((txn) async {
         List<Object> res = await txn.rawQuery(
-            'SELECT * FROM message WHERE id = 6035; '
+            'SELECT * FROM message WHERE id = 7296; '
         );
         print('Message read::: $res');
         return "";

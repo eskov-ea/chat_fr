@@ -100,6 +100,7 @@ MessageData createLocalMessage({
     );
   }
 
+  print('local message::  ${parseTime.getDate(DateTime.now())}  ${parseTime.getTime(DateTime.now())}');
   return MessageData(
     messageId: messageId,
     repliedMessage: parentMessage,

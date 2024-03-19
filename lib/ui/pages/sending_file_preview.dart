@@ -148,10 +148,13 @@ class _SendingFilePreviewState extends State<SendingFilePreview> {
             ElevatedButton(
               onPressed: () {
                 PopupManager.showLoadingPopup(context);
+                print('sending file:: ${widget.file.path}');
                 BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocSendMessageEvent(dialogId: widget.dialogId!, messageText: widget.controller.text,
                     parentMessage: widget.parentMessage, file: widget.file));
                 widget.controller.clear();
-                Navigator.popUntil(context, (route) => route.settings.name == MainNavigationRouteNames.chatPage);
+                // Navigator.popUntil(context, (route) => route.settings.name == MainNavigationRouteNames.chatPage);
+                Navigator.pop(context);
+                Navigator.pop(context);
                 PopupManager.closePopup(context);
               },
               style: ElevatedButton.styleFrom(

@@ -11,6 +11,7 @@ import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/user_profile/user_profile_repository.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sqflite/sqflite.dart';
 
 
 class ProfileBloc extends Bloc<ProfileBlocEvent, UserProfileState> {
@@ -37,7 +38,11 @@ class ProfileBloc extends Bloc<ProfileBlocEvent, UserProfileState> {
       } else if (event is ProfileBlocLoadedEvent) {
         emit(UserProfileLoadedState(profile: event.profile));
       }  else if (event is ProfileBlocUpdateEvent) {
-        await _db.saveUserProfile(event.profile);
+        try {
+          await _db.saveUserProfile(event.profile);
+        } on DatabaseException catch(err) {
+          errorHandlerBloc.add(ErrorHandlerWithErrorEvent(error: AppErrorException(AppErrorExceptionType.db, message: err.toString())));
+        }
         emit(UserProfileLoadedState(profile: event.profile));
       } else if (event is ProfileBlocLogoutEvent) {
         await onProfileBlocChangeProfileEvent(event, emit);

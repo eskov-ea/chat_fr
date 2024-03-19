@@ -25,6 +25,7 @@ class MessageAttachmentIconPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('AttachmentViewPageArguments::');
 
     void fileAttachmentMessCallback() {
       Navigator.of(context).pushNamed(

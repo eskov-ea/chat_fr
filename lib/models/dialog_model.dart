@@ -383,6 +383,7 @@ class DialogId {
 
 String getDateDialogModel(DateTime rawDate) {
   // Todo: is that necessary to check it
+  print('message_created_at:::   $rawDate');
   return rawDate != null ? dateFormater(rawDate) : "";
 }
 

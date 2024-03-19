@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:chat/services/database/db_provider.dart';
 import 'package:flutter/material.dart';
 
 enum PopupType { error, warning, success, general }
@@ -88,6 +91,81 @@ class PopupManager {
                   ),
                 ),
               ),
+            )
+    );
+  }
+
+  static Future<void> showDbErrorPopup(BuildContext context, {
+    required bool dismissible,
+  }) {
+    return showDialog(
+        barrierDismissible: dismissible,
+        barrierColor: const Color(0x73000000),
+        context: context,
+        builder: (context) =>
+            AlertDialog(
+              shadowColor: Colors.black12,
+              backgroundColor: const Color(0xFFEAEAEA),
+              insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+              title: Text('Произошла ошибка'),
+              content: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(6),
+                    bottomLeft: Radius.circular(6),
+                    topRight: Radius.circular(6),
+                    bottomRight: Radius.circular(6)
+                ),
+                child: Container(
+                  height: 150,
+                  padding: const EdgeInsets.only(left: 5, right: 10),
+                  decoration: BoxDecoration(
+                      color: const Color(0xFFEAEAEA),
+                      border: Border(top: BorderSide(
+                          color: popupColors["PopupType.error"]!, width: 10))
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Container(
+                        width: 60,
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Image.asset(
+                            "assets/icons/${popupIcon["PopupType.error"]!}"),
+                      ),
+                      Expanded(
+                          child: SingleChildScrollView(
+                            child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 20),
+                                child: Text('Произошла ошибка при работе с базой данных. Мы находимся в процессе разработки, такое возможно при '
+                                    'обновлении на новую версию. В таком случае необходимо перейти на вкладку Профиль и нажать "Удалить данные", после чего запустить приложение заново. Спасибо за понимание!')
+                            ),
+                          )
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Понятно')
+                ),
+                OutlinedButton(
+                  onPressed: () async {
+                    PopupManager.showLoadingPopup(context);
+                    final db = DBProvider.db;
+                    await db.deleteDBFile();
+                    exit(0);
+                  },
+                  style: ButtonStyle(
+                    foregroundColor: MaterialStatePropertyAll(Colors.redAccent)
+                  ),
+                  child: Text('Удалить сейчас')
+                )
+              ],
             )
     );
   }

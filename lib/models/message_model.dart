@@ -46,8 +46,8 @@ class MessageData extends Equatable{
           senderId: json["user_id"],
           dialogId: json["chat_id"],
           message: replaceForwardSymbol(json["message"]),
-          messageDate: getDate(DateTime.tryParse(json["created_at"])?.add(getTZ())),
-          messageTime: getTime(DateTime.tryParse(json["created_at"])?.add(getTZ())),
+          messageDate: getDate(DateTime.tryParse(json["created_at"])),
+          messageTime: getTime(DateTime.tryParse(json["created_at"])),
           rawDate: DateTime.tryParse(json["created_at"])!,
           localId: json["guid"],
           file: json["file"] != null
@@ -74,8 +74,8 @@ class MessageData extends Equatable{
           senderId: json["user_id"],
           dialogId: json["chat_id"],
           message: replaceForwardSymbol(json["message"]),
-          messageDate: getDate(DateTime.tryParse(json["message_created_at"])?.add(getTZ())),
-          messageTime: getTime(DateTime.tryParse(json["message_created_at"])?.add(getTZ())),
+          messageDate: getDate(DateTime.tryParse(json["message_created_at"])),
+          messageTime: getTime(DateTime.tryParse(json["message_created_at"])),
           rawDate: DateTime.tryParse(json["message_created_at"])!,
           localId: json["local_id"],
           file: json["file_id"] == null

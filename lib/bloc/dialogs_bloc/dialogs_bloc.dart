@@ -249,7 +249,6 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         // dialog.lastMessage.statuses = event.message.status;
       }
     }
-    print('onDialogStateNewMessageReceived  $newDialogs');
     final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: sortDialogsByLastMessage(newDialogs)));
     emit(newState);
   }
@@ -267,7 +266,6 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
       }
     }
 
-    print('onDialogStateNewMessageReceived  $newDialogs');
     final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: sortDialogsByLastMessage(newDialogs)));
     emit(newState);
   }

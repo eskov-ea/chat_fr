@@ -19,7 +19,7 @@ String dateFormater(DateTime rawDate) {
   } else {
     ///check if message was written in this day range
     if (hoursSinceMessageWritten <= hoursSinceLastMidnight) {
-      return DateFormat.Hm().format(rawDate.add(getTZ()));
+      return DateFormat.Hm().format(rawDate);
       ///check if message was written yesterday
     } else if (hoursSinceMessageWritten > hoursSinceLastMidnight && hoursSinceMessageWritten <= hoursSinceDayBeforeYesterday) {
       return "Вчера";

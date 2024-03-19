@@ -93,6 +93,9 @@ class _MessageWidgetState extends State<MessageWidget>  with SingleTickerProvide
   @override
   void initState() {
     checkIfAttachmentLoaded();
+    if (widget.file?.attachmentId == 520) {
+      print('Here it is:  ${widget.file?.filetype}  ${DocumentTypes.contains(widget.file!.filetype)}');
+    }
     super.initState();
   }
   @override

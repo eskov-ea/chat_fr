@@ -22,6 +22,7 @@ import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/dialogs/dialogs_api_provider.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/message_sender_helper.dart';
+import 'package:chat/services/popup_manager.dart';
 import 'package:chat/services/push_notifications/push_notification_service.dart';
 import 'package:chat/services/sip_connection_service/sip_repository.dart';
 import 'package:chat/services/user_profile/user_profile_api_provider.dart';
@@ -134,6 +135,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     print("ErrorHandlerState  $state  ${state.error}");
       if (state.error.type == AppErrorExceptionType.auth) {
         SessionExpiredModalWidget(context);
+      } else if (state.error.type == AppErrorExceptionType.db) {
+        PopupManager.showDbErrorPopup(context, dismissible: false);
       } else {
         final String message = mapErrorToMessage(state.error);
         customToastMessage(context: context, message: "Error message: $message");

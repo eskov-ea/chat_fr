@@ -57,7 +57,7 @@ class MessageContentWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        print('Messages taped $messageId $file');
+        print('Messages taped $messageId $file ');
         setSelected(SelectedMessage(id: messageId, message: message, author: senderName, file: file));
       },
       child: Align(
@@ -132,7 +132,7 @@ class MessageContentWidget extends StatelessWidget {
                 repliedMsgSenderName: repliedMsgSenderName
               ),
 
-              if (file == null || (file != null && message.trim() != "") || AudioTypes.contains(file!.filetype))
+              if (file == null || (file != null && message.trim() != "") || AudioTypes.contains(file!.filetype) || DocumentTypes.contains(file!.filetype))
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.end,

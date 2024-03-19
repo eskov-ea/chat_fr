@@ -48,14 +48,14 @@ class NotificationService: UNNotificationServiceExtension {
         if let bestAttemptContent = bestAttemptContent {
             
             NSLog("[notificationServiceAppExtension] create core")
-                        let config = Config.newForSharedCore(appGroupId: APP_GROUP_ID, configFilename: "linphonerc", factoryConfigFilename: "")
-                        if (NotificationService.log == nil) {
-                            NotificationService.log = LoggingService.Instance /*enable liblinphone logs.*/
-                            NotificationService.logDelegate = try! LinphoneLoggingServiceManager(config: config!, log: NotificationService.log, domain: "notificationServiceAppExtension")
-                        }
-                        // We are creating a shared core, which will use the configuration file form the main app thanks to the App Group
-                        lc = try! Factory.Instance.createSharedCoreWithConfig(config: config!, systemContext: nil, appGroupId: APP_GROUP_ID, mainCore: false)
-                        NotificationService.log.message(message: "received push payload : \(bestAttemptContent.userInfo.debugDescription)")
+                let config = Config.newForSharedCore(appGroupId: APP_GROUP_ID, configFilename: "linphonerc", factoryConfigFilename: "")
+                if (NotificationService.log == nil) {
+                    NotificationService.log = LoggingService.Instance /*enable liblinphone logs.*/
+                    NotificationService.logDelegate = try! LinphoneLoggingServiceManager(config: config!, log: NotificationService.log, domain: "notificationServiceAppExtension")
+                }
+                // We are creating a shared core, which will use the configuration file form the main app thanks to the App Group
+                lc = try! Factory.Instance.createSharedCoreWithConfig(config: config!, systemContext: nil, appGroupId: APP_GROUP_ID, mainCore: false)
+                NotificationService.log.message(message: "received push payload : \(bestAttemptContent.userInfo.debugDescription)")
 
             if let callId = bestAttemptContent.userInfo["call-id"] as? String {
                 NotificationService.log.message(message: "fetch msg for callid ["+callId+"]")
