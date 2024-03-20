@@ -254,12 +254,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                             data
                         )
                     )
-                    val callStatus: Int = call.callLog.status.toInt()
-                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
-                        callStatus = callStatus,
-                        fromCaller = call.callLog.fromAddress.username,
-                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
-                        callId = call.callLog.callId)
+                    val callData = makeCallDataPayload(call)
                     val callArgs = makePlatformEventPayload("INCOMING", call.remoteAddress.username, callData)
 
                     MainActivity.callServiceEventSink?.success(callArgs)
@@ -276,17 +271,8 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                         call.remoteAddress.username.toString()
                     }
 
-                    Log.w("CONFERENCE", "calls length ${core.calls.size }")
-                    if (core.calls.size > 1) {
-                        core.addAllToConference()
-                    }
-
-                    val callStatus: Int = call.callLog.status.toInt()
-                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
-                        callStatus = callStatus,
-                        fromCaller = call.callLog.fromAddress.username,
-                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
-                        callId = call.callLog.callId)
+//
+                    val callData = makeCallDataPayload(call)
                     val args = makePlatformEventPayload("CONNECTED", call.remoteAddress.username, callData)
 
                     MainActivity.callServiceEventSink?.success(args)
@@ -326,12 +312,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                             )
                     )
 
-                    val callStatus: Int = call.callLog.status.toInt()
-                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
-                            callStatus = callStatus,
-                            fromCaller = call.callLog.fromAddress.username,
-                            toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
-                            callId = call.callLog.callId)
+                    val callData = makeCallDataPayload(call)
                     val args = makePlatformEventPayload("ENDED", null, callData)
 
                     MainActivity.callServiceEventSink?.success(args)
@@ -341,13 +322,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     activateWakeLockListener()
                     Log.w("OUTGOING_CALL", "${call.remoteAddress.username}")
 
-                    val callStatus: Int = call.callLog.status.toInt()
-
-                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
-                        callStatus = callStatus,
-                        fromCaller = call.callLog.fromAddress.username,
-                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
-                        callId = call.callLog.callId)
+                    val callData = makeCallDataPayload(call)
                     val args = makePlatformEventPayload("OUTGOING", call.remoteAddress.username, callData)
 
                     MainActivity.callServiceEventSink?.success(args)
@@ -359,12 +334,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     getAudioDeviceList()
                     checkForHeadphoneDevicesAvailable(call)
                     Log.w("OUTGOING_CALL", "OutgoingRinging")
-                    val callStatus: Int = call.callLog.status.toInt()
-                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
-                        callStatus = callStatus,
-                        fromCaller = call.callLog.fromAddress.username,
-                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
-                        callId = call.callLog.callId)
+                    val callData = makeCallDataPayload(call)
                     val args = makePlatformEventPayload("OUTGOING_RINGING", call.remoteAddress.username, callData)
 
                     MainActivity.callServiceEventSink?.success(args)
@@ -381,12 +351,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                 Call.State.StreamsRunning -> {
                     Log.w("ACTIVE_CALL", "StreamsRunning")
 
-                    val callStatus: Int = call.callLog.status.toInt()
-                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
-                        callStatus = callStatus,
-                        fromCaller = call.callLog.fromAddress.username,
-                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
-                        callId = call.callLog.callId)
+                    val callData = makeCallDataPayload(call)
 
                     val args = makePlatformEventPayload("STREAM_RUNNING", null, callData)
 
@@ -396,10 +361,14 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 
                 }
                 Call.State.Paused -> {
-
+                    val callData = makeCallDataPayload(call)
+                    val args = makePlatformEventPayload("PAUSED", call.remoteAddress.username, callData)
+                    MainActivity.callServiceEventSink?.success(args)
                 }
                 Call.State.Resuming -> {
-
+                    val callData = makeCallDataPayload(call)
+                    val args = makePlatformEventPayload("RESUMED", call.remoteAddress.username, callData)
+                    MainActivity.callServiceEventSink?.success(args)
                 }
                 Call.State.Referred -> {
 
@@ -415,19 +384,16 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     }
                     Log.v("CALLS FIND ERROR", call.remoteAddress.username.toString())
 
-                    val callStatus: Int = call.callLog.status.toInt()
-                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
-                        callStatus = callStatus,
-                        fromCaller = call.callLog.fromAddress.username,
-                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
-                        callId = call.callLog.callId)
+                    val callData = makeCallDataPayload(call)
 
                     val args = makePlatformEventPayload("ERROR", call.remoteAddress.username, callData)
 
                     MainActivity.callServiceEventSink?.success(args)
                 }
                 Call.State.PausedByRemote -> {
-
+                    val callData = makeCallDataPayload(call)
+                    val args = makePlatformEventPayload("PAUSED", call.remoteAddress.username, callData)
+                    MainActivity.callServiceEventSink?.success(args)
                 }
                 Call.State.UpdatedByRemote -> {
 
@@ -458,12 +424,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                             data
                         )
                     )
-                    val callStatus: Int = call.callLog.status.toInt()
-                    val callData = makeCallDataPayload(duration = call.callLog.duration.toString(),
-                        callStatus = callStatus,
-                        fromCaller = call.callLog.fromAddress.username,
-                        toCaller = call.callLog.toAddress.username, date = call.callLog.startDate.toString(),
-                        callId = call.callLog.callId)
+                    val callData = makeCallDataPayload(call)
 
                     val args = makePlatformEventPayload("RELEASED", call.remoteAddress.username, callData)
 
@@ -503,22 +464,24 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         core.inviteAddressWithParams(remoteAddress, params)
     }
 
-    fun makeConference(remoteSipUri: String, context: Context) {
+    fun makeConference() {
         try {
-            val remoteAddress = Factory.instance().createAddress(remoteSipUri)
-            remoteAddress ?: return
+            Log.i("CONFERENCE_rc", "[Calls] Merging all calls into new conference")
+            val params = core.createConferenceParams()
 
-            val params = core.createCallParams(null)
-            params ?: return
+            val conference = core.createConferenceWithParams(params)
+            conference?.addParticipants(core.calls)
 
-            params.mediaEncryption = MediaEncryption.None
-            core.inviteAddressWithParams(remoteAddress, params)
+//            val remoteAddress = Factory.instance().createAddress(remoteSipUri)
+//            remoteAddress ?: return
 
 //            val params = core.createConferenceParams()
-            core.inviteAddressWithParams(remoteAddress, params)
-            params ?: return
 
-//            Log.w("CONFERENCE", "$remoteAddress, $params")
+//            val conference = core.conference ?: core.createConferenceWithParams(params)
+//            conference?.addParticipants(core.calls)
+
+
+            Log.w("CONFERENCE_rc", "finish $conference, $params\r\ncalls: ${core.calls}, conf: ${core.conference}")
 
 //            core.createConferenceWithParams(params)
 
@@ -527,7 +490,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
 //                core.addToConference(call)
 //            }
         } catch (err: Error) {
-            Log.w("CONFERENCE", "Error:   $err")
+            Log.w("CONFERENCE_rc", "Error:   $err")
         }
     }
 

@@ -37,6 +37,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   bool isCallingIncoming = false;
   bool isCallingOutgoing = false;
   bool isCallInProgress = true;
+  bool isCallPaused = false;
   double isAudioOptionPanelVisible = 0;
   Map<int, List<String>> availableAudioDevices = {};
   int? currentDeviceId;
@@ -115,6 +116,16 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
         isCallingIncoming = false;
         isCallingOutgoing = true;
         isCallInProgress = false;
+      });
+    } else if (state is PausedCallState) {
+      setState(() {
+        isCallPaused = true;
+        isCallInProgress = false;
+      });
+    } else if (state is ResumedCallState) {
+      setState(() {
+        isCallPaused = false;
+        isCallInProgress = true;
       });
     }
   }
@@ -258,9 +269,22 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
                       const SizedBox(
                         height: 10,
                       ),
-                      Text(
-                        username ?? "Не удалось определить номер",
-                        style: TextStyle(color: Colors.white, fontSize: 26),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (isCallPaused)
+                            SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Image.asset('assets/call_controls/pause_white.png'),
+                          ),
+                          if (isCallPaused)
+                            const SizedBox(width: 10),
+                          Text(
+                            username ?? "Не удалось определить номер",
+                            style: TextStyle(color: Colors.white, fontSize: 26, height: 1),
+                          ),
+                        ],
                       ),
                       const SizedBox(
                         height: 3,
@@ -278,6 +302,8 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
                         isCallingIncoming: isCallingIncoming,
                         optionsMenuOpen: isAudioOptionPanelVisible == 1,
                         isSipServiceActive: true,
+                        isCallPaused: isCallPaused,
+                        isCallRunning: isCallInProgress,
                         toggleAudioOptionsPanel: toggleAudioOptionsPanel,
                         onMessage: () {
                           // audioDeviceMethodChannel.invokeMethod("GET_DEVICE_LIST");
@@ -298,7 +324,6 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
                             isCallInProgress = true;
                           });
                         },
-                        isCallRunning: isCallInProgress,
                       ),
                       const SizedBox(
                         height: 50,

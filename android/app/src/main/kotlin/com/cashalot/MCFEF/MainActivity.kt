@@ -32,6 +32,7 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 import kotlinx.coroutines.launch
+import org.linphone.core.Call
 
 
 class MainActivity : FlutterActivity() {
@@ -148,7 +149,7 @@ class MainActivity : FlutterActivity() {
                 val number = call.argument<String?>("number")
                 Log.w("MAKE_CONFERENCE", "Start event  $number")
                 if (number != null) {
-                    linphoneCore.makeConference(number, context)
+                    linphoneCore.outgoingCall(number, context)
                 }
             } else if (call.method.equals("DESTROY_SIP")) {
                 Log.w("DESTROY_SIP", "DESTROY_SIP event")
@@ -365,14 +366,17 @@ class EventHandlerSip: EventChannel.StreamHandler{
 
 }
 
-fun makeCallDataPayload(duration: String?, callStatus: Int?, fromCaller: String?, toCaller: String?,
-                        date: String?, callId: String?): Map<String, Any?> {
+fun makeCallDataPayload(call: Call): Map<String, Any?> {
+
     return mapOf(
-            "duration" to duration,
-            "reason" to callStatus,
-            "sip_to" to toCaller,
-            "sip_from" to fromCaller,
-            "date" to date,
-            "call_id" to callId
+            "duration" to call.callLog.duration.toString(),
+            "reason" to call.callLog.status.toInt(),
+            "sip_to" to call.callLog.toAddress.username,
+            "sip_from" to call.callLog.fromAddress.username,
+            "date" to call.callLog.startDate.toString(),
+            "call_id" to call.callLog.callId,
+            "conference" to call.conference?.isIn,
+            "participants" to call.conference?.conferenceAddress,
+            "call_state" to call.state
     )
 }

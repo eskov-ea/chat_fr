@@ -17,7 +17,7 @@ class CallsBloc
   final timer = CallTimer.getInstance();
 
 
-  CallsBloc() : super(const ReleasedCallState()) {
+  CallsBloc() : super(ReleasedCallState()) {
     callServiceEventChannelSubscription = callServiceEventChannel
         .receiveBroadcastStream()
         .listen((dynamic event)  {
@@ -60,6 +60,12 @@ class CallsBloc
       } else if (callEvent.event == "OUTGOING_RINGING") {
         final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
         add(OutgoingRingingCallEvent(callData: callData));
+      } else if (callEvent.event == "PAUSED") {
+        final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
+        add(PausedCallEvent(callData: callData));
+      } else if (callEvent.event == "RESUMED") {
+        final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
+        add(ResumedCallEvent(callData: callData));
       }
     });
       on<CallsEvent>((event, emit) async {
@@ -67,24 +73,27 @@ class CallsBloc
           emit(IncomingCallState(callerId: event.callerId));
         } else if (event is EndedCallEvent) {
           timer.stop();
+          state.removeCall(event.callData);
           emit(EndedCallState(callData: event.callData));
         } else if (event is OutgoingCallEvent) {
           emit(OutgoingCallState(callData: event.callData));
         } else if (event is ConnectedCallEvent) {
+          state.addCall(event.callData);
           emit(ConnectedCallState(callData: event.callData));
         } else if (event is StreamRunningCallEvent) {
           timer.start();
           emit(StreamRunningCallState(callData: event.callData));
         } else if (event is StreamStopCallEvent) {
           timer.stop();
-          emit(const StreamStopCallState());
+          emit(StreamStopCallState());
         } else if (event is ErrorCallEvent) {
           timer.stop();
+          state.removeCall(event.callData);
           emit(ErrorCallState(callData: event.callData));
         } else if (event is OutgoingRingingCallEvent) {
           emit(OutgoingRingingCallState(callData: event.callData));
         } else if (event is EndCallWithNoLogEvent) {
-          emit(const EndCallWithNoLogState());
+          emit(EndCallWithNoLogState());
         }
       });
     }

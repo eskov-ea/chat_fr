@@ -22,6 +22,7 @@ class CallControlsWidget extends StatelessWidget {
     required this.isSipServiceActive,
     required this.isCallRunning,
     required this.isCallingIncoming,
+    required this.isCallPaused,
     super.key
   });
 
@@ -29,6 +30,7 @@ class CallControlsWidget extends StatelessWidget {
   final bool isSipServiceActive;
   final bool isCallingIncoming;
   final bool isCallRunning;
+  final bool isCallPaused;
   final Function(Map<int, List<String>>) setAvailableAudioDeviceOptions;
   final Function(int) setCurrentDeviceId;
   final Function() onMessage;
@@ -62,9 +64,9 @@ class CallControlsWidget extends StatelessWidget {
                         children: [
                           GestureDetector(
                             onTap: () async {
-                              customToastMessage(context: context, message: 'Функционал находится в разработке');
-                              // if (!isCallRunning) return;
-                              // await _openAddPersonOnCallDialog(context);
+                              // customToastMessage(context: context, message: 'Функционал находится в разработке');
+                              if (!isCallRunning) return;
+                              await _openAddPersonOnCallDialog(context);
                             },
                             child: Container(
                               // margin: EdgeInsets.symmetric(horizontal: 20),
@@ -78,7 +80,10 @@ class CallControlsWidget extends StatelessWidget {
                                   borderRadius: const BorderRadius.all(Radius.circular(50))),
                               child: Padding(
                                 padding: const EdgeInsets.all(25),
-                                child: Image.asset(
+                                child: isCallPaused ? Image.asset(
+                                  'assets/call_controls/pause_white.png',
+                                  fit: BoxFit.fill,
+                                ) : Image.asset(
                                   'assets/call_controls/add.png',
                                   fit: BoxFit.fill,
                                 ),
@@ -86,11 +91,11 @@ class CallControlsWidget extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 5,),
-                          const SizedBox(
+                          SizedBox(
                             width: 80,
-                            child: Text("Добавить",
+                            child: Text(isCallPaused ? "На удержании" : "Добавить",
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white, fontSize: 14)
                             ),
                           ),

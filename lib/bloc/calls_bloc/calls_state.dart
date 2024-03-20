@@ -2,14 +2,24 @@ import 'package:equatable/equatable.dart';
 import 'package:chat/models/call_model.dart';
 
 abstract class CallState extends Equatable {
-  const CallState();
+  final List<CallModel> activeCalls = [];
 
+  addCall(CallModel call) {
+    activeCalls.add(call);
+  }
+  removeCall(CallModel call) {
+    for (var c in activeCalls) {
+      if (c.id == call.id) {
+        activeCalls.remove(c);
+      }
+    }
+  }
 }
 
 class EndedCallState extends CallState{
   final CallModel callData;
 
-  const EndedCallState({
+  EndedCallState({
     required this.callData
   });
 
@@ -20,7 +30,7 @@ class EndedCallState extends CallState{
 class OutgoingCallState extends CallState{
   final CallModel callData;
 
-  const OutgoingCallState({required this.callData});
+  OutgoingCallState({required this.callData});
 
   @override
   List<Object?> get props => [runtimeType, callData];
@@ -30,7 +40,7 @@ class OutgoingCallState extends CallState{
 class OutgoingRingingCallState extends CallState{
   final CallModel callData;
 
-  const OutgoingRingingCallState({required this.callData});
+  OutgoingRingingCallState({required this.callData});
 
   @override
   List<Object?> get props => [runtimeType, callData];
@@ -41,7 +51,7 @@ class IncomingCallState extends CallState {
 
   final String callerId;
 
-  const IncomingCallState({
+  IncomingCallState({
     required this.callerId
   });
 
@@ -52,7 +62,7 @@ class IncomingCallState extends CallState {
 
 class ConnectedCallState extends CallState{
   final CallModel callData;
-  const ConnectedCallState({required this.callData});
+  ConnectedCallState({required this.callData});
 
   @override
   List<Object?> get props => [runtimeType,callData];
@@ -60,7 +70,7 @@ class ConnectedCallState extends CallState{
 
 class ErrorCallState extends CallState{
   final CallModel callData;
-  const ErrorCallState({required this.callData});
+  ErrorCallState({required this.callData});
 
   @override
   List<Object?> get props => [runtimeType,callData];
@@ -70,7 +80,27 @@ class StreamRunningCallState extends CallState{
   final CallModel callData;
 
 
-  const StreamRunningCallState({required this.callData});
+  StreamRunningCallState({required this.callData});
+
+  @override
+  List<Object?> get props => [runtimeType];
+}
+
+class PausedCallState extends CallState{
+  final CallModel callData;
+
+
+  PausedCallState({required this.callData});
+
+  @override
+  List<Object?> get props => [runtimeType];
+}
+
+class ResumedCallState extends CallState{
+  final CallModel callData;
+
+
+  ResumedCallState({required this.callData});
 
   @override
   List<Object?> get props => [runtimeType];
@@ -78,7 +108,7 @@ class StreamRunningCallState extends CallState{
 
 class StreamStopCallState extends CallState{
 
-  const StreamStopCallState();
+  StreamStopCallState();
 
   @override
   List<Object?> get props => [runtimeType];
@@ -86,7 +116,7 @@ class StreamStopCallState extends CallState{
 
 class EndCallWithNoLogState extends CallState{
 
-  const EndCallWithNoLogState();
+  EndCallWithNoLogState();
 
   @override
   List<Object?> get props => [runtimeType];
@@ -94,8 +124,7 @@ class EndCallWithNoLogState extends CallState{
 }
 
 class ReleasedCallState extends CallState{
-
-  const ReleasedCallState();
+  ReleasedCallState();
 
   @override
   List<Object?> get props => [runtimeType];

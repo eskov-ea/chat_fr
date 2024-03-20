@@ -52,6 +52,22 @@ class EndedCallEvent extends CallsEvent {
   });
 }
 
+class PausedCallEvent extends CallsEvent {
+  final CallModel callData;
+
+  PausedCallEvent({
+    required this.callData
+  });
+}
+
+class ResumedCallEvent extends CallsEvent {
+  final CallModel callData;
+
+  ResumedCallEvent({
+    required this.callData
+  });
+}
+
 class EndCallWithNoLogEvent extends CallsEvent {}
 
 
