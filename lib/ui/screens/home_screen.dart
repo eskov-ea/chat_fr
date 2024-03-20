@@ -34,7 +34,7 @@ import 'package:chat/theme.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
 import 'package:chat/ui/widgets/active_call_widget.dart';
 import 'package:chat/ui/widgets/app_notification_widget.dart';
-import 'package:chat/ui/widgets/call_connecting_audio_player.dart';
+import 'package:chat/ui/widgets/calls/call_connecting_audio_player.dart';
 import 'package:chat/ui/widgets/session_expires_widget.dart';
 import 'package:chat/ui/widgets/web_container_wrapper.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';

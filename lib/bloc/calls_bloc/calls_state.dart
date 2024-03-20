@@ -2,16 +2,16 @@ import 'package:equatable/equatable.dart';
 import 'package:chat/models/call_model.dart';
 
 abstract class CallState extends Equatable {
-  final List<CallModel> activeCalls = [];
+  final Map<String, CallModel> activeCalls = {};
 
   addCall(CallModel call) {
-    activeCalls.add(call);
+    if (!activeCalls.containsKey(call.id)) {
+      activeCalls.addAll({call.id: call});
+    }
   }
   removeCall(CallModel call) {
-    for (var c in activeCalls) {
-      if (c.id == call.id) {
-        activeCalls.remove(c);
-      }
+    if (activeCalls.containsKey(call.id)) {
+      activeCalls.remove(call.id);
     }
   }
 }

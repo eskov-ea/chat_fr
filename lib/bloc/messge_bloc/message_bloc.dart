@@ -55,7 +55,6 @@ class MessageBloc extends Bloc<MessageBlocEvent, MessagesBlocState> {
     });
 
     on<MessageBlocEvent>((event, emit) async {
-      print("ChatsBuilderEvent   $event");
       if (event is MessageBlocReceivedMessageEvent) {
         onMessageBlocReceivedMessageEvent(event, emit);
       } else if (event is MessageBlocLoadMessagesEvent) {

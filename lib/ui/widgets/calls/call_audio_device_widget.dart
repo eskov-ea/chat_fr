@@ -39,12 +39,12 @@ const Map<int, List<String>> deviceTypeToDescriptionMapIOS = {
 };
 
 
-class AudioOutputDeviceWidget extends StatefulWidget {
+class AudioOutputDeviceButton extends StatefulWidget {
   final Function() toggleAudioOptionsPanel;
   final Function(Map<int, List<String>>) setAvailableAudioDeviceOptions;
   final Function(int) setCurrentDeviceId;
   final bool optionsMenuOpen;
-  const AudioOutputDeviceWidget({
+  const AudioOutputDeviceButton({
     required this.setAvailableAudioDeviceOptions,
     required this.setCurrentDeviceId,
     required this.toggleAudioOptionsPanel,
@@ -53,10 +53,10 @@ class AudioOutputDeviceWidget extends StatefulWidget {
   });
 
   @override
-  State<AudioOutputDeviceWidget> createState() => _AudioOutputDeviceWidgetState();
+  State<AudioOutputDeviceButton> createState() => _AudioOutputDeviceButtonState();
 }
 
-class _AudioOutputDeviceWidgetState extends State<AudioOutputDeviceWidget> {
+class _AudioOutputDeviceButtonState extends State<AudioOutputDeviceButton> {
 
   final audioDeviceMethodChannel = const MethodChannel("com.application.chat/audio_devices");
   final audioDeviceEventChannel = const EventChannel("event.channel/audio_device_channel");

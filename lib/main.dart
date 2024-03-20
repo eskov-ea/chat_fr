@@ -7,6 +7,7 @@ import 'package:chat/bloc/dialogs_bloc/group_dialog_members_streamer.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/bloc/user_bloc/online_users_manager.dart';
+import 'package:chat/services/calls_manager/calls_manager.dart';
 import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/dialogs/dialogs_repository.dart';
 import 'package:chat/services/error_handling_service/error_handling_repository.dart';
@@ -64,6 +65,7 @@ void main() async {
   UserOnlineStatusManager.instance;
   ErrorHandlingRepository.instance;
   SipRepository.instance;
+  CallsManager.instance;
   GroupDialogsMemberStateStreamer.instance;
   await configureCacheFolder();
 

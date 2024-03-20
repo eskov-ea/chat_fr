@@ -6,6 +6,7 @@ import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
 import 'package:chat/ui/screens/own_profile_screen.dart';
+import 'package:chat/ui/screens/running_call_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -38,7 +39,10 @@ class _DatabaseInitializationScreenState extends State<DatabaseInitializationScr
           message = 'Загрузка завершена';
           stepProgress = 1;
         });
-        Navigator.pushReplacementNamed(context, MainNavigationRouteNames.homeScreen);
+        // Navigator.pushReplacementNamed(context, MainNavigationRouteNames.homeScreen);
+        Navigator.pushReplacementNamed(context, MainNavigationRouteNames.runningCallScreen,
+          arguments: CallScreenArguments(userId: '40')
+        );
       } else if (event is DatabaseBlocDBFailedInitializeState) {
         setState(() {
           error = event.exception;

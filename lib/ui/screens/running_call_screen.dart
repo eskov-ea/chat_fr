@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:chat/bloc/calls_bloc/calls_state.dart';
+import 'package:chat/models/call_model.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,7 +11,7 @@ import '../../bloc/calls_bloc/calls_bloc.dart';
 import '../../services/global.dart';
 import '../../services/helpers/call_timer.dart';
 import '../../view_models/user/users_view_cubit.dart';
-import '../widgets/call_controls_widget.dart';
+import '../widgets/calls/call_controls_widget.dart';
 
 class RunningCallScreen extends StatefulWidget {
 
@@ -41,6 +42,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   double isAudioOptionPanelVisible = 0;
   Map<int, List<String>> availableAudioDevices = {};
   int? currentDeviceId;
+  Map<String, CallModel> activeCalls = {};
 
   void setAvailableAudioDeviceOptions(Map<int, List<String>> devices) {
     log("setAvailableAudioDeviceOptions  $devices");
@@ -74,6 +76,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   }
 
   void _onCallStateChanged(CallState state) {
+    activeCalls = state.activeCalls;
     if (state is IncomingCallState) {
       setUsername(state.callerId);
       setState(() {
