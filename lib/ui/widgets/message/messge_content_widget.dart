@@ -133,31 +133,34 @@ class MessageContentWidget extends StatelessWidget {
               ),
 
               if (file == null || (file != null && message.trim() != "") || AudioTypes.contains(file!.filetype) || DocumentTypes.contains(file!.filetype))
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 5, right: 0, bottom: 8),
-                    child: Text(
-                      messageTime,
-                      style: const TextStyle(
-                        color: AppColors.textFaded,
-                        fontSize: 12,
-                        height: 0.5,
-                        fontWeight: FontWeight.bold,
+              SizedBox(
+                height: 20,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 0, right: 0, bottom: 3),
+                      child: Text(
+                        messageTime,
+                        style: const TextStyle(
+                          color: AppColors.textFaded,
+                          fontSize: 11,
+                          height: 0.5,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 5, right: 5),
-                    child: SizedBox(
-                      width: isMe ? 25 : 0,
-                      child: isMe && isError == 0 ? StatusWidget(status) : const SizedBox.shrink()
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5, right: 5),
+                      child: SizedBox(
+                        width: isMe ? 25 : 0,
+                        child: isMe && isError == 0 ? StatusWidget(status) : const SizedBox.shrink()
+                        ),
                       ),
-                    ),
-                  const SizedBox(width: 5)
-                ],
+                    const SizedBox(width: 5)
+                  ],
+                ),
               )
             ],
           ),

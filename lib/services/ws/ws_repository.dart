@@ -40,6 +40,7 @@ class WebsocketRepository extends IWebsocketRepository{
   );
 
   Future<void> connect(List<DialogData> dialogs) async {
+    print('WS connect:::  $dialogs');
     currentState = PusherChannelsClientLifeCycleState.pendingConnection;
     sinkState(currentState);
 

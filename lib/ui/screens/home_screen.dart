@@ -383,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     switch(state){
       case AppLifecycleState.resumed:
         BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocGetUpdatesOnResume());
-        customToastMessage(context: context, message: 'Обновляем данные');
+        // customToastMessage(context: context, message: 'Обновляем данные');
         _websocketRepo.reconnect();
       case AppLifecycleState.paused:
         DBProvider.db.setLastUpdateTime();

@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 Widget StatusWidget(int status) {
   switch (status) {
     case 0:
-      return const Center(
+      return const Align(
+        alignment: Alignment.bottomCenter,
         child: Padding(
-          padding: EdgeInsets.only(bottom: 4),
+          padding: EdgeInsets.only(bottom: 0),
           child: SizedBox(
             height: 10,
             width: 10,

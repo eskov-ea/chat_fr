@@ -215,6 +215,7 @@ class ActionBarState extends State<ActionBar> {
   Widget build(BuildContext context) {
     return Container(
       color: AppColors.backgroundLight,
+      height: 80,
       child: Stack(
         children: [
           Row(
@@ -360,10 +361,10 @@ class ActionBarState extends State<ActionBar> {
                 bottom: 0,
                 left: 0,
                 child: Transform.translate(
-                  offset: Offset(0,  65 - 65 * widget.animationController.value),
+                  offset: Offset(0,  80 - 80 * widget.animationController.value),
                   child: Container(
                     width: MediaQuery.of(context).size.width,
-                    height: 65,
+                    height: 80,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF3F3F3),
@@ -416,10 +417,10 @@ class ActionBarState extends State<ActionBar> {
             bottom: 0,
             left: 0,
             child: Transform.translate(
-              offset: Offset(0,  widget.animationController.value > 0 ? 0 : 65),
+              offset: Offset(0,  widget.animationController.value > 0 ? 0 : 80),
               child: Container(
                 width: MediaQuery.of(context).size.width,
-                height: 65,
+                height: 80,
                 color: AppColors.backgroundLight,
                 // decoration: const BoxDecoration(
                 //     color: Color(0xFFF3F3F3),

@@ -65,7 +65,7 @@ class _DBScreenState extends State<DBScreen> {
                         padding: EdgeInsets.all(5),
                         color: Colors.redAccent.shade100,
                         child: Center(
-                          child: Text('add 256 dialog',
+                          child: Text('add chat types',
                             style: TextStyle(color: Colors.white),
                           )
                         )
@@ -80,8 +80,12 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      await db.getDialogs();
-                      print('Chat types initialized::');
+                      final res = await (await db.database).transaction((txn) async {
+                        return await txn.rawDelete(
+                          'DELETE FROM attachments WHERE chat_message_id = 7137; '
+                        );
+                      });
+                      print('Delete file $res');
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width * 0.45,
@@ -89,7 +93,7 @@ class _DBScreenState extends State<DBScreen> {
                         padding: const EdgeInsets.all(5),
                         color: Colors.purple.shade200,
                         child: const Center(
-                            child: Text('Get last message',
+                            child: Text('Delete file',
                               style: TextStyle(color: Colors.white),
                             )
                         )
