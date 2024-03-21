@@ -142,23 +142,19 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
         isCallInProgress = true;
       });
     } else if (state is EndedCallState) {
-      if (state.activeCalls.isEmpty) {
-        return Navigator.pop(context);
-      } else if (activeCallId == state.callData.id) {
-        return Navigator.pop(context);
-      } else {
-        activeCalls.forEach((key, value) {
-          if (key != state.callData.id) {
-            setState(() {
-              activeCallId = key;
-              return;
-            });
-          }
-          sipMethodChannel.invokeMethod("RESUME_CALL", {"id": activeCallId});
-        });
-      }
 
+      activeCalls.forEach((key, value) {
+        if (key != state.callData.id) {
+          setState(() {
+            activeCallId = key;
+            return;
+          });
+        }
+        sipMethodChannel.invokeMethod("RESUME_CALL", {"id": activeCallId});
+      });
     }
+
+
   }
 
   void toggleAudioOptionsPanel() {

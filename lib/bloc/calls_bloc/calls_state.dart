@@ -1,8 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:chat/models/call_model.dart';
 
+final Map<String, CallModel> _activeCalls = {};
+
 abstract class CallState extends Equatable {
-  final Map<String, CallModel> activeCalls = {};
+  final activeCalls = _activeCalls;
 
   addCall(CallModel call) {
     if (!activeCalls.containsKey(call.id)) {

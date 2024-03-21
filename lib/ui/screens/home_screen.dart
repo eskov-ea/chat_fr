@@ -278,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _onCallStateChanged(CallState state) async {
 
-    print("callServiceBlocSubscription   $state");
+    print("callServiceBlocSubscription   $state  ${state.activeCalls}");
     if (state is IncomingCallState) {
       if(ModalRoute.of(context)?.settings.name == MainNavigationRouteNames.incomingCallScreen) return;
       setState(() {
@@ -304,8 +304,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     } else if(state is EndedCallState) {
       callPlayer.stopPlayConnectingSound();
       try {
-        Navigator.of(context).popUntil((route) =>
-        route.settings.name == MainNavigationRouteNames.homeScreen);
+        if (state.activeCalls.isEmpty) {
+          Navigator.of(context).popUntil((route) =>
+          route.settings.name == MainNavigationRouteNames.homeScreen);
+        }
       } catch (err) {
         Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.loaderWidget);
       }

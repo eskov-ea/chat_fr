@@ -39,10 +39,7 @@ class _DatabaseInitializationScreenState extends State<DatabaseInitializationScr
           message = 'Загрузка завершена';
           stepProgress = 1;
         });
-        // Navigator.pushReplacementNamed(context, MainNavigationRouteNames.homeScreen);
-        Navigator.pushReplacementNamed(context, MainNavigationRouteNames.runningCallScreen,
-          arguments: CallScreenArguments(userId: '40')
-        );
+        Navigator.pushReplacementNamed(context, MainNavigationRouteNames.homeScreen);
       } else if (event is DatabaseBlocDBFailedInitializeState) {
         setState(() {
           error = event.exception;
