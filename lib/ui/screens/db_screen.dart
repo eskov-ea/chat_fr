@@ -55,10 +55,9 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      final dialogs = await DialogsProvider().getDialogs();
-                      final dialog256 = dialogs.firstWhere((element) => element.dialogId == 256);
-                      final result = await db.saveDialogs([dialog256]);
-                      log('dialog 256 finish');
+                      await db.initializeChatTypeValues();
+                      final res = await db.readChatTypes();
+                      print('chat types::: $res');
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width * 0.45,

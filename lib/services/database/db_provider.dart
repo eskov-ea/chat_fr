@@ -44,6 +44,7 @@ class DBProvider implements IDBProvider {
 
   @override
   Future<Database> initDB() async {
+    print('Init DB:::  $_database');
     try {
       final databasesPath = await getDatabasesPath();
       String path = join(databasesPath, 'mcfef.db');
@@ -73,6 +74,11 @@ class DBProvider implements IDBProvider {
       log('DBInit error::   $stack');
       rethrow;
     }
+  }
+
+  Future<void> upgradeDBDumbWay() async {
+    _database = await initDB();
+    return;
   }
 
   /// CHAT TYPE DB LAYER

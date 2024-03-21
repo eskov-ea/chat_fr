@@ -18,7 +18,7 @@ final Map<String, String> tables = {
   'chat_type' :
   'CREATE TABLE chat_type ('
       'id INTEGER PRIMARY KEY AUTOINCREMENT, '
-      'name varchar(255) DEFAULT NULL, '
+      'name varchar(255) NOT NULL UNIQUE, '
       'description varchar(255) DEFAULT NULL, '
       'p2p TINYINT(1) DEFAULT NULL, '
       'secure TINYINT(1) DEFAULT NULL, '

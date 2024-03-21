@@ -3,6 +3,7 @@ import 'package:chat/bloc/database_bloc/database_bloc.dart';
 import 'package:chat/bloc/database_bloc/database_events.dart';
 import 'package:chat/bloc/database_bloc/database_state.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
+import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
 import 'package:chat/ui/screens/own_profile_screen.dart';
@@ -22,6 +23,7 @@ class _DatabaseInitializationScreenState extends State<DatabaseInitializationScr
   String message = 'Загружаем \r\n базу данных';
   double stepProgress = 0.55;
   AppErrorException? error;
+  int failsCount = 0;
 
   @override
   void initState() {
@@ -40,9 +42,19 @@ class _DatabaseInitializationScreenState extends State<DatabaseInitializationScr
         });
         Navigator.pushReplacementNamed(context, MainNavigationRouteNames.homeScreen);
       } else if (event is DatabaseBlocDBFailedInitializeState) {
-        setState(() {
-          error = event.exception;
-        });
+        if (event.exception.type == AppErrorExceptionType.auth) {
+          Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.auth);
+        }
+        if (failsCount == 0) {
+          _upgradeDBDumbWay().then((_) {
+            failsCount = 1;
+          });
+
+        } else {
+          setState(() {
+            error = event.exception;
+          });
+        }
       }
     });
     BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocInitializeEvent());
@@ -52,6 +64,13 @@ class _DatabaseInitializationScreenState extends State<DatabaseInitializationScr
   void dispose() {
     _databaseStateSubscription.cancel();
     super.dispose();
+  }
+
+  Future<void> _upgradeDBDumbWay() async {
+    final db = DBProvider.db;
+    await db.deleteDBFile();
+    await db.upgradeDBDumbWay();
+    BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocInitializeEvent());
   }
 
   @override

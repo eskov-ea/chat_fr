@@ -42,10 +42,11 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     required this.errorHandlerBloc,
     required this.db,
   }): super( DatabaseBlocDBNotInitializedState()){
+    websocketEventSubscription = websocketRepository.events.listen(_onWebsocketEvent);
+
     on<DatabaseBlocEvent>((event, emit) async {
       if (event is DatabaseBlocInitializeEvent) {
         await onDatabaseBlocInitializeEvent(event, emit);
-        websocketEventSubscription = websocketRepository.events.listen(_onWebsocketEvent);
       } else if (event is DatabaseBlocSendMessageEvent) {
         await onDatabaseBlocSendMessageEvent(event, emit);
       } else if (event is DatabaseBlocNewMessageReceivedEvent) {
