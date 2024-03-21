@@ -8,6 +8,8 @@ class CallModel {
   final String duration;
   final int callStatus;
   final String id;
+  final List? participants;
+  final int? callState;
 
 
   CallModel({
@@ -16,6 +18,8 @@ class CallModel {
     required this.toCaller,
     required this.duration,
     required this.callStatus,
+    required this.participants,
+    required this.callState,
     required this.id
   });
 
@@ -25,6 +29,8 @@ class CallModel {
       toCaller: json["sip_to"],
       duration: json["duration"] ?? "00:00:00",
       callStatus: mapCallReasonToStatusCode(json["reason"]),
+      callState: json['call_state'],
+      participants: json["participants"],
       id: json["call_id"],
   );
 
@@ -34,6 +40,8 @@ class CallModel {
     toCaller: json["dst"] ?? json["sip_to"],
     duration: json["duration"] ?? "00:00:00",
     callStatus: json["disposition"] ?? json["reason"],
+    callState: json['call_state'],
+    participants: json["participants"],
     id: json["uniqueid"] ?? json["call_id"]
   );
 
@@ -43,6 +51,8 @@ class CallModel {
     toCaller: json["dst"] ?? json["sip_to"],
     duration: json["duration"] ?? "00:00:00",
     callStatus: json["disposition"] ?? json["reason"],
+    callState: json['call_state'],
+    participants: json["participants"],
     id: "unspecified"
   );
 
@@ -102,6 +112,35 @@ int mapCallReasonToStatusCode(String name) {
     case "Busy here": return 1;
     case "Ringing": return 1;
     default: return 1;
+  }
+}
+
+String mapCallStateToStateName(int? state) {
+  if (state == null) return "Released";
+  switch(state) {
+    case 0: return "Idle";
+    case 1: return "IncomingReceived";
+    case 2: return "PushIncomingReceived";
+    case 3: return "OutgoingInit";
+    case 4: return "OutgoingProgress";
+    case 5: return "OutgoingRinging";
+    case 6: return "OutgoingEarlyMedia";
+    case 7: return "Connected";
+    case 8: return "StreamsRunning";
+    case 9: return "Pausing";
+    case 10: return "Paused";
+    case 11: return "Resuming";
+    case 12: return "Referred";
+    case 13: return "Error";
+    case 14: return "End";
+    case 15: return "PausedByRemote";
+    case 16: return "UpdatedByRemote";
+    case 17: return "IncomingEarlyMedia";
+    case 18: return "Updating";
+    case 19: return "Released";
+    case 20: return "EarlyUpdatedByRemote";
+    case 21: return "EarlyUpdating";
+    default: return "Released";
   }
 }
 

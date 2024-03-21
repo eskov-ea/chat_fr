@@ -585,6 +585,27 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         getCurrentAudioDevice()
     }
 
+    fun tryToResumeCall(callId: String?) {
+        if (callId == null) {
+            val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
+            MainActivity.callServiceEventSink?.success(args)
+        } else {
+            try {
+                core.calls.forEach {
+                    if (it.callLog.callId == callId) {
+                        it.resume()
+                        return
+                    }
+                }
+                val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
+                MainActivity.callServiceEventSink?.success(args)
+            } catch (e: Error) {
+                val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
+                MainActivity.callServiceEventSink?.success(args)
+            }
+        }
+    }
+
     fun getAudioDeviceList() {
         try {
             var deviceList = listOf<Int>()

@@ -25,6 +25,7 @@ class CallControlsWidget extends StatelessWidget {
     required this.isCallRunning,
     required this.isCallingIncoming,
     required this.isCallPaused,
+    required this.switchCallPanelToggleCallback,
     super.key
   });
 
@@ -40,6 +41,7 @@ class CallControlsWidget extends StatelessWidget {
   final Function() onCallDecline;
   final Function() onCallAccept;
   final Function() toggleAudioOptionsPanel;
+  final Function() switchCallPanelToggleCallback;
 
 
   @override
@@ -87,7 +89,7 @@ class CallControlsWidget extends StatelessWidget {
                   Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SwitchCallButton(),
+                        SwitchCallButton(switchCallPanelToggleCallback: switchCallPanelToggleCallback),
                         declineCallButton(),
                         conferenceButton()
                       ]

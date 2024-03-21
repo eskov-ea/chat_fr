@@ -162,6 +162,10 @@ class MainActivity : FlutterActivity() {
             } else if (call.method.equals("ACCEPT_CALL")) {
                 Log.w("ACCEPT_CALL", "DESTROY_SIP event")
                 linphoneCore.core.currentCall?.accept()
+            } else if (call.method.equals("RESUME_CALL")) {
+                val id = call.argument<String?>("id")
+                Log.w("RESUME_CALL", "RESUME_CALL call id: $id")
+                linphoneCore.tryToResumeCall(id)
             } else if (call.method.equals(("CHECK_FOR_RUNNING_CALL"))) {
                 if (linphoneCore.core.currentCall != null) {
                     result.success(true)
@@ -377,6 +381,6 @@ fun makeCallDataPayload(call: Call): Map<String, Any?> {
             "call_id" to call.callLog.callId,
             "conference" to call.conference?.isIn,
             "participants" to call.conference?.conferenceAddress,
-            "call_state" to call.state
+            "call_state" to call.state.toInt()
     )
 }

@@ -29,9 +29,10 @@ class RunningCallScreen extends StatefulWidget {
 class _RunningCallScreenState extends State<RunningCallScreen> {
 
   final audioDeviceMethodChannel = const MethodChannel("com.application.chat/audio_devices");
+  final sipMethodChannel = const MethodChannel("com.application.chat/sip");
   late final StreamSubscription _callServiceBlocSubscription;
   final timer = CallTimer.getInstance();
-  String? username = "Не удалось определить номер";
+  String username = "Не удалось определить номер";
   late final StreamSubscription _streamSubscription;
   String? callDuration;
   bool isSipServiceActive = true;
@@ -43,6 +44,8 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   Map<int, List<String>> availableAudioDevices = {};
   int? currentDeviceId;
   Map<String, CallModel> activeCalls = {};
+  bool isSwitchCallPanelVisible = false;
+  String? activeCallId;
 
   void setAvailableAudioDeviceOptions(Map<int, List<String>> devices) {
     log("setAvailableAudioDeviceOptions  $devices");
@@ -56,8 +59,14 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
     });
   }
 
+  void setToggleSwitchCallPanelVisibility() {
+    setState(() {
+      isSwitchCallPanelVisible = !isSwitchCallPanelVisible;
+    });
+  }
+
   void setUsername(String callerName) {
-    if (username == null || username == "Не удалось определить номер") {
+    if (username == "Не удалось определить номер") {
       try {
         final callerUser = BlocProvider.of<UsersViewCubit>(context)
             .usersBloc
@@ -91,6 +100,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
         setUsername(state.callData.fromCaller);
       }
       setState(() {
+        activeCallId = state.callData.id;
         isCallingIncoming = false;
         isCallingOutgoing = false;
         isCallInProgress = true;
@@ -109,6 +119,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
     } else if (state is OutgoingCallState) {
       setUsername(state.callData.toCaller);
       setState(() {
+        activeCallId = state.callData.id;
         isCallingIncoming = false;
         isCallingOutgoing = true;
         isCallInProgress = false;
@@ -130,6 +141,23 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
         isCallPaused = false;
         isCallInProgress = true;
       });
+    } else if (state is EndedCallState) {
+      if (state.activeCalls.isEmpty) {
+        return Navigator.pop(context);
+      } else if (activeCallId == state.callData.id) {
+        return Navigator.pop(context);
+      } else {
+        activeCalls.forEach((key, value) {
+          if (key != state.callData.id) {
+            setState(() {
+              activeCallId = key;
+              return;
+            });
+          }
+          sipMethodChannel.invokeMethod("RESUME_CALL", {"id": activeCallId});
+        });
+      }
+
     }
   }
 
@@ -252,22 +280,22 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.only(top: 80),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CircleAvatar(
-                              radius: 80,
-                              backgroundColor: Colors.grey,
-                              child: Padding(
-                                padding: const EdgeInsets.all(1), // Border radius
-                                child: ClipOval(
-                                    child: Image.asset('assets/images/no_avatar.png')),
-                              ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.1,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircleAvatar(
+                            radius: 80,
+                            backgroundColor: Colors.grey,
+                            child: Padding(
+                              padding: const EdgeInsets.all(1), // Border radius
+                              child: ClipOval(
+                                  child: Image.asset('assets/images/no_avatar.png')),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                       const SizedBox(
                         height: 10,
@@ -300,6 +328,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
                         child: SizedBox(),
                       ),
                       CallControlsWidget(
+                        switchCallPanelToggleCallback: setToggleSwitchCallPanelVisibility,
                         setAvailableAudioDeviceOptions: setAvailableAudioDeviceOptions,
                         setCurrentDeviceId: setCurrentDeviceId,
                         isCallingIncoming: isCallingIncoming,
@@ -328,8 +357,8 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
                           });
                         },
                       ),
-                      const SizedBox(
-                        height: 50,
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.1,
                       ),
                     ],
                   ),
@@ -374,6 +403,73 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
         ),
       ),
     );
+  }
+
+  Widget _activeCallsOptions () {
+    return Positioned(
+      right: 20,
+      bottom: 310,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.fastEaseInToSlowEaseOut,
+        opacity: isAudioOptionPanelVisible,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.65,
+          decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+              color: Colors.black54,
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black54,
+                    blurRadius: 120,
+                    spreadRadius: 30
+                )
+              ]
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                ...getActiveCallsItems()
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> getActiveCallsItems() {
+    final List<Widget> calls = [];
+    if (activeCalls.length < 2) return calls;
+    activeCalls.forEach((key, value) {
+      calls.add(
+          Material(
+            color: Colors.transparent,
+            child: Ink(
+              height: 50,
+              child: InkWell(
+                onTap: () {
+                  sipMethodChannel.invokeMethod("SET_ACTIVE_CALL", {"call_id": key});
+                  setToggleSwitchCallPanelVisibility();
+                },
+                customBorder: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6)
+                ),
+                splashColor: Colors.white24,
+                child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                        color: value.callState == key ? Color(0xFF646464) : Colors.transparent,
+                        borderRadius: BorderRadius.all(Radius.circular(6))
+                    ),
+                    child: Text("")
+                ),
+              ),
+            ),
+          )
+      );
+    });
+    return calls;
   }
 
   List<Widget> _getAudioOptionsItems() {
