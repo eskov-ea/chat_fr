@@ -26,6 +26,7 @@ class DialogItem extends StatefulWidget {
     required this.checkOnline,
     required this.clearSearch,
     required this.users,
+    required this.objKey,
     required this.onlineMembers
   }) : super(key: key);
 
@@ -35,6 +36,7 @@ class DialogItem extends StatefulWidget {
   final Function clearSearch;
   final Map<int, bool> onlineMembers;
   final List<UserModel> users;
+  final ObjectKey? objKey;
 
   @override
   State<DialogItem> createState() => _DialogItemState();
@@ -113,11 +115,11 @@ class _DialogItemState extends State<DialogItem> {
 
     final String partnerName = getChatItemName(widget.dialogData, widget.userId);
     final List<UserModel> partners = getPartnersData(widget.dialogData.users);
-    final objKey = ObjectKey("${widget.userId}_object_key");
+    final avatarObjKey = ObjectKey("${partnerName}__object_key");
 
     if(partners.isEmpty) return const SizedBox.shrink();
     return InkWell(
-      key: objKey,
+      key: widget.objKey,
       onTap: () async {
         print('open dialog:  ${widget.dialogData.dialogId}');
         BlocProvider.of<MessageBloc>(context).add(MessageBlocFlushMessagesEvent());
@@ -148,7 +150,7 @@ class _DialogItemState extends State<DialogItem> {
             Padding(
                 padding: const EdgeInsets.only(right: 12.0),
                 child: Center(
-                    child: _setDialogAvatar(dialogData: widget.dialogData, partners: partners, key: objKey)
+                    child: _setDialogAvatar(dialogData: widget.dialogData, partners: partners, key: avatarObjKey)
                 )
             ),
             Expanded(

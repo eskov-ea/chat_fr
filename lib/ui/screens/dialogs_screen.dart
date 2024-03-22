@@ -135,6 +135,7 @@ class _MessagesPageState extends State<MessagesPage> {
                           padding: const EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 0),
                           child: Align(
                             child: DialogItem(
+                              objKey: ObjectKey('${state.dialogs[index].dialogId}_dialog_item_key'),
                               clearSearch: clearSearch,
                               userId: userId,
                               users: (BlocProvider.of<UsersViewCubit>(context).state as UsersViewCubitLoadedState).users,

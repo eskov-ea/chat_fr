@@ -308,8 +308,12 @@ class _MessageTile extends StatelessWidget {
           children: [
             if (selectedMode)
               Checkbox(
-                activeColor: Colors.transparent,
+                activeColor: Colors.blue,
                 value: selected.any((m) => m.id == messageId),
+                shape: CircleBorder(
+                    side: BorderSide(color: Colors.black54, width: 1)
+                ),
+                checkColor: Colors.white,
                 onChanged: (_) {
                   setSelected(SelectedMessage(id: messageId, message: message, author: senderName, file: file));
                 },
@@ -366,6 +370,7 @@ class _MessageTile extends StatelessWidget {
                               trailingIcon: const Icon(Icons.control_point)),
                         ],
                         child: MessageContentWidget(
+                            objKey: ObjectKey('message_widget_key_${messageId}'),
                             dirPath: dirPath,
                             isMe: isMe,
                             file: file,

@@ -33,6 +33,7 @@ class MessageContentWidget extends StatelessWidget {
   final String? forwardFrom;
   final RepliedMessage? parentMessage;
   final String dirPath;
+  final ObjectKey? objKey;
   const MessageContentWidget({
     required this.isMe,
     required this.file,
@@ -52,6 +53,7 @@ class MessageContentWidget extends StatelessWidget {
     required this.parentMessage,
     required this.borderRadius,
     required this.dirPath,
+    required this.objKey,
     super.key
   });
 
@@ -62,6 +64,7 @@ class MessageContentWidget extends StatelessWidget {
         print('Messages taped $messageId $file $localId ');
         setSelected(SelectedMessage(id: messageId, message: message, author: senderName, file: file));
       },
+      key: objKey,
       child: Align(
         alignment: isMe ? Alignment.topRight : Alignment.topLeft,
         child: Container(

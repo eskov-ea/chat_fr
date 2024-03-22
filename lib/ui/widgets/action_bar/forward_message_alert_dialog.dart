@@ -93,6 +93,11 @@ class _ForwardMessageAlertDialogState extends State<ForwardMessageAlertDialog>{
     }
     await Future.delayed(const Duration(milliseconds: 200));
 
+    widget.forwardingMessages!.sort((a, b) {
+      if (a.id > b.id) return 1;
+      if (a.id == b.id) return 0;
+      return -1;
+    });
     for (final message in widget.forwardingMessages!) {
 
       for (final address in selectedAddresses) {
