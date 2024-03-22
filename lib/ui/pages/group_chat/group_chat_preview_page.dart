@@ -1,14 +1,14 @@
+import 'package:chat/models/dialog_model.dart';
+import 'package:chat/models/user_model.dart';
+import 'package:chat/services/dialogs/dialogs_api_provider.dart';
+import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
+import 'package:chat/services/helpers/navigation_helpers.dart';
 import 'package:chat/services/popup_manager.dart';
+import 'package:chat/storage/data_storage.dart';
+import 'package:chat/ui/navigation/main_navigation.dart';
+import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:flutter/material.dart';
-import '../../../models/contact_model.dart';
-import '../../../models/dialog_model.dart';
-import '../../../services/dialogs/dialogs_api_provider.dart';
-import '../../../services/global.dart';
-import '../../../services/helpers/navigation_helpers.dart';
-import '../../../storage/data_storage.dart';
-import '../../../view_models/user/users_view_cubit.dart';
-import '../../navigation/main_navigation.dart';
 
 class GroupChatPreviewPage extends StatefulWidget {
   const GroupChatPreviewPage({

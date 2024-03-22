@@ -1,24 +1,28 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:chat/bloc/call_logs_bloc/call_logs_bloc.dart';
+import 'package:chat/bloc/call_logs_bloc/call_logs_event.dart';
+import 'package:chat/bloc/call_logs_bloc/call_logs_state.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
+import 'package:chat/bloc/profile_bloc/profile_bloc.dart';
 import 'package:chat/models/call_model.dart';
-import 'package:chat/models/contact_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/services/helpers/dates.dart';
 import 'package:chat/services/popup_manager.dart';
 import 'package:chat/storage/data_storage.dart';
+import 'package:chat/types_extensions/String.dart';
+import 'package:chat/types_extensions/String.dart';
+import 'package:chat/types_extensions/String.dart';
+import 'package:chat/types_extensions/String.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
+import 'package:chat/ui/widgets/app_bar.dart';
 import 'package:chat/ui/widgets/unauthenticated_widget.dart';
+import 'package:chat/view_models/user/users_view_cubit.dart';
+import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../bloc/call_logs_bloc/call_logs_event.dart';
-import '../../bloc/call_logs_bloc/call_logs_state.dart';
-import '../../bloc/profile_bloc/profile_bloc.dart';
-import '../../view_models/user/users_view_cubit.dart';
-import '../../view_models/user/users_view_cubit_state.dart';
-import '../widgets/app_bar.dart';
 
 
 enum CallStatus {answered, declined, noAnswer, errored}
@@ -103,7 +107,7 @@ class _CallsPageState extends State<CallsPage> {
                   child: ListView.builder(
                     itemCount: state.callLog.length,
                     itemBuilder: (context, index) {
-                      return getCallInfo(
+                      return CallEntity(
                           _usersState is UsersViewCubitLoadedState ? (_usersState as UsersViewCubitLoadedState).usersDictionary : <int, UserModel>{},
                         state.callLog[index],
                         index
@@ -191,7 +195,7 @@ class _CallsPageState extends State<CallsPage> {
   }
 
 
-  Widget getCallInfo(Map<int, UserModel>  users, CallModel call, int index) {
+  Widget CallEntity(Map<int, UserModel>  users, CallModel call, int index) {
     try {
       CallRenderData? data;
       final toCaller = int.parse(call.toCaller.replaceAll(RegExp(r'[^0-9]'), '').substring(1));
@@ -203,7 +207,7 @@ class _CallsPageState extends State<CallsPage> {
             userId: userId!,
             callName:
                 call.callStatus == 0 ? "Входящий" : "Пропущенный",
-            callerName: "${user.lastname} ${user.firstname}",
+            callerName: "${user.lastname.toCapitalized()} ${user.firstname.toCapitalized()}",
             callerNumber: fromCaller.toString(),
             callDate: DateTime.parse(call.date),
             callDuration: call.duration);
@@ -212,7 +216,7 @@ class _CallsPageState extends State<CallsPage> {
         data = CallRenderData(
             userId: userId!,
             callName: "Исходящий",
-            callerName: "${user.lastname} ${user.firstname}",
+            callerName: "${user.lastname.toCapitalized()} ${user.firstname.toCapitalized()}",
             callerNumber: toCaller.toString(),
             callDate: DateTime.parse(call.date),
             callDuration: call.duration);

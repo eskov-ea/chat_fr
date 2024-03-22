@@ -109,7 +109,7 @@ class MessageData extends Equatable{
 
   @override
   String toString() {
-    return "Inctance of MessageData[ id: $messageId, author: $senderId, chat_id: $dialogId, "
+    return "Inctance of MessageData[ id: $messageId, local id: $localId, author: $senderId, chat_id: $dialogId, "
         "message: $message, created_at: $rawDate} "
         "file: {id: ${file?.attachmentId}, local_id: $localId, name: ${file?.name} ]"
         "${messageId.runtimeType}, ${senderId.runtimeType}, ${dialogId.runtimeType} "

@@ -26,6 +26,7 @@ class MessageContentWidget extends StatelessWidget {
   final String messageTime;
   final String message;
   final String senderName;
+  final String? localId;
   final String? repliedMsgSenderName;
   final double borderRadius;
   final File? fileAttachment;
@@ -38,6 +39,7 @@ class MessageContentWidget extends StatelessWidget {
     required this.isError,
     required this.setSelected,
     required this.messageId,
+    required this.localId,
     required this.message,
     required this.senderName,
     required this.repliedMsgSenderName,
@@ -57,7 +59,7 @@ class MessageContentWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        print('Messages taped $messageId $file ');
+        print('Messages taped $messageId $file $localId ');
         setSelected(SelectedMessage(id: messageId, message: message, author: senderName, file: file));
       },
       child: Align(

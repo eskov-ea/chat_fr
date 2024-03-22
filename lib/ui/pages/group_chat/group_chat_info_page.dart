@@ -13,7 +13,7 @@ import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../models/contact_model.dart';
+import '../../../models/user_model.dart';
 import '../../../services/dialogs/dialogs_api_provider.dart';
 import '../../../theme.dart';
 import '../../../view_models/user/users_view_cubit.dart';

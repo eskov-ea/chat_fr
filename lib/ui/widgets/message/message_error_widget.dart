@@ -33,8 +33,11 @@ class MessageErrorWidget extends StatelessWidget {
   Widget build(BuildContext context) {
 
     void deleteErroredMessage() {
-      //TODO: refacrot messageBloc
-      // BlocProvider.of<ChatsBuilderBloc>(context).add(ChatsBuilderDeleteLocalMessageEvent(dialogId: dialogId, messageId: messageId));
+      Navigator.of(context).pop();
+      //TODO: refactor db
+      if (localMessageId != null) {
+        BlocProvider.of<DatabaseBloc>(context).add(DatabaseBlocDeleteMessagesEvent(ids: [messageId], dialogId: dialogId));
+      }
     }
 
     // Widget mIcon = isErrorHandling
@@ -85,7 +88,6 @@ class MessageErrorWidget extends StatelessWidget {
                     GestureDetector(
                         onTap: (){
                           deleteErroredMessage();
-                          Navigator.of(context).pop();
                         },
                         child: const SizedBox(
                           child: Text("Удалить сообщение",

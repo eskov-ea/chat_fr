@@ -1,5 +1,5 @@
 import 'dart:developer';
-import 'package:chat/models/contact_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/services/database/db_provider.dart';
 import 'package:sqflite/sqflite.dart';
 

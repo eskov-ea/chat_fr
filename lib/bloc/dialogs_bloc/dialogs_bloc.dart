@@ -10,6 +10,7 @@ import 'package:chat/bloc/error_handler_bloc/error_handler_events.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/message_model.dart';
+import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/dialogs/dialogs_repository.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/services/logger/logger_service.dart';
@@ -17,7 +18,7 @@ import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 
-class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
+class DialogsBloc extends Bloc<DialogEvent, DialogsState> {
   final DialogRepository dialogRepository;
   final ErrorHandlerBloc errorHandlerBloc;
   final DatabaseBloc databaseBloc;
@@ -33,19 +34,19 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   }) : super(initialState) {
     databaseDialogEventSubscription = databaseBloc.stream.listen(_onDatabaseEvent);
 
-    on<DialogsEvent>((event, emit) async {
+    on<DialogEvent>((event, emit) async {
       print("DialogsEvent   ${event}  ${state.dialogsContainer}");
       if (event is DialogsLoadEvent) {
         await onDialogsLoadEvent(event, emit);
-      } else if (event is ReceiveNewDialogEvent) {
+      } else if (event is DialogBlocReceiveNewDialogEvent) {
         onReceiveNewDialogEvent(event, emit);
-      } else if (event is ReceiveDialogsOnUpdateEvent) {
+      } else if (event is DialogBlocReceiveDialogsOnUpdateEvent) {
         onReceiveDialogsOnUpdateEvent(event, emit);
-      } else if (event is DialogsLoadedEvent) {
+      } else if (event is DialogBlocDialogsLoadedEvent) {
         onDialogsLoadedEvent(event, emit);
-      } else if (event is DialogStateNewMessageReceived) {
+      } else if (event is DialogBlocNewMessageReceivedEvent) {
         onDialogStateNewMessageReceived(event, emit);
-      }  else if (event is DialogStateNewMessagesOnUpdate) {
+      }  else if (event is DialogBlocNewMessagesOnUpdateEvent) {
         onDialogStateNewMessagesOnUpdate(event, emit);
       } else if (event is DialogUserJoinChatEvent) {
         onDialogUserJoinChatEvent(event, emit);
@@ -59,8 +60,10 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         onDialogDeletedChatEvent(event, emit);
       } else if (event is DialogsSearchDialogEvent) {
         await onDialogsSearchEvent(event, emit);
-      } else if (event is DialogStateNewMessageStatusesReceived) {
+      } else if (event is DialogBlocNewMessageStatusesReceivedEvent) {
         await onDialogStateNewMessageStatusesReceived(event, emit);
+      } else if (event is DialogBlocUpdateLastMessageEvent) {
+        await onDialogBlocUpdateLastMessageEvent(event, emit);
       }
     });
   }
@@ -69,19 +72,19 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     print("Database state change   ${event}");
     if (event is DatabaseBlocDBInitializedState) {
       print('initialized:: ${event.dialogs}');
-      add(DialogsLoadedEvent(dialogs: event.dialogs));
+      add(DialogBlocDialogsLoadedEvent(dialogs: event.dialogs));
     } else if (event is DatabaseBlocNewDialogReceivedState) {
-      add(ReceiveNewDialogEvent(dialog: event.dialog));
+      add(DialogBlocReceiveNewDialogEvent(dialog: event.dialog));
     } else if (event is DatabaseBlocNewDialogsOnUpdateState) {
-      add(ReceiveDialogsOnUpdateEvent(dialogs: event.dialogs));
+      add(DialogBlocReceiveDialogsOnUpdateEvent(dialogs: event.dialogs));
     } else if (event is DatabaseBlocNewMessageReceivedState) {
-      add(DialogStateNewMessageReceived(message: event.message));
+      add(DialogBlocNewMessageReceivedEvent(message: event.message));
     } else if (event is DatabaseBlocNewMessagesOnUpdateReceivedState) {
-      add(DialogStateNewMessagesOnUpdate(messages: event.messages));
+      add(DialogBlocNewMessagesOnUpdateEvent(messages: event.messages));
     } else if (event is DatabaseBlocUpdateMessageStatusesState) {
-      add(DialogStateNewMessageStatusesReceived(statuses: event.statuses));
-    } else if (event is DatabaseBlocUpdateMessageStatusesState) {
-      add(DialogStateNewMessageStatusesReceived(statuses: event.statuses));
+      add(DialogBlocNewMessageStatusesReceivedEvent(statuses: event.statuses));
+    } else if (event is DatabaseBlocDeletedMessagesState) {
+      add(DialogBlocUpdateLastMessageEvent(ids: event.ids, dialogId: event.dialogId));
     }  else if (event is DatabaseBlocUserExitChatState) {
       _groupDialogsMemberStateStreamer.add(ChatUserEvent(chatUser: event.chatUser, event: event.event));
     }   else if (event is DatabaseBlocUserJoinChatState) {
@@ -110,7 +113,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   }
 
   Future<void> onDialogStateNewMessageStatusesReceived(
-      DialogStateNewMessageStatusesReceived event,
+      DialogBlocNewMessageStatusesReceivedEvent event,
       emit
   ) async {
     final userId = await _storage.getUserId();
@@ -148,7 +151,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   }
 
   void onReceiveNewDialogEvent(
-      ReceiveNewDialogEvent event,
+      DialogBlocReceiveNewDialogEvent event,
       Emitter<DialogsState> emit
   ) {
     for (var dialog in state.dialogsContainer.dialogs) {
@@ -162,7 +165,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   }
 
   void onReceiveDialogsOnUpdateEvent(
-      ReceiveDialogsOnUpdateEvent event,
+      DialogBlocReceiveDialogsOnUpdateEvent event,
       Emitter<DialogsState> emit
   ) {
     final newDialogs = <DialogData>[];
@@ -189,7 +192,7 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   }
 
   void onDialogsLoadedEvent(
-      DialogsLoadedEvent event,
+      DialogBlocDialogsLoadedEvent event,
       Emitter<DialogsState> emit
       ) {
     print('onReceiveNewDialogEvent:: 11 ${state.dialogsContainer.dialogs}');
@@ -236,11 +239,11 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
   }
 
   void onDialogStateNewMessageReceived(
-      DialogStateNewMessageReceived event,
+      DialogBlocNewMessageReceivedEvent event,
       Emitter<DialogsState> emit
       ) {
     final newDialogs = state.dialogs;
-    for (var dialog in newDialogs) {
+    for (var dialog in state.dialogs) {
       if (dialog.dialogId == event.message.dialogId) {
         dialog.lastMessage = event.message;
         // dialog.lastMessage.messageId = event.message.messageId;
@@ -249,12 +252,13 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
         // dialog.lastMessage.statuses = event.message.status;
       }
     }
-    final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: sortDialogsByLastMessage(newDialogs)));
+    final newState = state.copyWith(dialogsContainer: DialogsListContainer(dialogs: sortDialogsByLastMessage(state.dialogs)));
     emit(newState);
+    print('Emit new dialog received message:::  ${event.message}');
   }
 
   void onDialogStateNewMessagesOnUpdate(
-      DialogStateNewMessagesOnUpdate event,
+      DialogBlocNewMessagesOnUpdateEvent event,
       Emitter<DialogsState> emit
       ) {
     final newDialogs = state.dialogs;
@@ -294,6 +298,21 @@ class DialogsBloc extends Bloc<DialogsEvent, DialogsState> {
     final newDialogs = [ ...copyState.dialogsContainer!.dialogs];
     newDialogs.removeWhere((dialog) => dialog.dialogId == event.dialog.dialogId);
     emit(state.copyWith(dialogsContainer: DialogsListContainer(dialogs: newDialogs)));
+  }
+
+  Future<void> onDialogBlocUpdateLastMessageEvent(DialogBlocUpdateLastMessageEvent event, emit) async {
+    try {
+      final dialog = state.dialogs.firstWhere((dialog) => dialog.dialogId == event.dialogId);
+      if (event.ids.contains(dialog.lastMessage?.messageId)) {
+        final db = DBProvider.db;
+        final lastMessage = await db.getDialogLastMessage(event.dialogId);
+        dialog.lastMessage = lastMessage;
+        emit(state.copyWith(dialogsContainer: DialogsListContainer(dialogs: sortDialogsByLastMessage(state.dialogs))));
+        print('update last message:: updated ${state.dialogs.firstWhere((d) => d.dialogId == dialog.dialogId).lastMessage}');
+      }
+    } catch (err) {
+      print('update last message:: $err');
+    }
   }
 
 }

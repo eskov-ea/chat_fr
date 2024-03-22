@@ -4,7 +4,7 @@ import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/http_error_handler.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import '../../bloc/error_handler_bloc/error_types.dart';
-import '../../models/contact_model.dart';
+import '../../models/user_model.dart';
 import 'package:http/http.dart' as http;
 
 

@@ -372,6 +372,7 @@ class _MessageTile extends StatelessWidget {
                             isError: isError,
                             setSelected: setSelected,
                             messageId: messageId,
+                            localId: localMessageId,
                             message: message,
                             senderName: senderName,
                             repliedMsgSenderName: repliedMsgSenderName,

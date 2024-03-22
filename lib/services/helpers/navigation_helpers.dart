@@ -1,18 +1,16 @@
 import 'dart:io';
-
-import 'package:chat/models/contact_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/services/popup_manager.dart';
+import 'package:chat/ui/navigation/main_navigation.dart';
+import 'package:chat/ui/pages/user_profile_info_page.dart';
+import 'package:chat/ui/screens/chat_screen.dart';
+import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
-import '../../ui/navigation/main_navigation.dart';
-import '../../ui/pages/user_profile_info_page.dart';
-import '../../ui/screens/chat_screen.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
-
-import '../../view_models/user/users_view_cubit.dart';
 
 Future<void> openChatScreen({
   required BuildContext context,

@@ -1,10 +1,14 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:chat/models/dialog_model.dart';
+import 'package:chat/models/message_model.dart';
 import 'package:chat/services/helpers/client_error_handler.dart';
 import 'package:chat/storage/data_storage.dart';
+import 'package:chat/ui/widgets/app_bar.dart';
 import 'package:chat/ui/widgets/dialogs/dialog_item.dart';
 import 'package:chat/ui/widgets/dialogs/dialog_search_widget.dart';
 import 'package:chat/ui/widgets/dialogs/dialogs_skeleton.dart';
+import 'package:chat/ui/widgets/shimmer.dart';
 import 'package:chat/ui/widgets/unauthenticated_widget.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit_state.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
@@ -12,12 +16,6 @@ import 'package:chat/view_models/user/users_view_cubit_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../models/dialog_model.dart';
-import '../../models/message_model.dart';
-import '../widgets/app_bar.dart';
-import '../widgets/avatar_widget.dart';
-import '../widgets/shimmer.dart';
-import '../widgets/slidable_widget.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 
 

@@ -5,6 +5,9 @@ import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/services/popup_manager.dart';
 import 'package:chat/theme.dart';
+import 'package:chat/types_extensions/String.dart';
+import 'package:chat/types_extensions/String.dart';
+import 'package:chat/types_extensions/String.dart';
 import 'package:chat/ui/screens/db_screen.dart';
 import 'package:chat/ui/widgets/unauthenticated_widget.dart';
 import 'package:flutter/foundation.dart';
@@ -61,7 +64,7 @@ class ProfilePage extends StatelessWidget {
                               const SizedBox(height: 20,),
                               UserAvatarWidget(userId: state.profile?.user.id, size: 70,),
                               const SizedBox(height: 20,),
-                              Text(state.profile!.user.lastname + " " + state.profile!.user.firstname + " " + state.profile!.user.middlename,
+                              Text(state.profile!.user.lastname.toCapitalized() + " " + state.profile!.user.firstname.toCapitalized() + " " + state.profile!.user.middlename.toCapitalized(),
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(fontSize: 25,)
                               ),

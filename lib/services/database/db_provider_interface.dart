@@ -1,5 +1,5 @@
 import 'package:chat/models/app_settings_model.dart';
-import 'package:chat/models/contact_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/models/user_profile_model.dart';
@@ -31,7 +31,7 @@ abstract class IDBProvider {
   Future<List<MessageData>> getMessagesByDialog(int dialogId);
   Future<String> getMessageInfo();
   Future<int> saveLocalMessage(MessageData message);
-  Future<int> updateMessageWithSendFailed(int localMessageId);
+  Future<int> updateMessageWithSendFailed(String localMessageId);
   Future<int> updateMessageId(int localMessageId, int messageId);
   Future<MessageData?> getMessageByLocalId(String localId);
   Future<List?> updateLocalMessage(MessageData message);

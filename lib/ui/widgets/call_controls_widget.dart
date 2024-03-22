@@ -1,4 +1,4 @@
-import 'package:chat/models/contact_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/ui/widgets/call_audio_device_widget.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';

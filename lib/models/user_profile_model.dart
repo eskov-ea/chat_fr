@@ -1,4 +1,4 @@
-import 'package:chat/models/contact_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:equatable/equatable.dart';
 

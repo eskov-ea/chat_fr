@@ -13,6 +13,7 @@ import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/services/user_profile/user_profile_api_provider.dart';
 import 'package:chat/services/ws/ws_repository.dart';
+import 'package:chat/types_extensions/String.dart';
 import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:flutter/foundation.dart';
@@ -235,7 +236,7 @@ String generateUUID() {
     if (data.chatType.p2p == 1) {
       for (var i = 0; i < data.chatUsers.length; i++)  {
         if (data.chatUsers[i].userId != userId) {
-          return "${data.chatUsers[i].user.lastname} ${data.chatUsers[i].user.firstname}";
+          return "${data.chatUsers[i].user.lastname.toCapitalized()} ${data.chatUsers[i].user.firstname.toCapitalized()}";
         }
       }
     } else {

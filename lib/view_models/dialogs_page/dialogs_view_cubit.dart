@@ -34,7 +34,7 @@ class DialogsViewCubit extends Cubit<DialogsViewCubitState> {
 
   void updateLastDialogMessage(message){
     dialogsBloc.add(
-        DialogStateNewMessageReceived(message: message)
+        DialogBlocNewMessageReceivedEvent(message: message)
     );
   }
 

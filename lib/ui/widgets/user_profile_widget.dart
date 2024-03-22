@@ -1,6 +1,6 @@
+import 'package:chat/models/user_model.dart';
 import 'package:chat/ui/widgets/avatar_widget.dart';
 import 'package:flutter/material.dart';
-import '../../models/contact_model.dart';
 
 class UserProfileWidget extends StatelessWidget {
   const UserProfileWidget({

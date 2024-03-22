@@ -1,6 +1,5 @@
+import 'package:chat/models/user_model.dart';
 import 'package:chat/services/users/users_api_provider.dart';
-
-import '../../models/contact_model.dart';
 
 
 class UsersRepository  {

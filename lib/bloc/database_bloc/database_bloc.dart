@@ -8,7 +8,7 @@ import 'package:chat/bloc/database_bloc/database_state.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/call_model.dart';
-import 'package:chat/models/contact_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/from_db_models.dart';
 import 'package:chat/models/message_model.dart';
@@ -355,7 +355,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       // final updateRes = await db.updateMessageId(messageId, sentMessage.messageId);
       // print('update result  $updateRes');
     } catch (err, stackTrace) {
-      db.updateMessageWithSendFailed(messageId);
+      db.updateMessageWithSendFailed(message.localId!);
       emit(DatabaseBlocFailedSendMessageState(localMessageId: messageId, dialogId: event.dialogId));
       log('DBBloc send:: error: $err\r\n$stackTrace');
     }
@@ -431,7 +431,9 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
     DatabaseBlocResendMessageEvent event,
     emit
   ) async {
+    print('resend::: ${event.localMessageId}');
     final message = await db.getMessageByLocalId(event.localMessageId);
+    print('resend 2::: ${event.localMessageId}');
     if (message != null) {
       await db.updateMessageErrorStatusOnResend(event.localMessageId);
       emit(DatabaseBlocUpdateErrorStatusOnResendState(localMessageId: event.localMessageId, dialogId: event.dialogId));
@@ -444,7 +446,8 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
 
         await db.saveMessageStatuses(sentMessage.statuses);
       } catch (err, stackTrace) {
-        db.updateMessageWithSendFailed(message.messageId);
+        print('resend::: err  $err');
+        db.updateMessageWithSendFailed(message.localId!);
         emit(DatabaseBlocFailedSendMessageState(localMessageId: message.messageId, dialogId: event.dialogId));
         log('DBBloc send:: error: $err\r\n$stackTrace');
       }
@@ -458,11 +461,11 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
   ) async {
     print('DatabaseBlocDeleteMessagesEvent  ${event.ids}');
     try {
-      await MessagesProvider().deleteMessage(messageId: event.ids);
       await db.deleteMessages(event.ids);
       emit(DatabaseBlocDeletedMessagesState(ids: event.ids, dialogId: event.dialogId));
+      await MessagesProvider().deleteMessage(messageId: event.ids);
     } catch (err, stackTrace) {
-
+      print('Deletion error:: $err');
     }
   }
 

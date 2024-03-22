@@ -1,20 +1,16 @@
-import 'dart:async';
-import 'package:chat/bloc/database_bloc/database_bloc.dart';
-import 'package:chat/bloc/database_bloc/database_state.dart';
+import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
+import 'package:chat/bloc/error_handler_bloc/error_handler_events.dart';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/bloc/user_bloc/user_event.dart';
 import 'package:chat/bloc/user_bloc/user_state.dart';
 import 'package:chat/bloc/user_bloc/users_list_container.dart';
 import 'package:chat/models/dialog_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/services/logger/logger_service.dart';
+import 'package:chat/services/users/users_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../models/contact_model.dart';
-import '../../services/users/users_repository.dart';
-import '../../storage/data_storage.dart';
-import '../error_handler_bloc/error_handler_bloc.dart';
-import '../error_handler_bloc/error_handler_events.dart';
 
 
 class UsersBloc extends Bloc<UsersEvent, UsersState> {

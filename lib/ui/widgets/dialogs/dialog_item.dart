@@ -1,18 +1,19 @@
 import 'dart:async';
-import 'dart:developer';
-
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/bloc/messge_bloc/message_event.dart';
 import 'package:chat/bloc/user_bloc/online_users_manager.dart';
 import 'package:chat/helpers.dart';
-import 'package:chat/models/contact_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/navigation_helpers.dart';
 import 'package:chat/theme.dart';
+import 'package:chat/types_extensions/String.dart';
+import 'package:chat/types_extensions/String.dart';
+import 'package:chat/types_extensions/String.dart';
+import 'package:chat/types_extensions/String.dart';
 import 'package:chat/ui/widgets/avatar_widget.dart';
 import 'package:chat/ui/widgets/dialog_avatar_widget.dart';
-import 'package:chat/view_models/dialogs_page/dialogs_view_cubit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -127,9 +128,7 @@ class _DialogItemState extends State<DialogItem> {
             userId: widget.userId,
             partnerId: partners.first.id,
             dialogData: widget.dialogData,
-            username: widget.userId == widget.dialogData.chatUsers.first.userId
-                ? "${widget.dialogData.chatUsers.last.user.lastname} ${widget.dialogData.chatUsers.last.user.firstname}"
-                : "${widget.dialogData.chatUsers.first.user.lastname} ${widget.dialogData.chatUsers.first.user.firstname}"
+            username: partnerName
         );
       },
       child: Container(

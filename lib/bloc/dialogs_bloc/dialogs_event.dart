@@ -2,61 +2,61 @@ import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:equatable/equatable.dart';
 
-abstract class DialogsEvent extends Equatable{
+abstract class DialogEvent extends Equatable{
   @override
   List<DialogData> get props => [];
 }
 
-class DialogsLoadEvent extends DialogsEvent {}
+class DialogsLoadEvent extends DialogEvent {}
 
-class DialogsLoadedEvent extends DialogsEvent {
+class DialogBlocDialogsLoadedEvent extends DialogEvent {
   final List<DialogData> dialogs;
-  DialogsLoadedEvent({required this.dialogs});
+  DialogBlocDialogsLoadedEvent({required this.dialogs});
 }
 
-class DialogsSearchDialogEvent extends DialogsEvent {
+class DialogsSearchDialogEvent extends DialogEvent {
   final String searchQuery;
 
   DialogsSearchDialogEvent(this.searchQuery);
 }
 
-class ReceiveNewDialogEvent extends DialogsEvent{
+class DialogBlocReceiveNewDialogEvent extends DialogEvent{
   final DialogData dialog;
 
-  ReceiveNewDialogEvent({required this.dialog});
+  DialogBlocReceiveNewDialogEvent({required this.dialog});
 }
 
-class ReceiveDialogsOnUpdateEvent extends DialogsEvent{
+class DialogBlocReceiveDialogsOnUpdateEvent extends DialogEvent{
   final List<DialogData> dialogs;
 
-  ReceiveDialogsOnUpdateEvent({required this.dialogs});
+  DialogBlocReceiveDialogsOnUpdateEvent({required this.dialogs});
 }
 
-class DialogDeletedChatEvent extends DialogsEvent{
+class DialogDeletedChatEvent extends DialogEvent{
   final DialogData dialog;
 
   DialogDeletedChatEvent({required this.dialog});
 }
 
-class DialogStateNewMessageReceived extends DialogsEvent{
+class DialogBlocNewMessageReceivedEvent extends DialogEvent{
   final MessageData message;
 
-  DialogStateNewMessageReceived({required this.message});
+  DialogBlocNewMessageReceivedEvent({required this.message});
 }
 
-class DialogStateNewMessagesOnUpdate extends DialogsEvent{
+class DialogBlocNewMessagesOnUpdateEvent extends DialogEvent{
   final List<MessageData> messages;
 
-  DialogStateNewMessagesOnUpdate({required this.messages});
+  DialogBlocNewMessagesOnUpdateEvent({required this.messages});
 }
 
-class DialogsSearchEvent extends DialogsEvent{
+class DialogsSearchEvent extends DialogEvent{
   final String searchQuery;
 
   DialogsSearchEvent({required this.searchQuery});
 }
 
-class DialogUserJoinChatEvent extends DialogsEvent{
+class DialogUserJoinChatEvent extends DialogEvent{
   final ChatUser user;
 
   DialogUserJoinChatEvent({
@@ -64,13 +64,13 @@ class DialogUserJoinChatEvent extends DialogsEvent{
   });
 }
 
-class DialogStateNewMessageStatusesReceived extends DialogsEvent {
+class DialogBlocNewMessageStatusesReceivedEvent extends DialogEvent {
   final List<MessageStatus> statuses;
 
-  DialogStateNewMessageStatusesReceived({required this.statuses});
+  DialogBlocNewMessageStatusesReceivedEvent({required this.statuses});
 }
 
-class DialogUserExitChatEvent extends DialogsEvent{
+class DialogUserExitChatEvent extends DialogEvent{
   final ChatUser user;
 
   DialogUserExitChatEvent({
@@ -78,8 +78,15 @@ class DialogUserExitChatEvent extends DialogsEvent{
   });
 }
 
-class RefreshDialogsEvent extends DialogsEvent{}
+class DialogBlocUpdateLastMessageEvent extends DialogEvent {
+  final List<int> ids;
+  final int dialogId;
 
-class DialogsLoadFailureEvent extends DialogsEvent{}
+  DialogBlocUpdateLastMessageEvent({required this.ids, required this.dialogId});
+}
 
-class DeleteDialogsOnLogoutEvent extends DialogsEvent{}
+class RefreshDialogsEvent extends DialogEvent{}
+
+class DialogsLoadFailureEvent extends DialogEvent{}
+
+class DeleteDialogsOnLogoutEvent extends DialogEvent{}

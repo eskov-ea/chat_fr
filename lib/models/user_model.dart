@@ -1,4 +1,4 @@
-
+import 'package:chat/types_extensions/String.dart';
 
 final UserModel chatBot = UserModel(
     id: 5,
@@ -53,16 +53,16 @@ class UserModel {
     } else {
       return UserModel(
           id: json['id'],
-          firstname: json['staff']['firstname'] ?? "",
-          lastname: json['staff']['lastname'] ?? "",
-          middlename: json['staff']['middlename'] ?? "",
-          company: json['staff']['company'] ?? "",
-          position: json['staff']['position'] ?? "",
-          phone: json['staff']['phone'] ?? "",
-          dept: json['staff']['dept'] ?? "",
-          email: json['email'] ?? "",
-          birthdate: json['staff']['birthdate'] ?? "",
-          avatar: json['staff']['avatar'],
+          firstname: json['staff']['firstname'],
+          lastname: json['staff']['lastname'],
+          middlename: json['staff']['middlename'],
+          company: json['staff']['company'] ?? '',
+          position: json['staff']['position'] ?? '',
+          phone: json['staff']['phone'] ?? '',
+          dept: json['staff']['dept'] ?? '',
+          email: json['email'] ?? '',
+          birthdate: json['staff']['birthdate'] ?? '',
+          avatar: json['staff']['avatar'] ?? '',
           banned: 0,
           lastAccess: json['last_access'] ?? ''
       );

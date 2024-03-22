@@ -1,7 +1,7 @@
 import 'package:chat/bloc/database_bloc/database_bloc.dart';
 import 'package:chat/bloc/database_bloc/database_events.dart';
-import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/services/dialogs/dialogs_api_provider.dart';
 import 'package:chat/services/popup_manager.dart';
 import 'package:chat/ui/widgets/avatar_widget.dart';

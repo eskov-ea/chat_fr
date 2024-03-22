@@ -1,10 +1,9 @@
-import 'package:chat/services/global.dart';
+import 'package:chat/models/user_model.dart';
+import 'package:chat/theme.dart';
 import 'package:chat/ui/widgets/user_profile_widget.dart';
 import 'package:chat/ui/widgets/web_container_wrapper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../../models/contact_model.dart';
-import '../../theme.dart';
 
 class UserProfileInfoPage extends StatelessWidget {
   const UserProfileInfoPage({

@@ -147,10 +147,15 @@ class _DBScreenState extends State<DBScreen> {
                       // final String dirPath = documentDirectory.path;
                       // final path = '/var/mobile/Containers/Data/Application/97129959-3781-4898-9545-CB6B46E55DDE/Documents/cache/images/image_picker_3B5A7186-D3B1-44AC-BE09-47546C92B456-76519-0000284372488131.jpg';
                       // File? file = File(path) ;
-                      final db = DBProvider.db;
-                      final res = await db.getAttachmentById(511);
+                      final db = await DBProvider.db.database;
+                      return await db.transaction((txn) async {
+                        List<Object> res = await txn.rawQuery(
+                          'SELECT id FROM message WHERE chat_id = 265 AND created_at < datetime("now", "-1 day"); '
+                        );
+                        log('fileee::  ${res}');
+                      });
+                      // final res = await db.getMessageByLocalId('52d3d7b1-92df-5d22-bece-68ded52ab3d8');
                       // final res = await db.getMessageByLocalId(6986);
-                      print('fileee::  ${res}');
                     },
                     child: Container(
                         width: MediaQuery.of(context).size.width * 0.45,
@@ -158,7 +163,7 @@ class _DBScreenState extends State<DBScreen> {
                         padding: const EdgeInsets.all(5),
                         color: Colors.grey.shade500,
                         child: const Center(
-                            child: Text('Check file',
+                            child: Text('Check not sent m',
                               style: TextStyle(color: Colors.white),
                             )
                         )

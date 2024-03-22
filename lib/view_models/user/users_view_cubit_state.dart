@@ -1,5 +1,5 @@
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
-import 'package:chat/models/contact_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/models/dialog_model.dart';
 
 

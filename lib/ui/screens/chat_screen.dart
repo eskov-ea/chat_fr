@@ -1,14 +1,13 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui';
 import 'package:chat/bloc/database_bloc/database_bloc.dart';
 import 'package:chat/bloc/database_bloc/database_events.dart';
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/bloc/messge_bloc/message_event.dart';
 import 'package:chat/bloc/user_bloc/online_users_manager.dart';
-import 'package:chat/models/contact_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/message_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/navigation_helpers.dart';
 import 'package:chat/theme.dart';
@@ -217,8 +216,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   void deleteMessages() async {
-      isSelectedMode = false;
-      setState(() {});
+      setState(() {
+        isSelectedMode = false;
+      });
+      _selectedMessagesOptionsMenuAnimationController.reverse();
       List<int> ids = [];
       for (final message in selected) {
         ids.add(message.id);

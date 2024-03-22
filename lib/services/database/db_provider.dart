@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'package:chat/models/app_settings_model.dart';
-import 'package:chat/models/contact_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/from_db_models.dart';
 import 'package:chat/models/message_model.dart';
@@ -82,92 +82,149 @@ class DBProvider implements IDBProvider {
   }
 
   /// CHAT TYPE DB LAYER
+  @override
   Future initializeChatTypeValues() async => await ChatTypeDBLayer().initializeChatTypeValues();
+  @override
   Future<List<Object>> readChatTypes() async => await ChatTypeDBLayer().readChatTypes();
 
 
   ///   DIALOGS LAYER
+  @override
   Future<void> saveDialogs(List<DialogData> dialogs) async => await DialogDBLayer().saveDialog(dialogs);
+  @override
   Future<List<DialogData>> getDialogs() async => await DialogDBLayer().getDialogs();
+  @override
   Future<int> updateDialogLastPage(int dialogId, int page) async => DialogDBLayer().updateDialogLastPage(dialogId, page);
+  @override
   Future<int?> getLastDialogPage(int dialogId) async => DialogDBLayer().getLastDialogPage(dialogId);
+  @override
   Future<int> updateDialogLastMessage(MessageData message) async => DialogDBLayer().updateDialogLastMessage(message);
+  @override
   Future<List<DialogData>> getDialogById(int id) async => await DialogDBLayer().getDialogById(id);
 
 
   ///   MESSAGES LAYER
+  @override
   Future<List<Object?>> saveMessages(List<MessageData> messages) async => MessageDBLayer().saveMessages(messages);
+  @override
   Future<Map<int, MessageData>> getMessages() async => MessageDBLayer().getMessages();
+  @override
   Future<List<MessageData>> getMessagesByDialog(int dialogId) async => MessageDBLayer().getMessagesByDialog(dialogId);
+  @override
   Future<String> getMessageInfo() async => MessageDBLayer().getMessageInfo();
+  @override
   Future<int> saveLocalMessage(MessageData message) async => MessageDBLayer().saveLocalMessage(message);
-  Future<int> updateMessageWithSendFailed(int localMessageId) => MessageDBLayer().updateMessageWithSendingFailure(localMessageId);
+  @override
+  Future<int> updateMessageWithSendFailed(String localMessageId) => MessageDBLayer().updateMessageWithSendingFailure(localMessageId);
+  @override
   Future<int> updateMessageId(int localMessageId, int messageId) async => MessageDBLayer().updateMessageId(localMessageId, messageId);
+  @override
   Future<MessageData?> getMessageByLocalId(String localId) async => MessageDBLayer().getMessageByLocalId(localId);
+  @override
   Future<List?> updateLocalMessage(MessageData message) async => MessageDBLayer().updateLocalMessage(message);
+  @override
   Future<int> checkIfMessageExistWithThisId(int id) async => MessageDBLayer().checkIfMessageExistWithThisId(id);
+  @override
   Future updateMessagesThatFailedToBeSent() async => MessageDBLayer().updateMessagesThatFailedToBeSent();
+  @override
   Future<int> updateMessageErrorStatusOnResend(String localMessageId) async => MessageDBLayer().updateMessageErrorStatusOnResend(localMessageId);
+  @override
   Future<int> deleteMessages(List<int> ids) async => MessageDBLayer().deleteMessages(ids);
+  @override
   Future<int> getLastId() async => await MessageDBLayer().getLastId();
+  @override
   Future<int> deleteNotSentMessagesOlder5days() async => await MessageDBLayer().deleteNotSentMessagesOlder5days();
-
+  Future<MessageData?> getDialogLastMessage(int dialogId) async => await MessageDBLayer().getDialogLastMessage(dialogId);
 
   ///   MESSAGE STATUS LAYER
+  @override
   Future<List<Object?>> saveMessageStatuses(List<MessageStatus> statuses) async => MessageStatusDBLayer().saveMessageStatuses(statuses);
+  @override
   Future<Object?> saveMessageStatus(MessageStatus status) async => MessageStatusDBLayer().saveMessageStatus(status);
+  @override
   Future<List<MessageStatus>> getMessageStatuses() async => MessageStatusDBLayer().getMessageStatuses();
+  @override
   Future<int?> saveLocalMessageStatus(MessageStatus? status) async => MessageStatusDBLayer().saveLocalMessageStatus(status);
+  @override
   Future<List<MessageStatus>> getMessageStatusesByMessageId(int id) async => MessageStatusDBLayer().getMessageStatusesByMessageId(id);
 
 
   ///   MESSAGE ATTACHMENTS LAYER
+  @override
   Future saveAttachments(List<MessageAttachmentData> files) async => AttachmentDBLayer().saveAttachment(files);
+  @override
   Future<List<MessageAttachmentData>> getAttachments() async => AttachmentDBLayer().getAttachments();
+  @override
   Future<MessageAttachmentData> getAttachmentById(int id) async => AttachmentDBLayer().getAttachmentById(id);
+  @override
   Future<int> updateFilePath(int id, String path) async => await AttachmentDBLayer().updateFilePath(id, path);
 
 
   ///   USERS LAYER
+  @override
   Future<void> saveUsers(List<UserModel> users) async => await UsersDBLayer().saveUsers(users);
+  @override
   Future<Map<int, UserModel>> getUsers() async => await UsersDBLayer().getUsers();
 
 
   ///   CHAT USERS LAYER
+  @override
   Future<void> saveChatUsers(List<ChatUser> chatUsers) async => await ChatUsersDBLayer().saveChatUsers(chatUsers);
+  @override
   Future<Map<int, List<ChatUser>>> getChatUsers() async => await ChatUsersDBLayer().getChatUsers();
+  @override
   Future<int> deleteChatUser(ChatUser chatUser) async => await ChatUsersDBLayer().deleteChatUser(chatUser);
+  @override
   Future<int> addUserToChat(ChatUser chatUser) async => await ChatUsersDBLayer().addUserToChat(chatUser);
+  @override
   Future<List<ChatUser>> getChatUsersByDialogId(int dialogId) async => await ChatUsersDBLayer().getChatUsersByDialogId(dialogId);
 
 
   ///   USER PROFILE LAYER
+  @override
   Future<bool> saveUserProfile(UserProfileData profile) async => await UserProfileDBLayer().saveUserProfile(profile);
+  @override
   Future<UserProfileData> getProfile() async => await UserProfileDBLayer().getProfile();
 
 
   /// APP STATE DB LAYER
+  @override
   Future<String> getLastUpdateTime() async => await AppStateDBLayer().getLastUpdateTime();
+  @override
   Future<int> setLastUpdateTime() async => await AppStateDBLayer().setLastUpdateTime();
+  @override
   Future<String?> getToken() async => await AppStateDBLayer().getToken();
+  @override
   Future<int?> getUserId() async => await AppStateDBLayer().getUserId();
+  @override
   Future<String> getDeviceId() async => await AppStateDBLayer().getDeviceId();
+  @override
   Future<int> setToken(String token) async => AppStateDBLayer().setToken(token);
+  @override
   Future<int> setUserId(int userId) async => AppStateDBLayer().setUserId(userId);
+  @override
   Future<String> getSipContacts() async => AppStateDBLayer().getSipContacts();
+  @override
   Future<int> setSipContacts(String contacts) async => AppStateDBLayer().setSipContacts(contacts);
+  @override
   Future<int> setDeviceId(String deviceId) async => AppStateDBLayer().setDeviceId(deviceId);
+  @override
   Future<AppSettings> getAppSettings() async => AppStateDBLayer().getAppSettings();
+  @override
   Future<int> initAppSettings() async => AppStateDBLayer().initAppSettings();
+  @override
   Future<int> updateBooleanAppSettingByFieldAndValue(String field, int value) async => AppStateDBLayer().updateBooleanAppSettingByFieldAndValue(field, value);
 
 
   ///   DB DEVELOPER SERVICE
+  @override
   Future<List<Object>> checkExistingTables() async => await DBDeveloperService().checkExistingTables();
+  @override
   Future deleteDBFile() async => await DBDeveloperService().deleteDBFile();
 
 
   ///   HELPER FUNCTIONS
+  @override
   Future<void> createTables(Database db) async {
     try {
       tables.forEach((key, sql) async {
@@ -178,6 +235,7 @@ class DBProvider implements IDBProvider {
       print("ERROR:DBProvider:73:: $err");
     }
   }
+  @override
   Future<bool> checkIfDatabaseIsEmpty() async {
     final db = await database;
     return db.transaction((txn) async {
@@ -189,6 +247,7 @@ class DBProvider implements IDBProvider {
       }
     });
   }
+  @override
   Future<bool> deleteAllDataOnLogout() async {
     final db = await database;
     try {
@@ -204,6 +263,7 @@ class DBProvider implements IDBProvider {
       return false;
     }
   }
+  @override
   Future<int> updateAppSettingsTable({int? dbInitialized, String? deviceId}) async {
     final db = await database;
     await db.transaction((txn) async {
@@ -218,6 +278,7 @@ class DBProvider implements IDBProvider {
     return 1;
   }
 
+  @override
   Future<int> configAppValues(Database db) async {
     return await db.transaction((txn) async {
       return await txn.rawInsert(
@@ -231,6 +292,7 @@ class DBProvider implements IDBProvider {
   }
 
 
+  @override
   Future<void> DeveloperModeClearPersonTable() async {
     final db = await database;
     await db.execute("DROP TABLE IF EXISTS dialog");

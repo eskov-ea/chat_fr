@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'package:chat/bloc/user_bloc/online_users_manager.dart';
-import 'package:chat/models/contact_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/navigation_helpers.dart';
 import 'package:chat/storage/data_storage.dart';
+import 'package:chat/types_extensions/String.dart';
+import 'package:chat/types_extensions/String.dart';
+import 'package:chat/types_extensions/String.dart';
+import 'package:chat/types_extensions/String.dart';
 import 'package:flutter/material.dart';
 import 'avatar_widget.dart';
 
@@ -62,7 +66,7 @@ class _UserItemState extends State<UserItem> {
               userId: userId,
               partnerId: widget.user.id,
               dialogData: dialogData,
-              username: widget.user.firstname + " " + widget.user.lastname
+              username: widget.user.firstname.toCapitalized() + " " + widget.user.lastname.toCapitalized()
           );
         },
         child: Row(
@@ -78,7 +82,7 @@ class _UserItemState extends State<UserItem> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        widget.user.lastname + " " + widget.user.firstname,
+                        widget.user.lastname.toCapitalized() + " " + widget.user.firstname.toCapitalized(),
                         style: const TextStyle(fontSize: 16),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,

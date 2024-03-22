@@ -1,20 +1,15 @@
 import 'dart:async';
-import 'dart:collection';
-import 'package:chat/bloc/dialogs_bloc/dialogs_bloc.dart';
-import 'package:chat/bloc/dialogs_bloc/dialogs_event.dart';
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/bloc/messge_bloc/message_event.dart';
 import 'package:chat/bloc/messge_bloc/message_state.dart';
 import 'package:chat/helpers.dart';
 import 'package:chat/models/chat_builder_model.dart';
-import 'package:chat/models/contact_model.dart';
+import 'package:chat/models/user_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/services/messages/messages_repository.dart';
 import 'package:chat/ui/screens/chat_screen.dart';
-import 'package:chat/ui/widgets/action_bar/forward_message_alert_dialog.dart';
 import 'package:chat/ui/widgets/message/message_widget.dart';
-import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -63,6 +58,7 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
   bool _shouldAutoscroll = true;
   bool isLoadingMessages = false;
   bool isConnectionThrottling = false;
+  bool isInitialMessagesLoaded = false;
   late final StreamSubscription _newMessagesSubscription;
 
   @override
@@ -89,6 +85,9 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
     BlocProvider.of<MessageBloc>(context).add(MessageBlocLoadNextPortionMessagesEvent(
       dialogId: widget.dialogData.dialogId
     ));
+    if (!isInitialMessagesLoaded) {
+      isInitialMessagesLoaded = true;
+    }
   }
 
   void resetMessagesAndReload() {
@@ -162,7 +161,7 @@ class _MessagesListStatefullWidgetState extends State<MessagesListStatefullWidge
           );
         } else if (state is MessageBlocInitializationSuccessState) {
 
-          if (state.messages.length < 10) loadNextMessages();
+          if (state.messages.length < 10 && !isInitialMessagesLoaded) loadNextMessages();
 
           if (state.messages.isEmpty) {
             return const Center(child: Text('Нет сообщений'),);

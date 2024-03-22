@@ -1,4 +1,6 @@
-import '../../models/contact_model.dart';
+
+
+import 'package:chat/models/user_model.dart';
 
 class UsersListContainer {
   final List<UserModel> users;
