@@ -59,7 +59,7 @@ README.md
 analysis_options.yaml
 #android/
 #ios/
-test/
+#test/
 web/
 windows/
 ios/Podfile.lock
