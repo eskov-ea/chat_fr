@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:chat/bloc/database_bloc/database_bloc.dart';
 import 'package:chat/bloc/database_bloc/database_state.dart';
 import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
@@ -8,6 +7,7 @@ import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/bloc/profile_bloc/profile_events.dart';
 import 'package:chat/bloc/profile_bloc/profile_state.dart';
 import 'package:chat/services/database/db_provider.dart';
+import 'package:chat/services/user_profile/user_profile_api_provider.dart';
 import 'package:chat/services/user_profile/user_profile_repository.dart';
 import 'package:chat/storage/data_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,7 +15,7 @@ import 'package:sqflite/sqflite.dart';
 
 
 class ProfileBloc extends Bloc<ProfileBlocEvent, UserProfileState> {
-  final UserProfileRepository _userProfileRepository = UserProfileRepository();
+  final UserProfileRepository _userProfileRepository = UserProfileRepository(provider: UserProfileProvider());
   final _secureStorage = DataProvider.storage;
   final ErrorHandlerBloc errorHandlerBloc;
   final DBProvider _db = DBProvider.db;

@@ -14,7 +14,10 @@ import 'package:chat/models/from_db_models.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/models/message_model.dart' as messageModel;
 import 'package:chat/services/database/db_provider_interface.dart';
+import 'package:chat/services/dialogs/dialogs_repository.dart';
 import 'package:chat/services/messages/messages_api_provider.dart';
+import 'package:chat/services/user_profile/user_profile_repository.dart';
+import 'package:chat/services/users/users_repository.dart';
 import 'package:chat/services/ws/ws_repositor_interface.dart';
 import 'package:chat/services/ws/ws_repository.dart';
 import 'package:chat/services/database/db_provider.dart';
@@ -34,12 +37,19 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
   final ErrorHandlerBloc errorHandlerBloc;
   final WebsocketRepository websocketRepository;
   final IDBProvider db;
-  final _storage = DataProvider.storage;
+  final DataProvider storage;
+  final UserProfileRepository profileRepository;
+  final UsersRepository usersRepository;
+  final DialogsRepository dialogsRepository;
   late final StreamSubscription websocketEventSubscription;
 
   DatabaseBloc({
     required this.websocketRepository,
     required this.errorHandlerBloc,
+    required this.storage,
+    required this.profileRepository,
+    required this.usersRepository,
+    required this.dialogsRepository,
     required this.db,
   }): super( DatabaseBlocDBNotInitializedState()){
     websocketEventSubscription = websocketRepository.events.listen(_onWebsocketEvent);
@@ -107,14 +117,13 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
       ));
       final DateTime start = DateTime.now();
       await db.database;
-      await db.initDB();
       await db.initAppSettings();
 
       final appSettings = await db.getAppSettings();
 
       if (appSettings.firstInitialized != 1) {
         print('Initialize from server');
-        final token = await _storage.getToken();
+        final token = await storage.getToken();
         await db.initializeChatTypeValues();
 
 
@@ -124,7 +133,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
           progress: 0.12
         ));
         if (appSettings.profileLoaded == 0) {
-          final profile = await UserProfileProvider().getUserProfile(token);
+          final profile = await profileRepository.getUserProfile(token);
           await db.saveUsers([profile.user]);
           await db.saveUserProfile(profile);
           await DataProvider.storage.setUserId(profile.user.id);
@@ -135,7 +144,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
 
         /// Load and save users
         if (appSettings.usersLoaded == 0) {
-          final users = await UsersProvider().getUsers(token);
+          final users = await usersRepository.getAllUsers(token);
           await db.saveUsers(users);
           await db.updateBooleanAppSettingByFieldAndValue('users_loaded', 1);
         }
@@ -143,7 +152,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
 
         /// Load and save dialogs
         if (appSettings.dialogsLoaded == 0) {
-          final dialogs = await DialogsProvider().getDialogs();
+          final dialogs = await dialogsRepository.getDialogs();
           print('Dialogs:::  $dialogs');
 
           final chatUsers = <ChatUser>[];
@@ -380,7 +389,7 @@ class DatabaseBloc extends Bloc<DatabaseBlocEvent, DatabaseBlocState> {
   ) async {
     print('UPDATMESSAGE:: start');
 
-    final userId = await _storage.getUserId();
+    final userId = await storage.getUserId();
     if (userId != null && userId == event.message.senderId) {
       final updated = await db.updateLocalMessage(
           event.message);

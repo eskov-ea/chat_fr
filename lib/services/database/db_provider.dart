@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:chat/models/app_settings_model.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/models/dialog_model.dart';
-import 'package:chat/models/from_db_models.dart';
 import 'package:chat/models/message_model.dart';
 import 'package:chat/models/user_profile_model.dart';
 import 'package:chat/services/database/db_layers/app_state_db_layer.dart';

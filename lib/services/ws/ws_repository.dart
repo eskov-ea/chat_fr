@@ -47,7 +47,7 @@ class WebsocketRepository extends IWebsocketRepository{
     final token = await _secureStorage.getToken();
     final userId = await _secureStorage.getUserId();
     try {
-      final List<DialogData> dialogs = await DialogRepository().getDialogs();
+      final List<DialogData> dialogs = await DialogsRepository().getDialogs();
 
       _socket = PusherChannelsClient.websocket(
         options: options,

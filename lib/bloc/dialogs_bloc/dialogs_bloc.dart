@@ -19,7 +19,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 class DialogsBloc extends Bloc<DialogEvent, DialogsState> {
-  final DialogRepository dialogRepository;
+  final DialogsRepository dialogRepository;
   final ErrorHandlerBloc errorHandlerBloc;
   final DatabaseBloc databaseBloc;
   final _storage = DataProvider.storage;

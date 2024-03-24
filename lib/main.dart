@@ -11,6 +11,9 @@ import 'package:chat/services/database/db_provider.dart';
 import 'package:chat/services/dialogs/dialogs_repository.dart';
 import 'package:chat/services/error_handling_service/error_handling_repository.dart';
 import 'package:chat/services/messages/messages_repository.dart';
+import 'package:chat/services/user_profile/user_profile_api_provider.dart';
+import 'package:chat/services/user_profile/user_profile_repository.dart';
+import 'package:chat/services/users/users_api_provider.dart';
 import 'package:chat/services/users/users_repository.dart';
 import 'package:chat/services/ws/ws_repository.dart';
 import 'package:chat/storage/data_storage.dart';
@@ -67,31 +70,31 @@ void main() async {
   GroupDialogsMemberStateStreamer.instance;
   await configureCacheFolder();
 
-  if (!kIsWeb) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  }
-  FlutterError.onError = (errorDetails) async {
-    if (!kIsWeb) {
-      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-
-      final userId = await DataProvider.storage.getUserId();
-      FirebaseCrashlytics.instance.recordError(
-          errorDetails.exception,
-          errorDetails.stack,
-          information: ["[ USER ID ]: $userId"]
-      );
-    }
-
-  };
-  PlatformDispatcher.instance.onError = (error, stack) {
-    if (!kIsWeb) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    }
-    return false;
-  };
+  // if (!kIsWeb) {
+  //   await Firebase.initializeApp(
+  //     options: DefaultFirebaseOptions.currentPlatform,
+  //   );
+  // }
+  // FlutterError.onError = (errorDetails) async {
+  //   if (!kIsWeb) {
+  //     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  //
+  //     final userId = await DataProvider.storage.getUserId();
+  //     FirebaseCrashlytics.instance.recordError(
+  //         errorDetails.exception,
+  //         errorDetails.stack,
+  //         information: ["[ USER ID ]: $userId"]
+  //     );
+  //   }
+  //
+  // };
+  // PlatformDispatcher.instance.onError = (error, stack) {
+  //   if (!kIsWeb) {
+  //     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+  //     return true;
+  //   }
+  //   return false;
+  // };
   runApp(const MyApp());
 }
 
@@ -109,6 +112,13 @@ class MyApp extends StatelessWidget{
     final databaseBloc = DatabaseBloc(
       websocketRepository: websocketRepo,
       errorHandlerBloc: errorHandlerBloc,
+      usersRepository: UsersRepository(
+          provider: UsersProvider()
+      ),
+      storage: DataProvider.storage,
+      profileRepository: UserProfileRepository(
+        provider: UserProfileProvider()
+      ),
       db: db
     );
     //TODO: refactor bloc=to-bloc dependency with representation layer
@@ -141,7 +151,9 @@ class MyApp extends StatelessWidget{
               wsRepo: websocketRepo,
               usersBloc: UsersBloc(
                   errorHandlerBloc: errorHandlerBloc,
-                  usersRepository: UsersRepository()
+                  usersRepository: UsersRepository(
+                    provider: UsersProvider()
+                  )
               )
           )
         ),
@@ -150,7 +162,7 @@ class MyApp extends StatelessWidget{
             create: (context) => DialogsViewCubit(
                 dialogsBloc: DialogsBloc(
                     databaseBloc: databaseBloc,
-                    dialogRepository: DialogRepository(),
+                    dialogRepository: DialogsRepository(),
                     errorHandlerBloc: errorHandlerBloc,
                     initialState: const DialogsState.initial()
                 ),
