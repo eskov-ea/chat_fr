@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:chat/bloc/error_handler_bloc/error_types.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/message_model.dart';
+import 'package:chat/services/dialogs/dialogs_api_provider.dart';
 import 'package:chat/services/ws/ws_repositor_interface.dart';
 import 'package:chat/services/dialogs/dialogs_repository.dart';
 import 'package:chat/services/logger/logger_service.dart';
@@ -28,6 +29,9 @@ class WebsocketRepository extends IWebsocketRepository{
   List<StreamSubscription> eventSubscriptions = [];
   Map<String, Channel> channels = {};
   StreamSubscription? generalEventSubscription;
+  final dialogsRepository = DialogsRepository(
+      provider: DialogsProvider()
+  );
 
 
   final options = const PusherChannelsOptions.fromHost(
@@ -47,7 +51,7 @@ class WebsocketRepository extends IWebsocketRepository{
     final token = await _secureStorage.getToken();
     final userId = await _secureStorage.getUserId();
     try {
-      final List<DialogData> dialogs = await DialogsRepository().getDialogs();
+      final List<DialogData> dialogs = await dialogsRepository.getDialogs();
 
       _socket = PusherChannelsClient.websocket(
         options: options,

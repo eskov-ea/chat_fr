@@ -8,6 +8,7 @@ import 'package:chat/bloc/error_handler_bloc/error_handler_bloc.dart';
 import 'package:chat/bloc/messge_bloc/message_bloc.dart';
 import 'package:chat/bloc/user_bloc/online_users_manager.dart';
 import 'package:chat/services/database/db_provider.dart';
+import 'package:chat/services/dialogs/dialogs_api_provider.dart';
 import 'package:chat/services/dialogs/dialogs_repository.dart';
 import 'package:chat/services/error_handling_service/error_handling_repository.dart';
 import 'package:chat/services/messages/messages_repository.dart';
@@ -119,6 +120,9 @@ class MyApp extends StatelessWidget{
       profileRepository: UserProfileRepository(
         provider: UserProfileProvider()
       ),
+      dialogsRepository: DialogsRepository(
+        provider: DialogsProvider()
+      ),
       db: db
     );
     //TODO: refactor bloc=to-bloc dependency with representation layer
@@ -162,7 +166,9 @@ class MyApp extends StatelessWidget{
             create: (context) => DialogsViewCubit(
                 dialogsBloc: DialogsBloc(
                     databaseBloc: databaseBloc,
-                    dialogRepository: DialogsRepository(),
+                    dialogRepository: DialogsRepository(
+                      provider: DialogsProvider()
+                    ),
                     errorHandlerBloc: errorHandlerBloc,
                     initialState: const DialogsState.initial()
                 ),

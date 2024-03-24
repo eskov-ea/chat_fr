@@ -37,8 +37,8 @@ class _DBScreenState extends State<DBScreen> {
                   GestureDetector(
                     onTap: () async {
                       final db = DBProvider.db;
-                      final res = await db.getDialogById(256);
-                      print('256 dialogs::: ${res.length}');
+                      final res = await db.getDialogs();
+                      // print('256 dialogs::: ${res.length}');
                     },
                     child: Container(
                       width: MediaQuery.of(context).size.width * 0.45,
@@ -46,7 +46,7 @@ class _DBScreenState extends State<DBScreen> {
                       padding: EdgeInsets.all(5),
                       color: Colors.blueAccent.shade200,
                         child: Center(
-                          child: Text('get 265 dialog',
+                          child: Text('get 5 dialogs',
                             style: TextStyle(color: Colors.white),
                           )
                         )

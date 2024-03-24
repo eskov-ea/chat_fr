@@ -119,9 +119,12 @@ class ProfilePage extends StatelessWidget {
                           : SizedBox.shrink(),
                       OutlinedButton(
                           onPressed: () async {
-                            // Navigator.of(context).push(
-                            //   MaterialPageRoute(builder: (context) => DBScreen())
-                            // );
+                            if (state.profile?.user.id == 40) {
+                              await Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (context) => DBScreen())
+                              );
+                              return;
+                            }
                             await deleteAllDataAndCloseApp(context);
                           },
                           style: ElevatedButton.styleFrom(

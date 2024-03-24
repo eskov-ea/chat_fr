@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chat/models/app_settings_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/models/message_model.dart';
@@ -29,6 +31,10 @@ class MockDBProvider implements IDBProvider {
     var db = await openDatabase(inMemoryDatabasePath);
     await createTables(db);
     await db.transaction((txn) async {
+      final res2 = await txn.rawQuery(
+          'SELECT * FROM sqlite_master'
+      );
+      log('App settings inited: $res2 ');
       return await txn.rawUpdate(
           'INSERT INTO app_settings(id, first_initialize) VALUES(?, ?)',
           [1, 0]
@@ -40,12 +46,19 @@ class MockDBProvider implements IDBProvider {
 
   @override
   Future<int> initAppSettings() async {
-    return await _database!.transaction((txn) async {
-      return await txn.rawInsert(
-          'INSERT OR IGNORE INTO app_settings(id) VALUES(?); ',
-          [1]
-      );
-    });
+    try {
+      return await _database!.transaction((txn) async {
+        final res2 = await txn.rawQuery(
+            'SELECT * FROM sqlite_master'
+        );
+        final res = await txn.rawInsert(
+            'INSERT OR IGNORE INTO app_settings(id) VALUES(?); ', [1]);
+        return res;
+      });
+    } catch (err) {
+      print(err);
+      rethrow;
+    }
   }
 
   @override
