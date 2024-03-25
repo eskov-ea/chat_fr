@@ -20,7 +20,7 @@ class SwitchCallButton extends StatefulWidget {
 class _MuteButtonState extends State<SwitchCallButton> {
 
   late final StreamSubscription<CallState> _callEventSubscription;
-  Map<String, CallModel> _activeCalls = {};
+  Map<String, ActiveCallModel> _activeCalls = {};
 
   @override
   void initState() {

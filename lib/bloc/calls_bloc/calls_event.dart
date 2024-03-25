@@ -5,8 +5,9 @@ abstract class CallsEvent{}
 
 class IncomingCallEvent extends CallsEvent {
   final String callerId;
+  final CallModel callData;
 
-  IncomingCallEvent({required this.callerId});
+  IncomingCallEvent({required this.callerId, required this.callData});
 }
 
 class MissedCallEvent extends CallsEvent {}
@@ -23,7 +24,11 @@ class StreamRunningCallEvent extends CallsEvent {
   StreamRunningCallEvent({required this.callData});
 }
 
-class StreamStopCallEvent extends CallsEvent {}
+class StreamStopCallEvent extends CallsEvent {
+  final CallModel callData;
+
+  StreamStopCallEvent({required this.callData});
+}
 
 
 class OutgoingCallEvent extends CallsEvent {

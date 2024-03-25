@@ -78,7 +78,7 @@ class ScreenFactory {
   }
 
   Widget makeRunningCallScreen(CallScreenArguments arguments) {
-    return RunningCallScreen(userId: arguments.userId);
+    return RunningCallScreen(userId: arguments.userId, callId: arguments.callId);
   }
 
   // Widget makeOutgoingCallScreen(CallScreenArguments arguments) {

@@ -1,35 +1,25 @@
 import 'dart:async';
 
 class CallTimer {
-  static CallTimer? instance;
   int seconds = 0;
   int minutes = 0;
   int hours = 0;
-  StreamController<String>? _streamController;
+  late final StreamController<String> _streamController;
   Timer? _timer;
   bool isRunning = false;
+  bool isPaused = false;
   String lastValue = "00:00:00";
 
-  static CallTimer getInstance() {
-    if (instance == null) {
-      instance = CallTimer();
-      instance!.init();
-      return instance!;
-    } else {
-      return instance!;
-    }
+  CallTimer() {
+    _streamController = StreamController.broadcast();
   }
 
+
   void start() {
-    if (_streamController == null) init();
     if (!isRunning) {
       _startTimer();
       isRunning = true;
     }
-  }
-
-  void init() {
-    _streamController = StreamController.broadcast();
   }
 
   void stop() {
@@ -41,18 +31,29 @@ class CallTimer {
     lastValue = "00:00:00";
   }
 
-  void dispose() async {
-    await _streamController?.close();
-    _streamController = null;
+  void pause() {
+    isPaused = true;
   }
 
-  Stream<String> stream() {
-    return _streamController!.stream;
+  void resume() {
+    isPaused = false;
   }
+
+  void dispose() async {
+    await _streamController.close();
+  }
+
+  void close() {
+    _streamController.close();
+  }
+
+  Stream<String> get stream => _streamController.stream;
+
 
   _startTimer() {
     _streamController!.sink.add("00:00:00");
     _timer = Timer.periodic(const Duration(seconds: 1), (_timer) {
+      if (isPaused) return;
       if(seconds == 59) {
         if (minutes == 59) {
           ++hours;

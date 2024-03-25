@@ -165,7 +165,9 @@ class MyApp extends StatelessWidget{
           ),
         ),
         BlocProvider(
-          create: (_) => CallsBloc(),
+          create: (_) => CallsBloc(
+            callsManager: CallsManager.instance
+          ),
           lazy: false,
         ),
         BlocProvider(

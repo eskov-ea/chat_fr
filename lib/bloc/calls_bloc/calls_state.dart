@@ -1,22 +1,58 @@
+import 'package:chat/services/helpers/call_timer.dart';
 import 'package:equatable/equatable.dart';
 import 'package:chat/models/call_model.dart';
 
-final Map<String, CallModel> _activeCalls = {};
+final Map<String, ActiveCallModel> _activeCalls = {};
+
+class ActiveCallModel {
+  final CallModel call;
+  final CallTimer timer;
+  final bool outgoing;
+  int callState;
+  bool active;
+
+  ActiveCallModel({required this.call, required this.callState,
+    required this.active, required this.timer, required this.outgoing});
+}
 
 abstract class CallState extends Equatable {
-  final activeCalls = _activeCalls;
-
-  addCall(CallModel call) {
-    if (!activeCalls.containsKey(call.id)) {
-      activeCalls.addAll({call.id: call});
+  addCall(CallModel call, bool callActive, {bool outgoing = false}) {
+    if (!_activeCalls.containsKey(call.id)) {
+      final ac = ActiveCallModel(call: call, callState: call.callState!, timer: CallTimer(),
+          active: callActive, outgoing: outgoing);
+      _activeCalls.addAll({call.id: ac});
     }
   }
   removeCall(CallModel call) {
-    if (activeCalls.containsKey(call.id)) {
-      activeCalls.remove(call.id);
+    if (_activeCalls.containsKey(call.id)) {
+      _activeCalls[call.id]?.timer.stop();
+      _activeCalls[call.id]?.timer.close();
+      _activeCalls.remove(call.id);
     }
   }
+  update(CallModel call) {
+    if (_activeCalls.containsKey(call.id)) {
+      _activeCalls[call.id]?.callState = call.callState!;
+    }
+  }
+  pauseTimer(String callId) {
+    _activeCalls[callId]?.timer.pause();
+  }
+  resumeTimer(String callId) {
+    _activeCalls[callId]?.timer.resume();
+  }
+  stopTimer(String callId) {
+    _activeCalls[callId]?.timer.stop();
+  }
+  startTimer(String callId) {
+    _activeCalls[callId]?.timer.start();
+  }
+
+  Map<String, ActiveCallModel> get activeCalls => _activeCalls;
 }
+
+
+
 
 class EndedCallState extends CallState{
   final CallModel callData;

@@ -261,9 +261,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     try {
       final CallState state = BlocProvider.of<CallsBloc>(context).state;
       if (Platform.isIOS && state is! IncomingCallState || !Platform.isIOS) {
+        final activeCallId = state.activeCalls.entries.firstWhere((call) => call.value.active).key;
         Navigator.of(context).pushNamed(
             MainNavigationRouteNames.runningCallScreen,
-            arguments: CallScreenArguments(userId: userId.toString()));
+            arguments: CallScreenArguments(userId: userId.toString(), callId: activeCallId));
       }
     } catch(_) {
       setState(() {
@@ -280,27 +281,31 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     print("callServiceBlocSubscription   $state  ${state.activeCalls}");
     if (state is IncomingCallState) {
-      if(ModalRoute.of(context)?.settings.name == MainNavigationRouteNames.incomingCallScreen) return;
-      setState(() {
-        isIncomingCall = true;
-      });
-      _openCallScreen();
+      if (state.activeCalls.length == 1) {
+        if(ModalRoute.of(context)?.settings.name == MainNavigationRouteNames.incomingCallScreen) return;
+        // setState(() {
+        //   isIncomingCall = true;
+        // });
+        _openCallScreen();
+      } else {
+        //show incoming call widget
+      }
     } else if (state is OutgoingCallState) {
       if(ModalRoute.of(context)?.settings.name == MainNavigationRouteNames.outgoingCallScreen) return;
       callPlayer.startPlayConnectingSound();
       _isPushSent = false;
       _openCallScreen();
-      setState(() {
-        isOutgoingCall = true;
-      });
+      // setState(() {
+      //   isOutgoingCall = true;
+      // });
     } else if(state is ConnectedCallState) {
       callPlayer.stopPlayConnectingSound();
-      setState(() {
-        isCallBeenAnswered = true;
-        isActiveCall = true;
-        isIncomingCall = false;
-        isOutgoingCall = false;
-      });
+      // setState(() {
+      //   isCallBeenAnswered = true;
+      //   isActiveCall = true;
+      //   isIncomingCall = false;
+      //   isOutgoingCall = false;
+      // });
     } else if(state is EndedCallState) {
       callPlayer.stopPlayConnectingSound();
       try {
@@ -420,15 +425,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           children: [
             Column(
               children: [
-                !kIsWeb && isIncomingCall && Platform.isAndroid
-                    ? ActiveCallStatusWidget(message: "Входящий вызов", screenCallback: _openCallScreen,)
-                    : const SizedBox.shrink(),
-                !kIsWeb && isOutgoingCall
-                    ? ActiveCallStatusWidget(message: "Исходящий вызов", screenCallback: _openCallScreen,)
-                    : const SizedBox.shrink(),
-                !kIsWeb && isActiveCall
-                    ? RunningCallStatusWidget(screenCallback: _openCallScreen)
-                    : const SizedBox.shrink(),
+                RunningCallWidget(userId: userId.toString()),
                 Expanded(
                   child: IndexedStack(
                     index: _selectedTab,

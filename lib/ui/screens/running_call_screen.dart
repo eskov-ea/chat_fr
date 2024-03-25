@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:chat/bloc/calls_bloc/calls_state.dart';
 import 'package:chat/models/call_model.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
+import 'package:chat/ui/widgets/calls/incoming_call_receiver_during_another_call.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,10 +18,12 @@ class RunningCallScreen extends StatefulWidget {
 
   const RunningCallScreen({
     required this.userId,
+    required this.callId,
     Key? key
   }) : super(key: key);
 
   final String? userId;
+  final String callId;
 
   @override
   State<RunningCallScreen> createState() => _RunningCallScreenState();
@@ -31,7 +34,6 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   final audioDeviceMethodChannel = const MethodChannel("com.application.chat/audio_devices");
   final sipMethodChannel = const MethodChannel("com.application.chat/sip");
   late final StreamSubscription _callServiceBlocSubscription;
-  final timer = CallTimer.getInstance();
   String username = "Не удалось определить номер";
   late final StreamSubscription _streamSubscription;
   String? callDuration;
@@ -43,9 +45,12 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   double isAudioOptionPanelVisible = 0;
   Map<int, List<String>> availableAudioDevices = {};
   int? currentDeviceId;
-  Map<String, CallModel> activeCalls = {};
+  Map<String, ActiveCallModel> activeCalls = {};
   bool isSwitchCallPanelVisible = false;
   String? activeCallId;
+
+  bool incomingCallDuringRunningCall = false;
+  String? incomingCallerDuringRunningCall;
 
   void setAvailableAudioDeviceOptions(Map<int, List<String>> devices) {
     log("setAvailableAudioDeviceOptions  $devices");
@@ -87,12 +92,26 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   void _onCallStateChanged(CallState state) {
     activeCalls = state.activeCalls;
     if (state is IncomingCallState) {
-      setUsername(state.callerId);
-      setState(() {
-        isCallingIncoming = true;
-        isCallingOutgoing = false;
-        isCallInProgress = false;
-      });
+      if (state.activeCalls.isEmpty) {
+        setUsername(state.callerId);
+        setState(() {
+          isCallingIncoming = true;
+          isCallingOutgoing = false;
+          isCallInProgress = false;
+        });
+      } else {
+        final callerUser = BlocProvider.of<UsersViewCubit>(context)
+            .usersBloc
+            .state
+            .users
+            .firstWhere(
+                (el) => "${SipConfig.getPrefix()}${el.id}" == state.callerId);
+        final uName = "${callerUser.firstname} ${callerUser.lastname}";
+        setState(() {
+          incomingCallerDuringRunningCall = uName;
+          incomingCallDuringRunningCall = true;
+        });
+      }
     } else if (state is ConnectedCallState) {
       if (widget.userId == state.callData.fromCaller.substring(1, state.callData.fromCaller.length)) {
         setUsername(state.callData.toCaller);
@@ -170,9 +189,10 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   @override
   void initState() {
     super.initState();
-    _onCallStateChanged(BlocProvider.of<CallsBloc>(context).state);
-    callDuration = timer.lastValue;
-    _streamSubscription = timer.stream().listen((time) {
+    final cBloc = BlocProvider.of<CallsBloc>(context);
+    _onCallStateChanged(cBloc.state);
+    callDuration = cBloc.state.activeCalls[widget.callId]!.timer.lastValue;
+    _streamSubscription = cBloc.state.activeCalls[widget.callId]!.timer.stream.listen((time) {
       setState(() {
         callDuration = time;
       });
@@ -358,7 +378,8 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
                       ),
                     ],
                   ),
-                  isAudioOptionPanelVisible == 1 ? _audioOptions() : const SizedBox.shrink()
+                  isAudioOptionPanelVisible == 1 ? _audioOptions() : const SizedBox.shrink(),
+                  if (incomingCallDuringRunningCall) IncomingCallReceivedDuringCallWidget(caller: incomingCallerDuringRunningCall!)
                 ],
               ),
               context),
@@ -539,9 +560,11 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
 
 class CallScreenArguments {
   final String? userId;
+  final String callId;
 
   const CallScreenArguments({
-    required this.userId
+    required this.userId,
+    required this.callId
   });
 }
 

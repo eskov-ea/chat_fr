@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:chat/models/call_model.dart';
+import 'package:chat/services/calls_manager/calls_manager.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../services/helpers/call_timer.dart';
@@ -14,10 +15,11 @@ class CallsBloc
   late final StreamSubscription callServiceEventChannelSubscription;
   final callServiceEventChannel = const EventChannel("event.channel/call_service");
   final sipChannel = const MethodChannel("com.application.chat/sip");
-  final timer = CallTimer.getInstance();
+  final CallsManager callsManager;
 
 
-  CallsBloc() : super(ReleasedCallState()) {
+  CallsBloc({required this.callsManager}) : super(ReleasedCallState()) {
+    callsManager.subscribe(stream);
     callServiceEventChannelSubscription = callServiceEventChannel
         .receiveBroadcastStream()
         .listen((dynamic event)  {
@@ -32,12 +34,12 @@ class CallsBloc
         final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
         add(StreamRunningCallEvent(callData: callData));
       } else if (callEvent.event == "ENDED") {
-        add(StreamStopCallEvent());
+        final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
+        add(StreamStopCallEvent(callData: callData));
         if (callEvent.callData!["call_id"] == null && callEvent.callData!["uniqueid"] == null) {
           add(EndCallWithNoLogEvent());
           return;
         }
-        final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
         print('Call ended with data:: $callData');
         add(EndedCallEvent(callData: callData));
       } else if (callEvent.event == "RELEASED") {
@@ -49,8 +51,9 @@ class CallsBloc
           final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
           add(EndedCallEvent(callData: callData));
       } else if (callEvent.event == "INCOMING") {
+        final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
         print('INCOMING::: ${callEvent.callData} ${callEvent.callerId}');
-        add(IncomingCallEvent(callerId: callEvent.callerId!));
+        add(IncomingCallEvent(callerId: callEvent.callerId!, callData: callData));
       } else if (callEvent.event == "OUTGOING") {
         final callData = CallModel.fromJsonOnOutgoingCall(callEvent.callData);
         add(OutgoingCallEvent(callData: callData));
@@ -70,27 +73,30 @@ class CallsBloc
     });
       on<CallsEvent>((event, emit) async {
         if (event is IncomingCallEvent) {
+          state.addCall(event.callData, true);
           emit(IncomingCallState(callerId: event.callerId));
         } else if (event is EndedCallEvent) {
-          timer.stop();
+          // timer.stop();
           state.removeCall(event.callData);
           emit(EndedCallState(callData: event.callData));
         } else if (event is OutgoingCallEvent) {
+          state.addCall(event.callData, true, outgoing: true);
           emit(OutgoingCallState(callData: event.callData));
         } else if (event is ConnectedCallEvent) {
-          state.addCall(event.callData);
+          state.update(event.callData);
           emit(ConnectedCallState(callData: event.callData));
         } else if (event is StreamRunningCallEvent) {
-          timer.start();
+          state.startTimer(event.callData.id); //timer.start();
           emit(StreamRunningCallState(callData: event.callData));
         } else if (event is StreamStopCallEvent) {
-          timer.stop();
+          state.stopTimer(event.callData.id); //timer.stop();
           emit(StreamStopCallState());
         } else if (event is ErrorCallEvent) {
-          timer.stop();
+          state.stopTimer(event.callData.id); //timer.stop();
           state.removeCall(event.callData);
           emit(ErrorCallState(callData: event.callData));
         } else if (event is OutgoingRingingCallEvent) {
+
           emit(OutgoingRingingCallState(callData: event.callData));
         } else if (event is EndCallWithNoLogEvent) {
           emit(EndCallWithNoLogState());
@@ -103,7 +109,6 @@ class CallsBloc
   @override
   Future<void> close() {
     callServiceEventChannelSubscription.cancel();
-    timer.dispose();
     return super.close();
   }
 }
