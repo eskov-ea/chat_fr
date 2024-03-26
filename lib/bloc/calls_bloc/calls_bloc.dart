@@ -73,14 +73,14 @@ class CallsBloc
     });
       on<CallsEvent>((event, emit) async {
         if (event is IncomingCallEvent) {
-          state.addCall(event.callData, true);
+          state.addCall(event.callData);
           emit(IncomingCallState(callerId: event.callerId));
         } else if (event is EndedCallEvent) {
           // timer.stop();
           state.removeCall(event.callData);
           emit(EndedCallState(callData: event.callData));
         } else if (event is OutgoingCallEvent) {
-          state.addCall(event.callData, true, outgoing: true);
+          state.addCall(event.callData, outgoing: true);
           emit(OutgoingCallState(callData: event.callData));
         } else if (event is ConnectedCallEvent) {
           state.update(event.callData);

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
+import 'package:chat/bloc/calls_bloc/call_state_extension.dart';
 import 'package:chat/bloc/calls_bloc/calls_state.dart';
 import 'package:chat/models/call_model.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
@@ -45,9 +46,9 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   double isAudioOptionPanelVisible = 0;
   Map<int, List<String>> availableAudioDevices = {};
   int? currentDeviceId;
-  Map<String, ActiveCallModel> activeCalls = {};
   bool isSwitchCallPanelVisible = false;
   String? activeCallId;
+  Map<String, ActiveCallModel> activeCalls = {};
 
   bool incomingCallDuringRunningCall = false;
   String? incomingCallerDuringRunningCall;
@@ -83,95 +84,156 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
         setState(() {
           username = uName;
         });
-      } catch (_) {
+      } catch (err) {
+        print('find username err: $err');
         username = "Не удалось определить номер";
       }
     }
   }
 
   void _onCallStateChanged(CallState state) {
-    activeCalls = state.activeCalls;
-    if (state is IncomingCallState) {
-      if (state.activeCalls.isEmpty) {
-        setUsername(state.callerId);
-        setState(() {
-          isCallingIncoming = true;
-          isCallingOutgoing = false;
-          isCallInProgress = false;
-        });
-      } else {
-        final callerUser = BlocProvider.of<UsersViewCubit>(context)
-            .usersBloc
-            .state
-            .users
-            .firstWhere(
-                (el) => "${SipConfig.getPrefix()}${el.id}" == state.callerId);
-        final uName = "${callerUser.firstname} ${callerUser.lastname}";
-        setState(() {
-          incomingCallerDuringRunningCall = uName;
-          incomingCallDuringRunningCall = true;
-        });
-      }
-    } else if (state is ConnectedCallState) {
-      if (widget.userId == state.callData.fromCaller.substring(1, state.callData.fromCaller.length)) {
-        setUsername(state.callData.toCaller);
-      } else {
-        setUsername(state.callData.fromCaller);
-      }
-      setState(() {
-        activeCallId = state.callData.id;
-        isCallingIncoming = false;
-        isCallingOutgoing = false;
-        isCallInProgress = true;
-      });
-    } else if (state is StreamRunningCallState) {
-      if (widget.userId == state.callData.fromCaller.substring(1, state.callData.fromCaller.length)) {
-        setUsername(state.callData.toCaller);
-      } else {
-        setUsername(state.callData.fromCaller);
-      }
-      setState(() {
-        isCallingIncoming = false;
-        isCallingOutgoing = false;
-        isCallInProgress = true;
-      });
-    } else if (state is OutgoingCallState) {
-      setUsername(state.callData.toCaller);
-      setState(() {
-        activeCallId = state.callData.id;
-        isCallingIncoming = false;
-        isCallingOutgoing = true;
-        isCallInProgress = false;
-      });
-    } else if (state is OutgoingRingingCallState) {
-      setUsername(state.callData.toCaller);
-      setState(() {
-        isCallingIncoming = false;
-        isCallingOutgoing = true;
-        isCallInProgress = false;
-      });
-    } else if (state is PausedCallState) {
-      setState(() {
-        isCallPaused = true;
-        isCallInProgress = false;
-      });
-    } else if (state is ResumedCallState) {
-      setState(() {
-        isCallPaused = false;
-        isCallInProgress = true;
-      });
-    } else if (state is EndedCallState) {
 
-      activeCalls.forEach((key, value) {
-        if (key != state.callData.id) {
-          setState(() {
-            activeCallId = key;
-            return;
-          });
-        }
-        sipMethodChannel.invokeMethod("RESUME_CALL", {"id": activeCallId});
+    if (state is EndedCallState) {
+      if (state.activeCalls.isNotEmpty) {
+        setState(() {
+          activeCallId = state.activeCalls.values.first.call.id;
+        });
+
+      }
+    }
+    activeCalls = state.activeCalls;
+    final activeCall = state.activeCalls[activeCallId];
+    /// If call ends the calls_bloc removes the call from active calls state
+    /// So then we should check if there is any paused calls and resume it either pop back to homescreen
+    if (activeCall == null) {
+      if (state.activeCalls.isEmpty) {
+        print('Should pop to homescreen');
+        Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
+      } else {
+        /// There is a paused call - we have to resume it
+      }
+    } else if (CallStateExtension.INCOMING_STATE.contains(activeCall.callState)) {
+      setUsername(activeCall.call.fromCaller);
+      setState(() {
+        isCallingIncoming = true;
+        isCallingOutgoing = false;
+        isCallInProgress = false;
+      });
+    } else if (CallStateExtension.OUTGOING_STATE.contains(activeCall.callState)) {
+      setUsername(activeCall.call.toCaller);
+      setState(() {
+        isCallingIncoming = false;
+        isCallingOutgoing = true;
+        isCallInProgress = false;
+      });
+    } else if (CallStateExtension.RUNNING_STATE.contains(activeCall.callState)) {
+      setState(() {
+        isCallingIncoming = false;
+        isCallingOutgoing = false;
+        isCallInProgress = true;
+      });
+    } else if (CallStateExtension.PAUSED_STATE.contains(activeCall.callState)) {
+      setState(() {
+        isCallingIncoming = false;
+        isCallingOutgoing = false;
+        isCallInProgress = true;
+      });
+    } else if (CallStateExtension.ERROR_STATE.contains(activeCall.callState)) {
+      setState(() {
+        isCallingIncoming = false;
+        isCallingOutgoing = false;
+        isCallInProgress = true;
       });
     }
+
+
+
+
+
+
+
+
+    // if (state is IncomingCallState) {
+    //   if (state.activeCalls.length == 1) {
+    //     setUsername(state.callerId);
+    //     setState(() {
+    //       isCallingIncoming = true;
+    //       isCallingOutgoing = false;
+    //       isCallInProgress = false;
+    //     });
+    //   } else {
+    //     final callerUser = BlocProvider.of<UsersViewCubit>(context)
+    //         .usersBloc
+    //         .state
+    //         .users
+    //         .firstWhere(
+    //             (el) => "${SipConfig.getPrefix()}${el.id}" == state.callerId);
+    //     final uName = "${callerUser.firstname} ${callerUser.lastname}";
+    //     setState(() {
+    //       incomingCallerDuringRunningCall = uName;
+    //       incomingCallDuringRunningCall = true;
+    //     });
+    //   }
+    // } else if (state is ConnectedCallState) {
+    //   if (widget.userId == state.callData.fromCaller.substring(1, state.callData.fromCaller.length)) {
+    //     setUsername(state.callData.toCaller);
+    //   } else {
+    //     setUsername(state.callData.fromCaller);
+    //   }
+    //   setState(() {
+    //     activeCallId = state.callData.id;
+    //     isCallingIncoming = false;
+    //     isCallingOutgoing = false;
+    //     isCallInProgress = true;
+    //   });
+    // } else if (state is StreamRunningCallState) {
+    //   if (widget.userId == state.callData.fromCaller.substring(1, state.callData.fromCaller.length)) {
+    //     setUsername(state.callData.toCaller);
+    //   } else {
+    //     setUsername(state.callData.fromCaller);
+    //   }
+    //   setState(() {
+    //     isCallingIncoming = false;
+    //     isCallingOutgoing = false;
+    //     isCallInProgress = true;
+    //   });
+    // } else if (state is OutgoingCallState) {
+    //   setUsername(state.callData.toCaller);
+    //   setState(() {
+    //     activeCallId = state.callData.id;
+    //     isCallingIncoming = false;
+    //     isCallingOutgoing = true;
+    //     isCallInProgress = false;
+    //   });
+    // } else if (state is OutgoingRingingCallState) {
+    //   setUsername(state.callData.toCaller);
+    //   setState(() {
+    //     isCallingIncoming = false;
+    //     isCallingOutgoing = true;
+    //     isCallInProgress = false;
+    //   });
+    // } else if (state is PausedCallState) {
+    //   setState(() {
+    //     isCallPaused = true;
+    //     isCallInProgress = false;
+    //   });
+    // } else if (state is ResumedCallState) {
+    //   setState(() {
+    //     isCallPaused = false;
+    //     isCallInProgress = true;
+    //   });
+    // } else if (state is EndedCallState) {
+    //
+    //   activeCalls.forEach((key, value) {
+    //     if (key != state.callData.id) {
+    //       setState(() {
+    //         activeCallId = key;
+    //         return;
+    //       });
+    //     }
+    //     sipMethodChannel.invokeMethod("RESUME_CALL", {"id": activeCallId});
+    //   });
+    // }
 
 
   }
@@ -189,6 +251,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   @override
   void initState() {
     super.initState();
+    activeCallId = widget.callId;
     final cBloc = BlocProvider.of<CallsBloc>(context);
     _onCallStateChanged(cBloc.state);
     callDuration = cBloc.state.activeCalls[widget.callId]!.timer.lastValue;

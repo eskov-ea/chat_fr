@@ -5,9 +5,9 @@ import android.os.Bundle
 class Call {
 
 }
-data class Data(val args: Map<String, Any?>) {
+data class CallData(val args: Map<String, Any?>) {
 
-    var id: String = (args["id"] as? String) ?: ""
+    var id: String = (args["call_id"] as? String) ?: ""
     var uuid: String = (args["id"] as? String) ?: ""
     var nameCaller: String = (args["nameCaller"] as? String) ?: ""
     var appName: String = (args["appName"] as? String) ?: ""
@@ -65,7 +65,7 @@ data class Data(val args: Map<String, Any?>) {
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
-        val e: com.cashalot.MCFEF.calls_manager.Data = other as com.cashalot.MCFEF.calls_manager.Data
+        val e: com.cashalot.MCFEF.calls_manager.CallData = other as com.cashalot.MCFEF.calls_manager.CallData
         return this.id == e.id
     }
 
@@ -116,66 +116,66 @@ data class Data(val args: Map<String, Any?>) {
 
     companion object {
 
-        fun fromBundle(bundle: Bundle): com.cashalot.MCFEF.calls_manager.Data {
-            val data = Data(emptyMap())
-            data.id = bundle.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_ID, "")
-            data.nameCaller =
+        fun fromBundle(bundle: Bundle): com.cashalot.MCFEF.calls_manager.CallData {
+            val callData = CallData(emptyMap())
+            callData.id = bundle.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_ID, "")
+            callData.nameCaller =
                     bundle.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_NAME_CALLER, "")
-            data.appName =
+            callData.appName =
                     bundle.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_APP_NAME, "")
-            data.handle =
+            callData.handle =
                     bundle.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_HANDLE, "")
-            data.avatar =
+            callData.avatar =
                     bundle.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_AVATAR, "")
-            data.type = bundle.getInt(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_TYPE, 0)
-            data.duration =
+            callData.type = bundle.getInt(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_TYPE, 0)
+            callData.duration =
                     bundle.getLong(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_DURATION, 30000L)
-            data.textAccept =
+            callData.textAccept =
                     bundle.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_TEXT_ACCEPT, "")
-            data.textDecline =
+            callData.textDecline =
                     bundle.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_TEXT_DECLINE, "")
-            data.textMissedCall =
+            callData.textMissedCall =
                     bundle.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_TEXT_MISSED_CALL, "")
-            data.textCallback =
+            callData.textCallback =
                     bundle.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_TEXT_CALLBACK, "")
-            data.extra =
+            callData.extra =
                     bundle.getSerializable(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_EXTRA) as HashMap<String, Any?>
-            data.headers =
+            callData.headers =
                     bundle.getSerializable(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
 
-            data.isCustomNotification = bundle.getBoolean(
+            callData.isCustomNotification = bundle.getBoolean(
                     CallsManagerBroadcastReceiver.EXTRA_CALLKIT_IS_CUSTOM_NOTIFICATION,
                     false
             )
-            data.isShowLogo = bundle.getBoolean(
+            callData.isShowLogo = bundle.getBoolean(
                     CallsManagerBroadcastReceiver.EXTRA_CALLKIT_IS_SHOW_LOGO,
                     false
             )
-            data.isShowCallback = bundle.getBoolean(
+            callData.isShowCallback = bundle.getBoolean(
                     CallsManagerBroadcastReceiver.EXTRA_CALLKIT_IS_SHOW_CALLBACK,
                     true
             )
-            data.ringtonePath = bundle.getString(
+            callData.ringtonePath = bundle.getString(
                     CallsManagerBroadcastReceiver.EXTRA_CALLKIT_RINGTONE_PATH,
                     ""
             )
-            data.backgroundColor = bundle.getString(
+            callData.backgroundColor = bundle.getString(
                     CallsManagerBroadcastReceiver.EXTRA_CALLKIT_BACKGROUND_COLOR,
                     "#0955fa"
             )
-            data.backgroundUrl =
+            callData.backgroundUrl =
                     bundle.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_BACKGROUND_URL, "")
-            data.actionColor = bundle.getString(
+            callData.actionColor = bundle.getString(
                     CallsManagerBroadcastReceiver.EXTRA_CALLKIT_ACTION_COLOR,
                     "#4CAF50"
             )
-            data.from =
+            callData.from =
                     bundle.getString(CallsManagerBroadcastReceiver.EXTRA_CALLKIT_ACTION_FROM, "")
-            data.isShowMissedCallNotification = bundle.getBoolean(
+            callData.isShowMissedCallNotification = bundle.getBoolean(
                     CallsManagerBroadcastReceiver.EXTRA_CALLKIT_IS_SHOW_MISSED_CALL_NOTIFICATION,
                     true
             )
-            return data
+            return callData
         }
     }
 }

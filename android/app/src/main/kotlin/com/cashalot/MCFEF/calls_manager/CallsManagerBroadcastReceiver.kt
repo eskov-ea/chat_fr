@@ -12,7 +12,7 @@ import org.linphone.core.Reason
 
 class CallsManagerBroadcastReceiver : BroadcastReceiver() {
 
-    private val call = CoreContext.core
+    private val linphoneCore = CoreContext.core
 
     companion object {
         const val ACTION_CALL_INCOMING =
@@ -101,9 +101,12 @@ class CallsManagerBroadcastReceiver : BroadcastReceiver() {
         val callkitNotificationManager = CallsNotificationManager(context)
         val action = intent.action ?: return
         val data = intent.extras?.getBundle(EXTRA_CALLKIT_INCOMING_DATA) ?: return
+        val callId = data.getString("EXTRA_CALLKIT_ID")
+        Log.w("CALL_SERVICE", "call id: $callId")
         Log.v("BROADCAST_RECEIVER", intent.toString())
+        Log.w("CALL_SERVICE", "call actiob: $action")
         when (action) {
-            ACTION_CALL_INCOMING -> {
+                    ACTION_CALL_INCOMING -> {
                 try {
                     callkitNotificationManager.showIncomingNotification(data)
                     val soundPlayerServiceIntent = Intent(context, CallsSoundPlayerService::class.java)
@@ -116,10 +119,18 @@ class CallsManagerBroadcastReceiver : BroadcastReceiver() {
                 }
             }
             ACTION_CALL_ACCEPT -> {
+                Log.w("CALL_SERVICE accept", "try to accept call with id $callId")
                 try {
                     context.stopService(Intent(context, CallsSoundPlayerService::class.java))
                     callkitNotificationManager.clearIncomingNotification(data)
-                    call!!.currentCall?.accept()
+                    linphoneCore!!.calls.forEach {
+                        if (it.callLog.callId == callId) {
+                            Log.w("CALL_SERVICE", "accept call with id $callId")
+                            it.accept()
+                            return
+                        }
+                    }
+                    throw Error("No such call $callId")
                 } catch (error: Exception) {
                     error.printStackTrace()
                     Log.w("ERROR CALL","$error")
@@ -129,7 +140,12 @@ class CallsManagerBroadcastReceiver : BroadcastReceiver() {
                 try {
                     Log.w("DECLINE_CALL", "$this")
                     context.stopService(Intent(context, CallsSoundPlayerService::class.java))
-                    call!!.currentCall?.decline(Reason.Declined)
+                    linphoneCore!!.calls.forEach {
+                        if (it.callLog.callId == callId) {
+                            Log.w("CALL_SERVICE", "decline call with id $callId")
+                            it.decline(Reason.Declined)
+                        }
+                    }
                     callkitNotificationManager.clearIncomingNotification(data)
                 } catch (error: Exception) {
                     error.printStackTrace()
@@ -156,6 +172,7 @@ class CallsManagerBroadcastReceiver : BroadcastReceiver() {
             }
             ACTION_CALL_CALLBACK -> {
                 try {
+                    callkitNotificationManager.clearIncomingNotification(data)
 //                    callkitNotificationManager.clearMissCallNotification(data)
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                         val closeNotificationPanel = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)

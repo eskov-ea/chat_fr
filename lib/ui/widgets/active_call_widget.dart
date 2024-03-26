@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:chat/bloc/calls_bloc/call_state_extension.dart';
 import 'package:chat/bloc/calls_bloc/calls_bloc.dart';
 import 'package:chat/bloc/calls_bloc/calls_state.dart';
+import 'package:chat/services/global.dart';
 import 'package:chat/services/helpers/call_timer.dart';
 import 'package:chat/ui/navigation/main_navigation.dart';
 import 'package:chat/ui/screens/running_call_screen.dart';
+import 'package:chat/view_models/user/users_view_cubit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,6 +29,7 @@ class RunningCallWidget extends StatefulWidget {
 class _RunningCallWidgetState extends State<RunningCallWidget> {
   String callDuration = "00:00:00";
   String? callId;
+  String? username;
 
   void _openCallScreen() {
     if (kIsWeb) return;
@@ -42,6 +46,26 @@ class _RunningCallWidgetState extends State<RunningCallWidget> {
     }
   }
 
+  String? getUsername(String? caller) {
+    if (caller == null) return null;
+
+    final callerUser = BlocProvider.of<UsersViewCubit>(context)
+        .usersBloc
+        .state
+        .users
+        .firstWhere(
+            (el) => "${SipConfig.getPrefix()}${el.id}" == caller);
+    final uName = "${callerUser.firstname} ${callerUser.lastname}";
+    return uName;
+
+  }
+
+  void onCallReleased() {
+    setState(() {
+      username = null;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -55,7 +79,12 @@ class _RunningCallWidgetState extends State<RunningCallWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CallsBloc, CallState>(
+    return BlocConsumer<CallsBloc, CallState>(
+      listener: (context, state) {
+        if (state is EndedCallState || state is EndCallWithNoLogState) {
+          onCallReleased();
+        }
+      },
       builder: (context, state) {
         if (state.activeCalls.isEmpty) {
           return const SizedBox.shrink();
@@ -64,23 +93,24 @@ class _RunningCallWidgetState extends State<RunningCallWidget> {
           for (var call in state.activeCalls.values) {
             if (call.active) activeCall = call;
           }
+          final caller = activeCall?.call.fromCaller == widget.userId ? activeCall?.call.toCaller : activeCall?.call.fromCaller;
           if (activeCall == null) return const SizedBox.shrink();
           /// either the call outgoing and ringing
-          if ([3, 4, 5, 6].contains(activeCall.callState)) {
-            return ProgressCallWidget(message: "Входящий вызов", screenCallback: _openCallScreen);
+          if (CallStateExtension.OUTGOING_STATE.contains(activeCall.callState)) {
+            return ProgressCallWidget(message: "Исходящий вызов", username: getUsername(caller), screenCallback: _openCallScreen);
           }
           /// either the call is incoming and ringing
-          if ([1, 17].contains(activeCall.callState)) {
-            return ProgressCallWidget(message: "Исходящий вызов", screenCallback: _openCallScreen);
+          if (CallStateExtension.INCOMING_STATE.contains(activeCall.callState)) {
+            return ProgressCallWidget(message: "Входящий вызов", username: getUsername(caller), screenCallback: _openCallScreen);
           }
           /// if the call is connected and stream running
-          if ([7, 8].contains(activeCall.callState)) {
+          if (CallStateExtension.RUNNING_STATE.contains(activeCall.callState)) {
             return RunningProgressCallWidget(timer: activeCall.timer, initDurationValue: activeCall.timer.lastValue,
               screenCallback: _openCallScreen, );
           }
           /// if the call has not been automatically switched to active state
-          if ([9, 10, 15].contains(activeCall.callState)) {
-            return ProgressCallWidget(message: "Вызов на ожидании", screenCallback: _openCallScreen);
+          if (CallStateExtension.PAUSED_STATE.contains(activeCall.callState)) {
+            return ProgressCallWidget(message: "Вызов на ожидании", username: getUsername(caller), screenCallback: _openCallScreen);
           }
           return const SizedBox.shrink();
         }
@@ -128,7 +158,7 @@ class _RunningProgressCallWidgetState extends State<RunningProgressCallWidget> {
       onTap: widget.screenCallback,
       child: Container(
         width: MediaQuery.of(context).size.width,
-        height: 80,
+        height: 100,
         color: AppColors.activeCall,
         child: Align(
           alignment: Alignment.bottomCenter,
@@ -148,11 +178,13 @@ class ProgressCallWidget extends StatelessWidget {
   const ProgressCallWidget({
     required this.screenCallback,
     required this.message,
+    required this.username,
     Key? key
   }) :super(key: key);
 
   final void Function() screenCallback;
   final String message;
+  final String? username;
 
   @override
   Widget build(BuildContext context) {
@@ -160,15 +192,23 @@ class ProgressCallWidget extends StatelessWidget {
       onTap: screenCallback,
       child: Container(
         width: MediaQuery.of(context).size.width,
-        height: 80,
+        height: 100,
         color: AppColors.activeCall,
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
             padding: EdgeInsets.only(bottom: 10),
-            child: Text(message,
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(username ?? "",
+                  style: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+                Text(message,
+                  style: TextStyle(color: Colors.white, fontSize: 14),
+                ),
+              ],
+            )
           ),
         ),
       ),

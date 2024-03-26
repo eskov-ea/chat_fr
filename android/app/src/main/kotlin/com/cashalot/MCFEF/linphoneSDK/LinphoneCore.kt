@@ -6,7 +6,7 @@ import android.widget.Toast
 import com.cashalot.MCFEF.MainActivity
 import com.cashalot.MCFEF.StorageManager
 import com.cashalot.MCFEF.calls_manager.CallsManagerBroadcastReceiver
-import com.cashalot.MCFEF.calls_manager.Data
+import com.cashalot.MCFEF.calls_manager.CallData
 import com.cashalot.MCFEF.makeCallDataPayload
 import com.cashalot.MCFEF.makePlatformEventPayload
 import com.cashalot.MCFEF.makePlatformSipConnectionEventPayload
@@ -244,10 +244,11 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     Log.w("ACTIVE_CALL", "IncomingReceived   $caller, ${call.remoteAddress.domain}, ${call.remoteAddress.scheme}, ${call.remoteAddress.displayName}, ${call.remoteAddress.transport}")
                     val args: Map<String, Any?> = mapOf(
                         "nameCaller" to caller,
-                        "android" to android
+                        "android" to android,
+                        "call_id" to call.callLog.callId
                     )
 
-                    val data = Data(args).toBundle()
+                    val data = CallData(args).toBundle()
                     context.sendBroadcast(
                         CallsManagerBroadcastReceiver.getIntentIncoming(
                             context,
@@ -271,20 +272,19 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                         call.remoteAddress.username.toString()
                     }
 
-//
                     val callData = makeCallDataPayload(call)
                     val args = makePlatformEventPayload("CONNECTED", call.remoteAddress.username, callData)
 
                     MainActivity.callServiceEventSink?.success(args)
 
-                    val dargs: Map<String, Any?> = mapOf(
+                    val intentArgs: Map<String, Any?> = mapOf(
                         "nameCaller" to caller,
-                        "android" to android
+                        "android" to android,
+                        "call_id" to call.callLog.callId
                     )
-
-                    val data = Data(dargs).toBundle()
+                    val data = CallData(intentArgs).toBundle()
                     context.sendBroadcast(
-                        CallsManagerBroadcastReceiver.getIntentDecline(
+                        CallsManagerBroadcastReceiver.getIntentCallback(
                             context,
                             data
                         )
@@ -301,10 +301,11 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                     }
                     val dargs: Map<String, Any?> = mapOf(
                             "nameCaller" to caller,
-                            "android" to android
+                            "android" to android,
+                            "call_id" to call.callLog.callId
                     )
 
-                    val data = Data(dargs).toBundle()
+                    val data = CallData(dargs).toBundle()
                     context.sendBroadcast(
                             CallsManagerBroadcastReceiver.getIntentDecline(
                                     context,
@@ -417,7 +418,7 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                         "android" to android
                     )
 
-                    val data = Data(dargs).toBundle()
+                    val data = CallData(dargs).toBundle()
                     context.sendBroadcast(
                         CallsManagerBroadcastReceiver.getIntentDecline(
                             context,
@@ -594,6 +595,27 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
                 core.calls.forEach {
                     if (it.callLog.callId == callId) {
                         it.resume()
+                        return
+                    }
+                }
+                val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
+                MainActivity.callServiceEventSink?.success(args)
+            } catch (e: Error) {
+                val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
+                MainActivity.callServiceEventSink?.success(args)
+            }
+        }
+    }
+
+    fun tryToPauseCall(callId: String?) {
+        if (callId == null) {
+            val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
+            MainActivity.callServiceEventSink?.success(args)
+        } else {
+            try {
+                core.calls.forEach {
+                    if (it.callLog.callId == callId) {
+                        it.pause()
                         return
                     }
                 }

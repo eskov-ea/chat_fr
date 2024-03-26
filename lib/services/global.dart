@@ -87,6 +87,14 @@ String generateUUID() {
     await sipChannel.invokeMethod("ACCEPT_CALL");
   }
 
+  Future<void> pauseCall(String id) async {
+    await sipChannel.invokeMethod("PAUSE_CALL", {"call_id": id});
+  }
+
+  Future<void> resumeCall(String id) async {
+    await sipChannel.invokeMethod("RESUME_CALL", {"call_id": id});
+  }
+
   Future<bool> toggleMute() async {
     final result = await sipChannel.invokeMethod("TOGGLE_MUTE");
     return result;

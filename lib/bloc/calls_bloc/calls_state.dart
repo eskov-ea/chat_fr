@@ -16,10 +16,18 @@ class ActiveCallModel {
 }
 
 abstract class CallState extends Equatable {
-  addCall(CallModel call, bool callActive, {bool outgoing = false}) {
+  addCall(CallModel call, {bool outgoing = false}) {
     if (!_activeCalls.containsKey(call.id)) {
+      bool active = false;
+      if (_activeCalls.isEmpty) active = true;
+      if (outgoing) {
+        _activeCalls.forEach((key, call) {
+          call.active = false;
+        });
+        active = true;
+      }
       final ac = ActiveCallModel(call: call, callState: call.callState!, timer: CallTimer(),
-          active: callActive, outgoing: outgoing);
+          active: active, outgoing: outgoing);
       _activeCalls.addAll({call.id: ac});
     }
   }

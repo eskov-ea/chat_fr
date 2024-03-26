@@ -310,8 +310,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       callPlayer.stopPlayConnectingSound();
       try {
         if (state.activeCalls.isEmpty) {
-          Navigator.of(context).popUntil((route) =>
-          route.settings.name == MainNavigationRouteNames.homeScreen);
+          // Navigator.of(context).popUntil((route) =>
+          // route.settings.name == MainNavigationRouteNames.homeScreen);
         }
       } catch (err) {
         Navigator.of(context).pushReplacementNamed(MainNavigationRouteNames.loaderWidget);
@@ -342,7 +342,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       callPlayer.stopPlayConnectingSound();
     } else if (state is EndCallWithNoLogState) {
       callPlayer.stopPlayConnectingSound();
-      Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
+      // Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
       setState(() {
         isActiveCall = false;
         isIncomingCall = false;
