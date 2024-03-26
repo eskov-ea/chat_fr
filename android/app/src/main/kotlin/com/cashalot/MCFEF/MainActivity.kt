@@ -25,6 +25,7 @@ import androidx.lifecycle.lifecycleScope
 import com.cashalot.MCFEF.linphoneSDK.CoreContext
 import com.cashalot.MCFEF.linphoneSDK.LinphoneCore
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
 import com.google.firebase.messaging.FirebaseMessaging
 import io.flutter.Log
 import io.flutter.embedding.android.FlutterActivity
@@ -69,11 +70,18 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, METHOD_CHANNEL_NAME).setMethodCallHandler {
             call, result ->
-            if (call.method == "getDeviceToken") {
-                lifecycleScope.launch {
-                    val token = deviceToken
-                    Log.d("token:", "$token")
-                    result.success( token )
+            if (call.method == "GET_DEVICE_TOKEN") {
+                try {
+                    FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener {
+                            task -> if (!task.isSuccessful) { result.success(null) }
+                        result.success(task.result)
+                    })
+                } catch (error: Error) {
+                    Log.w("Native error", "$error")
+                    result.success(null)
+                } catch (error: Exception) {
+                    Log.w("Native exception", "$error")
+                    result.success(null)
                 }
             }
         }
@@ -239,19 +247,6 @@ class MainActivity : FlutterActivity() {
     }
 
 
-    private fun getDeviceToken() {
-
-        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener {
-            task -> if (!task.isSuccessful) {
-            Log.w("GET_PUSH", "Failed getting push")
-        }
-            deviceToken = task.result
-        })
-    }
-
-
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -260,7 +255,7 @@ class MainActivity : FlutterActivity() {
         linphoneCore = LinphoneCore(core, context)
 
         createNotificationChannel()
-        getDeviceToken()
+//        getDeviceToken()
 
         notificationManager = NotificationManagerCompat.from(this)
         notificationManager!!.cancelAll()

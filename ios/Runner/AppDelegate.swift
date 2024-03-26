@@ -47,7 +47,7 @@ import PushKit
         deviceIdChannel.setMethodCallHandler({
             [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) -> Void in
             self?.deviceIdResultCallback = result
-            if call.method == "getDeviceToken" {
+            if call.method == "GET_DEVICE_TOKEN" {
                 self?.registerForPushNotifications()
             } else {
                 result(FlutterMethodNotImplemented)

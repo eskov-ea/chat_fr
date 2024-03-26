@@ -1,4 +1,5 @@
 import 'package:chat/services/global.dart';
+import 'package:chat/services/logger/logger_service.dart';
 import 'package:chat/ui/widgets/web_container_wrapper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -45,16 +46,12 @@ class _AuthScreenState extends State<AuthScreen> {
         os = "Browser";
       }
       if (!kIsWeb) {
-        deviceToken = await methodChannel.invokeMethod('getDeviceToken');
+        deviceToken = await methodChannel.invokeMethod('GET_DEVICE_TOKEN');
+        print('Device token: $deviceToken');
         _dataProvider.setDeviceId(deviceToken);
       }
-    } on PlatformException catch (e) {
-      await Future.delayed(const Duration(seconds: 2), (){
-        if (!kIsWeb) _checkDeviceToken();
-      });
-      print(e);
-    } catch (err) {
-      print("_checkDeviceToken error  $err");
+    } catch (err, stackTrace) {
+      Logger.getInstance().sendErrorTrace(stackTrace: stackTrace, additionalInfo: "Error getting device token: $err\r\n");
     }
   }
 
