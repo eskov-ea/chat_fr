@@ -78,21 +78,21 @@ String generateUUID() {
         "MAKE_CONFERENCE", {"number": "sip:${SipConfig.getPrefix()}${userId}@${SipConfig.getDomain()}"});
   }
 
-  void declineCall()  {
+  void declineCall(String callId)  {
     print("CALL DECLINE:::  call method");
-    sipChannel.invokeMethod("DECLINE_CALL");
+    sipChannel.invokeMethod("DECLINE_CALL", {"call_id": callId});
   }
 
-  Future<void> acceptCall() async {
-    await sipChannel.invokeMethod("ACCEPT_CALL");
+  Future<void> acceptCall(String callId) async {
+    await sipChannel.invokeMethod("ACCEPT_CALL", {"call_id": callId});
   }
 
-  Future<void> pauseCall(String id) async {
-    await sipChannel.invokeMethod("PAUSE_CALL", {"call_id": id});
+  Future<void> pauseCall(String callId) async {
+    await sipChannel.invokeMethod("PAUSE_CALL", {"call_id": callId});
   }
 
-  Future<void> resumeCall(String id) async {
-    await sipChannel.invokeMethod("RESUME_CALL", {"call_id": id});
+  Future<void> resumeCall(String callId) async {
+    await sipChannel.invokeMethod("RESUME_CALL", {"call_id": callId});
   }
 
   Future<bool> toggleMute() async {

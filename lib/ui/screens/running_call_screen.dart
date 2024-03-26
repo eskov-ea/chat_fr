@@ -426,11 +426,11 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
                           // });
                         },
                         onCallDecline: () {
-                          Navigator.of(context).pop;
-                          declineCall();
+                          // Navigator.of(context).pop;
+                          declineCall(activeCallId!);
                         },
                         onCallAccept: () {
-                          acceptCall();
+                          acceptCall(activeCallId!);
                           setState(() {
                             isCallInProgress = true;
                           });
