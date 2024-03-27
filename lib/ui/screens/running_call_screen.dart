@@ -101,6 +101,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
 
       }
     }
+
     activeCalls = state.activeCalls;
     final activeCall = state.activeCalls[activeCallId];
     /// If call ends the calls_bloc removes the call from active calls state
@@ -113,12 +114,16 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
         /// There is a paused call - we have to resume it
       }
     } else if (CallStateExtension.INCOMING_STATE.contains(activeCall.callState)) {
-      setUsername(activeCall.call.fromCaller);
-      setState(() {
-        isCallingIncoming = true;
-        isCallingOutgoing = false;
-        isCallInProgress = false;
-      });
+      if (!isCallInProgress) {
+        setUsername(activeCall.call.fromCaller);
+        setState(() {
+          isCallingIncoming = true;
+          isCallingOutgoing = false;
+          isCallInProgress = false;
+        });
+      } else {
+        showIncomingCallDyringRunningCallWidget(state.);
+      }
     } else if (CallStateExtension.OUTGOING_STATE.contains(activeCall.callState)) {
       setUsername(activeCall.call.toCaller);
       setState(() {
@@ -416,17 +421,11 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
                         isCallPaused: isCallPaused,
                         isCallRunning: isCallInProgress,
                         toggleAudioOptionsPanel: toggleAudioOptionsPanel,
-                        onMessage: () {
-                          // audioDeviceMethodChannel.invokeMethod("GET_DEVICE_LIST");
-                        },
-                        onToggleSpeaker: () async {
-                          // final result = await toggleSpeaker();
-                          // setState(() {
-                          //   isSpeaker = result;
-                          // });
+                        onCallHangup: () {
+                          hangupCall();
                         },
                         onCallDecline: () {
-                          // Navigator.of(context).pop;
+                          Navigator.of(context).pop;
                           declineCall(activeCallId!);
                         },
                         onCallAccept: () {

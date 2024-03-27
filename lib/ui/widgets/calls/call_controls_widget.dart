@@ -15,9 +15,8 @@ class CallControlsWidget extends StatelessWidget {
   const CallControlsWidget({
     required this.setAvailableAudioDeviceOptions,
     required this.optionsMenuOpen,
-    required this.onToggleSpeaker,
     required this.onCallDecline,
-    required this.onMessage,
+    required this.onCallHangup,
     required this.onCallAccept,
     required this.toggleAudioOptionsPanel,
     required this.setCurrentDeviceId,
@@ -36,9 +35,8 @@ class CallControlsWidget extends StatelessWidget {
   final bool isCallPaused;
   final Function(Map<int, List<String>>) setAvailableAudioDeviceOptions;
   final Function(int) setCurrentDeviceId;
-  final Function() onMessage;
-  final Function() onToggleSpeaker;
   final Function() onCallDecline;
+  final Function() onCallHangup;
   final Function() onCallAccept;
   final Function() toggleAudioOptionsPanel;
   final Function() switchCallPanelToggleCallback;
@@ -74,23 +72,20 @@ class CallControlsWidget extends StatelessWidget {
                   height: 20,
                 ),
                 if (isCallingIncoming)
-                  GestureDetector(
-                    onTap: onCallAccept,
-                    child: Row(
-                      mainAxisAlignment: isCallingIncoming ? MainAxisAlignment.spaceAround : MainAxisAlignment.center,
-                      children: [
-                        acceptCallButton(),
-                        SizedBox(height: 10),
-                        declineCallButton()
-                      ]
-                    ),
+                  Row(
+                    mainAxisAlignment: isCallingIncoming ? MainAxisAlignment.spaceAround : MainAxisAlignment.center,
+                    children: [
+                      acceptCallButton(),
+                      SizedBox(height: 10),
+                      declineCallButton()
+                    ]
                   )
                 else
                   Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SwitchCallButton(switchCallPanelToggleCallback: switchCallPanelToggleCallback),
-                        declineCallButton(),
+                        hangupCallButton(),
                         conferenceButton()
                       ]
                   ),
@@ -240,6 +235,40 @@ class CallControlsWidget extends StatelessWidget {
         const SizedBox(
           width: 80,
           child: Text("Отменить",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white, fontSize: 14)),
+        ),
+      ],
+    );
+  }
+
+  Widget hangupCallButton() {
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: onCallHangup,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: isCallingIncoming ? 0 : 20),
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: const BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.all(Radius.circular(50))),
+              child: Padding(
+                padding: const EdgeInsets.all(25),
+                child: Image.asset(
+                  'assets/call_controls/decline_icon.png',
+                  fit: BoxFit.fill,
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 5,),
+        const SizedBox(
+          width: 80,
+          child: Text("Завершить",
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white, fontSize: 14)),
         ),

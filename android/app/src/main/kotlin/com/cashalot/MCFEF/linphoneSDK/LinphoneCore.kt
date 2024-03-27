@@ -586,45 +586,67 @@ class LinphoneCore constructor(var core: Core, var context: Context) {
         getCurrentAudioDevice()
     }
 
-    fun tryToResumeCall(callId: String?) {
-        if (callId == null) {
+    fun acceptCall(callId: String?) {
+        try {
+            core.calls.forEach {
+                if (it.callLog.callId == callId) {
+                    it.accept()
+                    return
+                }
+            }
             val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
             MainActivity.callServiceEventSink?.success(args)
-        } else {
-            try {
-                core.calls.forEach {
-                    if (it.callLog.callId == callId) {
-                        it.resume()
-                        return
-                    }
+        } catch (e: Error) {
+            val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
+            MainActivity.callServiceEventSink?.success(args)
+        }
+    }
+
+    fun declineCall(callId: String?) {
+        try {
+            core.calls.forEach {
+                if (it.callLog.callId == callId) {
+                    it.decline(Reason.Declined)
+                    return
                 }
-                val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
-                MainActivity.callServiceEventSink?.success(args)
-            } catch (e: Error) {
-                val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
-                MainActivity.callServiceEventSink?.success(args)
             }
+            val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
+            MainActivity.callServiceEventSink?.success(args)
+        } catch (e: Error) {
+            val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
+            MainActivity.callServiceEventSink?.success(args)
+        }
+    }
+
+    fun tryToResumeCall(callId: String?) {
+        try {
+            core.calls.forEach {
+                if (it.callLog.callId == callId) {
+                    it.resume()
+                    return
+                }
+            }
+            val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
+            MainActivity.callServiceEventSink?.success(args)
+        } catch (e: Error) {
+            val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
+            MainActivity.callServiceEventSink?.success(args)
         }
     }
 
     fun tryToPauseCall(callId: String?) {
-        if (callId == null) {
+        try {
+            core.calls.forEach {
+                if (it.callLog.callId == callId) {
+                    it.pause()
+                    return
+                }
+            }
             val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
             MainActivity.callServiceEventSink?.success(args)
-        } else {
-            try {
-                core.calls.forEach {
-                    if (it.callLog.callId == callId) {
-                        it.pause()
-                        return
-                    }
-                }
-                val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
-                MainActivity.callServiceEventSink?.success(args)
-            } catch (e: Error) {
-                val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
-                MainActivity.callServiceEventSink?.success(args)
-            }
+        } catch (e: Error) {
+            val args = makePlatformEventPayload("NO_SUCH_CALL", null, null)
+            MainActivity.callServiceEventSink?.success(args)
         }
     }
 

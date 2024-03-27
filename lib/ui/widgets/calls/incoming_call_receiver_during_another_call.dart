@@ -11,7 +11,7 @@ class IncomingCallReceivedDuringCallWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width * 0.9,
-      height: 100,
+      height: 60,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(6)),
         color: Colors.black87

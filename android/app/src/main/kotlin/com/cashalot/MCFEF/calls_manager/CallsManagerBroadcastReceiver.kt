@@ -173,6 +173,7 @@ class CallsManagerBroadcastReceiver : BroadcastReceiver() {
             ACTION_CALL_CALLBACK -> {
                 try {
                     callkitNotificationManager.clearIncomingNotification(data)
+                    context.stopService(Intent(context, CallsSoundPlayerService::class.java))
 //                    callkitNotificationManager.clearMissCallNotification(data)
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                         val closeNotificationPanel = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)

@@ -156,12 +156,16 @@ class MainActivity : FlutterActivity() {
                 linphoneCore.logout()
 //                linphoneCore.core.stop()
             } else if (call.method.equals("DECLINE_CALL")) {
-                Log.w("CALL", "DECLINE_CALL action")
-//                linphoneCore.core.currentCall?.terminate()
+                val callId = call.argument<String?>("call_id")
+                Log.w("CALL", "DECLINE_CALL action $callId")
+                linphoneCore.declineCall(callId)
+            } else if (call.method.equals("HANGUP_CALL")) {
+                Log.w("CALL", "HANGUP_CALL action")
                 linphoneCore.hangUp()
             } else if (call.method.equals("ACCEPT_CALL")) {
-                Log.w("ACCEPT_CALL", "DESTROY_SIP event")
-                linphoneCore.core.currentCall?.accept()
+                val callId = call.argument<String?>("call_id")
+                Log.w("ACCEPT_CALL", "ACCEPT_CALL event $callId")
+                linphoneCore.acceptCall(callId)
             } else if (call.method.equals("RESUME_CALL")) {
                 val id = call.argument<String?>("id")
                 Log.w("RESUME_CALL", "RESUME_CALL call id: $id")

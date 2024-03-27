@@ -83,6 +83,11 @@ String generateUUID() {
     sipChannel.invokeMethod("DECLINE_CALL", {"call_id": callId});
   }
 
+  void hangupCall()  {
+    print("CALL HANGUP:::  call method");
+    sipChannel.invokeMethod("HANGUP_CALL");
+  }
+
   Future<void> acceptCall(String callId) async {
     await sipChannel.invokeMethod("ACCEPT_CALL", {"call_id": callId});
   }
