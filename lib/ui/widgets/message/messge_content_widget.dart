@@ -34,6 +34,7 @@ class MessageContentWidget extends StatelessWidget {
   final RepliedMessage? parentMessage;
   final String dirPath;
   final ObjectKey? objKey;
+  final DateTime rawDate;
   const MessageContentWidget({
     required this.isMe,
     required this.file,
@@ -53,6 +54,7 @@ class MessageContentWidget extends StatelessWidget {
     required this.parentMessage,
     required this.borderRadius,
     required this.dirPath,
+    required this.rawDate,
     required this.objKey,
     super.key
   });
@@ -61,7 +63,7 @@ class MessageContentWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        print('Messages taped $messageId $file $localId ');
+        print('Messages taped $messageId $rawDate $messageTime $file $localId ');
         setSelected(SelectedMessage(id: messageId, message: message, author: senderName, file: file));
       },
       key: objKey,

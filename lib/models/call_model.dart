@@ -80,17 +80,17 @@ String getCallReason(String reason) {
 String getDateFromUnix(json) {
   try {
     final seconds = int.parse(json);
-    final date =  DateTime.fromMillisecondsSinceEpoch(seconds * 1000).subtract(getTZ());
+    final date =  DateTime.fromMillisecondsSinceEpoch(seconds * 1000).toUtc();
     return date.toString();
   } catch (_) {
-    final date = DateTime.parse(json).subtract(getTZ());
+    final date = DateTime.parse(json).toUtc();
     return date.toString();
   }
 }
 
 String getDate(json) {
   final date = DateTime.parse(json);
-  return date.toString();
+  return date.toUtc().toString();
 }
 
 int mapCallReasonToStatusCode(String name) {

@@ -271,7 +271,7 @@ class _CallsPageState extends State<CallsPage> {
               ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(dateFormater(data.callDate))),
+                  child: Text(dateToCustomDateStringRepresentation(data.callDate))),
           ]),
         ),
       );

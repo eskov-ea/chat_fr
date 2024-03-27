@@ -245,47 +245,6 @@ class DialogPartnerData {
   }
 }
 
-class DialogMessageData {
-  DialogMessageData(
-      {required this.message,
-      required this.messageDate,
-      required this.readStatus,
-      required this.senderMessageData,
-      required this.attachments,
-      required this.attachmentType});
-  String message;
-  String messageDate;
-  bool readStatus;
-  SenderMessageData senderMessageData;
-  bool attachments;
-  String? attachmentType;
-
-  static DialogMessageData emptyData() => DialogMessageData(
-    message: "",
-    messageDate: "",
-    readStatus: true,
-    senderMessageData: SenderMessageData.fromJson(null),
-    attachments: false,
-    attachmentType: null
-  );
-  static DialogMessageData fromJson(json) {
-    try {
-      return DialogMessageData(
-          message: json["text"] ?? 'Нет сообщений',
-          messageDate: getDate(DateTime.tryParse(json["updatedAt"])),
-          readStatus: json["read"],
-          senderMessageData: SenderMessageData.fromJson(json["user"]),
-          attachments: json["attachments"].length > 0 ? true : false,
-          attachmentType: json["attachments"].length > 0
-              ? json["attachments"][0]["filetype"]
-              : null);
-    }
-    catch (err, stack) {
-      throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
-    }
-  }
-}
-
 class SenderMessageData {
   SenderMessageData({required this.id});
   String id;
@@ -377,18 +336,6 @@ class DialogId {
       throw AppErrorException(AppErrorExceptionType.parsing, message: "Error happend parsing: $json\r\n$stack");
     }
   }
-}
-
-
-
-String getDateDialogModel(DateTime rawDate) {
-  // Todo: is that necessary to check it
-  print('message_created_at:::   $rawDate');
-  return rawDate != null ? dateFormater(rawDate) : "";
-}
-
-String? getAttachmentType(json) {
-  print(json);
 }
 
 class ClientUserEvent {

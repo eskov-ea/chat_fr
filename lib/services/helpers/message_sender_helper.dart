@@ -94,22 +94,22 @@ MessageData createLocalMessage({
         name: "$filename.$filetype",
         filetype: filetype,
         preview: "",
-        createdAt: DateTime.now().toString(),
+        createdAt: DateTime.now().toUtc().toString(),
         path: path,
         content: content
     );
   }
 
-  print('local message::  ${parseTime.getDate(DateTime.now())}  ${parseTime.getTime(DateTime.now())}');
+
   return MessageData(
     messageId: messageId,
     repliedMessage: parentMessage,
     senderId: userId,
     dialogId: dialogId,
     message: replaceForwardSymbol(messageText ?? ''),
-    messageDate: parseTime.getDate(DateTime.now()),
-    messageTime: parseTime.getTime(DateTime.now()),
-    rawDate: DateTime.now(),
+    messageDate: parseTime.getMessageStringDateWithTZ(DateTime.now().toUtc()),
+    messageTime: parseTime.getMessageStringTimeWithTZ(DateTime.now().toUtc()),
+    rawDate: DateTime.now().toUtc(),
     file: file,
     isError: 0,
     localId: generateUUID(),

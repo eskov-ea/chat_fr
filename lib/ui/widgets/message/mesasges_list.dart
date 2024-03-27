@@ -319,7 +319,8 @@ class MessagesListWidget extends StatelessWidget {
                     repliedMsgId: messages[index].repliedMessage?.parentMessageId,
                     dialogId: dialogData.dialogId,
                     deleteMessage: deleteMessage,
-                    dirPath: dirPath
+                    dirPath: dirPath,
+                    rawDate: messages[index].rawDate
                   )
                 ],
               );

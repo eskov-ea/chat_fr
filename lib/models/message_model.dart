@@ -46,8 +46,8 @@ class MessageData extends Equatable{
           senderId: json["user_id"],
           dialogId: json["chat_id"],
           message: replaceForwardSymbol(json["message"]),
-          messageDate: getDate(DateTime.tryParse(json["created_at"])),
-          messageTime: getTime(DateTime.tryParse(json["created_at"])),
+          messageDate: getMessageStringDateWithTZ(DateTime.parse(json["created_at"])),
+          messageTime: getMessageStringTimeWithTZ(DateTime.parse(json["created_at"])),
           rawDate: DateTime.tryParse(json["created_at"])!,
           localId: json["guid"],
           file: json["file"] != null
@@ -74,8 +74,8 @@ class MessageData extends Equatable{
           senderId: json["user_id"],
           dialogId: json["chat_id"],
           message: replaceForwardSymbol(json["message"]),
-          messageDate: getDate(DateTime.tryParse(json["message_created_at"])),
-          messageTime: getTime(DateTime.tryParse(json["message_created_at"])),
+          messageDate: getMessageStringDateWithTZ(DateTime.parse(json["message_created_at"])),
+          messageTime: getMessageStringTimeWithTZ(DateTime.parse(json["message_created_at"])),
           rawDate: DateTime.tryParse(json["message_created_at"])!,
           localId: json["local_id"],
           file: json["file_id"] == null
@@ -288,15 +288,13 @@ class MessageAttachmentData  extends Equatable{
   String toString() => "Instance of MessageAttachmentData(id: $attachmentId, message: $chatMessageId, path: $path)";
 }
 
-String getDate (DateTime? rawDate) {
-  if (rawDate == null) return "";
-  final arr = _dateFormatter.format(rawDate).split('/');
+String getMessageStringDateWithTZ (DateTime rawDate) {
+  final arr = _dateFormatter.format(rawDate.add(getTZ())).split('/');
   return [arr[1], getMonthRussianName(int.parse(arr[0])), arr[2]].join(" ");
 }
 
-String getTime (DateTime? rawDate) {
-  if (rawDate == null) return "";
-  return _timeFormatter.format(rawDate);
+String getMessageStringTimeWithTZ (DateTime rawDate) {
+  return _timeFormatter.format(rawDate.add(getTZ()));
 }
 
 int getMessageStatus (List collection) {

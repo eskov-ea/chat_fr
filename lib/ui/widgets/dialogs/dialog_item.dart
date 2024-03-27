@@ -6,6 +6,7 @@ import 'package:chat/helpers.dart';
 import 'package:chat/models/user_model.dart';
 import 'package:chat/models/dialog_model.dart';
 import 'package:chat/services/global.dart';
+import 'package:chat/services/helpers/dates.dart';
 import 'package:chat/services/helpers/navigation_helpers.dart';
 import 'package:chat/theme.dart';
 import 'package:chat/types_extensions/String.dart';
@@ -208,7 +209,7 @@ class _DialogItemState extends State<DialogItem> {
                     height: 11,
                   ),
                   Text(
-                    widget.dialogData.lastMessage != null ? getDateDialogModel(widget.dialogData.lastMessage!.rawDate) : "",
+                    widget.dialogData.lastMessage != null ? dateToCustomDateStringRepresentation(widget.dialogData.lastMessage!.rawDate) : "",
                     textAlign: TextAlign.end,
                     style: const TextStyle(
                       fontSize: 13,

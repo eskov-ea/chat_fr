@@ -51,6 +51,7 @@ class MessageWidget extends StatefulWidget {
     required this.dirPath,
     required this.openForwardMenu,
     required this.deleteMessage,
+    required this.rawDate,
     Key? key
   }) : super(key: key);
 
@@ -71,6 +72,7 @@ class MessageWidget extends StatefulWidget {
   final String? localMessageId;
   final String messageDate;
   final String messageTime;
+  final DateTime rawDate;
   final int senderId;
   final FocusNode focusNode;
   final Function(String, int, int, String) setReplyMessage;
@@ -142,7 +144,8 @@ class _MessageWidgetState extends State<MessageWidget>  with SingleTickerProvide
       repliedMsgId: widget.repliedMsgId,
       openForwardMenu: widget.openForwardMenu,
       deleteMessage: widget.deleteMessage,
-      dirPath: widget.dirPath
+      dirPath: widget.dirPath,
+      rawDate: widget.rawDate
     );
   }
 }
@@ -177,6 +180,7 @@ class _MessageTile extends StatelessWidget {
     required this.openForwardMenu,
     required this.deleteMessage,
     required this.dirPath,
+    required this.rawDate,
   }) : super(key: key);
 
   final int index;
@@ -185,6 +189,7 @@ class _MessageTile extends StatelessWidget {
   final String? localMessageId;
   final int messageId;
   final String messageDate;
+  final DateTime rawDate;
   final String messageTime;
   final String senderName;
   final String dirPath;
@@ -388,7 +393,8 @@ class _MessageTile extends StatelessWidget {
                             messageTime: messageTime,
                             fileAttachment: fileAttachment,
                             parentMessage: parentMessage,
-                            borderRadius: MessageStyle.borderRadius
+                            borderRadius: MessageStyle.borderRadius,
+                            rawDate: rawDate
                         )
                     ),
                   ),

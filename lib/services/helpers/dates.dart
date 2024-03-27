@@ -3,13 +3,18 @@ import 'package:intl/intl.dart';
 
 
 
-String dateFormater(DateTime rawDate) {
-  final now = DateTime.now();
+String dateToCustomDateStringRepresentation(DateTime rawDate) {
+  final now = DateTime.now().toUtc();
+  if (rawDate.toString() == "2024-03-27 01:02:32.000Z") {
+
+    print('now:::::::  $now    $rawDate   ${(now.millisecondsSinceEpoch - rawDate.millisecondsSinceEpoch) / 1000/60/60}');
+    print('now:::::::  ${now.toUtc()}    ${rawDate.isUtc} ${rawDate.isUtc}   ');
+  }
   final lastMidnight = DateTime(now.year, now.month,  now.day);
   final dayBeforeYesterday = DateTime(now.year, now.month,  now.day).subtract(const Duration(days: 1));
   final lastMonday = DateTime(now.year, now.month,  now.day - (now.weekday - 1));
   final hoursSinceMessageWritten = (now.millisecondsSinceEpoch - rawDate.millisecondsSinceEpoch) / 1000/60/60;
-  final hoursSinceLastMidnight = (now.add(getTZ()).millisecondsSinceEpoch - lastMidnight.millisecondsSinceEpoch) / 1000/60/60;
+  final hoursSinceLastMidnight = (now.millisecondsSinceEpoch - lastMidnight.millisecondsSinceEpoch) / 1000/60/60;
   final hoursSinceDayBeforeYesterday = (now.millisecondsSinceEpoch - dayBeforeYesterday.millisecondsSinceEpoch) / 1000/60/60;
   final hoursSinceLastMonday = (now.millisecondsSinceEpoch - lastMonday.millisecondsSinceEpoch) / 1000/60/60;
 
@@ -19,15 +24,16 @@ String dateFormater(DateTime rawDate) {
   } else {
     ///check if message was written in this day range
     if (hoursSinceMessageWritten <= hoursSinceLastMidnight) {
-      return DateFormat.Hm().format(rawDate);
+      return DateFormat.Hm().format(rawDate.add(getTZ()));
       ///check if message was written yesterday
     } else if (hoursSinceMessageWritten > hoursSinceLastMidnight && hoursSinceMessageWritten <= hoursSinceDayBeforeYesterday) {
       return "Вчера";
       ///check if message was written in range of this week
     } else if (hoursSinceMessageWritten > hoursSinceDayBeforeYesterday && hoursSinceMessageWritten <= hoursSinceLastMonday) {
-      return _toRussianWeekday(rawDate.weekday);
+      return _toRussianWeekday(rawDate.add(getTZ()).weekday);
     } else {
-      final date = DateFormat.yMd().format(rawDate).replaceAll(RegExp('/'), '.');
+      final dateWithTZ = rawDate.add(getTZ());
+      final date = DateFormat.yMd().format(dateWithTZ).replaceAll(RegExp('/'), '.');
       final splittedDate = date.split('.');
       final tmp = splittedDate[1];
       splittedDate[1] = splittedDate[0];
