@@ -74,7 +74,7 @@ class CallsBloc
       on<CallsEvent>((event, emit) async {
         if (event is IncomingCallEvent) {
           state.addCall(event.callData);
-          emit(IncomingCallState(callerId: event.callerId));
+          emit(IncomingCallState(callData: event.callData));
         } else if (event is EndedCallEvent) {
           // timer.stop();
           state.removeCall(event.callData);
@@ -100,6 +100,8 @@ class CallsBloc
           emit(OutgoingRingingCallState(callData: event.callData));
         } else if (event is EndCallWithNoLogEvent) {
           emit(EndCallWithNoLogState());
+        } else if (event is ResumedCallEvent) {
+          emit(ResumedCallState(callData: event.callData));
         }
       });
     }

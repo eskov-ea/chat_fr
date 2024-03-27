@@ -95,14 +95,14 @@ class OutgoingRingingCallState extends CallState{
 
 class IncomingCallState extends CallState {
 
-  final String callerId;
+  final CallModel callData;
 
   IncomingCallState({
-    required this.callerId
+    required this.callData
   });
 
   @override
-  List<Object?> get props => [runtimeType, callerId];
+  List<Object?> get props => [];
 
 }
 

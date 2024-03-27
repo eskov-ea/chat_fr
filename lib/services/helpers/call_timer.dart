@@ -4,11 +4,12 @@ class CallTimer {
   int seconds = 0;
   int minutes = 0;
   int hours = 0;
-  late final StreamController<String> _streamController;
   Timer? _timer;
   bool isRunning = false;
   bool isPaused = false;
   String lastValue = "00:00:00";
+  Stream<String> get stream => _streamController.stream;
+  late final StreamController<String> _streamController;
 
   CallTimer() {
     _streamController = StreamController.broadcast();
@@ -47,7 +48,6 @@ class CallTimer {
     _streamController.close();
   }
 
-  Stream<String> get stream => _streamController.stream;
 
 
   _startTimer() {
@@ -69,7 +69,6 @@ class CallTimer {
       final  digitSeconds = (seconds >= 10) ? "$seconds" : "0$seconds";
       final  digitMinutes = (minutes >= 10) ? "$minutes" : "0$minutes";
       final  digitHours = (hours >= 10) ? "$hours" : "0$hours";
-      print("timer  -->  $digitHours:$digitMinutes:$digitSeconds");
       _streamController!.sink.add("$digitHours:$digitMinutes:$digitSeconds");
       lastValue = "$digitHours:$digitMinutes:$digitSeconds";
     });
