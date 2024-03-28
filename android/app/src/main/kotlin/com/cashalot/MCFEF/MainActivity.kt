@@ -167,11 +167,11 @@ class MainActivity : FlutterActivity() {
                 Log.w("ACCEPT_CALL", "ACCEPT_CALL event $callId")
                 linphoneCore.acceptCall(callId)
             } else if (call.method.equals("RESUME_CALL")) {
-                val id = call.argument<String?>("id")
+                val id = call.argument<String?>("call_id")
                 Log.w("RESUME_CALL", "RESUME_CALL call id: $id")
                 linphoneCore.tryToResumeCall(id)
             } else if (call.method.equals("PAUSE_CALL")) {
-                val id = call.argument<String?>("id")
+                val id = call.argument<String?>("call_id")
                 Log.w("PAUSE_CALL", "RESUME_CALL call id: $id")
                 linphoneCore.tryToPauseCall(id)
             } else if (call.method.equals(("CHECK_FOR_RUNNING_CALL"))) {

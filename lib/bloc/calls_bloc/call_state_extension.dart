@@ -5,4 +5,5 @@ class CallStateExtension {
   static const PAUSED_STATE = <int>[9, 10, 11, 15];
   static const ENDED_STATE = <int>[14, 19];
   static const ERROR_STATE = <int>[13];
+  static const RESUMED_STATE = <int>[11];
 }

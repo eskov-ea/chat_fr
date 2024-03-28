@@ -153,6 +153,11 @@ class _RunningProgressCallWidgetState extends State<RunningProgressCallWidget> {
     });
   }
   @override
+  void dispose() {
+    callDurationSubscription.cancel();
+    super.dispose();
+  }
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: widget.screenCallback,

@@ -36,20 +36,14 @@ class CallsBloc
       } else if (callEvent.event == "ENDED") {
         final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
         add(StreamStopCallEvent(callData: callData));
-        if (callEvent.callData!["call_id"] == null && callEvent.callData!["uniqueid"] == null) {
-          add(EndCallWithNoLogEvent());
-          return;
-        }
-        print('Call ended with data:: $callData');
-        add(EndedCallEvent(callData: callData));
       } else if (callEvent.event == "RELEASED") {
         print("CALL_RELEASED event:    ${callEvent.callData} ${callEvent.callData!["uniqueid"]} ${callEvent.callData!["call_id"]}");
         if (callEvent.callData!["call_id"] == null && callEvent.callData!["uniqueid"] == null) {
           add(EndCallWithNoLogEvent());
           return;
         }
-          final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
-          add(EndedCallEvent(callData: callData));
+        final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
+        add(EndedCallEvent(callData: callData));
       } else if (callEvent.event == "INCOMING") {
         final callData = CallModel.fromJsonOnEndedCall(callEvent.callData);
         print('INCOMING::: ${callEvent.callData} ${callEvent.callerId}');
@@ -76,17 +70,17 @@ class CallsBloc
           state.addCall(event.callData);
           emit(IncomingCallState(callData: event.callData));
         } else if (event is EndedCallEvent) {
-          // timer.stop();
           state.removeCall(event.callData);
           emit(EndedCallState(callData: event.callData));
         } else if (event is OutgoingCallEvent) {
           state.addCall(event.callData, outgoing: true);
           emit(OutgoingCallState(callData: event.callData));
         } else if (event is ConnectedCallEvent) {
-          state.update(event.callData);
+          state.update(event.callData, true);
           emit(ConnectedCallState(callData: event.callData));
         } else if (event is StreamRunningCallEvent) {
           state.startTimer(event.callData.id); //timer.start();
+          state.update(event.callData, false);
           emit(StreamRunningCallState(callData: event.callData));
         } else if (event is StreamStopCallEvent) {
           state.stopTimer(event.callData.id); //timer.stop();
@@ -100,7 +94,11 @@ class CallsBloc
           emit(OutgoingRingingCallState(callData: event.callData));
         } else if (event is EndCallWithNoLogEvent) {
           emit(EndCallWithNoLogState());
+        } else if (event is PausedCallEvent) {
+          state.update(event.callData, false);
+          emit(PausedCallState(callData: event.callData));
         } else if (event is ResumedCallEvent) {
+          state.update(event.callData, true);
           emit(ResumedCallState(callData: event.callData));
         }
       });

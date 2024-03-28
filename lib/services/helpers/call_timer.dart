@@ -1,6 +1,7 @@
 import 'dart:async';
 
 class CallTimer {
+  final String callId;
   int seconds = 0;
   int minutes = 0;
   int hours = 0;
@@ -11,7 +12,7 @@ class CallTimer {
   Stream<String> get stream => _streamController.stream;
   late final StreamController<String> _streamController;
 
-  CallTimer() {
+  CallTimer(this.callId) {
     _streamController = StreamController.broadcast();
   }
 

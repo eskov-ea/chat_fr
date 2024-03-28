@@ -93,7 +93,7 @@ class _MuteButtonState extends State<SwitchCallButton> {
       return Column(
         children: [
           GestureDetector(
-            onTap: () {},
+            onTap: widget.switchCallPanelToggleCallback,
             child: Container(
               width: 80,
               height: 80,

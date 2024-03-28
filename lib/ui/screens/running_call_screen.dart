@@ -42,12 +42,14 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   bool isCallingIncoming = false;
   bool isCallingOutgoing = false;
   bool isCallInProgress = false;
+  bool isCallInErrorState = false;
   bool isCallPaused = false;
   double isAudioOptionPanelVisible = 0;
   Map<int, List<String>> availableAudioDevices = {};
   int? currentDeviceId;
   bool isSwitchCallPanelVisible = false;
   String? activeCallId;
+  ActiveCallModel? activeCall;
   Map<String, ActiveCallModel> activeCalls = {};
 
   bool incomingReceivedOnRunningCall = false;
@@ -64,12 +66,6 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   void setCurrentDeviceId(int id) {
     setState(() {
       currentDeviceId = id;
-    });
-  }
-
-  void setToggleSwitchCallPanelVisibility() {
-    setState(() {
-      isSwitchCallPanelVisible = !isSwitchCallPanelVisible;
     });
   }
 
@@ -96,127 +92,144 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   void _onCallStateChanged(CallState state) {
 
     activeCalls = state.activeCalls;
-    final activeCall = state.activeCalls[activeCallId];
+    if (state.activeCall != null && state.activeCall!.call.id != activeCall?.call.id) {
+      setState(() {
+        activeCall = state.activeCall;
+      });
+      final caller = widget.userId == state.activeCall!.call.fromCaller.substring(1, state.activeCall!.call.fromCaller.length) ? state.activeCall!.call.toCaller : state.activeCall!.call.fromCaller;
+      setUsername(caller);
+    }
     /// If call ends the calls_bloc removes the call from active calls state
     /// So then we should check if there is any paused calls and resume it either pop back to homescreen
-    // if (activeCall == null) {
-    //   if (state.activeCalls.isEmpty) {
-    //     print('Should pop to homescreen');
-    //     Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
-    //   } else {
-    //     /// There is a paused call - we have to resume it
-    //   }
-    // } else if (CallStateExtension.INCOMING_STATE.contains(activeCall.callState)) {
-    //   if (!isCallInProgress) {
-    //     setUsername(activeCall.call.fromCaller);
-    //     setState(() {
-    //       isCallingIncoming = true;
-    //       isCallingOutgoing = false;
-    //       isCallInProgress = false;
-    //     });
-    //   } else {
-    //     showIncomingCallDuringRunningCallWidget(state.);
-    //   }
-    // } else if (CallStateExtension.OUTGOING_STATE.contains(activeCall.callState)) {
-    //   setUsername(activeCall.call.toCaller);
-    //   setState(() {
-    //     isCallingIncoming = false;
-    //     isCallingOutgoing = true;
-    //     isCallInProgress = false;
-    //   });
-    // } else if (CallStateExtension.RUNNING_STATE.contains(activeCall.callState)) {
-    //   setState(() {
-    //     isCallingIncoming = false;
-    //     isCallingOutgoing = false;
-    //     isCallInProgress = true;
-    //   });
-    // } else if (CallStateExtension.PAUSED_STATE.contains(activeCall.callState)) {
-    //   setState(() {
-    //     isCallingIncoming = false;
-    //     isCallingOutgoing = false;
-    //     isCallInProgress = true;
-    //   });
-    // } else if (CallStateExtension.ERROR_STATE.contains(activeCall.callState)) {
-    //   setState(() {
-    //     isCallingIncoming = false;
-    //     isCallingOutgoing = false;
-    //     isCallInProgress = true;
-    //   });
-    // }
-
-
-
-
-
-
-
-
-    if (state is IncomingCallState) {
-      /// call INCOMING
-      if (state.activeCalls.length == 1) {
-        setUsername(state.callData.fromCaller);
+    if (activeCall == null) {
+      if (state.activeCalls.isEmpty) {
+        print('Should pop to homescreen');
+        Navigator.of(context).popUntil((route) => route.settings.name == MainNavigationRouteNames.homeScreen);
+      } else {
+        /// There is a paused call - we have to resume it
+      }
+    } else if (CallStateExtension.INCOMING_STATE.contains(activeCall!.callState)) {
+      if (!isCallInProgress) {
+        setUsername(activeCall!.call.fromCaller);
         setState(() {
           isCallingIncoming = true;
         });
-      } else {
-        showIncomingCallDuringRunningCallWidget(state.callData);
       }
-    } else if (state is ConnectedCallState) {
-      /// call CONNECTED
-      if (state.callData.id == activeCallId) {
-        setState(() {
-          timer = state.activeCalls[activeCallId]!.timer;
-          isCallingIncoming = false;
-          isCallingOutgoing = false;
-          isCallInProgress = true;
-        });
-      } else {
-        setState(() {
-          activeCallId = state.callData.id;
-          isCallingIncoming = false;
-          isCallingOutgoing = false;
-          isCallInProgress = true;
-        });
-        final caller = widget.userId == state.callData.fromCaller.substring(1, state.callData.fromCaller.length) ? state.callData.toCaller : state.callData.fromCaller;
-        setUsername(caller);
-        updateTimer(state.activeCalls[state.callData.id]!);
-      }
-
-    } else if (state is OutgoingCallState) {
-      /// call OUTGOING
-      setUsername(state.callData.toCaller);
+    } else if (CallStateExtension.OUTGOING_STATE.contains(activeCall!.callState)) {
+      setUsername(activeCall!.call.toCaller);
       setState(() {
-        activeCallId = state.callData.id;
         isCallingOutgoing = true;
       });
-    } else if (state is EndedCallState) {
-      /// call ENDED
-      if (state.activeCalls.isNotEmpty) {
-        activeCalls.forEach((key, value) {
-          if (key != state.callData.id) {
-            setState(() {
-              activeCallId = key;
-              sipMethodChannel.invokeMethod("RESUME_CALL", {"id": activeCallId});
-              return;
-            });
-          }
-        });
-      }
-    } else if (state is PausedCallState) {
+    } else if (CallStateExtension.RUNNING_STATE.contains(activeCall!.callState)) {
+      setState(() {
+        isCallingIncoming = false;
+        isCallingOutgoing = false;
+        isCallInProgress = true;
+      });
+    } else if (CallStateExtension.PAUSED_STATE.contains(activeCall!.callState)) {
       setState(() {
         isCallPaused = true;
       });
-    } else if (state is ResumedCallState) {
+    } else if (CallStateExtension.ERROR_STATE.contains(activeCall!.callState)) {
       setState(() {
-        isCallPaused = false;
+        isCallingIncoming = false;
+        isCallingOutgoing = false;
+        isCallInProgress = false;
+        isCallInErrorState = true;
       });
+    }
+
+    if (state is ResumedCallState) {
       final caller = widget.userId == state.callData.fromCaller.substring(1, state.callData.fromCaller.length) ? state.callData.toCaller : state.callData.fromCaller;
       setUsername(caller);
       print('Resumed caller name:  $caller');
       setState(() {
+        isCallPaused = false;
         activeCallId = state.callData.id;
       });
     }
+
+
+    if (activeCalls.length > 1) {
+      for (var call in activeCalls.values) {
+        if (!call.active && CallStateExtension.INCOMING_STATE.contains(call.callState)) {
+          showIncomingCallDuringRunningCallWidget(call.call);
+          break;
+        }
+      }
+    }
+
+
+
+
+
+
+    // if (state is IncomingCallState) {
+    //   /// call INCOMING
+    //   if (state.activeCalls.length == 1) {
+    //     setUsername(state.callData.fromCaller);
+    //     setState(() {
+    //       isCallingIncoming = true;
+    //     });
+    //   } else {
+    //     showIncomingCallDuringRunningCallWidget(state.callData);
+    //   }
+    // } else if (state is ConnectedCallState) {
+    //   /// call CONNECTED
+    //   if (state.callData.id == activeCallId) {
+    //     setState(() {
+    //       timer = state.activeCalls[activeCallId]!.timer;
+    //       isCallingIncoming = false;
+    //       isCallingOutgoing = false;
+    //       isCallInProgress = true;
+    //     });
+    //   } else {
+    //     setState(() {
+    //       activeCallId = state.callData.id;
+    //       isCallingIncoming = false;
+    //       isCallingOutgoing = false;
+    //       isCallInProgress = true;
+    //     });
+    //     final caller = widget.userId == state.callData.fromCaller.substring(1, state.callData.fromCaller.length) ? state.callData.toCaller : state.callData.fromCaller;
+    //     setUsername(caller);
+    //     updateTimer(state.activeCalls[state.callData.id]!);
+    //   }
+    //
+    // } else if (state is OutgoingCallState) {
+    //   /// call OUTGOING
+    //   setUsername(state.callData.toCaller);
+    //   setState(() {
+    //     activeCallId = state.callData.id;
+    //     isCallingOutgoing = true;
+    //   });
+    // } else if (state is EndedCallState) {
+    //   /// call ENDED
+    //   if (state.activeCalls.isNotEmpty) {
+    //     activeCalls.forEach((key, value) {
+    //       if (key != state.callData.id) {
+    //         setState(() {
+    //           activeCallId = key;
+    //           sipMethodChannel.invokeMethod("RESUME_CALL", {"id": activeCallId});
+    //           return;
+    //         });
+    //       }
+    //     });
+    //   }
+    // } else if (state is PausedCallState) {
+    //   setState(() {
+    //     isCallPaused = true;
+    //   });
+    // } else if (state is ResumedCallState) {
+    //   setState(() {
+    //     isCallPaused = false;
+    //   });
+    //   final caller = widget.userId == state.callData.fromCaller.substring(1, state.callData.fromCaller.length) ? state.callData.toCaller : state.callData.fromCaller;
+    //   setUsername(caller);
+    //   print('Resumed caller name:  $caller');
+    //   setState(() {
+    //     activeCallId = state.callData.id;
+    //   });
+    // }
 
     checkForPausedCall();
     /// skip this states for now
@@ -246,7 +259,8 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
   void checkForPausedCall() {
     final callees = <String>[];
     for (var call in activeCalls.values) {
-      if (CallStateExtension.PAUSED_STATE.contains(call.call.callState)) {
+      print('checkForPausedCall  $callees $call ${call.callState}');
+      if (CallStateExtension.PAUSED_STATE.contains(call.callState)) {
         final caller = widget.userId == call.call.fromCaller.substring(1, call.call.fromCaller.length) ? call.call.toCaller : call.call.fromCaller;
         final callerUser = BlocProvider.of<UsersViewCubit>(context)
             .usersBloc
@@ -258,15 +272,21 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
         callees.add(name);
       }
     }
+    print('checkForPausedCall  res $callees ');
     setState(() {
       pausedCallees = callees;
     });
-    print('checkForPausedCall  $callees');
   }
 
   void toggleAudioOptionsPanel() {
     setState(() {
       isAudioOptionPanelVisible = isAudioOptionPanelVisible == 0 ? 1 : 0;
+    });
+  }
+
+  void toggleSwitchCallOptions() {
+    setState(() {
+      isSwitchCallPanelVisible = !isSwitchCallPanelVisible;
     });
   }
 
@@ -440,7 +460,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
                       const SizedBox(
                         height: 3,
                       ),
-                      if (isCallInProgress) TimerWidget(timer: timer!),
+                      const TimerWidget(),
                       const SizedBox(height: 10),
                       if (pausedCallees.isNotEmpty) Text("На ожидании: ${pausedCallees}",
                         style: const TextStyle(fontSize: 13, height: 1, color: Colors.white),
@@ -452,7 +472,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
                         child: SizedBox(),
                       ),
                       CallControlsWidget(
-                        switchCallPanelToggleCallback: setToggleSwitchCallPanelVisibility,
+                        switchCallPanelToggleCallback: toggleSwitchCallOptions,
                         setAvailableAudioDeviceOptions: setAvailableAudioDeviceOptions,
                         setCurrentDeviceId: setCurrentDeviceId,
                         isCallingIncoming: isCallingIncoming,
@@ -494,6 +514,7 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
                       callId: incomingCallIdReceivedOnRunningCall!,
                   ),
                   isAudioOptionPanelVisible == 1 ? _audioOptions() : const SizedBox.shrink(),
+                  if (isSwitchCallPanelVisible) _switchCallOptions()
                 ],
               ),
               context),
@@ -536,19 +557,19 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
     );
   }
 
-  Widget _activeCallsOptions () {
+  Widget _switchCallOptions () {
     return Positioned(
-      right: 20,
-      bottom: 310,
+      right: MediaQuery.of(context).size.width * 0.15,
+      bottom: MediaQuery.of(context).size.height * 0.4,
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 300),
         curve: Curves.fastEaseInToSlowEaseOut,
-        opacity: isAudioOptionPanelVisible,
+        opacity: isSwitchCallPanelVisible ? 1 : 0,
         child: Container(
-          width: MediaQuery.of(context).size.width * 0.65,
+          width: MediaQuery.of(context).size.width * 0.7,
           decoration: const BoxDecoration(
               borderRadius: BorderRadius.all(Radius.circular(10)),
-              color: Colors.black54,
+              color: Colors.black87,
               boxShadow: [
                 BoxShadow(
                     color: Colors.black54,
@@ -571,29 +592,50 @@ class _RunningCallScreenState extends State<RunningCallScreen> {
 
   List<Widget> getActiveCallsItems() {
     final List<Widget> calls = [];
-    if (activeCalls.length < 2) return calls;
     activeCalls.forEach((key, value) {
+      final caller = widget.userId == value.call.fromCaller.substring(1, value.call.fromCaller.length) ? value.call.toCaller : value.call.fromCaller;
+      final callerUser = BlocProvider.of<UsersViewCubit>(context)
+          .usersBloc
+          .state
+          .users
+          .firstWhere(
+              (el) => "${SipConfig.getPrefix()}${el.id}" == caller);
+      final name = "${callerUser.firstname} ${callerUser.lastname}";
       calls.add(
-          Material(
-            color: Colors.transparent,
-            child: Ink(
-              height: 50,
-              child: InkWell(
-                onTap: () {
-                  sipMethodChannel.invokeMethod("SET_ACTIVE_CALL", {"call_id": key});
-                  setToggleSwitchCallPanelVisibility();
-                },
-                customBorder: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6)
-                ),
-                splashColor: Colors.white24,
-                child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                        color: value.callState == key ? Color(0xFF646464) : Colors.transparent,
-                        borderRadius: BorderRadius.all(Radius.circular(6))
-                    ),
-                    child: Text("")
+          Container(
+            padding: EdgeInsets.symmetric(),
+            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+            decoration: BoxDecoration(
+              color: Colors.white24,
+              borderRadius: BorderRadius.all(Radius.circular(6)),
+              border: Border.all(width: 1, color: Colors.white12)
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: Ink(
+                height: 50,
+                width: MediaQuery.of(context).size.width,
+                child: InkWell(
+                  onTap: () {
+                    // sipMethodChannel.invokeMethod("SET_ACTIVE_CALL", {"call_id": key});
+                    // toggleSwitchCallOptions();
+                  },
+                  customBorder: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6)
+                  ),
+                  splashColor: Colors.white24,
+                  child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                          color: activeCall?.call.id == key ? Colors.white54 : Colors.transparent,
+                          borderRadius: BorderRadius.all(Radius.circular(6))
+                      ),
+                      child: Center(
+                        child: Text(name,
+                          style: TextStyle(color: Colors.white, fontSize: 15),
+                        ),
+                      )
+                  ),
                 ),
               ),
             ),
